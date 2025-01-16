@@ -1,12 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import AppHome from '@/views/AppHome';
-import AppRotation from '@/views/AppRotation';
-import AppSettings from '@/views/AppSettings';
+import AppStartModal from '@/views/AppStartModal'
 
 const routes = [
-    { path: '/', component: AppHome },
-    { path: '/rotation',component: AppRotation },
-    { path: '/settings', component: AppSettings },
+    { path: '/auth', component: AppStartModal },
 ];
 
 const router = createRouter({
