@@ -17,7 +17,7 @@ export default {
         if (isAuthorized) {
             this.$router.push('/signin');
         } else {
-            this.$router.push('/signup');
+            this.$router.push('/signup_1');
         }
     }
 };

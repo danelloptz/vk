@@ -208,8 +208,7 @@
                 this.isNotSelectInterest = !(this.selectedInterests.length > 0);
                 this.isNotCheckboxChecked = !this.isCheckboxChecked;
                 if (!(this.isNotSelectCountry || this.isNotSelectGender || this.isNotSelectInterest || this.isNotCheckboxChecked)) {
-                    // this.$router.push('/step-two');
-                    console.log("можно");
+                    this.$router.push('/signup_2');
                 }
             }
         },
