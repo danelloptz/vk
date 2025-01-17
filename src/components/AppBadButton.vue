@@ -22,7 +22,8 @@
         background: none;
         border: 1px solid white;
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 600;
+        letter-spacing: 1px;
         line-height: 20.8px;
         font-family: 'Tektur', sans-serif;
         color: white;

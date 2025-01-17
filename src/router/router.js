@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppStartModal from '@/views/AppStartModal'
+import AppRegistrationStepOne from '@/views/AppRegistrationStepOne'
 
 const routes = [
-    { path: '/auth', component: AppStartModal },
+    { path: '/signin', component: AppStartModal },
+    { path: '/signup', component: AppRegistrationStepOne },
 ];
 
 const router = createRouter({

@@ -23,7 +23,8 @@
         background: linear-gradient(to right, #A139DE, #E14ABB, #E14A7A);
         color: white;
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 600;
+        letter-spacing: 1px;
         line-height: 20.8px;
         font-family: 'Tektur', sans-serif;
         cursor: pointer;

@@ -1,15 +1,25 @@
 <template>
   <div id="app">
-    <AppStartModal />
     <router-view></router-view> 
   </div>
 </template>
 
 
 <script>
-import AppStartModal from './views/AppStartModal.vue';
+
+import { checkUserAuthorization } from './services/auth';
+
 export default {
-  components: { AppStartModal }
+  // components: { AppStartModal },
+  async created() {
+        const isAuthorized = await checkUserAuthorization();
+        console.log(isAuthorized);
+        if (isAuthorized) {
+            this.$router.push('/signin');
+        } else {
+            this.$router.push('/signup');
+        }
+    }
 };
 </script>
 
@@ -22,10 +32,10 @@ export default {
   }
   #app {
     width: 100%;
-    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     background: #070A29;
+    padding: 50px 0;
   }
 </style>
