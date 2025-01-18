@@ -7,7 +7,7 @@ app.use(cors());
 
 app.get('/api/check-auth', (req, res) => {
     res.json({ 
-        "isAuthorized" : false
+        "isAuthorized" : true
     });
 });
 

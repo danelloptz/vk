@@ -7,8 +7,10 @@
         </div>
         <hr>
         <div class="btn_wrapper">
-            <AppGoodButton :text="text" />
+            <AppGoodButton :text="text" @click="routNextPage" />
             <AppBadButton :text="text2" />
+            <div id="VkIdSdkOneTap"></div>
+            <span style="font-size: 14px; position: absolute; bottom: 0; left: 10; cursor: pointer;" @click="userVKInfo">userVKInfo</span>
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
         <img src="@/assets/images/auth_image.png" class="right_image">
@@ -19,13 +21,56 @@
 
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    // import { checkUserAuthorization } from '@/services/auth';
+    import { silentTokenBack } from '@/services/auth';
+    import * as VKID from '@vkid/sdk';
+    import { useRoute } from 'vue-router';
+
+    const route = useRoute();
 
     export default {
         components: { AppBadButton, AppGoodButton },
+        mounted() {
+            VKID.Config.init({
+                app: 52936208, 
+                redirectUrl: "http://localhost:80/signin", // сюда полный путь, какой будет на проде
+                state: 'bhbt4h3vtv6v6b34',
+            });
+            const oneTap = new VKID.OneTap();
+
+            const container = document.getElementById('VkIdSdkOneTap');
+
+            if (container) {
+                oneTap.render({ container: container, scheme: VKID.Scheme.LIGHT, lang: VKID.Languages.RUS });
+            } else {
+                console.error('Container not found!');
+            }
+        },
+        methods: {
+            async routNextPage() {
+                // ЗДЕСЬ ПРОВЕРКА, АВТОРИЗОВАН ПОЛЬЗОВАТЕЛЬ ИЛИ НЕТ
+                // const isAuthorized = await checkUserAuthorization();
+                // if (isAuthorized) {
+                //     this.$router.push('/home');
+                // } else {
+                //     this.$router.push('/signup_1');
+                // }
+                this.$router.push('/signup_1');
+            },
+            async userVKInfo() {
+                // аналогично функции submitSilentTockenToBack из видео
+                const payload = route.query.payload;
+                console.log('Полученные данные:', payload);
+
+                const user_info = await silentTokenBack(payload);
+                console.log(user_info);
+            }
+        },      
         data() {
             return {
                 text: "ВОЙТИ",
-                text2: "ОТМЕНИТЬ"
+                text2: "ОТМЕНИТЬ",
+                text3: "userVKInfo"
             }
         }
     };
@@ -52,6 +97,8 @@
         justify-content: space-between;
         padding: 50px 0px;
         z-index: 2;
+        align-self: center;
+        margin-top: -50px;
         @media (max-width: 900px) {
             width: 80vw;
             height: 60vh;

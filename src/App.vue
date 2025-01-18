@@ -7,18 +7,10 @@
 
 <script>
 
-import { checkUserAuthorization } from './services/auth';
-
 export default {
   // components: { AppStartModal },
   async created() {
-        const isAuthorized = await checkUserAuthorization();
-        console.log(isAuthorized);
-        if (isAuthorized) {
-            this.$router.push('/signin');
-        } else {
-            this.$router.push('/signup_1');
-        }
+          this.$router.push('/signin');
     }
 };
 </script>
@@ -32,10 +24,21 @@ export default {
   }
   #app {
     width: 100%;
+    height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     background: #070A29;
     padding: 50px 0;
+    overflow-y: scroll;
+    scrollbar-width: none;
   }
+  #app::-webkit-scrollbar {
+        width: 0;  
+        height: 0;
+    }
+
+  #app::-webkit-scrollbar-thumb {
+        background: transparent;
+    }
 </style>
