@@ -33,6 +33,28 @@ app.get('/api/refer-info', (req, res) => {
     });
 });
 
+app.get('/api/group-info', (req, res) => {
+    let name = Math.random() < 0.5 ? 'group_avatar.png' : 'avatar.jpg';
+    res.json({ 
+        "img" : name,
+        "name" : "Название группы ",
+        "sentence" : "Здесь написано какое-то вип-предложение",
+        "status": "Leader",
+        "links": {
+            "vk" : "link",
+            "telegram" : "link",
+            "whatsapp" : "link",
+        },
+        "groupLink" : "https://vk.com/profcom.petrsu"
+    });
+});
+
+app.get('/api/is-subscribe', (req, res) => {
+    res.json({ 
+        "isSubscribe" : true
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });

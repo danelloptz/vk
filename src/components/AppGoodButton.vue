@@ -40,7 +40,7 @@
         @media (max-width: 420px) {
             width: 130px;
             height: 30px;
-            font-size: 13px;
+            font-size: 12px;
         }
     }
 </style>

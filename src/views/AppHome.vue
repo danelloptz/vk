@@ -1,3 +1,3 @@
 <template>
-    <h1>Личный кабинет</h1>
+    <h1 style="color: white;">Личный кабинет</h1>
 </template>

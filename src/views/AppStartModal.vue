@@ -10,7 +10,7 @@
             <AppGoodButton :text="text" @click="routNextPage" />
             <AppBadButton :text="text2" />
             <div id="VkIdSdkOneTap"></div>
-            <span style="font-size: 14px; position: absolute; bottom: 0; left: 10; cursor: pointer;" @click="userVKInfo">userVKInfo</span>
+            <!-- <span style="font-size: 14px; position: absolute; bottom: 0; left: 10; cursor: pointer;" @click="userVKInfo">userVKInfo</span> -->
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
         <img src="@/assets/images/auth_image.png" class="right_image">
@@ -33,8 +33,12 @@
         mounted() {
             VKID.Config.init({
                 app: 52936208, 
-                redirectUrl: "http://localhost:80/signin", // сюда полный путь, какой будет на проде
                 state: 'bhbt4h3vtv6v6b34',
+                scopes: [
+                    "phone"
+                ],
+                redirectUrl: "https://lk.intelektaz.com/auth/start_process_auth", // сюда полный путь, какой будет на проде
+                code_verifier: "t4bth45by54hby54"
             });
             const oneTap = new VKID.OneTap();
 
@@ -55,6 +59,7 @@
                 // } else {
                 //     this.$router.push('/signup_1');
                 // }
+                // this.$router.push('/home');
                 this.$router.push('/signup_1');
             },
             async userVKInfo() {

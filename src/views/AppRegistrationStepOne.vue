@@ -1,7 +1,7 @@
 <template>
     <section class="modal">
         <div class="modal-background"></div>
-        <img src="@/assets/images/close.png" class="close">
+        <img src="@/assets/images/close.png" class="close" @click="this.$router.push('/signin')">
         <div class="text_wrapper">
             <h1>ШАГ 1 - РЕГИСТРАЦИЯ</h1>
             <span>Добро пожаловать в сервис Intelektaz! Всего три простых шага отделяют Вас от мощного прорыва в Вашем бизнесе с нашим ИИ. Мы проведем Вас за руку к успеху. Сделайте первый шаг – заполните анкету ниже и перейдите на второй шаг нажав кнопку «Шаг 2»: </span>
@@ -111,22 +111,7 @@
                 <h1>ВОЗНИКЛИ ВОПРОСЫ?</h1>
                 <span>Обратитесь за помощью к Вашему личному консультанту (рефереру):</span>
             </div>
-            <div class="footer_data">
-                <img v-if="referData" :src="require(`@/assets/images/${referData.img}`)" class="avatar">
-                <div class="footer_data_wrapper">
-                    <div class="footer_data_row">
-                        <h2 v-if="referData">{{ referData.name }}</h2>
-                        <span v-if="referData">{{ referData.status }}</span>
-                    </div>
-                    <span v-if="referData">{{ referData.id }}</span>
-                    <div class="footer_data_links">
-                        <a v-if="referData" :href="referData.links.vk"><img src="@/assets/images/vk.png"></a>
-                        <a v-if="referData" :href="referData.links.telegram"><img src="@/assets/images/telegram.png"></a>
-                        <a v-if="referData" :href="referData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a>
-                    </div>
-                </div>
-                
-            </div>
+            <AppGroupOrUser :objectData="referData" />
         </div>
 </section>
 </template>
@@ -135,10 +120,11 @@
 
     // import AppBadButton from '@/components/AppBadButton.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     import { getUserInfo, getReferInfo } from '@/services/user';
 
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppGroupOrUser },
         data() {
             return {
                 text: "ШАГ 2",
@@ -589,70 +575,7 @@
             text-align: center;
         }
     }
-    .footer_data {
-        display: flex;
-        column-gap: 30px;
-        @media (max-width: 1100px) {
-            justify-content: center;
-            align-items: center;
-        }
-    }
-    .footer_data > img {
-        @media (max-width: 1200px) {
-            width: 100px;
-            height: 100px;
-        }
-    }
-    .footer_data_wrapper {
-        display: flex;
-        flex-direction: column;
-        row-gap: 10px;
-    }
-    .footer_data_row {
-        display: flex;
-        column-gap: 20px;
-        align-items: center;
-        @media (max-width: 650px) {
-            flex-direction: column-reverse;
-            align-items: start;
-        }
-    }
-    .footer_data_row h2 {
-        color: white;
-        font-size: 20px;
-        text-wrap: nowrap;
-        @media (max-width: 560px) {
-            text-wrap: wrap;
-        }
-    }
-    .footer_data_row span {
-        color: white;
-        font-size: 14px;
-        padding: 0px 18px;
-        background: #7023EC;
-        border-radius: 5px;
-        @media (max-width: 650px) {
-            padding: 0 15px;
-            line-height: 1.2;
-        }
-    }
-    .footer_data_links {
-        display: flex;
-        column-gap: 23px;
-    }
-    .footer_data_links img {
-        width: 35px;
-        height: 35px;
-        @media (max-width: 650px) {
-            width: 25px;
-            height: 25px;
-        }
 
-    }
-    .footer_data_links a {
-        z-index: 10;
-        cursor: pointer;
-    }
     .error_message {
         font-size: 14px;
         font-family: 'OpenSans';
