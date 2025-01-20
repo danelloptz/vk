@@ -10,45 +10,78 @@
             <AppGoodButton :text="text" @click="routNextPage" />
             <AppBadButton :text="text2" />
             <div id="VkIdSdkOneTap"></div>
-            <!-- <span style="font-size: 14px; position: absolute; bottom: 0; left: 10; cursor: pointer;" @click="userVKInfo">userVKInfo</span> -->
+            <!-- <span style="font-size: 14px; position: absolute; bottom: 0; left: 10; cursor: pointer;" @click="result">userVKInfo</span> -->
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
         <img src="@/assets/images/auth_image.png" class="right_image">
     </section>
 </template>
 
+<!-- <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script> -->
 <script>
 
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
     // import { checkUserAuthorization } from '@/services/auth';
-    import { silentTokenBack } from '@/services/auth';
+    import { getToken } from '@/services/auth';
     import * as VKID from '@vkid/sdk';
-    import { useRoute } from 'vue-router';
+    // import { useRoute } from 'vue-router';
 
-    const route = useRoute();
+    // const route = useRoute();
 
     export default {
         components: { AppBadButton, AppGoodButton },
+        data() {
+            return {
+                text: "ВОЙТИ",
+                text2: "ОТМЕНИТЬ",
+                text3: "userVKInfo",
+                code_verifier: "",
+                code_challenge: "",
+                code_challenge_method: "S256",
+                state: "grehthrtjui7643trr",
+                code: "",
+                device_id: ""
+            }
+        },
         mounted() {
+            
+
+            this.generatePKCE().then((pkce) => {
+                console.log('Code Verifier:', pkce.codeVerifier);
+                console.log('Code Challenge:', pkce.codeChallenge);
+                console.log('Code Challenge Method:', pkce.codeChallengeMethod);
+            });
             VKID.Config.init({
                 app: 52936208, 
-                state: 'bhbt4h3vtv6v6b34',
-                scopes: [
-                    "phone"
-                ],
-                redirectUrl: "https://lk.intelektaz.com/auth/start_process_auth", // сюда полный путь, какой будет на проде
-                code_verifier: "t4bth45by54hby54"
+                state: this.state,
+                codeChallenge: this.code_challenge,
+                redirectUrl: "https://lk.intelektaz.com/signup_1", // сюда полный путь, какой будет на проде
             });
+
             const oneTap = new VKID.OneTap();
 
             const container = document.getElementById('VkIdSdkOneTap');
 
-            if (container) {
-                oneTap.render({ container: container, scheme: VKID.Scheme.LIGHT, lang: VKID.Languages.RUS });
-            } else {
-                console.error('Container not found!');
-            }
+            oneTap.render({
+                container: container,
+                scheme: VKID.Scheme.LIGHT,
+                lang: VKID.Languages.RUS
+            })
+            .on(VKID.WidgetEvents.ERROR, (error) => { console.log(error); })
+            .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async function (payload) {
+                const code = payload.code;
+                const device_id = payload.device_id;
+                const state = payload.state;
+                console.log("On", this.codeVerifier);
+
+                const user_info = await getToken(code, state, device_id, this.codeVerifier);
+                console.log(user_info);
+                // VKID.Auth.exchangeCode(code, deviceId)
+                // .then(vkidOnSuccess)
+                // .catch(vkidOnError);
+            });
+
         },
         methods: {
             async routNextPage() {
@@ -62,22 +95,45 @@
                 // this.$router.push('/home');
                 this.$router.push('/signup_1');
             },
-            async userVKInfo() {
-                // аналогично функции submitSilentTockenToBack из видео
-                const payload = route.query.payload;
-                console.log('Полученные данные:', payload);
 
-                const user_info = await silentTokenBack(payload);
-                console.log(user_info);
-            }
+            // Функция для генерации случайной строки
+            generateCodeVerifier(length = 64) {
+                const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.';
+                let codeVerifier = '';
+                for (let i = 0; i < length; i++) {
+                    codeVerifier += validChars.charAt(Math.floor(Math.random() * validChars.length));
+                }
+                return codeVerifier;
+            },
+
+            // Преобразование строки в Base64 URL-safe
+            base64UrlEncode(buffer) {
+                return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)))
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+            },
+            async generatePKCE() {
+                const codeVerifier = this.generateCodeVerifier();
+                const codeChallenge = await this.generateCodeChallenge(codeVerifier); 
+                const codeChallengeMethod = 'S256'; 
+
+                return {
+                    codeVerifier,
+                    codeChallenge,
+                    codeChallengeMethod
+                };
+            },
+
+            // Генерация code_challenge из code_verifier
+            async generateCodeChallenge(codeVerifier) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(codeVerifier);
+                const digest = await crypto.subtle.digest('SHA-256', data);
+                return this.base64UrlEncode(digest);
+            },
         },      
-        data() {
-            return {
-                text: "ВОЙТИ",
-                text2: "ОТМЕНИТЬ",
-                text3: "userVKInfo"
-            }
-        }
+        
     };
 </script>
 

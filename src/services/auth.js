@@ -23,4 +23,19 @@ export async function silentTokenBack(secret_token) {
     
 }
 
+export async function getToken(code, state, device_id, code_verifier) {
+    try {
+        const response = await axios.post('/auth/token', {
+            code: code, 
+            state: state,
+            device_id: device_id,
+            code_verifier: code_verifier
+        })
+        return response.data
+    }  catch (error) {
+        console.error('Ошибка при выполнении запроса:', error);
+        throw error;
+    }
+}
+
 // здесь тоже пути запросов менять
