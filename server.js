@@ -15,7 +15,8 @@ app.get('/api/user-info', (req, res) => {
     res.json({ 
         "img" : "avatar.jpg",
         "name" : "Василенко Данил",
-        "id" : "ID: 942744235"
+        "id" : "ID: 942744235",
+        "status": "Leader"
     });
 });
 
@@ -52,6 +53,73 @@ app.get('/api/group-info', (req, res) => {
 app.get('/api/is-subscribe', (req, res) => {
     res.json({ 
         "isSubscribe" : true
+    });
+});
+
+app.get('/api/assembly-groups', (req, res) => {
+    res.json({ 
+        "groups": [
+            {
+                "id": "0",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "1",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "2",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "3",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "4",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "5",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "6",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "7",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "8",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+            {
+                "id": "9",
+                "link": "link",
+                "name": "Название группы",
+                "img": "avatar.jpg"
+            },
+        ]
     });
 });
 

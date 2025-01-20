@@ -10,7 +10,7 @@
 export default {
   // components: { AppStartModal },
   async created() {
-          this.$router.push('/signin');
+          this.$router.push('/home');
     }
 };
 </script>
@@ -29,7 +29,7 @@ export default {
     justify-content: center;
     align-items: start;
     background: #070A29;
-    padding: 50px 0;
+    padding: 25px 0;
     overflow-y: scroll;
     scrollbar-width: none;
   }
