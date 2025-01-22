@@ -4,6 +4,8 @@ const app = express();
 const port = 3000;
 
 app.use(cors());
+app.use(express.json());
+
 
 app.get('/api/check-auth', (req, res) => {
     res.json({ 
@@ -122,6 +124,20 @@ app.get('/api/assembly-groups', (req, res) => {
         ]
     });
 });
+
+app.post('/api/get-add', (req, res) => {
+    if(!req.body) return res.sendStatus(400);
+
+    const k = parseInt(req.body.len, 10);
+    const adds = Array.from({ length: k }, () => ({ img: "add_example.png" }));
+
+    console.log(adds);
+
+    res.json({ 
+        "adds": adds 
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

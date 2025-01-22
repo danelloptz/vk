@@ -10,7 +10,7 @@
 export default {
   // components: { AppStartModal },
   async created() {
-          this.$router.push('/home');
+          this.$router.push('/signin');
     }
 };
 </script>

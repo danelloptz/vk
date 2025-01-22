@@ -77,7 +77,6 @@
         padding: 10px;
         background-color: #2f3251a8;
         border-radius: 10px;
-        margin-top: 50px;
         position: relative;
     }
     .item {

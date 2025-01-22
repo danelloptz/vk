@@ -23,13 +23,14 @@ export async function silentTokenBack(secret_token) {
     
 }
 
-export async function getToken(code, state, device_id, code_verifier) {
+export async function getToken(code, state, code_verifier, device_id, redirect_uri) {
     try {
-        const response = await axios.post('/auth/token', {
+        const response = await axios.post('https://web.intelektaz.com/api/v1/auth/', {
             code: code, 
             state: state,
+            code_verifier: code_verifier,
             device_id: device_id,
-            code_verifier: code_verifier
+            redirect_uri: redirect_uri
         })
         return response.data
     }  catch (error) {

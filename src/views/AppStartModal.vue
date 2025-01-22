@@ -41,22 +41,22 @@
                 code_challenge_method: "S256",
                 state: "grehthrtjui7643trr",
                 code: "",
-                device_id: ""
+                device_id: "",
+                redirectUrl: "https://lk.intelektaz.com/signup_1"
             }
         },
         mounted() {
             
 
             this.generatePKCE().then((pkce) => {
-                console.log('Code Verifier:', pkce.codeVerifier);
-                console.log('Code Challenge:', pkce.codeChallenge);
-                console.log('Code Challenge Method:', pkce.codeChallengeMethod);
+                this.code_verifier = pkce.codeVerifier;
+                this.code_challenge = pkce.codeChallenge;
             });
             VKID.Config.init({
-                app: 52936208, 
+                app: 52191705, 
                 state: this.state,
                 codeChallenge: this.code_challenge,
-                redirectUrl: "https://lk.intelektaz.com/signup_1", // сюда полный путь, какой будет на проде
+                redirectUrl: this.redirectUrl,
             });
 
             const oneTap = new VKID.OneTap();
@@ -73,9 +73,10 @@
                 const code = payload.code;
                 const device_id = payload.device_id;
                 const state = payload.state;
-                console.log("On", this.codeVerifier);
+                
+                console.log("payload: ", payload);
 
-                const user_info = await getToken(code, state, device_id, this.codeVerifier);
+                const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
                 console.log(user_info);
                 // VKID.Auth.exchangeCode(code, deviceId)
                 // .then(vkidOnSuccess)
