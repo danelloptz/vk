@@ -42,47 +42,41 @@
                 state: "grehthrtjui7643trr",
                 code: "",
                 device_id: "",
-                redirectUrl: "https://lk.intelektaz.com/signup_1"
+                redirectUrl: "https://lk.intelektaz.com/"
             }
         },
         mounted() {
-            
-
             this.generatePKCE().then((pkce) => {
                 this.code_verifier = pkce.codeVerifier;
                 this.code_challenge = pkce.codeChallenge;
+
+                VKID.Config.init({
+                    app: 52191705,
+                    state: this.state,
+                    codeChallenge: this.code_challenge,
+                    redirectUrl: "https://lk.intelektaz.com/",
+                });
+
+                const oneTap = new VKID.OneTap();
+                const container = document.getElementById('VkIdSdkOneTap');
+                console.log(this.redirectUrl);
+
+                oneTap.render({
+                    container: container,
+                    scheme: VKID.Scheme.LIGHT,
+                    lang: VKID.Languages.RUS,
+                })
+                .on(VKID.WidgetEvents.ERROR, (error) => {
+                    console.error("VKID Widget Error: ", error);
+                })
+                .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
+                    const { code, device_id, state } = payload;
+                    console.log("payload: ", payload);
+
+                    const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
+                    localStorage.setItem('user_info', JSON.stringify(user_info));
+                });
             });
-            VKID.Config.init({
-                app: 52191705, 
-                state: this.state,
-                codeChallenge: this.code_challenge,
-                redirectUrl: this.redirectUrl,
-            });
-
-            const oneTap = new VKID.OneTap();
-
-            const container = document.getElementById('VkIdSdkOneTap');
-
-            oneTap.render({
-                container: container,
-                scheme: VKID.Scheme.LIGHT,
-                lang: VKID.Languages.RUS
-            })
-            .on(VKID.WidgetEvents.ERROR, (error) => { console.log(error); })
-            .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async function (payload) {
-                const code = payload.code;
-                const device_id = payload.device_id;
-                const state = payload.state;
-                
-                console.log("payload: ", payload);
-
-                const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
-                console.log(user_info);
-                // VKID.Auth.exchangeCode(code, deviceId)
-                // .then(vkidOnSuccess)
-                // .catch(vkidOnError);
-            });
-
         },
         methods: {
             async routNextPage() {
