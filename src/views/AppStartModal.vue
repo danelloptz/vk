@@ -47,19 +47,18 @@
             }
         },
         mounted() {
-            const isParams = localStorage.getItem("isParams");
-            this.generatePKCE().then((pkce) => {
-                if (isParams != "true") {
-                    this.code_verifier = pkce.codeVerifier;
-                    this.code_challenge = pkce.codeChallenge;
-                }
-
-                this.handleUrlParams();
-            });
-
+            this.handleUrlParams();
         },
         methods: {
             async tap() {
+                const isParams = localStorage.getItem("isParams");
+                if (isParams != "true") {
+                    const pkce = await this.generatePKCE();
+                    this.code_verifier = pkce.codeVerifier;
+                    this.code_challenge = pkce.codeChallenge;
+                    localStorage.setItem("isParams", "true");
+                }
+
                 const clientId = "52191705";
                 const redirectUri = this.redirectUrl;
                 const state = this.state;
@@ -70,18 +69,19 @@
                 window.location.href = vkAuthUrl;
             },
             async handleUrlParams() {
-                localStorage.setItem("isParams", true);
                 const params = new URLSearchParams(window.location.search);
                 const code = params.get("code");
                 const state = params.get("state");
                 const device_id = params.get("device_id");
+                const code_verifier = localStorage.getItem("code_verifier");
 
                 if (code && state && device_id) {
                     console.log("Параметры найдены:", { code, state, device_id });
 
-                    const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
+                    const user_info = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
                     console.log(user_info);
                     localStorage.setItem("user_info", user_info);
+                    window.history.replaceState({}, document.title, window.location.pathname);
                 } else {
                     console.warn("Параметры code, state или device_id отсутствуют в URL.");
                 }
@@ -100,11 +100,14 @@
 
             // Функция для генерации случайной строки
             generateCodeVerifier(length = 64) {
-                const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+                console.log("генерация code_verifier");
+                const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                 let codeVerifier = "";
                 for (let i = 0; i < length; i++) {
                     codeVerifier += validChars.charAt(Math.floor(Math.random() * validChars.length));
                 }
+                if (localStorage.getItem("code_verifier") === null)
+                    localStorage.setItem("code_verifier", codeVerifier);
                 return codeVerifier;
             },
 

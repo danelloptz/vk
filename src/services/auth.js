@@ -34,7 +34,6 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
         redirect_uri
     })
     .then((response) => {
-        console.log(response);
         console.log("Response status:", response.status);
         console.log("Response data:", response.data);
         return response; // Возвращаем ответ, чтобы вызвать .then на результат
