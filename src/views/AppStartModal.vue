@@ -68,21 +68,6 @@
 
                 const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}`;
                 window.location.href = vkAuthUrl;
-
-                window.addEventListener("message", this.handlePostMessage, false);
-            },
-            async handlePostMessage() {
-                const params = new URLSearchParams(window.location.search);
-                const code = params.get("code");
-                const state = params.get("state");
-                const device_id = params.get("device_id");
-
-                if (!code || !state || !device_id) {
-                    console.error("Не найдены параметры в редиректе");
-                    return;
-                } 
-                console.log("IM HERE", code);
-                localStorage.setItem("MYINFO", `${code}, ${state}, ${device_id}`);
             },
             async handleUrlParams() {
                 localStorage.setItem("isParams", true);
