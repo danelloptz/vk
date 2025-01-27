@@ -24,7 +24,8 @@ export async function silentTokenBack(secret_token) {
 }
 
 export function getToken(code, state, code_verifier, device_id, redirect_uri) {
-    console.log("pre-response");
+    console.log(code_verifier);
+    localStorage.setItem("POST CODE_VERIFIER", code_verifier);
     return axios.post('https://web.intelektaz.com/api/v1/auth/', {
         code, 
         state,
@@ -44,6 +45,17 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
     });
 }
 
+
+export async function check() {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/ping');
+        console.log(response);
+        return response;
+    } catch (error) {
+        console.error("Ошибка при проверке авторизации", error);
+        return false; 
+    }
+}
 
 
 // здесь тоже пути запросов менять

@@ -9,9 +9,9 @@
 
 export default {
   // components: { AppStartModal },
-  async created() {
-          this.$router.push('/signin');
-    }
+  // async created() {
+  //         this.$router.push('/signin/');
+  //   }
 };
 </script>
 

@@ -7,9 +7,10 @@
         </div>
         <hr>
         <div class="btn_wrapper">
-            <AppGoodButton :text="text" @click="routNextPage" />
+            <AppGoodButton :text="text" @click="tap"/>
+            <!-- <AppGoodButton :text="text" @click="routNextPage" /> -->
             <AppBadButton :text="text2" />
-            <div id="VkIdSdkOneTap"></div>
+            <!-- <div id="VkIdSdkOneTap"></div> -->
             <!-- <span style="font-size: 14px; position: absolute; bottom: 0; left: 10; cursor: pointer;" @click="result">userVKInfo</span> -->
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
@@ -24,7 +25,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     // import { checkUserAuthorization } from '@/services/auth';
     import { getToken } from '@/services/auth';
-    import * as VKID from '@vkid/sdk';
+    // import * as VKID from '@vkid/sdk';
     // import { useRoute } from 'vue-router';
 
     // const route = useRoute();
@@ -36,73 +37,70 @@
                 text: "ВОЙТИ",
                 text2: "ОТМЕНИТЬ",
                 text3: "userVKInfo",
-                code_verifier: "",
+                code_verifier: "ZOPA_2.0",
                 code_challenge: "",
                 code_challenge_method: "S256",
                 state: "grehthrtjui7643trr",
                 code: "",
                 device_id: "",
-                redirectUrl: "https://lk.intelektaz.com/"
+                redirectUrl: "https://lk.intelektaz.com/signin"
             }
         },
         mounted() {
+            const isParams = localStorage.getItem("isParams");
             this.generatePKCE().then((pkce) => {
-                this.code_verifier = pkce.codeVerifier;
-                this.code_challenge = pkce.codeChallenge;
+                if (isParams != "true") {
+                    this.code_verifier = pkce.codeVerifier;
+                    this.code_challenge = pkce.codeChallenge;
+                }
 
-                VKID.Config.init({
-                    app: 52191705,
-                    state: this.state,
-                    codeChallenge: this.code_challenge,
-                    redirectUrl: "https://lk.intelektaz.com/",
-                });
-
-                const oneTap = new VKID.OneTap();
-                const container = document.getElementById('VkIdSdkOneTap');
-
-                oneTap.render({
-                    container: container,
-                    scheme: VKID.Scheme.LIGHT,
-                    lang: VKID.Languages.RUS,
-                })
-                .on(VKID.WidgetEvents.ERROR, (error) => {
-                    console.error("VKID Widget Error: ", error);
-                })
-                // .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
-                //     const { code, device_id, state } = payload;
-                //     console.log("payload: ", payload);
-
-                //     const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
-                //     localStorage.setItem('user_info', JSON.stringify(user_info));
-                // });
-                window.addEventListener("message", this.handlePostMessage, false);
+                this.handleUrlParams();
             });
+
         },
         methods: {
-            async handlePostMessage(event) {
-                try {
-                    if (event.data.action === "oauth2_authorize_responsegrehthrtjui7643trr") {
-                        const code = event.data.payload.code;
-                        const device_id = event.data.payload.device_id;
-                        const state = event.data.payload.state;
+            async tap() {
+                const clientId = "52191705";
+                const redirectUri = this.redirectUrl;
+                const state = this.state;
+                const code_challenge = this.code_challenge;
+                const code_challenge_method = this.code_challenge_method;
 
-                        console.log("Device ID:", device_id);
-                        localStorage.setItem("data-connect-code", code);
-                        localStorage.setItem("data-connect-state", state);
-                        localStorage.setItem("data-connect-device_id", device_id);
-                        localStorage.setItem("data-connect-code_verifier", this.code_verifier);
+                const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}`;
+                window.location.href = vkAuthUrl;
 
-                        const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
-                        console.log("User Info:", user_info);
+                window.addEventListener("message", this.handlePostMessage, false);
+            },
+            async handlePostMessage() {
+                const params = new URLSearchParams(window.location.search);
+                const code = params.get("code");
+                const state = params.get("state");
+                const device_id = params.get("device_id");
 
-                        localStorage.setItem('user_info', JSON.stringify(user_info));
-                    }
-                    localStorage.setItem(`${event.data.action}`, JSON.stringify(event.data.payload));
-                } catch (error) {
-                    console.error("Error in handlePostMessage:", error);
+                if (!code || !state || !device_id) {
+                    console.error("Не найдены параметры в редиректе");
+                    return;
+                } 
+                console.log("IM HERE", code);
+                localStorage.setItem("MYINFO", `${code}, ${state}, ${device_id}`);
+            },
+            async handleUrlParams() {
+                localStorage.setItem("isParams", true);
+                const params = new URLSearchParams(window.location.search);
+                const code = params.get("code");
+                const state = params.get("state");
+                const device_id = params.get("device_id");
+
+                if (code && state && device_id) {
+                    console.log("Параметры найдены:", { code, state, device_id });
+
+                    const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
+                    console.log(user_info);
+                    localStorage.setItem("user_info", user_info);
+                } else {
+                    console.warn("Параметры code, state или device_id отсутствуют в URL.");
                 }
-            }
-            ,  
+            },
             async routNextPage() {
                 // ЗДЕСЬ ПРОВЕРКА, АВТОРИЗОВАН ПОЛЬЗОВАТЕЛЬ ИЛИ НЕТ
                 // const isAuthorized = await checkUserAuthorization();
@@ -117,8 +115,8 @@
 
             // Функция для генерации случайной строки
             generateCodeVerifier(length = 64) {
-                const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.';
-                let codeVerifier = '';
+                const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+                let codeVerifier = "";
                 for (let i = 0; i < length; i++) {
                     codeVerifier += validChars.charAt(Math.floor(Math.random() * validChars.length));
                 }
