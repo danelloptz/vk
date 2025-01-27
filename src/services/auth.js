@@ -23,20 +23,27 @@ export async function silentTokenBack(secret_token) {
     
 }
 
-export async function getToken(code, state, code_verifier, device_id, redirect_uri) {
-    try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/auth/', {
-            code: code, 
-            state: state,
-            code_verifier: code_verifier,
-            device_id: device_id,
-            redirect_uri: redirect_uri
-        })
-        return response.data
-    }  catch (error) {
-        console.error('Ошибка при выполнении запроса:', error);
-        throw error;
-    }
+export function getToken(code, state, code_verifier, device_id, redirect_uri) {
+    console.log("pre-response");
+    return axios.post('https://web.intelektaz.com/api/v1/auth/', {
+        code, 
+        state,
+        code_verifier,
+        device_id,
+        redirect_uri
+    })
+    .then((response) => {
+        console.log(response);
+        console.log("Response status:", response.status);
+        console.log("Response data:", response.data);
+        return response; // Возвращаем ответ, чтобы вызвать .then на результат
+    })
+    .catch((error) => {
+        console.error("Error during request:", error.response || error);
+        throw error; // Пробрасываем ошибку для обработки в вызвавшем коде
+    });
 }
+
+
 
 // здесь тоже пути запросов менять

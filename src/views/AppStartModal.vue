@@ -59,7 +59,6 @@
 
                 const oneTap = new VKID.OneTap();
                 const container = document.getElementById('VkIdSdkOneTap');
-                console.log(this.redirectUrl);
 
                 oneTap.render({
                     container: container,
@@ -69,16 +68,41 @@
                 .on(VKID.WidgetEvents.ERROR, (error) => {
                     console.error("VKID Widget Error: ", error);
                 })
-                .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
-                    const { code, device_id, state } = payload;
-                    console.log("payload: ", payload);
+                // .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, async (payload) => {
+                //     const { code, device_id, state } = payload;
+                //     console.log("payload: ", payload);
 
-                    const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
-                    localStorage.setItem('user_info', JSON.stringify(user_info));
-                });
+                //     const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
+                //     localStorage.setItem('user_info', JSON.stringify(user_info));
+                // });
+                window.addEventListener("message", this.handlePostMessage, false);
             });
         },
         methods: {
+            async handlePostMessage(event) {
+                try {
+                    if (event.data.action === "oauth2_authorize_responsegrehthrtjui7643trr") {
+                        const code = event.data.payload.code;
+                        const device_id = event.data.payload.device_id;
+                        const state = event.data.payload.state;
+
+                        console.log("Device ID:", device_id);
+                        localStorage.setItem("data-connect-code", code);
+                        localStorage.setItem("data-connect-state", state);
+                        localStorage.setItem("data-connect-device_id", device_id);
+                        localStorage.setItem("data-connect-code_verifier", this.code_verifier);
+
+                        const user_info = await getToken(code, state, this.code_verifier, device_id, this.redirectUrl);
+                        console.log("User Info:", user_info);
+
+                        localStorage.setItem('user_info', JSON.stringify(user_info));
+                    }
+                    localStorage.setItem(`${event.data.action}`, JSON.stringify(event.data.payload));
+                } catch (error) {
+                    console.error("Error in handlePostMessage:", error);
+                }
+            }
+            ,  
             async routNextPage() {
                 // ЗДЕСЬ ПРОВЕРКА, АВТОРИЗОВАН ПОЛЬЗОВАТЕЛЬ ИЛИ НЕТ
                 // const isAuthorized = await checkUserAuthorization();
