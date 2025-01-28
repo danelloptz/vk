@@ -7,12 +7,19 @@
                 :class="{ active: activeIndex === index }" 
                 @click="setActive(index)"
             >{{ item }}</span>
-        </div>        
+        </div>
+            <AppBalancePutMoney v-if="activeIndex === 0" />
+            <AppBalanceCashOut v-if="activeIndex === 1" />
+            <!-- <AppBalanceTransfer v-else-if="activeIndex === 2" />
+            <AppBalanceHistory v-else-if="activeIndex === 3" /> -->
     </section>
 </template>
 
 <script>
+    import AppBalanceCashOut from '@/components/AppBalanceCashOut.vue';
+    import AppBalancePutMoney from '@/components/AppBalancePutMoney.vue';
     export default {
+        components: { AppBalanceCashOut, AppBalancePutMoney },
         data() {
             return {
                 listSwtich: ["Пополнить баланс", "Вывод средств", "Перевод средств", "Финансовая история"],
@@ -36,7 +43,7 @@
         width: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        row-gap: 50px;
         z-index: 4;
     }
     .switch {
@@ -54,7 +61,7 @@
         text-align: center;
         align-content: center;
         transition: .1s ease-in;
-        @media (max-width: 1200px) {
+        @media (max-width: 1300px) {
             font-size: 16px;
         }
         @media (max-width: 1100px) {

@@ -231,6 +231,9 @@
         background: #2F3251;
         border-radius: 10px;
         padding: 30px 50px;
+        @media (max-width: 1500px) {
+            width: 100%;
+        }
         @media (max-width: 700px) {
             height: auto;
         }

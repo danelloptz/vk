@@ -25,7 +25,8 @@ app.get('/api/user-info', (req, res) => {
             "telegram" : "link",
             "whatsapp" : "link",
         },
-        "groupLink" : "https://vk.com/profcom.petrsu"
+        "groupLink" : "https://vk.com/profcom.petrsu",
+        "balance": "80"
     });
 });
 

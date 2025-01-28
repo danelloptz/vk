@@ -10,24 +10,13 @@
                     type="number"
                     v-model="usdt"
                     placeholder="USDT"
-                    @input="countCashout"
                 >
-                <span>Комиссия 1 USDT включена</span>
+                <span>Минимальная сумма пополнения 1 USDT</span>
             </div>
-            <div class="item">
-                <input 
-                    v-model="adress"
-                    placeholder="Адрес BEP-20"
-                >
-                <span>Если вы укажите адрес другой сети, средства будут утеряны безвозвратно!</span>
-            </div>
-            
-            <span>Вывод обрабатывается в течение рабочего дня</span>
-            <span>Вы получите {{ cashout }} USDT за вычетом комиссии.</span>
-            <AppGoodButton :text="text1" />
+            <AppGoodButton :text="text1" @click="checkCash" />
         </div>
         <div class="right">
-            <h2>Выберите сеть для вывода:</h2>
+            <h2>Выберите сеть для пополнения:</h2>
             <div class="right_row">
                 <span
                     v-for="(item, index) in choices"
@@ -48,7 +37,7 @@
         components: { AppGoodButton },
         data() {
             return {
-                text1: "ЗАПРОСИТЬ ВЫВОД",
+                text1: "ПОПОЛНИТЬ БАЛАНС",
                 choices: ["BEP-20", "TRC-20"],
                 bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
                 trc_msg: "Обратите внимание, переводы по сети TRC-20 с комиссией 5 USDT",
@@ -56,8 +45,8 @@
                 commision: 1,
                 userInfo: null,
                 usdt: "",
-                adress: "",
                 cashout: 0,
+                minCash: 10,
             }
         },
         async created() {
@@ -68,13 +57,11 @@
             setActive(index) {
                 this.activeIndex = index;
                 this.commision = (index == 0) ? 1 : 5;
-                this.countCashout();
             },
-            countCashout() {
-                if (this.usdt != "0" && Number(this.usdt) > this.commision)
-                    this.cashout = Number(this.usdt) - this.commision
-                else 
-                    this.cashout = 0;
+            checkCash() {
+                if ( !(this.usdt != "" && Number(this.usdt) > this.commision))
+                    console.log('bad');
+                // TODO: переключение на следующий этап 
             }
         }
     };
