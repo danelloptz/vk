@@ -28,8 +28,8 @@
 </template>
 
 <script>
-    import { getUserInfo  } from '@/services/user';
-    import AppPopup from '../components/AppPopup.vue';
+    import { getUserInfoLocal  } from '@/services/user';
+    import AppPopup from '@/components/AppPopup.vue';
 
     export default {
         components: { AppPopup },
@@ -48,7 +48,7 @@
             },
         },
         async created() {
-            const response = await getUserInfo();
+            const response = await getUserInfoLocal();
             this.userData = response;
             console.log(this.userData.img);
 

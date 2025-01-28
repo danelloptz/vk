@@ -1,6 +1,19 @@
 import axios from 'axios';
 
-export async function getUserInfo() {
+export async function getUserInfo(access_token, client_id) {
+    try {
+        const response = await axios.post('https://id.vk.com/oauth2/user_info', {
+            "client_id": client_id,
+            "access_token": access_token
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении данных пользователя", error);
+        return false; 
+    }
+}
+
+export async function getUserInfoLocal() {
     try {
         const response = await axios.get('http://localhost:3000/api/user-info');
         return response.data;
@@ -9,6 +22,7 @@ export async function getUserInfo() {
         return false; 
     }
 }
+
 
 export async function getReferInfo() {
     try {

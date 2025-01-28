@@ -18,7 +18,14 @@ app.get('/api/user-info', (req, res) => {
         "img" : "avatar.jpg",
         "name" : "Василенко Данил",
         "id" : "ID: 942744235",
-        "status": "Leader"
+        "status": "Leader",
+        "sentence" : "Здесь написано какое-то вип-предложение",
+        "links": {
+            "vk" : "link",
+            "telegram" : "link",
+            "whatsapp" : "link",
+        },
+        "groupLink" : "https://vk.com/profcom.petrsu"
     });
 });
 
@@ -126,15 +133,22 @@ app.get('/api/assembly-groups', (req, res) => {
 });
 
 app.post('/api/get-add', (req, res) => {
-    if(!req.body) return res.sendStatus(400);
+    if (!req.body) return res.sendStatus(400);
 
     const k = parseInt(req.body.len, 10);
-    const adds = Array.from({ length: k }, () => ({ img: "add_example.png" }));
+    if (isNaN(k) || k <= 0) {
+        return res.status(400).json({ error: 'Invalid length' });
+    }
 
-    console.log(adds);
+    const photos = ['wide-bg2.jpg', 'wide-bg.jpg'];
 
-    res.json({ 
-        "adds": adds 
+    const adds = Array.from({ length: k }, () => {
+        const randomIndex = Math.floor(Math.random() * photos.length);
+        return { img: photos[randomIndex] };
+    });
+
+    res.json({
+        adds
     });
 });
 

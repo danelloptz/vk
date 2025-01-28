@@ -6,13 +6,16 @@
                 <h2 v-if="objectData">{{ objectData.name }}</h2>
                 <span v-if="objectData && objectData.status != 'Free'">{{ objectData.status }}</span>
             </div>
-            <span v-if="objectData && (objectData.id || objectData.sentence && correctStatus.includes(objectData.status))">{{ objectData.id || objectData.sentence }}</span>
+            <span v-if="objectData && objectData.id">{{ objectData.id }}</span>
+            <span v-if="objectData && objectData.sentence && correctStatus.includes(objectData.status)">{{ objectData.sentence }}</span>
+            <a v-if="objectData && objectData.groupLink" :href="objectData.groupLink">Ссылка</a>
             <div class="footer_data_links">
                 <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
+        <span v-if="isBusiness" class="business">Business-предложение</span>
         
     </div>
 </template>
@@ -24,6 +27,7 @@
                 type: Object,
                 required: true,
             },
+            isBusiness: Boolean
         },
         data() {
             return {
@@ -42,8 +46,8 @@
         background-clip: text;
         color: transparent;
     }
-    h1, h2, span, img {
-        z-index: 5;
+    h1, h2, span, img, a {
+        z-index: 4;
     }
 
     span {
@@ -51,13 +55,28 @@
         font-size: 18px;
         font-family: 'OpenSans';
     }
+    a {
+        text-decoration: underline;
+        color: white;
+        font-family: 'OpenSans';
+        font-size: 16px;
+        cursor: pointer;
+    }
     .footer_data {
         display: flex;
         column-gap: 30px;
         align-items: center;
+        width: fit-content; 
+        max-width: 100%;
+        position: relative;
         @media (max-width: 1100px) {
             justify-content: center;
             align-items: center;
+        }
+        @media (max-width: 600px) {
+            align-items: start;
+            flex-direction: column;
+            row-gap: 20px;
         }
     }
     .footer_data > img {
@@ -113,7 +132,7 @@
 
     }
     .footer_data_links a {
-        z-index: 10;
+        z-index: 4;
         cursor: pointer;
     }
     .avatar {
@@ -122,9 +141,21 @@
         border-radius: 50%;
         object-position: center;
         object-fit: cover;
+        outline: 1px solid white; /* Толщина и цвет обводки */
+        outline-offset: 10px;
         @media (max-width: 560px) {
             width: 100px;
             height: 100px;
         }
+    }
+    .business {
+        color: #23EC63;
+        font-size: 16px;
+        font-family: 'OpenSans';
+        font-weight: 500;
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        cursor: pointer;
     }
 </style>

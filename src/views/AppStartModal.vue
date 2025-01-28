@@ -25,6 +25,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     // import { checkUserAuthorization } from '@/services/auth';
     import { getToken } from '@/services/auth';
+    import { getUserInfo } from '@/services/user';
     // import * as VKID from '@vkid/sdk';
     // import { useRoute } from 'vue-router';
 
@@ -81,6 +82,8 @@
                     const user_info = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
                     console.log(user_info);
                     localStorage.setItem("user_info", user_info);
+                    const full_data = await getUserInfo(user_info.access_token, "52191705");
+                    console.log(full_data);
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } else {
                     console.warn("Параметры code, state или device_id отсутствуют в URL.");

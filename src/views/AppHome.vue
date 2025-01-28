@@ -26,12 +26,21 @@
                     </div>
                 </div>
                 <AppAdd 
-                    v-if="addData"
+                    v-if="addDataVertical"
                     :orientation="orientation" 
-                    :data="addData" />
+                    :data="addDataVertical" />
             </div>
             <div class="right">
-
+                <AppGroupOrUser 
+                    :objectData="userInfo"
+                    :isBusiness="isBusiness"
+                    class="card"
+                />
+                <AppBalance />
+                <AppAdd 
+                    v-if="addDataHorizontal"
+                    :orientation="orientationH" 
+                    :data="addDataHorizontal" />
             </div>
         </section>
     </div>
@@ -40,24 +49,55 @@
 <script>
     import AppHeader from '@/components/AppHeader.vue';
     import AppGroupsAssemble from '@/components/AppGroupsAssemble.vue';
+    import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     import AppNavigation from '@/components/AppNavigation.vue';
+    import AppBalance from '@/components/AppBalance.vue';
     import AppAdd from '@/components/AppAdd.vue';
     import { getAdds } from '@/services/add';
+    import { getUserInfoLocal } from '@/services/user';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance },
         data() {
             return {
                 verticalAddCount: 2,
-                addData: null,
-                orientation: "vertical"
+                horizontalCount: 1,
+                addDataVertical: null,
+                addDataHorizontal: null,
+                orientationV: "vertical",
+                orientationH: "horizontal",
+                orientation: "vertical",
+                userInfo: null,
+                isMobileView: false,
+                isBusiness: true
             }
         },  
+        computed: {
+            currentOrientation() {
+                return window.innerWidth <= 600 ? 'vertical' : 'horizontal';
+            }
+        },
         async created() {
-            const response = await getAdds(this.verticalAddCount);
-            console.log(response, response.adds);
-            this.addData = response.adds;
-        }
+            const responseV = await getAdds(this.verticalAddCount);
+            this.addDataVertical = responseV.adds;
+            const responseH = await getAdds(this.horizontalCount);
+            this.addDataHorizontal = responseH.adds;
+            
+            const userInfo = await getUserInfoLocal();
+            this.userInfo = userInfo;
+
+            this.checkWindowWidth();
+            window.addEventListener("resize", this.checkWindowWidth);
+        },
+        beforeUnmount() {
+            window.removeEventListener("resize", this.checkWindowWidth);
+        },
+        methods: {
+            checkWindowWidth() {
+                this.orientation = window.innerWidth <= 1000 ? this.orientationH : this.orientationV;
+                console.log(this.orientation);
+            },
+        },
     };
 </script>
 
@@ -90,8 +130,10 @@
         }
     }
     .content {
+        width: 100%;
         display: flex;
         column-gap: 38px;
+        row-gap: 30px;
         @media (max-width: 1000px) {
             flex-direction: column;
         }
@@ -101,6 +143,24 @@
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+        @media (max-width: 1000px) {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            width: 100%;
+            column-gap: 20px;
+        }
+        @media (max-width: 800px) {
+            grid-template-columns: 2fr 3fr;
+        }
+        @media (max-width: 600px) {
+            grid-template-columns: 1fr;
+        }
+    }
+    .right {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        row-gap: 35px;
     }
 
     .vip {
@@ -115,7 +175,7 @@
     .vip_user {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        column-gap: 20px;
     }
     .vip_user img {
         width: 60px;
@@ -164,5 +224,18 @@
         font-size: 10px;
         font-weight: 500;
         font-family: 'OpenSans';
+    }
+
+    .card {
+        height: 276px;
+        background: #2F3251;
+        border-radius: 10px;
+        padding: 30px 50px;
+        @media (max-width: 700px) {
+            height: auto;
+        }
+        @media (max-width: 500px) {
+            padding: 50px;
+        }
     }
 </style>
