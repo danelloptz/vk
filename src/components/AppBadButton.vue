@@ -27,7 +27,7 @@
         line-height: 20.8px;
         font-family: 'Tektur', sans-serif;
         color: white;
-        z-index: 10;
+        z-index: 4;
         cursor: pointer;
         @media (max-width: 900px) {
             width: 170px;

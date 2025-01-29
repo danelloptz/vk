@@ -153,6 +153,16 @@ app.post('/api/get-add', (req, res) => {
     });
 });
 
+app.post('/api/txid-check', (req, res) => {
+    if (!req.body) return res.sendStatus(400);
+
+    const txid = req.body.txid;
+
+    res.json({
+        "status": true
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

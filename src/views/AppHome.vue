@@ -75,7 +75,10 @@
         computed: {
             currentOrientation() {
                 return window.innerWidth <= 600 ? 'vertical' : 'horizontal';
-            }
+            },
+            // accessToken() {
+            //     return this.$store.state.auth.accessToken;
+            // }
         },
         async created() {
             const responseV = await getAdds(this.verticalAddCount);
@@ -88,6 +91,7 @@
 
             this.checkWindowWidth();
             window.addEventListener("resize", this.checkWindowWidth);
+            // console.log(this.accessToken());
         },
         beforeUnmount() {
             window.removeEventListener("resize", this.checkWindowWidth);

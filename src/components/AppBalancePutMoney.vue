@@ -1,6 +1,18 @@
 <template>
+    <AppModalHash 
+        :visibility1="isOpen" 
+        @update:visibility1="isOpen = $event"
+        @close="closeModal" 
+    />
+    <AppModal
+        :title="title" 
+        :message="msg" 
+        :visibility1="isMoneyPut"
+        @update:visibility1="isMoneyPut = $event"
+        @close="closeModalMoneyPut" 
+    />
     <section class="cashout">
-        <div class="left">
+        <div class="left" v-if="!stepTwo">
             <div class="row">
                 <img src="@/assets/images/balance.png">
                 <h2 v-if="userInfo">Ваш баланс: {{ userInfo.balance }} USDT</h2>
@@ -15,7 +27,7 @@
             </div>
             <AppGoodButton :text="text1" @click="checkCash" />
         </div>
-        <div class="right">
+        <div class="right" v-if="!stepTwo">
             <h2>Выберите сеть для пополнения:</h2>
             <div class="right_row">
                 <span
@@ -27,17 +39,41 @@
             </div>
             <span>{{ (activeIndex == 0) ? bep_msg : trc_msg }}</span>
         </div>
+        <div class="steptwo" v-if="stepTwo">
+            <div class="row">
+                <img src="@/assets/images/balance.png">
+                <h2 v-if="userInfo">Ваш баланс: {{ userInfo.balance }} USDT</h2>
+            </div>
+            <div class="item">
+                <span>Для пополнения отправьте {{ cashout }} USDT (сеть {{ choices[activeIndex] }}) на кошелек: </span>
+                <span><strong>TFJpSqMrjrBr9EB1JRG48f5iTyoakJ2x8V</strong></span>
+            </div>
+            <span>Убедитесь, что адрес правильный и относится к той же сети! Транзакции невозможно отменить. После завершения транзакции отправьте ниже хэш (TxID) вашей транзакции. Зачисление средств происходит автоматически только после подтверждения хэша (TxID). </span>
+            <a @click="openModal">Инструкция, где взять хэш (TxID)</a>
+            <div class="input">
+                <input 
+                    v-model="txid"
+                    placeholder="TxID транзакция"
+                >
+                <AppGoodButton :text="text2" class="txid" @click="check" />
+            </div>
+        </div>
     </section>
 </template>
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
+    import AppModalHash from "@/components/AppModalHash.vue";
+    import AppModal from "@/components/AppModal.vue";
+
     import { getUserInfoLocal } from "@/services/user";
+    import { checkTxid } from "@/services/cash";
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppModalHash, AppModal },
         data() {
             return {
                 text1: "ПОПОЛНИТЬ БАЛАНС",
+                text2: "Я ОПЛАТИЛ",
                 choices: ["BEP-20", "TRC-20"],
                 bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
                 trc_msg: "Обратите внимание, переводы по сети TRC-20 с комиссией 5 USDT",
@@ -47,6 +83,12 @@
                 usdt: "",
                 cashout: 0,
                 minCash: 10,
+                stepTwo: false,
+                isOpen: false,
+                txid: "",
+                title: "УСПЕШНО!",
+                msg: "Ваш баланс пополнен",
+                isMoneyPut: false
             }
         },
         async created() {
@@ -60,8 +102,27 @@
             },
             checkCash() {
                 if ( !(this.usdt != "" && Number(this.usdt) > this.commision))
-                    console.log('bad');
-                // TODO: переключение на следующий этап 
+                    console.log('bad')
+                else {
+                    this.cashout = Number(this.usdt);
+                    this.stepTwo = true;
+                }
+            },
+            openModal() {
+                this.isOpen = true;
+            },
+            closeModal() {
+                this.isOpen = false;
+            },
+            async check() {
+                if (this.txid != "") {
+                    const response = await checkTxid(this.txid);
+                    this.isMoneyPut = response.status == true
+                }
+            },
+            closeModalMoneyPut() {
+                this.isMoneyPut = false;
+                this.stepTwo = false;
             }
         }
     };
@@ -70,11 +131,12 @@
 <style scoped>
     .cashout {
         display: flex;
-        column-gap: 200px;
+        justify-content: space-between;
         @media (max-width: 1300px) {
             column-gap: 50px;
         }
         @media (max-width: 700px) {
+            justify-content: start;
             flex-direction: column-reverse;
             row-gap: 40px;
         }
@@ -166,5 +228,38 @@
 
     input[type="number"] {
         -moz-appearance: textfield;
+    }
+    .steptwo {
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
+    }
+    .item {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+    }
+    .steptwo span, a {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .input {
+        display: flex;
+        column-gap: 30px;
+        align-items: center;
+        height: 60px;
+    }
+    .steptwo input {
+        width: 360px;
+        height: 100%;
+    }
+    .txid {
+        height: 100%;
+        width: 170px;
+    }
+    a {
+        text-decoration: underline;
+        cursor: pointer;
     }
 </style>
