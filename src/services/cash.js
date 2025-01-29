@@ -11,3 +11,13 @@ export async function checkTxid(txid) {
         return false; 
     }
 }
+
+export async function getHistory() {
+    try {
+        const response = await axios.get('http://localhost:3000/api/history-trans');
+        return response.data.history;
+    } catch (error) {
+        console.error("Ошибка при получении истории транзакций", error);
+        return false; 
+    }
+}

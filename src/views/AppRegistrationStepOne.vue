@@ -9,9 +9,9 @@
         <hr>
         <div class="modal_cotainer">
             <div class="user_info">
-                <img v-if="userData" :src="require(`@/assets/images/${userData.img}`)" class="avatar">
+                <img v-if="userData" :src="userData.avatar" class="avatar">
                 <div class="user_info_text">
-                    <h2 v-if="userData">{{ userData.name }}</h2>
+                    <h2 v-if="userData">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
                     <span v-if="userData">{{ userData.id }}</span>
                 </div>
             </div>
@@ -121,7 +121,8 @@
     // import AppBadButton from '@/components/AppBadButton.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
-    import { getUserInfo, getReferInfo } from '@/services/user';
+    // import { getUserInfo, getReferInfo } from '@/services/user';
+    import { getUserInfo } from '@/services/user';
 
     export default {
         components: { AppGoodButton, AppGroupOrUser },
@@ -199,10 +200,11 @@
             }
         },
         async created() {
-            const responseUser = await getUserInfo();
-            const responseRefer = await getReferInfo();
+            const responseUser = await getUserInfo(localStorage.getItem("token"));
+            console.log("в vue: ", responseUser);
+            // const responseRefer = await getReferInfo();
             this.userData = responseUser;
-            this.referData = responseRefer;
+            // this.referData = responseRefer;
 
             try {
                 const response = await fetch('https://restcountries.com/v3.1/all');

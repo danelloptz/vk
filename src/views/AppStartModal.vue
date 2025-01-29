@@ -38,7 +38,7 @@
                 text: "ВОЙТИ",
                 text2: "ОТМЕНИТЬ",
                 text3: "userVKInfo",
-                code_verifier: "ZOPA_2.0",
+                code_verifier: "",
                 code_challenge: "",
                 code_challenge_method: "S256",
                 state: "grehthrtjui7643trr",
@@ -79,10 +79,12 @@
                 if (code && state && device_id) {
                     console.log("Параметры найдены:", { code, state, device_id });
 
-                    const user_info = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
-                    console.log(user_info);
-                    localStorage.setItem("user_info", user_info);
-                    this.$store.dispatch("login", user_info);
+                    const response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
+                    if (response.status == 200) {
+                        localStorage.clear();
+                        localStorage.setItem("token", response.data.access_token);
+                        this.$router.push('/signup_1');
+                    } 
                 } else {
                     console.warn("Параметры code, state или device_id отсутствуют в URL.");
                 }

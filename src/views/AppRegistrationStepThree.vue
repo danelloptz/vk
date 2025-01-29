@@ -8,9 +8,9 @@
         <hr>
         <div class="info_block">
             <div class="user_info">
-                <img v-if="userData" :src="require(`@/assets/images/${userData.img}`)" class="avatar">
+                <img v-if="userData" :src="userData.avatar" class="avatar">
                 <div class="user_info_text">
-                    <h2 v-if="userData">{{ userData.name }}</h2>
+                    <h2 v-if="userData">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
                     <span v-if="userData">{{ userData.id }}</span>
                 </div>
             </div>
@@ -67,7 +67,7 @@
             };
         },
         async created() {
-            const response = await getUserInfo();
+            const response = await getUserInfo(localStorage.getItem("token"));
             this.userData = response;
         },
         methods: {

@@ -1,4 +1,11 @@
 <template>
+    <AppModal
+        :title="title" 
+        :message="msg" 
+        :visibility1="waitingModal"
+        @update:visibility1="waitingModal = $event"
+        @close="closeModalWaiting" 
+    />
     <section class="cashout">
         <div class="left">
             <div class="row">
@@ -24,7 +31,8 @@
             
             <span>Вывод обрабатывается в течение рабочего дня</span>
             <span>Вы получите {{ cashout }} USDT за вычетом комиссии.</span>
-            <AppGoodButton :text="text1" />
+            <span v-if="isError" class="error">{{ errMsg }}</span>
+            <AppGoodButton :text="text1" @click="openWaitingModal"/>
         </div>
         <div class="right">
             <h2>Выберите сеть для вывода:</h2>
@@ -43,9 +51,10 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
+    import AppModal from "@/components/AppModal.vue";
     import { getUserInfoLocal } from "@/services/user";
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppModal },
         data() {
             return {
                 text1: "ЗАПРОСИТЬ ВЫВОД",
@@ -58,6 +67,11 @@
                 usdt: "",
                 adress: "",
                 cashout: 0,
+                waitingModal: false,
+                title: "ОЖИДАЙТЕ!",
+                msg: "Запрос на вывод обрабатывается. Вы всегда можете отменить вывод в разделе «История»",
+                isError: false,
+                errMsg: ""
             }
         },
         async created() {
@@ -75,12 +89,32 @@
                     this.cashout = Number(this.usdt) - this.commision
                 else 
                     this.cashout = 0;
+            },
+            openWaitingModal() {
+                if (this.userInfo.balance >= this.usdt && this.adress != "" && this.usdt != "") {
+                    this.isError = false;
+                    this.waitingModal = true;
+                } else {
+                    this.isError = true;
+                }
+                if (this.userInfo.balance < this.usdt) 
+                    this.errMsg = "Не хватает средств!";
+                if (this.adress == "")
+                    this.errMsg = "Заполните поле с адресом!";
+                if (this.usdt == "")
+                    this.errMsg = "Введите сумму для вывода!";
+            },
+            closeModalWaiting() {
+                this.waitingModal = false;
             }
         }
     };
 </script>
 
 <style scoped>
+    .error {
+        color: red;
+    }
     .cashout {
         display: flex;
         column-gap: 200px;

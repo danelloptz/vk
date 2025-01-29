@@ -10,19 +10,6 @@ export async function checkUserAuthorization() {
     }
 }
 
-export async function silentTokenBack(secret_token) {
-    try {
-        const response = await axios.post('http://localhost:3000/api/vk', {
-            token: secret_token
-        })
-        return response.data
-    }  catch (error) {
-        console.error('Ошибка при выполнении запроса:', error);
-        throw error;
-    }
-    
-}
-
 export function getToken(code, state, code_verifier, device_id, redirect_uri) {
     console.log(code_verifier);
     localStorage.setItem("POST CODE_VERIFIER", code_verifier);
@@ -43,18 +30,3 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
         throw error; // Пробрасываем ошибку для обработки в вызвавшем коде
     });
 }
-
-
-export async function check() {
-    try {
-        const response = await axios.get('https://web.intelektaz.com/ping');
-        console.log(response);
-        return response;
-    } catch (error) {
-        console.error("Ошибка при проверке авторизации", error);
-        return false; 
-    }
-}
-
-
-// здесь тоже пути запросов менять

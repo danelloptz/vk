@@ -37,7 +37,7 @@
                 </div>
             </div>
             <div class="btns">
-                <AppGoodButton :text="text1" class="btn" />
+                <AppGoodButton :text="text1" class="btn" @click="sendMoney" />
                 <AppBadButton :text="text2"  class="btn"  />
             </div>
         </div>

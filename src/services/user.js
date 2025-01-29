@@ -1,11 +1,14 @@
 import axios from 'axios';
 
-export async function getUserInfo(access_token, client_id) {
+export async function getUserInfo(token) {
     try {
-        const response = await axios.post('https://id.vk.com/oauth2/user_info', {
-            "client_id": client_id,
-            "access_token": access_token
+        const response = await axios.get('https://web.intelektaz.com/api/v1/user/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
         });
+        console.log('в js: ', response)
         return response.data;
     } catch (error) {
         console.error("Ошибка при получении данных пользователя", error);

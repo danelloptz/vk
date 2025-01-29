@@ -11,16 +11,17 @@
             <AppBalancePutMoney v-if="activeIndex === 0" />
             <AppBalanceCashOut v-if="activeIndex === 1" />
             <AppBalanceSend v-else-if="activeIndex === 2" />
-            <!-- <AppBalanceHistory v-else-if="activeIndex === 3" /> -->
+            <AppBalanceHistory v-else-if="activeIndex === 3" />
     </section>
 </template>
 
 <script>
     import AppBalanceCashOut from '@/components/AppBalanceCashOut.vue';
     import AppBalancePutMoney from '@/components/AppBalancePutMoney.vue';
+    import AppBalanceHistory from '@/components/AppBalanceHistory.vue';
     import AppBalanceSend from '@/components/AppBalanceSend.vue';
     export default {
-        components: { AppBalanceCashOut, AppBalancePutMoney, AppBalanceSend },
+        components: { AppBalanceCashOut, AppBalancePutMoney, AppBalanceSend, AppBalanceHistory },
         data() {
             return {
                 listSwtich: ["Пополнить баланс", "Вывод средств", "Перевод средств", "Финансовая история"],
