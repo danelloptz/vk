@@ -5,7 +5,7 @@
         <AppGroupsAssemble />
         <section class="content">
             <div class="left">
-                <AppNavigation />
+                <AppNavigation @update-active-index="updateActiveComponent"/>
                 <div class="vip">
                     <div class="vip_user">
                         <img src="@/assets/images/avatar.jpg">
@@ -36,7 +36,8 @@
                     :isBusiness="isBusiness"
                     class="card"
                 />
-                <AppBalance />
+                <AppBalance v-if="selectedComponent === 0" />
+                <AppRotation v-if="selectedComponent === 4" />
                 <AppAdd 
                     v-if="addDataHorizontal"
                     :orientation="orientationH" 
@@ -52,12 +53,13 @@
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     import AppNavigation from '@/components/AppNavigation.vue';
     import AppBalance from '@/components/AppBalance.vue';
+    import AppRotation from '@/components/AppRotation.vue';
     import AppAdd from '@/components/AppAdd.vue';
     import { getAdds } from '@/services/add';
     import { getUserInfoLocal } from '@/services/user';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation },
         data() {
             return {
                 verticalAddCount: 2,
@@ -69,7 +71,8 @@
                 orientation: "vertical",
                 userInfo: null,
                 isMobileView: false,
-                isBusiness: true
+                isBusiness: true,
+                selectedComponent: 0
             }
         },  
         computed: {
@@ -101,6 +104,9 @@
                 this.orientation = window.innerWidth <= 1000 ? this.orientationH : this.orientationV;
                 console.log(this.orientation);
             },
+            updateActiveComponent(index) {
+                this.selectedComponent = index;
+            }
         },
     };
 </script>

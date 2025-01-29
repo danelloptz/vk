@@ -29,6 +29,7 @@
         color: white;
         z-index: 4;
         cursor: pointer;
+        transition: .2s ease-in;
         @media (max-width: 900px) {
             width: 170px;
             font-size: 14px;
@@ -42,5 +43,8 @@
             height: 30px;
             font-size: 12px;
         }
+    }
+    .button:hover {
+        background: rgba(255, 255, 255, 0.167);
     }
 </style>

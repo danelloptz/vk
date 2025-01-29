@@ -43,4 +43,7 @@
             font-size: 12px;
         }
     }
+    .button:hover {
+        background: linear-gradient(to right, #E14A7A, #E14ABB, #A139DE);
+    }
 </style>

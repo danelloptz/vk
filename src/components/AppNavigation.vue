@@ -16,7 +16,7 @@
             <div class="wrapper">
                 <div 
                     class="item" 
-                    v-for="(menu, index) in menuItems" 
+                    v-for="(menu, index) in updatedMenuItems" 
                     :key="index" 
                     :class="{ active: activeIndex === index }" 
                     @click="setActive(index)"
@@ -29,35 +29,53 @@
 </template>
 
 <script>
-export default {
-    data() {
-        return {
-            activeIndex: 0,
-            menuItems: [
-                { img: require('@/assets/images/balance.png'), label: 'Баланс: ' },
-                { img: require('@/assets/images/home.png'), label: 'Главная' },
-                { img: require('@/assets/images/Ai.png'), label: 'ИИ генератор' },
-                { img: require('@/assets/images/structure.png'), label: 'Структура' },
-                { img: require('@/assets/images/rotation.png'), label: 'Ротация' },
-                { img: require('@/assets/images/settings.png'), label: 'Настройки' },
-                { img: require('@/assets/images/instructions.png'), label: 'Инструкции' },
-            ],
-            pos: "50px !important",
-            isShown: false,
-            background: "#1B1E3D",
-            display: "block",
-            zindex: 6
-        };
-    },
-    methods: {
-        setActive(index) {
-            this.activeIndex = index;
+    import { getUserInfoLocal } from "@/services/user";
+
+    export default {
+        data() {
+            return {
+                activeIndex: 0,
+                menuItems: [
+                    { img: require('@/assets/images/balance.png'), label: 'Баланс: ' },
+                    { img: require('@/assets/images/home.png'), label: 'Главная' },
+                    { img: require('@/assets/images/Ai.png'), label: 'ИИ генератор' },
+                    { img: require('@/assets/images/structure.png'), label: 'Структура' },
+                    { img: require('@/assets/images/rotation.png'), label: 'Ротация' },
+                    { img: require('@/assets/images/settings.png'), label: 'Настройки' },
+                    { img: require('@/assets/images/instructions.png'), label: 'Инструкции' },
+                ],
+                pos: "50px !important",
+                isShown: false,
+                background: "#1B1E3D",
+                display: "block",
+                zindex: 6,
+                userInfo: null
+            };
         },
-        setShown() {
-            this.isShown = !(this.isShown);
-        }
-    },
-};
+        async created() {
+            const response = await getUserInfoLocal();
+            this.userInfo = response;
+        },
+        computed: {
+            updatedMenuItems() {
+                return this.menuItems.map((item, index) => {
+                    if (index === 0 && this.userInfo) {
+                        return { ...item, label: `Баланс: ${this.userInfo.balance} USDT` };
+                    }
+                    return item;
+                });
+            }
+        },
+        methods: {
+            setActive(index) {
+                this.activeIndex = index;
+                this.$emit("update-active-index", index);
+            },
+            setShown() {
+                this.isShown = !(this.isShown);
+            }
+        },
+    };
 </script>
 
 <style scoped>
