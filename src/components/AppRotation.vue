@@ -9,17 +9,17 @@
             >{{ item }}</span>
         </div>
             <AppRotationGroup v-if="activeIndex === 0" />
-            <!-- <AppBalancePutMoney v-if="activeIndex === 0" />
-            <AppBalanceCashOut v-if="activeIndex === 1" />
-            <AppBalanceSend v-else-if="activeIndex === 2" />
-            <AppBalanceHistory v-else-if="activeIndex === 3" /> -->
+            <AppRotationVideo v-if="activeIndex === 1" />
+            <AppRotationPosts v-if="activeIndex === 2" />
     </section>
 </template>
 
 <script>
     import AppRotationGroup from '@/components/AppRotationGroup.vue';
+    import AppRotationVideo from '@/components/AppRotationVideo.vue';
+    import AppRotationPosts from '@/components/AppRotationPosts.vue';
     export default {
-        components: { AppRotationGroup },
+        components: { AppRotationGroup, AppRotationVideo, AppRotationPosts },
         data() {
             return {
                 listSwtich: ["Ротация групп", "Ротация видео", "Ротация постов"],

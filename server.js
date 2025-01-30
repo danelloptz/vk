@@ -56,7 +56,9 @@ app.get('/api/group-info', (req, res) => {
             "telegram" : "link",
             "whatsapp" : "link",
         },
-        "groupLink" : "https://vk.com/profcom.petrsu"
+        "groupLink" : "https://vk.com/profcom.petrsu",
+        "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
+        "last_post": 'https://vk.com/profcom.petrsu?from=search&w=wall-38200854_40249'
     });
 });
 
