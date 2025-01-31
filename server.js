@@ -21,9 +21,7 @@ app.get('/api/user-info', (req, res) => {
         "status": "Leader",
         "sentence" : "Здесь написано какое-то вип-предложение",
         "links": {
-            "vk" : "link",
-            "telegram" : "link",
-            "whatsapp" : "link",
+            "vk" : "https://vk.com/",
         },
         "groupLink" : "https://vk.com/profcom.petrsu",
         "balance": "80"
@@ -52,9 +50,9 @@ app.get('/api/group-info', (req, res) => {
         "sentence" : "Здесь написано какое-то вип-предложение",
         "status": "Leader",
         "links": {
-            "vk" : "link",
-            "telegram" : "link",
-            "whatsapp" : "link",
+            "vk" : "https://vk.com/",
+            "telegram" : "https://telegram.com/",
+            "whatsapp" : "https://whatsapp.com/",
         },
         "groupLink" : "https://vk.com/profcom.petrsu",
         "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
@@ -199,33 +197,33 @@ app.get('/api/history-trans', (req, res) => {
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
@@ -260,33 +258,33 @@ app.get('/api/history-trans', (req, res) => {
             },
 
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             {
-                "date": "19.10.2024 | 17:56",
-                "sum": "60",
-                "description": "Пополнение средств",
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
                 "status": "Успешно"
             },
             

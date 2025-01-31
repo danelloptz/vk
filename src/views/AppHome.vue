@@ -38,6 +38,7 @@
                 />
                 <AppBalance v-if="selectedComponent === 0" />
                 <AppRotation v-if="selectedComponent === 4" />
+                <AppSettings v-if="selectedComponent === 5" />
                 <AppAdd 
                     v-if="addDataHorizontal"
                     :orientation="orientationH" 
@@ -54,12 +55,13 @@
     import AppNavigation from '@/components/AppNavigation.vue';
     import AppBalance from '@/components/AppBalance.vue';
     import AppRotation from '@/components/AppRotation.vue';
+    import AppSettings from '@/components/AppSettings.vue';
     import AppAdd from '@/components/AppAdd.vue';
     import { getAdds } from '@/services/add';
     import { getUserInfoLocal } from '@/services/user';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings },
         data() {
             return {
                 verticalAddCount: 2,
