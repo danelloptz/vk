@@ -1,5 +1,5 @@
 <template>
-    <section class="settings">
+    <section class="settings" v-if="!isAuto">
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
@@ -8,17 +8,17 @@
             <span v-if="userData?.links?.whatsapp">WhatsApp: {{ userData.links.whatsapp }}</span>
         </div>
         
-        <div class="row" v-if="!userData?.links?.telegram">
+        <div class="row">
             <input 
                 v-model="telegramLink" 
                 placeholder="Telegram">
-            <span>ДОБАВИТЬ</span>
+            <span @click="addTelegram">ДОБАВИТЬ</span>
         </div>
-        <div class="row" v-if="!userData?.links?.whatsapp">
+        <div class="row">
             <input 
                 v-model="whatsappLink" 
                 placeholder="WhatsApp">
-            <span>ДОБАВИТЬ</span>
+            <span @click="addWhatsapp">ДОБАВИТЬ</span>
         </div>
         <h3>Региональные данные</h3>
         <div class="dropdown">
@@ -71,6 +71,35 @@
             </ul>
         </div>
         <span v-if="isNotSelectGender" class="error_message">Не выбран пол!</span>
+
+        <h3>ВК группа для продвижения:</h3>
+        <div class="row">
+            <input  
+                v-model="vkGroupLink" 
+                placeholder="ВК группа" >
+            <span @click="addVKGroup">ДОБАВИТЬ</span>
+            <h3 v-if="userData">Подписки: {{ userData.groupStat }}</h3>
+        </div>
+        <div class="row2">
+            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked">
+            <span>Подписки</span>
+        </div>
+        
+        <h3>ВК видео для продвижения:</h3>
+        <div class="row">
+            <input  
+                v-model="vkVideoLink" 
+                placeholder="ВК видео" >
+            <span @click="addVKVideo">ДОБАВИТЬ</span>
+            <h3 v-if="userData">Просмотры: {{ userData.videoStat }}</h3>
+        </div>
+
+        <div v-if="selectedInterests.length > 0" class="selected-countries">
+            <span v-for="(interest, index) in selectedInterests" :key="index" class="selected-interest">
+            {{ interest }}
+            <img src="@/assets/images/close.png" @click="removeInterest(index)" class="remove-btn">
+            </span>
+        </div>
         <div class="dropdown">
             <input
                 type="text"
@@ -92,20 +121,48 @@
             </ul>
         </div>
         <span v-if="isNotSelectInterest" class="error_message">Не выбраны интересы!</span>
-    </section>
+        <a @click="nextStep">Автопродвижение</a>
+        <div class="auto">
+            <span>Блок <strong>«Ваше предложение»</strong> - отображается только у обладателей пакетов <strong>Business и Leader</strong> в виде большого центрального рекламного блока, и на тарифе <strong>VIP и пакетах Business и Leader</strong>  в левом рекламном блоке. У пользователей  Free, Start и Standard - эта информация отображается только в разделе структура.</span>
+            <span><i><strong>Сделайте свое предложение пользователям INTELEKTAZ, прямо сейчас</strong></i></span>
+        </div>
+        <h3>Ваше предложение:</h3>
+        <textarea
+            v-model="sentence"
+            placeholder="Описание"
+        ></textarea>
+        <input  
+            v-model="siteLink" 
+            placeholder="Сайт" >
+        <AppGroupOrUser 
+            :objectData="userData"
+            :isBusiness="isBusiness"
+            class="card"
+        />
+        <span style="font-size: 14px;"><i>Для продвижения запрещены порнографические материалы, призывы к насилию, оскорбления и другие темы запрещенные законодательством вашей страны и правилами Вконтакте.</i></span>
+        <AppGoodButton :text="text1" class="btn" @click="saveSettings" />
+   </section>
+   <AppSettingsAuto v-if="isAuto" />
 </template>
 
 <script>
-import { getUserInfoLocal } from "@/services/user";
+    import { getUserInfoLocal, sendNewSettings } from "@/services/user";
+    import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
+    import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
 
 export default {
+    components: { AppGroupOrUser, AppGoodButton, AppSettingsAuto },
     data() {
         return {
             userData: null,
             telegramLink: "",
             whatsappLink: "",
-            text: "ШАГ 2",
-            text2: "ОТМЕНИТЬ",
+            vkGroupLink: "",
+            vkVideoLink: "",
+            sentence: "",
+            siteLink: "",
+            text1: "СОХРАНИТЬ ИЗМЕНЕНИЯ",
             isCheckboxChecked : false,
             countries: [],
             genders: ["Мужской", "Женский"],
@@ -123,7 +180,9 @@ export default {
             isNotSelectCountry: false,
             isNotSelectGender: false,
             isNotSelectInterest: false,
-            isNotCheckboxChecked: false
+            isBusiness: true,
+            isNotCheckboxChecked: false,
+            isAuto: false
         };
     },
     computed: {
@@ -146,6 +205,8 @@ export default {
         } catch (error) {
             console.error('Ошибка при загрузке данных о странах:', error);
         }
+
+        this.initLinks();
     },
     watch: {
         userData: {
@@ -189,13 +250,60 @@ export default {
                 this.isDropdownVisibleInterest = false;
             },
             nextStep() {
-                this.isNotSelectCountry = !this.countries.some(country => country.name === this.selectedCountry);
-                this.isNotSelectGender = !(this.selectedGender != "");
-                this.isNotSelectInterest = !(this.selectedInterests.length > 0);
-                this.isNotCheckboxChecked = !this.isCheckboxChecked;
-                if (!(this.isNotSelectCountry || this.isNotSelectGender || this.isNotSelectInterest || this.isNotCheckboxChecked)) {
-                    this.$router.push('/signup_2');
-                }
+                this.isAuto = true;
+            },
+            addTelegram() {
+                this.userData.links.telegram = this.telegramLink;
+            },
+            addWhatsapp() {
+                this.userData.links.whatsapp = this.whatsappLink;
+            },
+            addVKGroup() {
+                this.userData.links.vk = this.vkGroupLink;
+            },
+            addVKVideo() {
+                this.userData.links.videoLink = this.vkVideoLink;
+            },
+            initLinks() {
+                if (this.userData.links.telegram) 
+                    this.telegramLink = this.userData.links.telegram;
+                if (this.userData.links.whatsapp)
+                    this.whatsappLink = this.userData.links.whatsapp;
+                if (this.userData.links.vk)
+                    this.vkGroupLink = this.userData.links.vk;
+                if (this.userData.links.videoLink)
+                    this.vkVideoLink = this.userData.links.videoLink;
+                if (this.userData.country)
+                    this.searchQuery = this.userData.country;
+                if (this.userData.city)
+                    this.selectedCity = this.userData.city;
+                if (this.userData.sex)
+                    this.searchQueryGender = this.userData.sex;
+                if (this.userData.selectedInterests) 
+                    this.selectedInterests = this.userData.selectedInterests;
+                if (this.userData.sentence)
+                    this.sentence = this.userData.sentence;
+                if (this.userData.site)
+                    this.siteLink = this.userData.site;
+            },
+            async saveSettings() {
+                const payload = {
+                    links: {
+                        telegram: this.telegramLink,
+                        whatsapp: this.whatsappLink,
+                        vk: this.vkGroupLink,
+                        videoLink: this.vkVideoLink
+                    },
+                    country: this.searchQuery,
+                    city: this.selectedCity,
+                    sex: this.searchQueryGender,
+                    selectedInterests: this.selectedInterests,
+                    sentence: this.sentence,
+                    site: this.siteLink,
+                    groupStat: this.userData?.groupStat,
+                    videoStat: this.userData?.videoStat
+                };
+                await sendNewSettings(payload);
             }
     }
 };
@@ -212,6 +320,52 @@ export default {
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
     }
 
+    .btn {
+        width: 300px;
+        @media (max-width: 900px) {
+            width: 250px;
+        }
+        @media (max-width: 500px) {
+            height: 50px;
+            width: 200px;
+        }
+    }
+    .card {
+        height: 276px;
+        background: #2F3251;
+        border-radius: 10px;
+        padding: 30px 50px;
+        @media (max-width: 1500px) {
+            width: 100%;
+        }
+        @media (max-width: 700px) {
+            height: auto;
+        }
+        @media (max-width: 500px) {
+            padding: 50px;
+        }
+    }
+
+    a {
+        color: #60ADDC;
+        font-size: 20px;
+        font-weight: bold;
+        font-family: 'OpenSans';
+        text-decoration: underline;
+    }
+    .auto {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
+        padding: 30px;
+        background: #2F3251;
+        border-radius: 10px;
+    }
+    .auto span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+    }
     .settings {
         display: flex;
         flex-direction: column;
@@ -225,7 +379,20 @@ export default {
     }
     .row {
         display: flex;
+        align-items: center;
         column-gap: 20px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+    }
+    .row2 {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
+    .row2 span {
+        font-size: 16px;
+        color: white;
+        font-family: 'OpenSans';
     }
     .row span {
         font-size: 16px;
@@ -239,6 +406,11 @@ export default {
         text-align: center;
         align-content: center;
         height: 60px;
+        transition: .2s ease-in;
+        cursor: pointer;
+    }
+    .row span:hover {
+        background: rgba(255, 255, 255, 0.167);
     }
 
     h3 {
@@ -250,17 +422,6 @@ export default {
     h1, h2, span, img {
         z-index: 5;
     }
-    .inputs {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        row-gap: 20px;
-        width: 360px;
-        @media (max-width: 500px) {
-            width: 100%;
-            align-items: center;
-        }
-    }
     .dropdown {
         position: relative;
         width: 360px;
@@ -270,9 +431,25 @@ export default {
     }
 
     input {
-        width: 100%;
+        width: 360px;
         height: 60px;
         padding: 0 20px;
+        box-sizing: border-box;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.5);
+        background: none;
+        border: 1px solid white;
+        border-radius: 10px;
+        font-family: 'OpenSans';
+        position: relative;
+        @media (max-width: 500px) {
+            width: 70vw;
+        }
+    }
+    textarea {
+        width: 360px;
+        height: 190px;
+        padding: 20px;
         box-sizing: border-box;
         font-size: 16px;
         color: rgba(255, 255, 255, 0.5);
@@ -336,76 +513,6 @@ export default {
         background: #0c103e;
     }
 
-    .modal {
-        width: 1160px;
-        border-radius: 10px;
-        position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 50px;
-        z-index: 2;
-        overflow-y: auto;
-        scrollbar-width: none;
-        row-gap: 50px;
-        box-sizing: border-box;
-        @media (max-width: 1400px) {
-            width: 80vw;
-        }
-        @media (max-width: 650px) {
-            width: 90vw;
-            padding: 30px 15px;
-        }
-    }
-
-    .modal::-webkit-scrollbar {
-        width: 0;  
-        height: 0;
-    }
-
-    .modal::-webkit-scrollbar-thumb {
-        background: transparent;
-    }
-
-
-    .close {
-        position: absolute;
-        right: 30px;
-        top: 30px;
-        width: 21px;
-        height: 21px;
-        cursor: pointer;
-        @media (max-width: 450px) {
-            right: 20px;
-            top: 20px;
-        }
-    }
-    .modal-background {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url("@/assets/images/background.png");
-        background-color: #1B1E3D;
-        background-size: contain;
-        background-position: center;
-        background-blend-mode: multiply;
-        background-repeat: repeat-y;
-        opacity: 0.25; 
-        background-size: 300%;
-        filter: brightness(140%) contrast(80%);
-        border-radius: 10px;
-    }
-
-    .text_wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        row-gap: 30px;
-    }
-
     h1 {
         font-size: 48px;
         color: white;
@@ -449,36 +556,6 @@ export default {
             width: 95%;
         }
     }
-
-    .modal_cotainer {
-        display: flex;
-        width: 100%;
-        align-items: start;
-        column-gap: 130px;
-        @media (max-width: 1100px) {
-            flex-direction: column;
-            align-items: center;
-            row-gap: 30px;
-        }
-        
-    }
-    .user_info {
-        display: flex;
-        column-gap: 30px;
-        align-items: center;
-    }
-    .avatar {
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        object-position: center;
-        object-fit: cover;
-        @media (max-width: 560px) {
-            width: 100px;
-            height: 100px;
-        }
-    }
-
     h2 {
         font-family: 'OpenSans';
         font-size: 40px;
@@ -496,6 +573,7 @@ export default {
         flex-wrap: wrap;
         column-gap: 10px;
         row-gap: 10px;
+        width: 360px;
     }
 
     .selected-interest {
@@ -514,81 +592,22 @@ export default {
         cursor: pointer;
     }
 
-    .agreement {
-        display: flex;
-        align-items: start;
-        column-gap: 12px;
-    }
-    .agreement input {
-        width: 40px;
-        height: 40px;
-        background: none;
-        border: 1px solid white;
-        border-radius: 3px;
-    }
-    .agreement span {
-        font-size: 16px;
-        line-height: 1.2;
-    }
-
     a {
         text-decoration: underline;
         cursor: pointer;
-    }
-
-    .footer {
-        margin-top: 20px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        column-gap: 40px;
-        @media (max-width: 1100px) {
-            grid-template-columns: 1fr;
-            align-items: center;
-            row-gap: 20px;
-        }
-    }
-    .footer_text {
-        display: flex;
-        flex-direction: column;
-        row-gap: 30px;
-        @media (max-width: 1300px) {
-            row-gap: 10px;
-        }
-        @media (max-width: 1100px) {
-            row-gap: 0px;
-            text-align: center;
-        }
-    }
-    .footer_text h1 {
-        font-family: 'Tektur';
-        font-size: 36px;
-        font-weight: normal;
-        @media (max-width: 1300px) {
-            font-size: 30px;
-        }
-        @media (max-width: 1100px) {
-            font-size: 36px;
-        }
-    }
-    .footer_text span {
-        font-family: 'OpenSans';
-        color: white;
-        font-size: 18px;
-        @media (max-width: 1300px) {
-            font-size: 16px;
-        }
-        @media (max-width: 1100px) {
-            font-size: 16px;
-        }
-        @media (max-width: 830px) {
-            font-size: 15px;
-            text-align: center;
-        }
     }
 
     .error_message {
         font-size: 14px;
         font-family: 'OpenSans';
         color: red;
+    }
+
+    .checkbox {
+        width: 30px;
+        height: 30px;
+        background: none;
+        border: 1px solid white;
+        border-radius: 3px;
     }
 </style>

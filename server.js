@@ -22,9 +22,17 @@ app.get('/api/user-info', (req, res) => {
         "sentence" : "Здесь написано какое-то вип-предложение",
         "links": {
             "vk" : "https://vk.com/",
+            "videoLink" : "https://vk.com/profcom.petrsu/video_39545043",
         },
         "groupLink" : "https://vk.com/profcom.petrsu",
-        "balance": "80"
+        "balance": "80",
+        "groupStat": "7824",
+        "videoStat": "38434",
+        "selectedInterests": ["Интернет бизнес", "МЛМ", "Инвестиции"],
+        "country": "Russia",
+        "city": "Петрозаводск",
+        "sex": "Мужской",
+        "site": "https://danelloptz.github.io/"
     });
 });
 
@@ -292,6 +300,16 @@ app.get('/api/history-trans', (req, res) => {
     });
 });
 
+app.post('/api/user/settings', (req, res) => {
+    if (!req.body) return res.sendStatus(400);
+
+    const data = req.body.payload;
+    let status = data ? true : false;
+
+    res.json({
+        "status" : status
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

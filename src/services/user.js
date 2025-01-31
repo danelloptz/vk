@@ -56,3 +56,16 @@ export async function isSubscribe() {
         return false; 
     }
 }
+
+export async function sendNewSettings(payload) {
+    axios.post('http://localhost:3000/api/user/settings', {"payload": payload})
+        .then(response => {
+            if (response.data.status)
+                console.log('Настройки сохранены!')
+            else 
+                console.log('Что-то не так!')
+        })
+        .catch(error => {
+            console.error("Ошибка при сохранении настроек:", error);
+        });
+}
