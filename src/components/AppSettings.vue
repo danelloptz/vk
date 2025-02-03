@@ -150,7 +150,7 @@
         <!-- <AppGoodButton :text="text1" class="btn" @click="saveSettings" /> !!!! РАССКОМЕНТИРОВАТЬ !!!! --> 
         <AppGoodButton :text="text1" class="btn" /> <!-- УДАЛИТЬ -->
    </section>
-   <!-- <AppSettingsAuto v-if="isAuto" /> !!!! РАСКОМЕНТИТЬ !!!! -->
+   <AppSettingsAuto v-if="isAuto" />
 </template>
 
 <script>
@@ -160,11 +160,10 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppModalSubscribe from '@/components/AppModalSubscribe.vue';
     
-    // import AppSettingsAuto from '@/components/AppSettingsAuto.vue'; !!!! РАССКОМЕНТИТЬ !!!!
+    import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
 
 export default {
-    // components: { AppGroupOrUser, AppGoodButton, AppSettingsAuto },
-    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe },
+    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto },
     data() {
         return {
             userData: null,

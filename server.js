@@ -311,6 +311,53 @@ app.post('/api/user/settings', (req, res) => {
     });
 });
 
+app.get('/api/get-posts', (req, res) => {
+    res.json({ 
+       "posts": [
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        },
+        {
+            "title": "Обзор сервиса Best Followers: Как быстро развить ваш Telegram-канал и увеличить доходы с сервисом Best Followers",
+            "banner": "banner.png"
+        }
+       ]
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });

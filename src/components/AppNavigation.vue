@@ -70,6 +70,7 @@
             setActive(index) {
                 this.activeIndex = index;
                 this.$emit("update-active-index", index);
+                if (this.isShown ) this.setShown();
             },
             setShown() {
                 this.isShown = !(this.isShown);

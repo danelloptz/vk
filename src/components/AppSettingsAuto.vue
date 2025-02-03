@@ -9,41 +9,67 @@
                 :placeholder="social.platform"
                 v-model="social.link"
             >
-            <span class="add">ДОБАВИТЬ</span>
-            <img src="@/assets/images/addPlus.png" @click="addSocial(index)">
-            <!-- <img src="@/assets/images/delete.png" v-if="socials.length > 1" @click="removeSocial(index)" class="delete-icon"> -->
+            <div class="sub_row">
+                <span v-if="!social.isNew" class="add">ДОБАВИТЬ</span>
+                <span v-else class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
+                <img 
+                    v-if="!social.isNew"
+                    src="@/assets/images/addPlus.png" 
+                    @click="addSocial(social, index)"
+                >
+            </div>
         </div>
+
+        <div v-for="(post, index) in posts" :key="index" class="row2">
+            <span>{{ index + 1 }}</span>
+            <span>{{ post.title }}</span>
+            <img :src="require(`@/assets/images/${post.banner}`)" >
+            <a href="#" @click.prevent="downloadImage(post.banner)">Скачать</a>
+        </div> 
     </div>
 </template>
 
 <script>
-import { getUserInfoLocal } from "@/services/user";  // Подключаем API
+import { getUserInfo } from "@/services/user";
+import { getPosts } from "@/services/posts";
 
 export default {
     data() {
         return {
-            socials: []
+            socials: [],
+            posts: []
         };
     },
     async created() {
-        const response = await getUserInfoLocal();
+        const response = await getUserInfo(localStorage.getItem("token"));
         
-        // Заполняем socials из данных сервера
+        // Заполняем socials из данных сервера (по умолчанию соцсети без isNew)
         this.socials = [
-            { platform: "Вконтакте", link: response?.links?.vk || "" },
-            { platform: "Instagram", link: response?.links?.instagram || "" },
-            { platform: "Telegram", link: response?.links?.telegram || "" },
-            { platform: "TikTok", link: response?.links?.tiktok || "" },
-            { platform: "WhatsApp", link: response?.links?.whatsapp || "" },
-            { platform: "Facebook", link: response?.links?.facebook || "" }
+            { platform: "Вконтакте", link: response.group_link || "", isNew: false },
+            { platform: "Instagram", link: response?.social_links?.instagram || "", isNew: false },
+            { platform: "Telegram", link: response?.social_links?.telegram || "", isNew: false },
+            { platform: "TikTok", link: response?.social_links?.tiktok || "", isNew: false },
+            { platform: "WhatsApp", link: response?.social_links?.whatsapp || "", isNew: false },
+            { platform: "Facebook", link: response?.social_links?.facebook || "", isNew: false }
         ];
+
+        const posts = await getPosts();
+        this.posts = posts;
+
     },
     methods: {
-        addSocial(index) {
-            this.socials.splice(index + 1, 0, { platform: "Дополнительно", link: "" });
+        addSocial(social, index) {
+            this.socials.splice(index + 1, 0, { platform: social.platform, link: "", isNew: true });
         },
         removeSocial(index) {
             this.socials.splice(index, 1);
+        },
+        downloadImage(imageName) {
+            const imageUrl = require(`@/assets/images/${imageName}`);
+            const a = document.createElement("a");
+            a.href = imageUrl;
+            a.download = imageName;
+            a.click();
         }
     }
 };
@@ -78,7 +104,7 @@ export default {
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
+        @media (max-width: 600px) {
             width: 70vw;
         }
     }
@@ -86,12 +112,23 @@ export default {
         display: flex;
         column-gap: 20px;
         align-items: center;
+        @media (max-width: 600px) {
+            flex-direction: column;
+            align-items: start;
+            row-gap: 15px;
+        }
+    }
+    .sub_row {
+        display: flex;
+        align-items: center;
+        column-gap: 20px;
     }
     img {
         width: 60px;
         height: 62px;
         object-fit: cover;
         object-position: center;
+        cursor: pointer;
     }
     .add {
         font-size: 16px;
@@ -110,5 +147,68 @@ export default {
     }
     .add:hover {
         background: rgba(255, 255, 255, 0.167);
+    }
+    .row2 {
+        display: flex;
+        align-items: center;
+        justify-content: stretch;
+        column-gap: 50px;
+        padding: 0px 50px;
+        @media (max-width: 800px) {
+            column-gap: 30px;
+            padding: 0px 20px;
+        }
+        @media (max-width: 500px) {
+            flex-direction: column;
+            row-gap: 20px;
+        }
+    }
+    .row2:nth-child(2n) {
+        padding: 15px 50px;
+        background: #111433;
+        @media (max-width: 800px) {
+            padding: 15px 20px;
+        }
+    }
+    .row2 span, .row2 a {
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+        @media (max-width: 600px) {
+            font-size: 12px;
+        }
+    }
+    .row2 span {
+        @media (max-width: 500px) {
+            align-self: start;
+            font-size: 15px;
+        }
+    }
+    .row2 span:first-of-type {
+        @media (max-width: 500px) {
+            align-self: start;
+            font-size: 20px;
+        }
+    }
+    a {
+        text-decoration: underline;
+        cursor: pointer;
+        @media (max-width: 500px) {
+            align-self: end;
+        }
+    }
+    .row2 img {
+        width: 230px;
+        @media (max-width: 600px) {
+            width: 100px;
+            object-fit: cover;
+            object-position: center;
+        }
+        @media (max-width: 500px) {
+            width: 100%;
+            height: 100px;
+            align-self: start;
+        }
+        
     }
 </style>
