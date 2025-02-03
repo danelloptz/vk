@@ -1,4 +1,5 @@
 <template>
+    <AppRotationPlans v-if="isPlans" />
     <AppVideoModal
         v-if="groupInfo"
         :visibility1="isVideoShown"
@@ -14,7 +15,7 @@
         <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Активировать тариф».</span>
         <div class="rotation_preview_btns">
             <AppBadButton :text="text1" @click="makeRotation"/>
-            <AppGoodButton :text="text2" />
+            <AppGoodButton :text="text2" @click="openPlans" />
         </div>
     </section>
     <section class="rotation" v-if="isRotation">
@@ -45,10 +46,11 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppVideoModal from "@/components/AppVideoModal.vue";
+    import AppRotationPlans from "@/components/AppRotationPlans.vue";
     // import { getGroupInfo } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppVideoModal },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppVideoModal, AppRotationPlans },
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
@@ -65,7 +67,8 @@
                 notWatched: false,
                 noSkips: false,
                 isVideoShown: false,
-                isWatched: false
+                isWatched: false,
+                isPlans: false
             }
         },
         async created() {
@@ -124,6 +127,9 @@
                 } else {
                     this.notWatched = true;
                 }
+            },
+            openPlans() {
+                this.isPlans = true;
             }
         }
     };

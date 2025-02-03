@@ -1,12 +1,13 @@
 <template>
-    <section class="rotation_preview" v-if="isRotationPreview">
+    <AppRotationPlans v-if="isPlans" />
+    <section class="rotation_preview" v-if="isRotationPreview && !isPlans">
         <span>Вы можете получать целевые просмотры и реакции на свой последний  пост совершенно бесплатно за счет прохождения Ротации постов.</span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных постов ВК,
             и в ответ получаете 10 просмотров вашего последнего поста. </span>
         <span>Если у Вас активен премиальный тариф, то Вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Активировать тариф».</span>
         <div class="rotation_preview_btns">
             <AppBadButton :text="text1" @click="makeRotation"/>
-            <AppGoodButton :text="text2" />
+            <AppGoodButton :text="text2" @click="openPlans" />
         </div>
     </section>
     <section class="rotation" v-if="isRotation">
@@ -37,10 +38,11 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
+    import AppRotationPlans from "@/components/AppRotationPlans.vue";
     // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
@@ -55,6 +57,7 @@
                 skipCounts: 10,
                 noSubscribe: false,
                 noSkips: false,
+                isPlans: false
             }
         },
         async created() {
@@ -132,6 +135,9 @@
                     this.skipCounts--;
                     this.getGroups();
                 }
+            },
+            openPlans() {
+                this.isPlans = true;
             }
         }
     };

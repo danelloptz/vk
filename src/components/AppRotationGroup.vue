@@ -1,11 +1,12 @@
 <template>
+    <AppRotationPlans v-if="isPlans" />
     <section class="rotation_preview" v-if="isRotationPreview">
         <span>Вы можете увеличить количество целевых подписчиков на свою ВК группу совершенно бесплатно за счет прохождения Ротации. </span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо подписаться на 20 предложенных ВК групп, посмотреть одно ВК видео 20 секунд, и в ответ получаете 10 подписок на свою ВК группу.</span>
         <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных подписок до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
         <div class="rotation_preview_btns">
             <AppBadButton :text="text1" @click="makeRotation"/>
-            <AppGoodButton :text="text2" />
+            <AppGoodButton :text="text2" @click="openPlans" />
         </div>
     </section>
     <section class="rotation" v-if="isRotation">
@@ -32,10 +33,11 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
+    import AppRotationPlans from "@/components/AppRotationPlans.vue";
     // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
@@ -50,6 +52,7 @@
                 skipCounts: 10,
                 noSubscribe: false,
                 noSkips: false,
+                isPlans: false
             }
         },
         async created() {
@@ -125,6 +128,9 @@
                     this.skipCounts--;
                     this.getGroups();
                 }
+            },
+            openPlans() {
+                this.isPlans = true;
             }
         }
     };
