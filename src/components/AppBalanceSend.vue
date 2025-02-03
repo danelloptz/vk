@@ -47,7 +47,7 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
-    import { getUserInfoLocal } from "@/services/user";
+    import { getUserInfo } from "@/services/user";
 
     export default {
         components: { AppGoodButton, AppBadButton },
@@ -67,14 +67,26 @@
             }
         },
         async created() {
-            const info = await getUserInfoLocal();
+            const info = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = info;
         },
         methods: {
             async send() {
                 if (this.userId != "" && Number(this.userInfo.balance) >= Number(this.usdt)) {
-                    const response = await getUserInfoLocal();
-                    this.userToSend = response;
+                    // const response = await getUserInfoLocal(); !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
+                    // this.userToSend = response;
+
+                    this.userToSend = {  // !!!!! УДАЛИТЬ !!!!!
+                        "img" : "send_avatar.png",
+                        "name" : "Иванов Иван",
+                        "id" : "ID: 842052594",
+                        "status": "Leader",
+                        "links": {
+                            "vk" : "link",
+                            "telegram" : "link",
+                            "whatsapp" : "link",
+                        }
+                    }
                     if (this.userToSend != null) 
                         this.stepTwo = true
                     else {

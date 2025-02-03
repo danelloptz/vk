@@ -1,11 +1,18 @@
 <template>
+    <AppModalSubscribe
+        :visibility1="isModal"
+        :checkboxState="isCheckboxChecked"
+        @update:visibility1="isModal = $event"
+        @update:checkboxState="isCheckboxChecked = $event"
+        @close="closeModal" 
+    />
     <section class="settings" v-if="!isAuto">
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
-            <span v-if="userData?.links?.vk">Вконтакте: {{ userData.links.vk }}</span>
-            <span v-if="userData?.links?.telegram">Telegram: {{ userData.links.telegram }}</span>
-            <span v-if="userData?.links?.whatsapp">WhatsApp: {{ userData.links.whatsapp }}</span>
+            <span v-if="userData?.social_links?.vk">Вконтакте: {{ userData.social_links.vk }}</span>
+            <span v-if="userData?.social_links?.telegram">Telegram: {{ userData.social_links.telegram }}</span>
+            <span v-if="userData?.social_links?.whatsapp">WhatsApp: {{ userData.social_links.whatsapp }}</span>
         </div>
         
         <div class="row">
@@ -81,7 +88,7 @@
             <h3 v-if="userData">Подписки: {{ userData.groupStat }}</h3>
         </div>
         <div class="row2">
-            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked">
+            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
             <span>Подписки</span>
         </div>
         
@@ -140,19 +147,24 @@
             class="card"
         />
         <span style="font-size: 14px;"><i>Для продвижения запрещены порнографические материалы, призывы к насилию, оскорбления и другие темы запрещенные законодательством вашей страны и правилами Вконтакте.</i></span>
-        <AppGoodButton :text="text1" class="btn" @click="saveSettings" />
+        <!-- <AppGoodButton :text="text1" class="btn" @click="saveSettings" /> !!!! РАССКОМЕНТИРОВАТЬ !!!! --> 
+        <AppGoodButton :text="text1" class="btn" /> <!-- УДАЛИТЬ -->
    </section>
-   <AppSettingsAuto v-if="isAuto" />
+   <!-- <AppSettingsAuto v-if="isAuto" /> !!!! РАСКОМЕНТИТЬ !!!! -->
 </template>
 
 <script>
-    import { getUserInfoLocal, sendNewSettings } from "@/services/user";
+    // import { getUserInfo, sendNewSettings } from "@/services/user";
+    import { getUserInfo } from "@/services/user";
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
-    import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
+    import AppModalSubscribe from '@/components/AppModalSubscribe.vue';
+    
+    // import AppSettingsAuto from '@/components/AppSettingsAuto.vue'; !!!! РАССКОМЕНТИТЬ !!!!
 
 export default {
-    components: { AppGroupOrUser, AppGoodButton, AppSettingsAuto },
+    // components: { AppGroupOrUser, AppGoodButton, AppSettingsAuto },
+    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe },
     data() {
         return {
             userData: null,
@@ -163,7 +175,7 @@ export default {
             sentence: "",
             siteLink: "",
             text1: "СОХРАНИТЬ ИЗМЕНЕНИЯ",
-            isCheckboxChecked : false,
+            isCheckboxChecked : true,
             countries: [],
             genders: ["Мужской", "Женский"],
             interests: ["Интернет бизнес", "МЛМ", "Инвестиции", "Недвижимость", "Здоровье и красота", "Трейдинг", "Криптовалюта", "Технологии", "Туризм и путешествия", "Мотивация", "Авто", "Одежда", "Еда и кулинария", "Развлечения и досуг", "Другое"],
@@ -182,7 +194,8 @@ export default {
             isNotSelectInterest: false,
             isBusiness: true,
             isNotCheckboxChecked: false,
-            isAuto: false
+            isAuto: false,
+            isModal: false,
         };
     },
     computed: {
@@ -193,7 +206,7 @@ export default {
         },
     },
     async created() {
-        const response = await getUserInfoLocal();
+        const response = await getUserInfo(localStorage.getItem("token"));
         this.userData = response;
 
         try {
@@ -205,16 +218,16 @@ export default {
         } catch (error) {
             console.error('Ошибка при загрузке данных о странах:', error);
         }
-
+ 
         this.initLinks();
     },
     watch: {
         userData: {
             immediate: true,
             handler(newData) {
-                if (newData?.links) {
-                    this.telegramLink = newData.links.telegram || "";
-                    this.whatsappLink = newData.links.whatsapp || "";
+                if (newData?.social_links) {
+                    this.telegramLink = newData.social_links.telegram || "";
+                    this.whatsappLink = newData.social_links.whatsapp || "";
                 }
             }
         }
@@ -253,58 +266,67 @@ export default {
                 this.isAuto = true;
             },
             addTelegram() {
-                this.userData.links.telegram = this.telegramLink;
+                 this.userData.social_links.telegram = this.telegramLink;
             },
             addWhatsapp() {
-                this.userData.links.whatsapp = this.whatsappLink;
+                 this.userData.social_links.whatsapp = this.whatsappLink;
             },
             addVKGroup() {
-                this.userData.links.vk = this.vkGroupLink;
+                 this.userData.group_link = this.vkGroupLink;
             },
             addVKVideo() {
-                this.userData.links.videoLink = this.vkVideoLink;
+                 this.userData.social_links.vk = this.vkVideoLink;
             },
-            initLinks() {
-                if (this.userData.links.telegram) 
-                    this.telegramLink = this.userData.links.telegram;
-                if (this.userData.links.whatsapp)
-                    this.whatsappLink = this.userData.links.whatsapp;
-                if (this.userData.links.vk)
-                    this.vkGroupLink = this.userData.links.vk;
-                if (this.userData.links.videoLink)
-                    this.vkVideoLink = this.userData.links.videoLink;
-                if (this.userData.country)
-                    this.searchQuery = this.userData.country;
-                if (this.userData.city)
-                    this.selectedCity = this.userData.city;
+            closeModal() {
+                this.isModal = false;
+            },
+            handleCheckboxChange() {
+                if (!this.isCheckboxChecked) {
+                    this.isModal = true;
+                }
+            },
+
+            initLinks() { 
+                if (this.userData.social_links[0].telegram) 
+                    this.telegramLink = this.userData.social_links[0].telegram;
+                if (this.userData.social_links[1].whatsapp)
+                    this.whatsappLink = this.userData.social_links[1].whatsapp;
+                if (this.userData.group_link)
+                    this.vkGroupLink = this.userData.group_link;
+                if (this.userData.social_links[2].vk)
+                    this.vkVideoLink = this.userData.social_links[2].vk;
+                // if (this.userData.country)
+                //     this.searchQuery = this.userData.country;
+                // if (this.userData.city)
+                //     this.selectedCity = this.userData.city;
                 if (this.userData.sex)
-                    this.searchQueryGender = this.userData.sex;
-                if (this.userData.selectedInterests) 
-                    this.selectedInterests = this.userData.selectedInterests;
-                if (this.userData.sentence)
-                    this.sentence = this.userData.sentence;
-                if (this.userData.site)
-                    this.siteLink = this.userData.site;
+                    this.searchQueryGender = this.userData.sex == 1 ? "Женский" : "Мужской";
+                // if (this.userData.selectedInterests) 
+                //     this.selectedInterests = this.userData.selectedInterests;
+                // if (this.userData.sentence)
+                //     this.sentence = this.userData.sentence;
+                // if (this.userData.site)
+                //     this.siteLink = this.userData.site;
             },
-            async saveSettings() {
-                const payload = {
-                    links: {
-                        telegram: this.telegramLink,
-                        whatsapp: this.whatsappLink,
-                        vk: this.vkGroupLink,
-                        videoLink: this.vkVideoLink
-                    },
-                    country: this.searchQuery,
-                    city: this.selectedCity,
-                    sex: this.searchQueryGender,
-                    selectedInterests: this.selectedInterests,
-                    sentence: this.sentence,
-                    site: this.siteLink,
-                    groupStat: this.userData?.groupStat,
-                    videoStat: this.userData?.videoStat
-                };
-                await sendNewSettings(payload);
-            }
+            // async saveSettings() {  !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
+            //     const payload = {
+            //         links: {
+            //             telegram: this.telegramLink,
+            //             whatsapp: this.whatsappLink,
+            //             vk: this.vkGroupLink,
+            //             videoLink: this.vkVideoLink
+            //         },
+            //         country: this.searchQuery,
+            //         city: this.selectedCity,
+            //         sex: this.searchQueryGender,
+            //         selectedInterests: this.selectedInterests,
+            //         sentence: this.sentence,
+            //         site: this.siteLink,
+            //         groupStat: this.userData?.groupStat,
+            //         videoStat: this.userData?.videoStat
+            //     };
+            //     await sendNewSettings(payload); 
+            // }
     }
 };
 </script>

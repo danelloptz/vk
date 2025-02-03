@@ -19,7 +19,7 @@
 </template>
 
 <script>
-    import { getAssemblyGroups  } from '@/services/groups';
+    // import { getAssemblyGroups  } from '@/services/groups'; !!!!! РАССКОМЕНИТРОВАТЬ !!!!!
 
     export default {
         data() {
@@ -29,8 +29,16 @@
             }
         },
         async created() {
-            const response = await getAssemblyGroups();
-            this.assemblyGroups = response;
+            // const response = await getAssemblyGroups(); !!!!! РАССКОМЕНИТРОВАТЬ !!!!!
+            // this.assemblyGroups = response;
+
+            this.assemblyGroups  = Array.from({ length: 10 }, (_, i) => ({
+                id: String(i),
+                link: "link",
+                name: "Название группы",
+                img: "group_avatar2.png"
+            }));
+
             this.updateItemsToShow();
             window.addEventListener("resize", this.updateItemsToShow);
         },

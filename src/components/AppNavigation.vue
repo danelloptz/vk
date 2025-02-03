@@ -29,7 +29,7 @@
 </template>
 
 <script>
-    import { getUserInfoLocal } from "@/services/user";
+    import { getUserInfo } from "@/services/user";
 
     export default {
         data() {
@@ -53,7 +53,7 @@
             };
         },
         async created() {
-            const response = await getUserInfoLocal();
+            const response = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = response;
         },
         computed: {

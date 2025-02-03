@@ -1,18 +1,22 @@
 <template>
     <div class="footer_data">
-        <img v-if="objectData" :src="require(`@/assets/images/${objectData.img}`)" class="avatar">
+        <img v-if="objectData" :src="objectData.avatar" class="avatar">
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
-                <h2 v-if="objectData">{{ objectData.name }}</h2>
-                <span v-if="objectData && objectData.status != 'Free'">{{ objectData.status }}</span>
+                <h2 v-if="objectData">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
+                <span v-if="objectData && objectData.package_name != 'Free'">{{ objectData.package_name }}</span>
             </div>
-            <span v-if="objectData && objectData.id">{{ objectData.id }}</span>
+            <span v-if="objectData && objectData.vk_id">ID: {{ objectData.vk_id }}</span>
             <span v-if="objectData && objectData.sentence && correctStatus.includes(objectData.status)">{{ objectData.sentence }}</span>
-            <a v-if="objectData && objectData.groupLink" :href="objectData.groupLink">Ссылка</a>
+            <a v-if="objectData && objectData.group_link" :href="objectData.group_link">Ссылка</a>
             <div class="footer_data_links">
-                <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
+                <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
+                <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
-                <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a>
+                <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a> -->
+                <a v-if="objectData"><img src="@/assets/images/vk.png"></a>
+                <a v-if="objectData"><img src="@/assets/images/telegram.png"></a>
+                <a v-if="objectData"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
         <span v-if="isBusiness" class="business">Business-предложение</span>
@@ -21,21 +25,36 @@
 </template>
 
 <script>
-    export default {
-        props: {
-            objectData: {
-                type: Object,
-                required: true,
-            },
-            isBusiness: Boolean
+export default {
+    props: {
+        objectData: {
+            type: Object,
+            default: () => ({}), // Указываем пустой объект, чтобы избежать ошибок
         },
-        data() {
-            return {
-                correctStatus: ["VIP", "Leader", "Business"],
+        isBusiness: Boolean
+    },
+    data() {
+        return {
+            correctStatus: ["VIP", "Leader", "Business"],
+            userData: {} // Создаём переменную для хранения данных
+        }
+    },
+    watch: {
+        objectData: {
+            immediate: true, // Срабатывает сразу после загрузки компонента
+            handler(newValue) {
+                if (newValue) {
+                    this.userData = newValue;
+                }
             }
         }
-    };
+    },
+    async created() {
+        console.log('data', this.objectData);
+    }
+};
 </script>
+
 
 <style scoped>
     h2 {

@@ -21,3 +21,23 @@ export async function getHistory() {
         return false; 
     }
 }
+
+
+export async function getTransactions(offset, limit, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/v1/user/transactions', { 
+            params: { 
+                offset: offset,
+                limit: limit
+            },
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о транзакциях", error);
+        return false; 
+    }
+}

@@ -8,9 +8,9 @@
                 <AppNavigation @update-active-index="updateActiveComponent"/>
                 <div class="vip">
                     <div class="vip_user">
-                        <img src="@/assets/images/avatar.jpg">
+                        <img src="@/assets/images/avatar.png">
                         <div class="text_wrapper">
-                            <h2>Василенко Данил</h2>
+                            <h2>Никитин Артур</h2>
                             <span>VIP</span>
                         </div>
                     </div>
@@ -57,8 +57,8 @@
     import AppRotation from '@/components/AppRotation.vue';
     import AppSettings from '@/components/AppSettings.vue';
     import AppAdd from '@/components/AppAdd.vue';
-    import { getAdds } from '@/services/add';
-    import { getUserInfoLocal } from '@/services/user';
+    // import { getAdds } from '@/services/add';  !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
+    import { getUserInfo } from '@/services/user';
 
     export default {
         components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings },
@@ -73,7 +73,8 @@
                 orientation: "vertical",
                 userInfo: null,
                 isMobileView: false,
-                isBusiness: true,
+                // isBusiness: true, !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
+                isBusiness: false, // !!!!!! УДАЛИТЬ !!!!!!
                 selectedComponent: 0
             }
         },  
@@ -86,13 +87,23 @@
             // }
         },
         async created() {
-            const responseV = await getAdds(this.verticalAddCount);
-            this.addDataVertical = responseV.adds;
-            const responseH = await getAdds(this.horizontalCount);
-            this.addDataHorizontal = responseH.adds;
+            // const responseV = await getAdds(this.verticalAddCount);  !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
+            // this.addDataVertical = responseV.adds;
+
+            this.addDataVertical = Array.from({ length: this.verticalAddCount }, () => { // !!!!!! УДАЛИТЬ !!!!!!
+                return { "img": "wide-bg.jpg" };
+            })
+
+            // const responseH = await getAdds(this.horizontalCount);  !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
+            // this.addDataHorizontal = responseH.adds;
+
+            this.addDataHorizontal = Array.from({ length: this.horizontalCount }, () => { // !!!!!! УДАЛИТЬ !!!!!!
+                return { "img": "wide-bg.jpg" };
+            })
             
-            const userInfo = await getUserInfoLocal();
+            const userInfo = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = userInfo;
+            console.log("userInfo", this.userInfo);
 
             this.checkWindowWidth();
             window.addEventListener("resize", this.checkWindowWidth);

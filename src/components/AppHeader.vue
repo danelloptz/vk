@@ -19,16 +19,16 @@
                 <span>33%</span>
             </div>
             <div class="header_info">
-                <div class="header_info_circle" :class="userData && (userData.status !== 'Free' && userData.status !== 'Not active' ? 'green' : 'red')"></div>
-                <div v-if="userData" class="header_info_status">{{ userData.status }}</div>
-                <img v-if="userData" :src="require(`@/assets/images/${userData.img}`)" >
+                <div class="header_info_circle" :class="userData && (userData.package_name !== 'Free' && userData.package_name !== 'Not active' ? 'green' : 'red')"></div>
+                <div v-if="userData" class="header_info_status">{{ userData.package_name }}</div>
+                <img v-if="userData" :src="userData.avatar" >
             </div>
         </div>
     </section>
 </template>
 
 <script>
-    import { getUserInfoLocal  } from '@/services/user';
+    import { getUserInfo  } from '@/services/user';
     import AppPopup from '@/components/AppPopup.vue';
 
     export default {
@@ -48,9 +48,9 @@
             },
         },
         async created() {
-            const response = await getUserInfoLocal();
+            const response = await getUserInfo(localStorage.getItem("token"));
             this.userData = response;
-            console.log(this.userData.img);
+            console.log(this.userData);
 
         }
     };

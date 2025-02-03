@@ -45,7 +45,7 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppVideoModal from "@/components/AppVideoModal.vue";
-    import { getGroupInfo } from "@/services/user";
+    // import { getGroupInfo } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppVideoModal },
@@ -83,9 +83,25 @@
                 this.isRotation = false;
             },
             async getGroups() {
-                const response = await getGroupInfo();
-                console.log(response);
-                this.groupInfo = response;
+                // const response = await getGroupInfo(); !!!! РАССКОМЕНТИТЬ !!!!
+                // console.log(response);
+                // this.groupInfo = response;
+
+                this.groupInfo = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
+                    "avatar" : "https://geo-media.beatport.com/image_size/1400x1400/f0a20551-14f3-4fb0-896e-993ad866c3ea.jpg",
+                    "first_name" : "Название группы ",
+                    "last_name": "",
+                    "sentence" : "Здесь написано какое-то вип-предложение",
+                    "status": "Leader",
+                    "links": {
+                        "vk" : "https://vk.com/",
+                        "telegram" : "https://telegram.com/",
+                        "whatsapp" : "https://whatsapp.com/",
+                    },
+                    "groupLink" : "https://vk.com/profcom.petrsu",
+                    "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
+                    "last_post": 'https://vk.com/profcom.petrsu?from=search&w=wall-38200854_40249'
+                }
             },
             watchVideo() {
                 this.isVideoShown = true;

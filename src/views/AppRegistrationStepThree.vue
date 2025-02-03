@@ -11,7 +11,7 @@
                 <img v-if="userData" :src="userData.avatar" class="avatar">
                 <div class="user_info_text">
                     <h2 v-if="userData">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
-                    <span v-if="userData">{{ userData.id }}</span>
+                    <span v-if="userData">ID: {{ userData.vk_id }}</span>
                 </div>
             </div>
             <div class="user_data">
@@ -48,7 +48,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppModal from '@/components/AppModal.vue';
-    import { getUserInfo } from '@/services/user';
+    import { getUserInfo, sendNewSettings } from '@/services/user';
 
     export default {
         components: { AppGoodButton, AppBadButton, AppModal },
@@ -78,10 +78,15 @@
                         alert('Неверный формат ссылки на группу ВКонтакте!');
                         return;
                     }
+                    localStorage.setItem("vk_link", this.selectedGroup);
+                    const dataToSend = this.getAllParams();
+                    await sendNewSettings(dataToSend);
                     this.modalVisible = true; // Открыть первое модальное окно
                 }
             },
-            skip() {
+            async skip() {
+                const dataToSend = this.getAllParams();
+                await sendNewSettings(dataToSend);
                 this.modalVisible = false; // Закрыть первое модальное окно
                 this.modalEndVisible = true; // Открыть второе модальное окно
             },
@@ -92,6 +97,18 @@
             openSecondModal() {
                 this.modalVisible = false; // Закрыть первое окно, если оно открыто
                 this.modalEndVisible = true; // Открыть второе окно
+            },
+            getAllParams() {
+                const data = {
+                    "vk_id": this.userData.vk_id,
+                    "country": localStorage.getItem("country"),
+                    "city": localStorage.getItem("city"),
+                    "sex": localStorage.getItem("sex"),
+                    "interests": JSON.parse(localStorage.getItem("interests")),
+                    "vk_link": localStorage.getItem("vk_link") ? localStorage.getItem("vk_link") : "",
+                }
+                console.log(data);
+                return data;
             }
         }
     };
@@ -232,6 +249,10 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         align-items: start;
+        @media (max-width: 1200px) {
+            grid-template-columns: 1fr;
+            row-gap: 20px;
+        }
     }
     .user_info {
         display: flex;

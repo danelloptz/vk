@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { getHistory } from "@/services/cash";
+import { getTransactions } from "@/services/cash";
 
 export default {
     data() {
@@ -46,8 +46,133 @@ export default {
         };
     },
     async created() {
-        const response = await getHistory();
-        this.history = response.reverse();
+        const offset = (this.currentPage - 1) * this.perPage;
+        const response = await getTransactions(offset, this.perPage, localStorage.getItem("token"));
+        console.log(response);
+        this.history =  [
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "19.10.2024 | 17:56",
+                "sum": "60",
+                "description": "Пополнение средств",
+                "status": "Успешно"
+            },
+
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            {
+                "date": "18.10.2024 | 12:47",
+                "sum": "-20",
+                "description": "Вывод средств",
+                "status": "Успешно"
+            },
+            
+        ]
     },
     computed: {
         totalPages() {

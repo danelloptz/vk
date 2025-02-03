@@ -12,7 +12,7 @@
                 <img v-if="userData" :src="userData.avatar" class="avatar">
                 <div class="user_info_text">
                     <h2 v-if="userData">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
-                    <span v-if="userData">{{ userData.id }}</span>
+                    <span v-if="userData">ID: {{ userData.vk_id }}</span>
                 </div>
             </div>
             <div class="inputs">
@@ -195,6 +195,11 @@
                 this.isNotSelectInterest = !(this.selectedInterests.length > 0);
                 this.isNotCheckboxChecked = !this.isCheckboxChecked;
                 if (!(this.isNotSelectCountry || this.isNotSelectGender || this.isNotSelectInterest || this.isNotCheckboxChecked)) {
+                    localStorage.setItem("country", this.selectedCountry);
+                    localStorage.setItem("city", this.selectedCity);
+                    localStorage.setItem("sex", this.selectedGender);
+                    localStorage.setItem("interests", JSON.stringify(this.selectedInterests));
+                    
                     this.$router.push('/signup_2');
                 }
             }
@@ -205,6 +210,22 @@
             // const responseRefer = await getReferInfo();
             this.userData = responseUser;
             // this.referData = responseRefer;
+
+            this.referData = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
+                "avatar" : "https://geo-media.beatport.com/image_size/1400x1400/f0a20551-14f3-4fb0-896e-993ad866c3ea.jpg",
+                "first_name" : "Название группы ",
+                "last_name": "",
+                "sentence" : "Здесь написано какое-то вип-предложение",
+                "status": "Leader",
+                "links": {
+                    "vk" : "https://vk.com/",
+                    "telegram" : "https://telegram.com/",
+                    "whatsapp" : "https://whatsapp.com/",
+                },
+                "groupLink" : "https://vk.com/profcom.petrsu",
+                "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
+                "last_post": 'https://vk.com/profcom.petrsu?from=search&w=wall-38200854_40249'
+            }
 
             try {
                 const response = await fetch('https://restcountries.com/v3.1/all');

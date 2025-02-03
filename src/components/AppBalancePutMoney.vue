@@ -66,8 +66,8 @@
     import AppModalHash from "@/components/AppModalHash.vue";
     import AppModal from "@/components/AppModal.vue";
 
-    import { getUserInfoLocal } from "@/services/user";
-    import { checkTxid } from "@/services/cash";
+    import { getUserInfo } from "@/services/user";
+    // import { checkTxid } from "@/services/cash";
     export default {
         components: { AppGoodButton, AppModalHash, AppModal },
         data() {
@@ -92,7 +92,7 @@
             }
         },
         async created() {
-            const info = await getUserInfoLocal();
+            const info = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = info;
         },
         methods: {
@@ -116,8 +116,10 @@
             },
             async check() {
                 if (this.txid != "") {
-                    const response = await checkTxid(this.txid);
-                    this.isMoneyPut = response.status == true
+                    // const response = await checkTxid(this.txid); !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
+                    // this.isMoneyPut = response.status == true
+
+                    this.isMoneyPut = true; // !!!!! УДАЛИТЬ !!!!!!
                 }
             },
             closeModalMoneyPut() {

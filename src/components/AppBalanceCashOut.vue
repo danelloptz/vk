@@ -52,7 +52,7 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppModal from "@/components/AppModal.vue";
-    import { getUserInfoLocal } from "@/services/user";
+    import { getUserInfo } from "@/services/user";
     export default {
         components: { AppGoodButton, AppModal },
         data() {
@@ -75,7 +75,7 @@
             }
         },
         async created() {
-            const info = await getUserInfoLocal();
+            const info = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = info;
         },
         methods: {

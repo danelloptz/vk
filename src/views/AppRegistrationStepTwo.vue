@@ -30,13 +30,13 @@
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
-    import { getGroupInfo, isSubscribe } from '@/services/user';
+    // import { getGroupInfo, isSubscribe } from '@/services/user';  !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
 
     export default {
         components: { AppGroupOrUser, AppGoodButton, AppBadButton },
         data() {
             return {
-                addGroups: 24,
+                addGroups: 23,
                 totalGroups: 25,
                 skipCounts: 10,
                 groupInfo: null,
@@ -51,9 +51,25 @@
         },
         methods: {
             async getGroups() {
-                const response = await getGroupInfo();
-                console.log(response);
-                this.groupInfo = response;
+                // const response = await getGroupInfo(); !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
+                // console.log(response);
+                // this.groupInfo = response;
+
+                this.groupInfo = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
+                    "avatar" : "https://geo-media.beatport.com/image_size/1400x1400/f0a20551-14f3-4fb0-896e-993ad866c3ea.jpg",
+                    "first_name" : "Название группы ",
+                    "last_name": "",
+                    "sentence" : "Здесь написано какое-то вип-предложение",
+                    "status": "Leader",
+                    "links": {
+                        "vk" : "https://vk.com/",
+                        "telegram" : "https://telegram.com/",
+                        "whatsapp" : "https://whatsapp.com/",
+                    },
+                    "groupLink" : "https://vk.com/profcom.petrsu",
+                    "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
+                    "last_post": 'https://vk.com/profcom.petrsu?from=search&w=wall-38200854_40249'
+                }
             },
             async subscribeGroup() {
                 if (this.groupInfo) {
@@ -65,8 +81,12 @@
                     const intervalId = setInterval(async () => {
                         if (newWindow.closed) { 
                             clearInterval(intervalId); 
-                            const response = await isSubscribe();
-                            console.log(response);
+                            // const response = await isSubscribe(); !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
+                            
+                            const response = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
+                                "isSubscribe" : true
+                            }
+
                             if (response.isSubscribe) {
                                 this.addGroups = this.addGroups + 1;
                                 if (this.addGroups == this.totalGroups) {

@@ -58,7 +58,7 @@ export async function isSubscribe() {
 }
 
 export async function sendNewSettings(payload) {
-    axios.post('http://localhost:3000/api/user/settings', {"payload": payload})
+    axios.post('https://web.intelektaz.com/api/v2/users/new_user', { payload })
         .then(response => {
             if (response.data.status)
                 console.log('Настройки сохранены!')
