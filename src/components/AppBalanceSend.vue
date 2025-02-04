@@ -30,10 +30,10 @@
         <span>Подтвердите перевод. Вы хотите перевести {{ usdt }} USDT пользователю</span>
         <div class="user_tosend">
             <div class="user">
-                <img :src="require(`@/assets/images/${userToSend.img}`)">
+                <img :src="require(`@/assets/images/${userToSend.avatar}`)">
                 <div class="text_wrapper">
-                    <h3>{{ userToSend.name }}</h3>
-                    <span>{{ userToSend.id }}</span>
+                    <h3>{{ `${userToSend.first_name} ${userToSend.last_name}` }}</h3>
+                    <span>ID: {{ userToSend.vk_id }}</span>
                 </div>
             </div>
             <div class="btns">
@@ -47,7 +47,7 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
-    import { getUserInfo } from "@/services/user";
+    import { getUserInfo, getUserInfoById } from "@/services/user";
 
     export default {
         components: { AppGoodButton, AppBadButton },
@@ -73,20 +73,20 @@
         methods: {
             async send() {
                 if (this.userId != "" && Number(this.userInfo.balance) >= Number(this.usdt)) {
-                    // const response = await getUserInfoLocal(); !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
-                    // this.userToSend = response;
+                    const response = await getUserInfoById(this.userId, localStorage.getItem("token"));
+                    this.userToSend = response;
 
-                    this.userToSend = {  // !!!!! УДАЛИТЬ !!!!!
-                        "img" : "send_avatar.png",
-                        "name" : "Иванов Иван",
-                        "id" : "ID: 842052594",
-                        "status": "Leader",
-                        "links": {
-                            "vk" : "link",
-                            "telegram" : "link",
-                            "whatsapp" : "link",
-                        }
-                    }
+                    // this.userToSend = {  // !!!!! УДАЛИТЬ !!!!!
+                    //     "img" : "send_avatar.png",
+                    //     "name" : "Иванов Иван",
+                    //     "id" : "ID: 842052594",
+                    //     "status": "Leader",
+                    //     "links": {
+                    //         "vk" : "link",
+                    //         "telegram" : "link",
+                    //         "whatsapp" : "link",
+                    //     }
+                    // }
                     if (this.userToSend != null) 
                         this.stepTwo = true
                     else {

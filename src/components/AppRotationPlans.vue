@@ -1,4 +1,12 @@
 <template>
+    <AppModalPayment 
+        :package="selectedPackage" 
+        :visibility1="isModal"
+        :isGoodPayment="isGoodPayment"
+        @update:visibility1="isModal = $event"
+        @update:isGoodPayment="isGoodPayment = $event"
+    />
+
     <section class="plans">
         <h2>Выберите свой идеальный вариант продвижения. Доверьте ИИ стремительный рост вашего бизнеса</h2>
         <div class="row">
@@ -290,23 +298,23 @@
                     </td>
                     <td class="column">
                         <span>10 USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn"/>
+                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[0])"/>
                     </td>
                     <td class="column">
                         <span>30 USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn"/>
+                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[1])"/>
                     </td>
                     <td class="column">
                         <span>50 USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn"/>
+                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[2])"/>
                     </td>
                     <td class="column">
                         <span>25* USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn"/>
+                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[3])"/>
                     </td>
                     <td class="column">
                         <span>42* USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn"/>
+                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[4])"/>
                     </td>
                 </tr>
             </tbody>
@@ -315,13 +323,24 @@
 </template>
 
 <script>
-    import AppGoodButton from "@/components/AppGoodButton.vue";
+import AppModalPayment from "@/components/AppModalPayment.vue";
+import AppGoodButton from "@/components/AppGoodButton.vue";
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppModalPayment },
         data() {
             return {
                 userData: [],
-                text1: "КУПИТЬ"
+                text1: "КУПИТЬ",
+                selectedPackage: "",
+                plans: ["Start", "Standart", "VIP", "Business", "Leader"],
+                isModal: false,
+                isGoodPayment: false
+            }
+        },
+        methods: {
+            selectPackage(pack) {
+                this.selectedPackage = pack;
+                this.isModal = true;
             }
         }
     };

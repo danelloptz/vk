@@ -69,3 +69,21 @@ export async function sendNewSettings(payload) {
             console.error("Ошибка при сохранении настроек:", error);
         });
 }
+
+export async function getUserInfoById(user_id, token) {
+    try {
+        const response = await axios.get(`https://web.intelektaz.com/api/v1/user/${user_id}`, { 
+            params: { 
+                user_id: user_id,
+            },
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о транзакциях", error);
+        return false; 
+    }
+}

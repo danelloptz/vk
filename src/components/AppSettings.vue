@@ -85,7 +85,7 @@
                 v-model="vkGroupLink" 
                 placeholder="ВК группа" >
             <span @click="addVKGroup">ДОБАВИТЬ</span>
-            <h3 v-if="userData">Подписки: {{ userData.groupStat }}</h3>
+            <h3 v-if="userData">Подписки: {{ userData.group.rotation_count }}</h3>
         </div>
         <div class="row2">
             <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
@@ -271,7 +271,7 @@ export default {
                  this.userData.social_links.whatsapp = this.whatsappLink;
             },
             addVKGroup() {
-                 this.userData.group_link = this.vkGroupLink;
+                 this.userData.group.group_link = this.vkGroupLink;
             },
             addVKVideo() {
                  this.userData.social_links.vk = this.vkVideoLink;
@@ -290,22 +290,22 @@ export default {
                     this.telegramLink = this.userData.social_links[0].telegram;
                 if (this.userData.social_links[1].whatsapp)
                     this.whatsappLink = this.userData.social_links[1].whatsapp;
-                if (this.userData.group_link)
-                    this.vkGroupLink = this.userData.group_link;
+                if (this.userData.group.group_link)
+                    this.vkGroupLink = this.userData.group.group_link;
                 if (this.userData.social_links[2].vk)
                     this.vkVideoLink = this.userData.social_links[2].vk;
-                // if (this.userData.country)
-                //     this.searchQuery = this.userData.country;
-                // if (this.userData.city)
-                //     this.selectedCity = this.userData.city;
+                if (this.userData.country)
+                    this.searchQuery = this.userData.country;
+                if (this.userData.city)
+                    this.selectedCity = this.userData.city;
                 if (this.userData.sex)
                     this.searchQueryGender = this.userData.sex == 1 ? "Женский" : "Мужской";
-                // if (this.userData.selectedInterests) 
-                //     this.selectedInterests = this.userData.selectedInterests;
-                // if (this.userData.sentence)
-                //     this.sentence = this.userData.sentence;
-                // if (this.userData.site)
-                //     this.siteLink = this.userData.site;
+                if (this.userData.interests) 
+                    this.selectedInterests = this.userData.interests;
+                if (this.userData.group.vip_offer) {
+                    this.sentence = this.userData.group.vip_offer_text;
+                    this.siteLink = this.userData.group.group_link;
+                }
             },
             // async saveSettings() {  !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
             //     const payload = {
