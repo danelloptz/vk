@@ -37,6 +37,7 @@
                     class="card"
                 />
                 <AppBalance v-if="selectedComponent === 0" />
+                <AppStructure v-if="selectedComponent === 3" />
                 <AppRotation v-if="selectedComponent === 4" />
                 <AppSettings v-if="selectedComponent === 5" />
                 <AppFAQ v-if="selectedComponent === 6" />
@@ -59,11 +60,12 @@
     import AppSettings from '@/components/AppSettings.vue';
     import AppAdd from '@/components/AppAdd.vue';
     import AppFAQ from '@/components/AppFAQ.vue';
+    import AppStructure from '@/components/AppStructure.vue';
     // import { getAdds } from '@/services/add';  !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
     import { getUserInfo } from '@/services/user';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure },
         data() {
             return {
                 verticalAddCount: 2,
