@@ -4,14 +4,14 @@
             class="item"
             v-for="(group, index) in assemblyGroups"
             v-show="index < itemsToShow"
-            :key="group.id"
-            @click="redirectToGroup(group.link)"
+            :key="group.group_name"
+            @click="redirectToGroup(group.group_link)"
         >
             <img
-                :src="getImagePath(group)">
+                :src="group.group_photo">
             <!-- <span v-else>Изображение не найдено</span> -->
             <div class="text_block">
-                <span>{{ group.name }}</span>
+                <span>{{ group.group_name }}</span>
             </div>
         </div>
         <img src="@/assets/images/plus.png" class="add_group">
@@ -20,6 +20,7 @@
 
 <script>
     // import { getAssemblyGroups  } from '@/services/groups'; !!!!! РАССКОМЕНИТРОВАТЬ !!!!!
+    import { getAdds } from '@/services/add';
 
     export default {
         data() {
@@ -29,15 +30,18 @@
             }
         },
         async created() {
+            const adds = await getAdds();
+            console.log(adds.groups);
+            this.assemblyGroups = adds.groups;
             // const response = await getAssemblyGroups(); !!!!! РАССКОМЕНИТРОВАТЬ !!!!!
             // this.assemblyGroups = response;
 
-            this.assemblyGroups  = Array.from({ length: 10 }, (_, i) => ({
-                id: String(i),
-                link: "link",
-                name: "Название группы",
-                img: "group_avatar2.png"
-            }));
+            // this.assemblyGroups  = Array.from({ length: 10 }, (_, i) => ({
+            //     id: String(i),
+            //     link: "link",
+            //     name: "Название группы",
+            //     img: "group_avatar2.png"
+            // }));
 
             this.updateItemsToShow();
             window.addEventListener("resize", this.updateItemsToShow);
@@ -65,13 +69,6 @@
                     console.error("Ссылка на группу отсутствует!");
                 }
             },
-            getImagePath(group) {
-                try {
-                    return require(`@/assets/images/${group.img}`);
-                } catch (error) {
-                    console.error(`Ошибка загрузки изображения: ${group.img}`, error);
-                }
-            }
         }
     };
 </script>

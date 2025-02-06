@@ -47,16 +47,6 @@ export async function getGroupInfo() {
     }
 }
 
-export async function isSubscribe() {
-    try {
-        const response = await axios.get('http://localhost:3000/api/is-subscribe');
-        return response.data;
-    } catch (error) {
-        console.error("Ошибка при получении информации о подписке", error);
-        return false; 
-    }
-}
-
 export async function sendNewSettings(payload) {
     axios.post('https://web.intelektaz.com/api/v2/users/new_user', { payload })
         .then(response => {

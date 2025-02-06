@@ -19,7 +19,7 @@
                 <a v-if="objectData"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
-        <span v-if="objectData.vip_offer" class="business">Business-предложение</span>
+        <span v-if="objectData?.vip_offer" class="business">Business-предложение</span>
         
     </div>
 </template>

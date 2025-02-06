@@ -16,11 +16,12 @@
             <img 
                 v-for="(item, index) in filteredData"
                 :key="index"
-                :src="require(`@/assets/images/${item.img}`)"
+                :src="item.ads_img"
                 :style="{
                     aspectRatio: orientation === 'vertical' ? '1/1' : 'auto',
                     height: orientation === 'vertical' ? 'auto' : '160px'
                 }"
+                @click="openLink(item.ads_url)"
             >
         </div>
         <div 
@@ -33,7 +34,7 @@
                 <img src="@/assets/images/add.png">
                 <h2>Реклама</h2>
             </div>
-            <AppGoodButton :text="text1" class="button" />
+            <AppGoodButton :text="text1" class="button" @click="order" />
         </div>
     </section>
 </template>
@@ -45,7 +46,8 @@
         components: { AppGoodButton },
         props: {
             orientation: String,
-            data: Array
+            data: Array,
+            isClicked: Boolean
         },
         data() {
             return {
@@ -64,6 +66,15 @@
         methods: {
             handleResize() {
                 this.windowWidth = window.innerWidth;
+            },
+            order() {
+                console.log('clicked');
+                this.$emit("update:isClicked", true);
+            },
+            openLink(url) {
+                if (url) {
+                    window.open(url, "_blank");
+                }
             }
         },
         mounted() {

@@ -5,7 +5,7 @@
         <AppGroupsAssemble />
         <section class="content">
             <div class="left">
-                <AppNavigation @update-active-index="updateActiveComponent"/>
+                <AppNavigation @update-active-index="updateActiveComponent" @update-isClicked="updateIsClicked"/>
                 <div class="vip">
                     <div class="vip_user">
                         <img src="@/assets/images/avatar.png">
@@ -27,6 +27,8 @@
                 </div>
                 <AppAdd 
                     v-if="addDataVertical"
+                    :isClicked="isClicked"
+                    @update:isClicked="isClicked = $event" 
                     :orientation="orientation" 
                     :data="addDataVertical" />
             </div>
@@ -36,12 +38,15 @@
                     :isBusiness="isBusiness"
                     class="card"
                 />
-                <AppBalance v-if="selectedComponent === 0" />
-                <AppStructure v-if="selectedComponent === 3" />
-                <AppRotation v-if="selectedComponent === 4" />
-                <AppSettings v-if="selectedComponent === 5" />
-                <AppFAQ v-if="selectedComponent === 6" />
-                <AppAdd 
+                <AppBalance v-if="selectedComponent === 0 && !isClicked" />
+                <AppStructure v-if="selectedComponent === 3 && !isClicked" />
+                <AppRotation v-if="selectedComponent === 4 && !isClicked" />
+                <AppSettings v-if="selectedComponent === 5 && !isClicked" />
+                <AppFAQ v-if="selectedComponent === 6 && !isClicked" />
+                <AppBannerAdds v-if="isClicked" />
+                <AppAdd
+                    :isClicked="isClicked" 
+                    @update:isClicked="isClicked = $event" 
                     v-if="addDataHorizontal"
                     :orientation="orientationH" 
                     :data="addDataHorizontal" />
@@ -61,11 +66,13 @@
     import AppAdd from '@/components/AppAdd.vue';
     import AppFAQ from '@/components/AppFAQ.vue';
     import AppStructure from '@/components/AppStructure.vue';
-    // import { getAdds } from '@/services/add';  !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
+    import AppBannerAdds from '@/components/AppBannerAdds.vue';
     import { getUserInfo } from '@/services/user';
+    import { refreshToken } from '@/services/auth';
+    import { getOtherAdds } from '@/services/add';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds },
         data() {
             return {
                 verticalAddCount: 2,
@@ -79,7 +86,8 @@
                 isMobileView: false,
                 // isBusiness: true, !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
                 isBusiness: false, // !!!!!! УДАЛИТЬ !!!!!!
-                selectedComponent: 0
+                selectedComponent: 0,
+                isClicked: false,
             }
         },  
         computed: {
@@ -91,23 +99,29 @@
             // }
         },
         async created() {
-            // const responseV = await getAdds(this.verticalAddCount);  !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
-            // this.addDataVertical = responseV.adds;
-
-            this.addDataVertical = Array.from({ length: this.verticalAddCount }, () => { // !!!!!! УДАЛИТЬ !!!!!!
-                return { "img": "wide-bg.jpg" };
-            })
-
-            // const responseH = await getAdds(this.horizontalCount);  !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
-            // this.addDataHorizontal = responseH.adds;
-
-            this.addDataHorizontal = Array.from({ length: this.horizontalCount }, () => { // !!!!!! УДАЛИТЬ !!!!!!
-                return { "img": "wide-bg.jpg" };
-            })
+            const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+            console.log(isAuthorized);
+            if (isAuthorized) {
+                localStorage.setItem("token", isAuthorized.access_token);
+                localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+            } else {
+                localStorage.clear();
+                this.$router.push('/signin');
+            }
             
             const userInfo = await getUserInfo(localStorage.getItem("token"));
+            if (!userInfo) {
+                localStorage.clear();
+                this.$router.push('/signin');
+                return;
+            }
             this.userInfo = userInfo;
             console.log("userInfo", this.userInfo);
+
+            const otherAdds = await getOtherAdds(userInfo.vk_id);
+            console.log(otherAdds);
+            this.addDataVertical = otherAdds.left_ads;
+            this.addDataHorizontal = otherAdds.bottom_ads;
 
             this.checkWindowWidth();
             window.addEventListener("resize", this.checkWindowWidth);
@@ -123,9 +137,14 @@
             },
             updateActiveComponent(index) {
                 this.selectedComponent = index;
+            },
+            updateIsClicked(flag) {
+                this.isClicked = flag;
             }
         },
     };
+    // A: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YmQ1MGNiNC1lNGUzLTQ4ODMtYmZjZC00MDU4NzBjMWNkN2IiLCJleHAiOjE3Mzg3ODQzNTF9.0nmjzukwIVJ1noe02WDyvCrMnfX57fJUzlR3NbT18fI"
+    // R: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YmQ1MGNiNC1lNGUzLTQ4ODMtYmZjZC00MDU4NzBjMWNkN2IiLCJleHAiOjE3Mzg3ODQzNTF9.0nmjzukwIVJ1noe02WDyvCrMnfX57fJUzlR3NbT18fI"
 </script>
 
 <style scoped>

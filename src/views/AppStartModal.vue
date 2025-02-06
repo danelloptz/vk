@@ -83,6 +83,7 @@
                     if (response.status == 200) {
                         localStorage.clear();
                         localStorage.setItem("token", response.data.access_token);
+                        localStorage.setItem("token_refresh", response.data.refresh_token);
                         this.$router.push('/signup_1');
                     } 
                 } else {

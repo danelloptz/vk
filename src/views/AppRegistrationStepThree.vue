@@ -19,6 +19,7 @@
                 <input
                     v-model="selectedGroup" 
                     placeholder="Вставьте ссылку" >
+                <span v-if="isErorr" class="error">Не существует такой группы!</span>
                 <span>*Вы в любое время можете добавить или изменить свою группу для продвижения в разделе «Настройки» в личном кабинете.</span>
                 <div class="wrapper_btn">
                     <AppGoodButton :text="text1" @click="checkLink" />
@@ -49,6 +50,7 @@
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppModal from '@/components/AppModal.vue';
     import { getUserInfo, sendNewSettings } from '@/services/user';
+    import { checkGroupLink } from '@/services/groups';
 
     export default {
         components: { AppGoodButton, AppBadButton, AppModal },
@@ -62,8 +64,9 @@
                 linkEndTitle: "ПОЗДРАВЛЯЮ!",
                 linkEndMessage: "Вы успешно прошли регистрацию! Ваш тариф FREE",
                 linkGroupMessage: "Ваша группа ВК привязана",
-                modalVisible: false,      // Видимость первого модального окна
-                modalEndVisible: false,  // Видимость второго модального окна
+                modalVisible: false,      
+                modalEndVisible: false,  
+                isErorr: false
             };
         },
         async created() {
@@ -75,13 +78,21 @@
                 if (this.selectedGroup !== "") {
                     const regex = /^https:\/\/vk\.com\/.+$/;
                     if (!regex.test(this.selectedGroup)) {
-                        alert('Неверный формат ссылки на группу ВКонтакте!');
+                        this.isErorr = true;
                         return;
                     }
-                    localStorage.setItem("vk_link", this.selectedGroup);
-                    const dataToSend = this.getAllParams();
-                    await sendNewSettings(dataToSend);
-                    this.modalVisible = true; // Открыть первое модальное окно
+
+                    const response = await checkGroupLink(this.selectedGroup, this.userData.vk_id);
+                    if (response.status) {
+                        localStorage.setItem("vk_link", this.selectedGroup);
+                        const dataToSend = this.getAllParams();
+                        await sendNewSettings(dataToSend);
+                        this.modalVisible = true; // Открыть первое модальное окно
+                    } else {
+                        this.isErorr= true;
+                    }
+
+                    
                 }
             },
             async skip() {

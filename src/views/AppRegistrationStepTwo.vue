@@ -31,6 +31,8 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     // import { getGroupInfo, isSubscribe } from '@/services/user';  !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
+    import { checkGroupSub } from '@/services/groups';
+    import { getUserInfo } from '@/services/user';
 
     export default {
         components: { AppGroupOrUser, AppGoodButton, AppBadButton },
@@ -40,6 +42,7 @@
                 totalGroups: 25,
                 skipCounts: 10,
                 groupInfo: null,
+                userInfo: [],
                 text1: "ПОДПИСАТЬСЯ",
                 text2: "ПРОПУСТИТЬ",
                 noSkips: false,
@@ -47,6 +50,8 @@
             }
         },
         async created() {
+            const response = await getUserInfo(localStorage.getItem("token"));
+            this.userInfo = response;
             this.getGroups();
         },
         methods: {
@@ -81,13 +86,10 @@
                     const intervalId = setInterval(async () => {
                         if (newWindow.closed) { 
                             clearInterval(intervalId); 
-                            // const response = await isSubscribe(); !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
-                            
-                            const response = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
-                                "isSubscribe" : true
-                            }
+                            const response = await checkGroupSub(this.groupInfo.groupLink, this.userInfo.vk_id);
+                            console.log(response);
 
-                            if (response.isSubscribe) {
+                            if (response.status) {
                                 this.addGroups = this.addGroups + 1;
                                 if (this.addGroups == this.totalGroups) {
                                     this.$router.push('/signup_3');

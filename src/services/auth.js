@@ -30,3 +30,16 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
         throw error; // Пробрасываем ошибку для обработки в вызвавшем коде
     });
 }
+
+export async function refreshToken(refresh_token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v1/auth/refresh', {
+            "refresh_token": refresh_token,
+        },
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при проверке авторизации", error);
+        return false; 
+    }
+}
