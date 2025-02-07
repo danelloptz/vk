@@ -1,7 +1,7 @@
 <template>
     <div class="container">
        
-        <AppHeader />
+        <AppHeader @show-help="updateActiveComponent(7)" />
         <AppGroupsAssemble />
         <section class="content">
             <div class="left">
@@ -44,6 +44,7 @@
                 <AppSettings v-if="selectedComponent === 5 && !isClicked" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked" />
                 <AppBannerAdds v-if="isClicked" />
+                <AppHelp v-if="selectedComponent === 7" />
                 <AppAdd
                     :isClicked="isClicked" 
                     @update:isClicked="isClicked = $event" 
@@ -67,12 +68,13 @@
     import AppFAQ from '@/components/AppFAQ.vue';
     import AppStructure from '@/components/AppStructure.vue';
     import AppBannerAdds from '@/components/AppBannerAdds.vue';
+    import AppHelp from '@/components/AppHelp.vue';
     import { getUserInfo } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp },
         data() {
             return {
                 verticalAddCount: 2,
@@ -87,6 +89,7 @@
                 // isBusiness: true, !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
                 isBusiness: false, // !!!!!! УДАЛИТЬ !!!!!!
                 selectedComponent: 0,
+                selectedPage: "",
                 isClicked: false,
             }
         },  
@@ -143,8 +146,6 @@
             }
         },
     };
-    // A: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YmQ1MGNiNC1lNGUzLTQ4ODMtYmZjZC00MDU4NzBjMWNkN2IiLCJleHAiOjE3Mzg3ODQzNTF9.0nmjzukwIVJ1noe02WDyvCrMnfX57fJUzlR3NbT18fI"
-    // R: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0YmQ1MGNiNC1lNGUzLTQ4ODMtYmZjZC00MDU4NzBjMWNkN2IiLCJleHAiOjE3Mzg3ODQzNTF9.0nmjzukwIVJ1noe02WDyvCrMnfX57fJUzlR3NbT18fI"
 </script>
 
 <style scoped>

@@ -84,7 +84,12 @@
                         localStorage.clear();
                         localStorage.setItem("token", response.data.access_token);
                         localStorage.setItem("token_refresh", response.data.refresh_token);
-                        this.$router.push('/signup_1');
+                        localStorage.setItem("is_new_user", response.data.is_new_user);
+
+                        if (response.data.is_new_user) 
+                            this.$router.push('/signup_1')
+                        else 
+                            this.$router.push('/home');
                     } 
                 } else {
                     console.warn("Параметры code, state или device_id отсутствуют в URL.");

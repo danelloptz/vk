@@ -8,10 +8,9 @@
 <script>
 
 export default {
-  // components: { AppStartModal },
   // async created() {
-  //         this.$router.push('/signin/');
-  //   }
+  //   this.$router.push('/signin');
+  // }
 };
 </script>
 

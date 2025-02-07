@@ -11,7 +11,7 @@
         </div>
         <div class="header_links">
             <a href="">Новости</a>
-            <a href="">Помощь</a>
+            <a href="" @click.prevent="showHelp">Помощь</a>
         </div>
         <div class="header_user">
             <div class="header_gift" @click="open">
@@ -45,6 +45,9 @@
             },
             close() {
                 this.popupVisible = false;
+            },
+            showHelp() {
+                this.$emit('show-help');
             },
         },
         async created() {
