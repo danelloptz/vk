@@ -6,7 +6,7 @@ import AppRegistrationStepThree from '@/views/AppRegistrationStepThree'
 import AppHome from '@/views/AppHome'
 
 const routes = [
-    { path: '/signin', component: AppStartModal },
+    { path: '/', component: AppStartModal },
     { path: '/signup_1', component: AppRegistrationStepOne },
     { path: '/signup_2', component: AppRegistrationStepTwo },
     { path: '/signup_3', component: AppRegistrationStepThree },

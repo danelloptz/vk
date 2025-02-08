@@ -43,3 +43,13 @@ export async function checkGroupSub(vk_link, vk_id) {
         return false; 
     }
 }
+
+export async function getGroups(vk_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/get_registration_groups', vk_id);
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении групп на подписку", error);
+        return false; 
+    }
+}

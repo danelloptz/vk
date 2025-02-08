@@ -38,6 +38,9 @@
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
+        props: {
+            isTarif: Boolean
+        },
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
@@ -56,6 +59,10 @@
             }
         },
         async created() {
+            if (this.isTarif) {
+                this.openPlans();
+                this.$emit("update:isTarif", false);
+            }
             this.getGroups();
         },
         methods: {
@@ -131,6 +138,11 @@
             },
             openPlans() {
                 this.isPlans = true;
+            }
+        },
+        watch: {
+            isTarif(newValue) {
+                if (newValue) this.openPlans();
             }
         }
     };

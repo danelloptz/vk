@@ -31,7 +31,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     // import { getGroupInfo, isSubscribe } from '@/services/user';  !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
-    import { checkGroupSub } from '@/services/groups';
+    import { checkGroupSub, getGroups } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
 
     export default {
@@ -53,6 +53,8 @@
             const response = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = response;
             this.getGroups();
+            const groups = await getGroups(this.userInfo.vk_id);
+            console.log(groups);
         },
         methods: {
             async getGroups() {

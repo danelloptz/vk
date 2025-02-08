@@ -1,7 +1,7 @@
 <template>
     <section class="modal">
         <div class="modal-background"></div>
-        <img src="@/assets/images/close.png" class="close" @click="this.$router.push('/signin')">
+        <img src="@/assets/images/close.png" class="close" @click="this.$router.push('/')">
         <div class="text_wrapper">
             <h1>ШАГ 1 - РЕГИСТРАЦИЯ</h1>
             <span>Добро пожаловать в сервис Intelektaz! Всего три простых шага отделяют Вас от мощного прорыва в Вашем бизнесе с нашим ИИ. Мы проведем Вас за руку к успеху. Сделайте первый шаг – заполните анкету ниже и перейдите на второй шаг нажав кнопку «Шаг 2»: </span>

@@ -367,13 +367,11 @@
                 // if (this.userData.balance >= this.priceSummary) {
                     const formData = new FormData();
 
-                    console.log(this.img.get("file"));
-    
                     formData.append("ads_img", this.img.get("file"));
                     
                     formData.append("days_count", this.daysSummary);
                     formData.append("vk_id", this.userData.vk_id);
-                    formData.append("ads_text", "");
+                    formData.append("ads_text", "text");
                     formData.append("ads_url", this.link);
                     formData.append("position", this.position);
                     
@@ -391,9 +389,6 @@
                     } else {
                         console.log('Возникли трудности ((');
                     }
-                // } else {
-                //     console.log('нельзя');
-                // }
             }
         }
     };

@@ -44,7 +44,7 @@
                 state: "grehthrtjui7643trr",
                 code: "",
                 device_id: "",
-                redirectUrl: "https://lk.intelektaz.com/signin"
+                redirectUrl: "https://lk.intelektaz.com"
             }
         },
         mounted() {

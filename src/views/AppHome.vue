@@ -5,7 +5,12 @@
         <AppGroupsAssemble />
         <section class="content">
             <div class="left">
-                <AppNavigation @update-active-index="updateActiveComponent" @update-isClicked="updateIsClicked"/>
+                <AppNavigation
+                    :indexPage="selectedComponent" 
+                    @update:indexPage="selectedComponent = $event" 
+                    @update-active-index="updateActiveComponent" 
+                    @update-isClicked="updateIsClicked"
+                />
                 <div class="vip">
                     <div class="vip_user">
                         <img src="@/assets/images/avatar.png">
@@ -39,12 +44,14 @@
                     class="card"
                 />
                 <AppBalance v-if="selectedComponent === 0 && !isClicked" />
+                <AppMain v-if="selectedComponent === 1 && !isClicked" @update-isTarif="openTarif" @update-isRot="openRot" />
+                <AppAiGenerator v-if="selectedComponent === 2 && !isClicked" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked" />
-                <AppRotation v-if="selectedComponent === 4 && !isClicked" />
+                <AppRotation v-if="selectedComponent === 4 && !isClicked" :isTarif="isTarif" @update:isTarif="isTarif == $event" />
                 <AppSettings v-if="selectedComponent === 5 && !isClicked" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked" />
                 <AppBannerAdds v-if="isClicked" />
-                <AppHelp v-if="selectedComponent === 7" />
+                <AppHelp v-if="selectedComponent === 7" @update-isInstructions="updateActiveComponent(6)" />
                 <AppAdd
                     :isClicked="isClicked" 
                     @update:isClicked="isClicked = $event" 
@@ -69,12 +76,14 @@
     import AppStructure from '@/components/AppStructure.vue';
     import AppBannerAdds from '@/components/AppBannerAdds.vue';
     import AppHelp from '@/components/AppHelp.vue';
+    import AppMain from '@/components/AppMain.vue';
+    import AppAiGenerator from '@/components/AppAiGenerator.vue';
     import { getUserInfo } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator },
         data() {
             return {
                 verticalAddCount: 2,
@@ -91,6 +100,7 @@
                 selectedComponent: 0,
                 selectedPage: "",
                 isClicked: false,
+                isTarif: false
             }
         },  
         computed: {
@@ -109,13 +119,13 @@
                 localStorage.setItem("token_refresh", isAuthorized.refresh_token);
             } else {
                 localStorage.clear();
-                this.$router.push('/signin');
+                this.$router.push('/');
             }
             
             const userInfo = await getUserInfo(localStorage.getItem("token"));
             if (!userInfo) {
                 localStorage.clear();
-                this.$router.push('/signin');
+                this.$router.push('/');
                 return;
             }
             this.userInfo = userInfo;
@@ -139,10 +149,18 @@
                 console.log(this.orientation);
             },
             updateActiveComponent(index) {
+                // if (index < 7)
                 this.selectedComponent = index;
             },
             updateIsClicked(flag) {
                 this.isClicked = flag;
+            },
+            openTarif() {
+                this.isTarif = true;
+                this.selectedComponent = 4;
+            },
+            openRot() {
+                this.selectedComponent = 4;
             }
         },
     };

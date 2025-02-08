@@ -1,10 +1,16 @@
 <template>
      <AppPopup 
-            :visibility1="popupVisible" 
-            @update:visibility1="popupVisible = $event"
+        :visibility1="popupVisible" 
+        @update:visibility1="popupVisible = $event"
+        @close="close" 
+    />
+    <section class="header">
+        <AppModalMini 
+            :visibility1="modalUser"
+            :userData="userData"
+            @update:visibility1="modalUser = $event"
             @close="close" 
         />
-    <section class="header">
         <div class="header_title">
             <img src="@/assets/images/main_logo.png" >
             <div class="main_title"></div>
@@ -18,7 +24,7 @@
                 <img src="@/assets/images/gift.png" >
                 <span>33%</span>
             </div>
-            <div class="header_info">
+            <div class="header_info" @click="openModalUser">
                 <div class="header_info_circle" :class="userData && (userData.package_name !== 'Free' && userData.package_name !== 'Not active' ? 'green' : 'red')"></div>
                 <div v-if="userData" class="header_info_status">{{ userData.package_name }}</div>
                 <img v-if="userData" :src="userData.avatar" >
@@ -30,12 +36,14 @@
 <script>
     import { getUserInfo  } from '@/services/user';
     import AppPopup from '@/components/AppPopup.vue';
+    import AppModalMini from '@/components/AppModalMini.vue';
 
     export default {
-        components: { AppPopup },
+        components: { AppPopup, AppModalMini },
         data() {
             return {
                 popupVisible: false,
+                modalUser: false,
                 userData: null
             }
         },
@@ -49,6 +57,9 @@
             showHelp() {
                 this.$emit('show-help');
             },
+            openModalUser() {
+                this.modalUser = true;
+            }
         },
         async created() {
             const response = await getUserInfo(localStorage.getItem("token"));
@@ -74,7 +85,7 @@
         align-items: center;
         justify-content: space-between;
         position: relative;
-        z-index: 9;
+        z-index: 15;
     }
     .header_title {
         display: flex;
@@ -157,6 +168,7 @@
         padding-left: 8px;
         border-radius: 50px;
         border: 1px solid white;
+        cursor: pointer;
     }
     .header_info_circle {
         width: 10px;

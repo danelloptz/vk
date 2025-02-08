@@ -1,5 +1,5 @@
 <template>
-    <section class="balance">
+    <section class="ai">
         <div class="switch">
             <span
                 v-for="(item, index) in listSwtich"
@@ -7,31 +7,19 @@
                 :class="{ active: activeIndex === index }" 
                 @click="setActive(index)"
             >{{ item }}</span>
-        </div>
-            <AppRotationGroup v-if="activeIndex === 0" :isTarif="isPackage" @update:isTarif="isPackage == $event" />
-            <AppRotationVideo v-if="activeIndex === 1" />
-            <AppRotationPosts v-if="activeIndex === 2" />
+        </div>  
+        <AppAiGeneratorContent v-if="activeIndex == 0" />
     </section>
 </template>
 
 <script>
-    import AppRotationGroup from '@/components/AppRotationGroup.vue';
-    import AppRotationVideo from '@/components/AppRotationVideo.vue';
-    import AppRotationPosts from '@/components/AppRotationPosts.vue';
+    import AppAiGeneratorContent from '@/components/AppAiGeneratorContent.vue';
     export default {
-        components: { AppRotationGroup, AppRotationVideo, AppRotationPosts },
-        props: {
-            isTarif: Boolean
-        },
-        async created() {
-            this.isPackage = this.isTarif;
-            this.$emit("update:isTarif", false);
-        },
+        components: { AppAiGeneratorContent },
         data() {
             return {
-                listSwtich: ["Ротация групп", "Ротация видео", "Ротация постов"],
                 activeIndex: 0,
-                isPackage: false
+                listSwtich: ["ИИ контент", "ИИ анализ", "ИИ сценарий", "Помощник", "ИИ менеджер"],
             }
         },
         methods: {
@@ -39,14 +27,6 @@
                 this.activeIndex = index;
             },
         },
-        watch: {
-            isTarif(newValue) {
-                console.log('поменялось значение');
-                if (newValue) {
-                    this.isPackage = true;
-                }
-            }
-        }
     };
 </script>
 
@@ -55,7 +35,7 @@
         background: #7023EC;
         font-weight: bold;
     }
-    .balance {
+    .ai {
         width: 100%;
         display: flex;
         flex-direction: column;
@@ -65,7 +45,7 @@
     .switch {
         width: 100%;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
     }
     span {
         width: 100%;

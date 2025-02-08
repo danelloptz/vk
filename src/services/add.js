@@ -26,7 +26,7 @@ export async function getOtherAdds(vk_id) {
 
 export async function sendOtherAdd(payload) {
     try {
-        const response = await axios.post("https://web.intelektaz.com/api/v2/others/get_ads", 
+        const response = await axios.post("https://web.intelektaz.com/api/v2/others/add_ads", 
             payload,
             {
                 headers: { "Content-Type": "multipart/form-data" } 

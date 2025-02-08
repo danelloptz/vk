@@ -32,9 +32,12 @@
     import { getUserInfo } from "@/services/user";
 
     export default {
+        props: {
+            indexPage: Number
+        },
         data() {
             return {
-                activeIndex: 0,
+                activeIndex: this.indexPage, 
                 menuItems: [
                     { img: require('@/assets/images/balance.png'), label: 'Баланс: ' },
                     { img: require('@/assets/images/home.png'), label: 'Главная' },
@@ -55,6 +58,11 @@
         async created() {
             const response = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = response;
+        },
+        watch: {
+            indexPage(newValue) {
+                this.activeIndex = newValue; // Обновляем activeIndex при изменении indexPage
+            }
         },
         computed: {
             updatedMenuItems() {
