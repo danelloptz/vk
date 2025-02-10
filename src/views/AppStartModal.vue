@@ -61,10 +61,10 @@
             async tap() {
                 const isParams = localStorage.getItem("isParams");
                 if (isParams != "true") {
-                    const pkce = await this.generatePKCE();
-                    this.code_verifier = pkce.codeVerifier;
-                    this.code_challenge = pkce.codeChallenge;
-                    localStorage.setItem("isParams", "true");
+                const pkce = await this.generatePKCE();
+                this.code_verifier = pkce.codeVerifier;
+                this.code_challenge = pkce.codeChallenge;
+                localStorage.setItem("isParams", "true");
                 }
 
                 const clientId = "52191705";
