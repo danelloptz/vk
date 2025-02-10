@@ -31,7 +31,7 @@
         <h1>Ваши реферальные ссылки</h1>
         <div class="item2">
             <span>Реферальная ссылка:</span>
-            <strong><span>https://intelektaz.com/12345678</span></strong>
+            <strong><span>https://lk.intelektaz.com/?ref={{ userData.id }}</span></strong>
         </div>
         <div class="item2">
             <span>Реферальная ссылка для ВК:</span>

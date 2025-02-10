@@ -37,7 +37,7 @@
         <span class="counter">Просмотрено {{ addGroups }} из {{ totalGroups }}</span>
         <strong><span>Вы успешно прошли Ротацию видео!</span></strong>
         <span>Ваше видео добавлено в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше просмотров и подписок без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
-        <AppGoodButton :text="text5" />
+        <AppGoodButton :text="text5" @click="openPlans" />
     </section>
 </template>
 
@@ -47,6 +47,8 @@
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppVideoModal from "@/components/AppVideoModal.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
+    import { addInRotation } from "@/services/groups";
+    import { getUserInfo } from "@/services/user";
     // import { getGroupInfo } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
@@ -68,10 +70,13 @@
                 noSkips: false,
                 isVideoShown: false,
                 isWatched: false,
-                isPlans: false
+                isPlans: false,
+                userInfo: []
             }
         },
         async created() {
+            const response = await getUserInfo(localStorage.getItem("token"));
+            this.userInfo = response;
             this.getGroups();
         },
         methods: {
@@ -80,7 +85,9 @@
                 this.isRotationEnd = false;
                 this.isRotation = true;
             },
-            endRotation() {
+            async endRotation() {
+                const response = await addInRotation(this.userInfo.vk_id, "video");
+                console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;

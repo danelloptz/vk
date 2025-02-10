@@ -319,6 +319,16 @@
                 </tr>
             </tbody>
         </table>
+        <span>*Пакеты Business и Leader активируются сроком только на 1 год с максимальной скидкой и полным функционалом сервиса с дальнейшими доработками. Это несоизмеримо выгоднее, чем любой другой тариф.</span>
+        <div class="booster">
+            <div class="booster-img"></div>
+            <div class="col">
+                <span><strong>Booster</strong> - инструмент, который дает мощный всплеск подписчиков, просмотров видео, постов, за счет обнуления показателей внутренней статистики тарифа/пакета. Доступен на тарифе VIP, пакетах Business, Leader</span>
+                <strong><span>Цена 30 USDT</span></strong>
+                <AppGoodButton :text="text1" class="booster_btn"/>
+            </div>
+            
+        </div>
     </section>
 </template>
 
@@ -331,6 +341,7 @@ import AppGoodButton from "@/components/AppGoodButton.vue";
             return {
                 userData: [],
                 text1: "КУПИТЬ",
+                text2: "ПРОДЛИТЬ",
                 selectedPackage: "",
                 plans: ["Start", "Standart", "VIP", "Business", "Leader"],
                 isModal: false,
@@ -444,5 +455,39 @@ import AppGoodButton from "@/components/AppGoodButton.vue";
         width: 100%;
         height: 100%;
         z-index: -1;
+    }
+    .booster {
+        width: 100%;
+        background: #2F3251;
+        display: flex;
+        column-gap: 40px;
+        align-items: center;
+        border-radius: 10px;
+        padding: 30px 40px;
+    }
+    .col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+    }
+    .booster-img {
+        width: 173px;
+        height: 244px;
+        background: url("@/assets/images/rocket.png") no-repeat center/cover, #2F3251;
+        background-blend-mode: lighten;
+        -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+        mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+    }
+
+    .booster span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+        text-align: start;
+        align-self: auto;
+        width: 60%;
+    }
+    .booster_btn {
+        width: 130px;
     }
 </style>

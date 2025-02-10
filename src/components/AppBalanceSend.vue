@@ -30,7 +30,7 @@
         <span>Подтвердите перевод. Вы хотите перевести {{ usdt }} USDT пользователю</span>
         <div class="user_tosend">
             <div class="user">
-                <img :src="require(`@/assets/images/${userToSend.avatar}`)">
+                <img :src="userToSend.avatar">
                 <div class="text_wrapper">
                     <h3>{{ `${userToSend.first_name} ${userToSend.last_name}` }}</h3>
                     <span>ID: {{ userToSend.vk_id }}</span>
@@ -48,6 +48,7 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import { getUserInfo, getUserInfoById } from "@/services/user";
+    import { sendTo } from "@/services/cash";
 
     export default {
         components: { AppGoodButton, AppBadButton },
@@ -101,6 +102,10 @@
                     this.errorMsg = "Введите id пользователя!";
                 if (Number(this.userInfo.balance) < Number(this.usdt))
                     this.errorMsg = "Не хватает средств!";
+            },
+            async sendMoney() {
+                const response = await sendTo(this.userToSend.vk_id, this.usdt, localStorage.getItem("token"));
+                console.log(response);
             }
         }
     };

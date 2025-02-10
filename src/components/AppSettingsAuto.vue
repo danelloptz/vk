@@ -22,9 +22,9 @@
 
         <div v-for="(post, index) in posts" :key="index" class="row2">
             <span>{{ index + 1 }}</span>
-            <span>{{ post.title }}</span>
-            <img :src="require(`@/assets/images/${post.banner}`)" >
-            <a href="#" @click.prevent="downloadImage(post.banner)">Скачать</a>
+            <span>{{ post.text }}</span>
+            <img :src="post.image" >
+            <a href="#" @click.prevent="downloadImage(post.image)">Скачать</a>
         </div> 
     </div>
 </template>
@@ -64,11 +64,11 @@ export default {
         removeSocial(index) {
             this.socials.splice(index, 1);
         },
-        downloadImage(imageName) {
-            const imageUrl = require(`@/assets/images/${imageName}`);
+        downloadImage(imageLink) {
+            const imageUrl = imageLink;
             const a = document.createElement("a");
             a.href = imageUrl;
-            a.download = imageName;
+            a.download = imageLink;
             a.click();
         }
     }

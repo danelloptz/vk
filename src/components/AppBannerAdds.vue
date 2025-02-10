@@ -189,14 +189,53 @@
         </div>
 
         <h1 style="margin-top: 50px;">Мои объявления</h1>
-        
+        <table v-if="userAdds">
+            <thead>
+                <tr class="head">
+                    <th>Номер</th>
+                    <th>Объявление</th>
+                    <th>Статус</th>
+                    <th>Осталось дней</th>
+                    <th>Управление</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item, index) in userAdds" :key="index">
+                    <td>
+                        <span>{{ index + 1 }}</span>
+                    </td>
+                    <td>
+                        <img :src="item.add_img" >
+                    </td>
+                    <td>
+                        <span v-if="item.status">активно</span>
+                        <span v-if="!item.status">неактивно</span>
+                    </td>
+                    <td>
+                        <span>{{ item.time_left }}</span>
+                    </td>
+                    <td>
+                        <div class="edit">
+                            <div class="row">
+                                <img src="@/assets/images/edit.png">
+                                <a>редактировать</a>
+                            </div>
+                            <div class="row">
+                                <img src="@/assets/images/delete.png">
+                                <a>удалить</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </section>
 </template>
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import { getUserInfo } from "@/services/user";
-    import { sendOtherAdd } from "@/services/add";
+    import { sendOtherAdd, getUserAdds } from "@/services/add";
 
     export default {
         components: { AppGoodButton },
@@ -235,6 +274,7 @@
                 daysSummary: 0,
                 priceSummary: 0,
                 userData: [],
+                userAdds: [],
                 img: "",
                 position: ""
             }
@@ -250,6 +290,9 @@
             const user_data = await getUserInfo(localStorage.getItem("token"));
             this.userData = user_data;
 
+            const adds = await getUserAdds(this.userData.vk_id);
+            this.userAdds = adds.ads;
+            console.log(this.userAdds);
             try {
                 const response = await fetch('https://restcountries.com/v3.1/all');
                 const data = await response.json();
@@ -596,5 +639,39 @@
     }
     .btn {
         width: 189px;
+    }
+    th {
+        line-height: 3;
+    }
+    td {
+        padding: 0px 10px;
+    }
+    span, td, th {
+        color: white;
+        font-family: 'OpenSans';
+        font-size: 20px;
+        text-align: center;
+        align-self: center;
+        z-index: 9;
+        padding: 10px;
+        position: relative;
+    }
+    tr:nth-child(2n+1) {
+        background: #111433;
+    }
+    .head {
+        background: none !important;
+    }
+    .edit {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+    }
+    .edit .row {
+        column-gap: 10px;
+    }
+    .edit img {
+        width: 20px;
+        height: 20px;
     }
 </style>

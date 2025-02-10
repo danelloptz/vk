@@ -73,7 +73,31 @@ export async function getUserInfoById(user_id, token) {
          });
         return response.data;
     } catch (error) {
-        console.error("Ошибка при получении информации о транзакциях", error);
+        console.error("Ошибка при получении информации пользователя по айди", error);
+        return false; 
+    }
+}
+
+export async function getReferer(vk_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_referer`, { 
+            "vk_id": vk_id
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о реферере", error);
+        return false; 
+    }
+}
+
+export async function getVipUser(vk_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_vip_user`, { 
+            "vk_id": vk_id
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о вип юзере", error);
         return false; 
     }
 }

@@ -25,7 +25,7 @@
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <strong><span>Вы успешно прошли Ротацию групп!</span></strong>
         <span>Ваша группа добавлена в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
-        <AppGoodButton :text="text2" />
+        <AppGoodButton :text="text2" @click="openPlans"  />
     </section>
 </template>
 
@@ -34,6 +34,8 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
+    import { addInRotation } from "@/services/groups";
+    import { getUserInfo } from "@/services/user";
     // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
@@ -55,10 +57,13 @@
                 skipCounts: 10,
                 noSubscribe: false,
                 noSkips: false,
-                isPlans: false
+                isPlans: false,
+                userInfo: []
             }
         },
         async created() {
+            const response = await getUserInfo(localStorage.getItem("token"));
+            this.userInfo = response;
             if (this.isTarif) {
                 this.openPlans();
                 this.$emit("update:isTarif", false);
@@ -71,7 +76,9 @@
                 this.isRotationEnd = false;
                 this.isRotation = true;
             },
-            endRotation() {
+            async endRotation() {
+                const response = await addInRotation(this.userInfo.vk_id, "group");
+                console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;

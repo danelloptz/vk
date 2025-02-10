@@ -41,3 +41,37 @@ export async function getTransactions(offset, limit, token) {
         return false; 
     }
 }
+
+export async function buyTariff(count_month, tariff_name, tariff_price_per_month, tariff_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v1/user/tariffs/buy', {
+            "count_month": count_month,
+            "tariff_name": tariff_name,
+            "tariff_price_per_month": tariff_price_per_month,
+            "tariff_id": tariff_id,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при покупке тарифа", error);
+        return false; 
+    }
+}
+
+export async function sendTo(to_user, amount, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/v1/transactions/transfer', { 
+            params: { 
+                to_user: to_user,
+                amount: amount
+            },
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при переводе средств", error);
+        return false; 
+    }
+}

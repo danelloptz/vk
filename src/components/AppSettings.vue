@@ -161,6 +161,7 @@
     import AppModalSubscribe from '@/components/AppModalSubscribe.vue';
     
     import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
+    import { editGroup, editVideo } from "@/services/groups";
 
 export default {
     components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto },
@@ -270,11 +271,15 @@ export default {
             addWhatsapp() {
                  this.userData.social_links.whatsapp = this.whatsappLink;
             },
-            addVKGroup() {
-                 this.userData.group.group_link = this.vkGroupLink;
+            async addVKGroup() {
+                this.userData.group.group_link = this.vkGroupLink;
+                const response = await editGroup(this.vkGroupLink, this.userData.vk_id);
+                console.log(response.status);
             },
-            addVKVideo() {
+            async addVKVideo() {
                  this.userData.social_links.vk = this.vkVideoLink;
+                 const response = await editVideo(this.vkVideoLink, this.userData.vk_id);
+                 console.log(response.status);
             },
             closeModal() {
                 this.isModal = false;

@@ -43,3 +43,17 @@ export async function refreshToken(refresh_token) {
         return false; 
     }
 }
+
+export async function addReferer(referer_id, referal_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/add_referer', {
+            "referer_id": referer_id,
+            "referal_id": referal_id
+        },
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при сохранении реферала", error);
+        return false; 
+    }
+}

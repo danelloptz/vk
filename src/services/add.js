@@ -38,3 +38,18 @@ export async function sendOtherAdd(payload) {
         return false;
     }
 }
+
+export async function getUserAdds(vk_id) {
+    console.log("vk_id: ",vk_id);
+    try {
+        const response = await axios.post("https://web.intelektaz.com/api/v2/users/get_ads", 
+            {
+                "vk_id": vk_id
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении всех реклам пользователя", error);
+        return false;
+    }
+}

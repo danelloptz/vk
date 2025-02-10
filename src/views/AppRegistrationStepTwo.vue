@@ -88,7 +88,7 @@
                     const intervalId = setInterval(async () => {
                         if (newWindow.closed) { 
                             clearInterval(intervalId); 
-                            const response = await checkGroupSub(this.groupInfo.groupLink, this.userInfo.vk_id);
+                            const response = await checkGroupSub(this.groupInfo.groupLink, this.userInfo.vk_id, "registration");
                             console.log(response);
 
                             if (response.status) {

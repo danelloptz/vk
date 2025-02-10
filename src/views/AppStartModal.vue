@@ -24,7 +24,8 @@
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
     // import { checkUserAuthorization } from '@/services/auth';
-    import { getToken } from '@/services/auth';
+    import { getToken, addReferer } from '@/services/auth';
+    import { getUserInfo } from '@/services/user';
     // import { getUserInfo } from '@/services/user';
     // import * as VKID from '@vkid/sdk';
     // import { useRoute } from 'vue-router';
@@ -44,11 +45,17 @@
                 state: "grehthrtjui7643trr",
                 code: "",
                 device_id: "",
-                redirectUrl: "https://lk.intelektaz.com"
+                redirectUrl: "https://lk.intelektaz.com",
             }
         },
         mounted() {
             this.handleUrlParams();
+        },
+        async created() {
+            if (!localStorage.getItem("first")) localStorage.clear();
+            localStorage.setItem("first", true);
+            const urlParams = new URLSearchParams(window.location.search);
+            localStorage.setItem("referer", urlParams.get('ref'));
         },
         methods: {
             async tap() {
@@ -86,6 +93,12 @@
                         localStorage.setItem("token_refresh", response.data.refresh_token);
                         localStorage.setItem("is_new_user", response.data.is_new_user);
 
+                        const user = await getUserInfo(localStorage.getItem("token"));
+                        const refererId = localStorage.getItem("referer");
+                        if (refererId) {
+                            const resp = await addReferer(refererId, user.id);
+                            if (!resp.status) console.log(resp.message);
+                        }
                         if (response.data.is_new_user) 
                             this.$router.push('/signup_1')
                         else 

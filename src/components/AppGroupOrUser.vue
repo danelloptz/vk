@@ -3,11 +3,12 @@
         <img v-if="objectData" :src="objectData.avatar" class="avatar">
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
-                <h2 v-if="objectData">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
-                <span v-if="objectData && objectData.package_name != 'Free'">{{ objectData.package_name }}</span>
+                <h2 v-if="objectData && userData.first_name && userData.last_name">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
+                <h2 v-if="objectData && userData.name">{{ userData.name }}</h2>
+                <span v-if="objectData && objectData.package_name != 'Free' || (objectData && objectData.status != 'Free') && objectData.status">{{ objectData.package_name || objectData.status }}</span>
             </div>
             <span v-if="objectData && objectData.vk_id">ID: {{ objectData.vk_id }}</span>
-            <span v-if="objectData && objectData.sentence && correctStatus.includes(objectData.status)">{{ objectData.sentence }}</span>
+            <span v-if="objectData && objectData.sentence && correctStatus.includes(objectData.package_name)">{{ objectData.sentence }}</span>
             <a v-if="objectData && objectData.group_link" :href="objectData.group_link">Ссылка</a>
             <div class="footer_data_links">
                 <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->

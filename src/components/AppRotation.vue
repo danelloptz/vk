@@ -9,7 +9,7 @@
             >{{ item }}</span>
         </div>
             <AppRotationGroup v-if="activeIndex === 0" :isTarif="isPackage" @update:isTarif="isPackage == $event" />
-            <AppRotationVideo v-if="activeIndex === 1" />
+            <AppRotationVideo v-if="activeIndex === 1"  />
             <AppRotationPosts v-if="activeIndex === 2" />
     </section>
 </template>

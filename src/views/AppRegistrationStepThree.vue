@@ -82,7 +82,7 @@
                         return;
                     }
 
-                    const response = await checkGroupLink(this.selectedGroup, this.userData.vk_id);
+                    const response = await checkGroupLink(this.selectedGroup, this.userData.vk_id, "registration");
                     if (response.status) {
                         localStorage.setItem("vk_link", this.selectedGroup);
                         const dataToSend = this.getAllParams();

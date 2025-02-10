@@ -35,7 +35,7 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppModalMessage from "@/components/AppModalMessage.vue";
-    import { getUserInfoById } from "@/services/user";
+    import { getReferer, getUserInfo } from "@/services/user";
 
     export default {
         components: { AppGoodButton, AppGroupOrUser, AppModalMessage },
@@ -46,7 +46,8 @@
                 text1: "ИНСТРУКЦИИ",
                 text2: "ЗАДАТЬ ВОПРОС",
                 text3: "НАПИСАТЬ ОПЕРАТОРУ",
-                referData: [],
+                refererData: [],
+                userData: [],
                 isMessageModal: false,
                 textData: [
                     { 
@@ -77,8 +78,10 @@
             }
         },
         async created() {
-            const refer = await getUserInfoById(842052594, localStorage.getItem("token"));
-            this.referData = refer;
+            const user = await getUserInfo(localStorage.getItem("token"));
+            this.userData = user;
+            const refer = await getReferer(this.userData.vk_id);
+            this.refererData = refer;
 
             console.log(this.referData);
         },

@@ -11,16 +11,16 @@
                     @update-active-index="updateActiveComponent" 
                     @update-isClicked="updateIsClicked"
                 />
-                <div class="vip">
+                <div class="vip" v-if="vipUser">
                     <div class="vip_user">
-                        <img src="@/assets/images/avatar.png">
+                        <img :src="vipUser.avatar">
                         <div class="text_wrapper">
-                            <h2>Никитин Артур</h2>
+                            <h2>{{ vipUser.name }}</h2>
                             <span>VIP</span>
                         </div>
                     </div>
-                    <span>Здесь написано какое-то вип-предложение</span>
-                    <a href="https://vk.com/profcom.petrsu">Ссылка</a>
+                    <span>{{ vipUser.vip_offer_text }}</span>
+                    <a :href="vipUser.group_link">{{ vipUser.group_link }}</a>
                     <div class="vip_footer">
                         <div class="vip_links">
                             <img src="@/assets/images/vk.png">
@@ -78,7 +78,7 @@
     import AppHelp from '@/components/AppHelp.vue';
     import AppMain from '@/components/AppMain.vue';
     import AppAiGenerator from '@/components/AppAiGenerator.vue';
-    import { getUserInfo } from '@/services/user';
+    import { getUserInfo, getVipUser } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
 
@@ -100,7 +100,8 @@
                 selectedComponent: 0,
                 selectedPage: "",
                 isClicked: false,
-                isTarif: false
+                isTarif: false,
+                vipUser: []
             }
         },  
         computed: {
@@ -135,6 +136,10 @@
             console.log(otherAdds);
             this.addDataVertical = otherAdds.left_ads;
             this.addDataHorizontal = otherAdds.bottom_ads;
+
+            const vip = await getVipUser(userInfo.vk_id);
+            this.vipUser = vip;
+            console.log(this.vipUser);
 
             this.checkWindowWidth();
             window.addEventListener("resize", this.checkWindowWidth);
