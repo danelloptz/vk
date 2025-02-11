@@ -29,10 +29,10 @@
                     <ul v-if="isDropdownVisibleCountry" class="dropdown-menu">
                     <li
                         v-for="country in filteredCountries"
-                        :key="country.name"
-                        @mousedown.prevent="selectCountry(country.name)"
+                        :key="country"
+                        @mousedown.prevent="selectCountry(country)"
                     >
-                        {{ country.name }}
+                        {{ country }}
                     </li>
                     </ul>
                 </div>
@@ -122,7 +122,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     // import { getUserInfo, getReferInfo } from '@/services/user';
-    import { getUserInfo } from '@/services/user';
+    import { getUserInfo, getReferer } from '@/services/user';
 
     export default {
         components: { AppGoodButton, AppGroupOrUser },
@@ -155,7 +155,7 @@
         computed: {
             filteredCountries() {
                 return this.countries.filter((country) =>
-                    country.name.toLowerCase().startsWith(this.searchQuery.toLowerCase())
+                    country.toLowerCase().startsWith(this.searchQuery.toLowerCase())
                 );
             },
         },
@@ -190,7 +190,7 @@
                 this.isDropdownVisibleInterest = false;
             },
             nextStep() {
-                this.isNotSelectCountry = !this.countries.some(country => country.name === this.selectedCountry);
+                this.isNotSelectCountry = !this.countries.some(country => country === this.selectedCountry);
                 this.isNotSelectGender = !(this.selectedGender != "");
                 this.isNotSelectInterest = !(this.selectedInterests.length > 0);
                 this.isNotCheckboxChecked = !this.isCheckboxChecked;
@@ -206,33 +206,20 @@
         },
         async created() {
             const responseUser = await getUserInfo(localStorage.getItem("token"));
-            console.log("в vue: ", responseUser);
-            // const responseRefer = await getReferInfo();
             this.userData = responseUser;
-            // this.referData = responseRefer;
 
-            this.referData = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
-                "avatar" : "https://geo-media.beatport.com/image_size/1400x1400/f0a20551-14f3-4fb0-896e-993ad866c3ea.jpg",
-                "first_name" : "Название группы ",
-                "last_name": "",
-                "sentence" : "Здесь написано какое-то вип-предложение",
-                "status": "Leader",
-                "links": {
-                    "vk" : "https://vk.com/",
-                    "telegram" : "https://telegram.com/",
-                    "whatsapp" : "https://whatsapp.com/",
-                },
-                "groupLink" : "https://vk.com/profcom.petrsu",
-                "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
-                "last_post": 'https://vk.com/profcom.petrsu?from=search&w=wall-38200854_40249'
-            }
+            const refer = await getReferer(this.userData.vk_id);
+            this.referData = refer;
 
+            // тут получаем все страны на русском для выпадаюшего списка
             try {
-                const response = await fetch('https://restcountries.com/v3.1/all');
+                const response = await fetch('https://namaztimes.kz/ru/api/country');
                 const data = await response.json();
-                this.countries = data.map(country => ({
-                    name: country.name.common
-                }));
+                
+                for (const value of Object.values(data)) {
+                    this.countries.push(value);
+                }
+
             } catch (error) {
                 console.error('Ошибка при загрузке данных о странах:', error);
             }

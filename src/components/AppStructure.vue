@@ -1,5 +1,6 @@
 <template>
-    <section class="struct">
+    <AppMain :links="isLinks" v-if="isLinks" />
+    <section class="struct" v-if="!isLinks">
         <div class="user">
             <img :src="userData.avatar">
             <div class="user_col">
@@ -40,7 +41,7 @@
                 </div>
             </div>
         </div>
-        <AppGoodButton :text="text1" />
+        <AppGoodButton :text="text1" @click="openLinks" />
 
         <div class="text_row">
             <div class="text_row_item">
@@ -70,8 +71,10 @@
 import { getUserInfo } from "@/services/user";
 import AppGoodButton from "@/components/AppGoodButton.vue";
 import AppBadButton from "@/components/AppBadButton.vue";
+import AppMain from "@/components/AppMain.vue";
+
 export default {
-    components: { AppGoodButton, AppBadButton },
+    components: { AppGoodButton, AppBadButton, AppMain },
     data() {
         return {
             userData: [],
@@ -89,7 +92,8 @@ export default {
                 { "img": "bonus.png", "num": 5, "text": "Matching bonus, (ур.)" },
                 { "img": "global_bonus.png", "num": 0, "text": "Глобальный бонус, (пул)" },
                 { "img": "fast_start.png", "num": 25, "text": "Быстрый старт, дней осталось" }
-            ]
+            ],
+            isLinks: false
         };
     },
     computed: {
@@ -110,6 +114,9 @@ export default {
         },
         switchShowNums() {
             this.showNums = !this.showNums;
+        },
+        openLinks() {
+            this.isLinks = true;
         }
     }
 };

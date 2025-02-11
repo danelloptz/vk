@@ -9,6 +9,7 @@
             :visibility1="modalUser"
             :userData="userData"
             @update:visibility1="modalUser = $event"
+            @isClicked="sendClick"
             @close="close" 
         />
         <div class="header_title">
@@ -59,6 +60,9 @@
             },
             openModalUser() {
                 this.modalUser = true;
+            },
+            sendClick() {
+                this.$emit("isTarif");
             }
         },
         async created() {

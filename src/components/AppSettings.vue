@@ -40,10 +40,10 @@
             <ul v-if="isDropdownVisibleCountry" class="dropdown-menu">
             <li
                 v-for="country in filteredCountries"
-                :key="country.name"
-                @mousedown.prevent="selectCountry(country.name)"
+                :key="country"
+                @mousedown.prevent="selectCountry(country)"
             >
-                {{ country.name }}
+                {{ country }}
             </li>
             </ul>
         </div>
@@ -201,7 +201,7 @@ export default {
     computed: {
         filteredCountries() {
             return this.countries.filter((country) =>
-                country.name.toLowerCase().startsWith(this.searchQuery.toLowerCase())
+                country.toLowerCase().startsWith(this.searchQuery.toLowerCase())
             );
         },
     },
@@ -210,11 +210,13 @@ export default {
         this.userData = response;
 
         try {
-            const response = await fetch('https://restcountries.com/v3.1/all');
+            const response = await fetch('https://namaztimes.kz/ru/api/country');
             const data = await response.json();
-            this.countries = data.map(country => ({
-                name: country.name.common
-            }));
+            
+            for (const value of Object.values(data)) {
+                this.countries.push(value);
+            }
+
         } catch (error) {
             console.error('Ошибка при загрузке данных о странах:', error);
         }
@@ -291,14 +293,14 @@ export default {
             },
 
             initLinks() { 
-                if (this.userData.social_links[0].telegram) 
-                    this.telegramLink = this.userData.social_links[0].telegram;
-                if (this.userData.social_links[1].whatsapp)
-                    this.whatsappLink = this.userData.social_links[1].whatsapp;
+                if (this.userData.social_links[0]?.link) 
+                    this.telegramLink = this.userData.social_links[0].link;
+                if (this.userData.social_links[1]?.link)
+                    this.whatsappLink = this.userData.social_links[1].link;
                 if (this.userData.group?.group_link)
                     this.vkGroupLink = this.userData.group.group_link;
-                if (this.userData.social_links[2].vk)
-                    this.vkVideoLink = this.userData.social_links[2].vk;
+                if (this.userData.social_links[2]?.link)
+                    this.vkVideoLink = this.userData.social_links[2].link;
                 if (this.userData.country)
                     this.searchQuery = this.userData.country;
                 if (this.userData.city)
@@ -311,6 +313,7 @@ export default {
                     this.sentence = this.userData.group.vip_offer_text;
                     this.siteLink = this.userData.group.group_link;
                 }
+                console.log(this.searchQuery);
             },
             // async saveSettings() {  !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
             //     const payload = {

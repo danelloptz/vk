@@ -1,4 +1,10 @@
 <template>
+    <AppModal
+        :title="title" 
+        :message="msg" 
+        :visibility1="endModal"
+        @update:visibility1="endModal = $event"
+    />
     <section class="send" v-if="!stepTwo">
         <div class="row">
             <img src="@/assets/images/balance.png">
@@ -47,11 +53,12 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
+    import AppModal from "@/components/AppModal.vue";
     import { getUserInfo, getUserInfoById } from "@/services/user";
     import { sendTo } from "@/services/cash";
 
     export default {
-        components: { AppGoodButton, AppBadButton },
+        components: { AppGoodButton, AppBadButton, AppModal },
         data() {
             return {
                 text1: "ПОДТВЕРДИТЬ",
@@ -64,7 +71,10 @@
                 isError: false,
                 userToSend: null,
                 stepTwo: false,
-                errorMsg: ""
+                errorMsg: "",
+                title: "УСПЕШНО",
+                message: "Баланс был пополнен",
+                endModal: false,
             }
         },
         async created() {
@@ -105,7 +115,10 @@
             },
             async sendMoney() {
                 const response = await sendTo(this.userToSend.vk_id, this.usdt, localStorage.getItem("token"));
-                console.log(response);
+                if (response) {
+                    this.endModal = true;
+                    this.stepTwo = false;
+                } 
             }
         }
     };

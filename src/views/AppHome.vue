@@ -1,7 +1,7 @@
 <template>
     <div class="container">
        
-        <AppHeader @show-help="updateActiveComponent(7)" />
+        <AppHeader @show-help="updateActiveComponent(7)" @isTarif="openTarif" />
         <AppGroupsAssemble />
         <section class="content">
             <div class="left">
@@ -95,8 +95,7 @@
                 orientation: "vertical",
                 userInfo: null,
                 isMobileView: false,
-                // isBusiness: true, !!!!!! РАССКОМЕНТИРОВАТЬ !!!!!!
-                isBusiness: false, // !!!!!! УДАЛИТЬ !!!!!!
+                isBusiness: false,
                 selectedComponent: 0,
                 selectedPage: "",
                 isClicked: false,
@@ -105,12 +104,10 @@
             }
         },  
         computed: {
-            currentOrientation() {
+            currentOrientation() { 
+                // это нужно для расположения реклам, которые слева
                 return window.innerWidth <= 600 ? 'vertical' : 'horizontal';
             },
-            // accessToken() {
-            //     return this.$store.state.auth.accessToken;
-            // }
         },
         async created() {
             const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
@@ -130,41 +127,44 @@
                 return;
             }
             this.userInfo = userInfo;
-            console.log("userInfo", this.userInfo);
 
-            const otherAdds = await getOtherAdds(userInfo.vk_id);
-            console.log(otherAdds);
+            if (["Leader", "Business"].includes(this.userInfo.package_name)) this.isBusiness = true;
+
+            const otherAdds = await getOtherAdds(userInfo.vk_id); // рекламные банеры слева и снизу
+
             this.addDataVertical = otherAdds.left_ads;
             this.addDataHorizontal = otherAdds.bottom_ads;
 
-            const vip = await getVipUser(userInfo.vk_id);
+            const vip = await getVipUser(userInfo.vk_id); // вип юзер слева
             this.vipUser = vip;
-            console.log(this.vipUser);
 
             this.checkWindowWidth();
             window.addEventListener("resize", this.checkWindowWidth);
-            // console.log(this.accessToken());
         },
         beforeUnmount() {
             window.removeEventListener("resize", this.checkWindowWidth);
         },
         methods: {
             checkWindowWidth() {
+                // аналогично для блока рекламы надо
                 this.orientation = window.innerWidth <= 1000 ? this.orientationH : this.orientationV;
                 console.log(this.orientation);
             },
             updateActiveComponent(index) {
-                // if (index < 7)
+                // в навигации выбираем элемент и selectedComponent переключает видимость блоков
                 this.selectedComponent = index;
             },
             updateIsClicked(flag) {
+                // не помню уже для чего, лучше не трогать :)))
                 this.isClicked = flag;
             },
             openTarif() {
+                // вызываем это, когда где-то захотят открыть Тарифы
                 this.isTarif = true;
                 this.selectedComponent = 4;
             },
             openRot() {
+                // если откуда-то захотят открыть Ротацию
                 this.selectedComponent = 4;
             }
         },

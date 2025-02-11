@@ -24,10 +24,10 @@
                     <ul v-if="isDropdownVisibleCountry" class="dropdown-menu">
                     <li
                         v-for="country in filteredCountries"
-                        :key="country.name"
-                        @mousedown.prevent="selectCountry(country.name)"
+                        :key="country"
+                        @mousedown.prevent="selectCountry(country)"
                     >
-                        {{ country.name }}
+                        {{ country }}
                     </li>
                     </ul>
                 </div>
@@ -282,7 +282,7 @@
         computed: {
             filteredCountries() {
                 return this.countries.filter((country) =>
-                    country.name.toLowerCase().startsWith(this.searchQuery.toLowerCase())
+                    country.toLowerCase().startsWith(this.searchQuery.toLowerCase())
                 );
             },
         },
@@ -294,11 +294,13 @@
             this.userAdds = adds.ads;
             console.log(this.userAdds);
             try {
-                const response = await fetch('https://restcountries.com/v3.1/all');
+                const response = await fetch('https://namaztimes.kz/ru/api/country');
                 const data = await response.json();
-                this.countries = data.map(country => ({
-                    name: country.name.common
-                }));
+                
+                for (const value of Object.values(data)) {
+                    this.countries.push(value);
+                }
+
             } catch (error) {
                 console.error('Ошибка при загрузке данных о странах:', error);
             }
@@ -635,6 +637,7 @@
     }
     .summary_text_row {
         display: flex;
+        align-items: center;
         column-gap: 5px;
     }
     .btn {

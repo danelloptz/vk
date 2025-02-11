@@ -87,3 +87,18 @@ export async function addInRotation(vk_id, rotation_type) {
         return false; 
     }
 }
+
+export async function getGroups(vk_id) {
+    console.log(typeof vk_id);
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/get_registration_groups', {
+            params: {
+                vk_id: vk_id
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при выводе групп для подписки", error);
+        return false; 
+    }
+}

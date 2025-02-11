@@ -82,8 +82,6 @@
             this.userData = user;
             const refer = await getReferer(this.userData.vk_id);
             this.refererData = refer;
-
-            console.log(this.referData);
         },
         methods: {
             gotoInstructions() {

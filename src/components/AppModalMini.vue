@@ -15,8 +15,8 @@
                 </div>
             </div>
             <div class="row">
-                <AppGoodButton :text="text1" class="btn" />
-                <AppBadButton :text="text2" class="btn" />
+                <AppGoodButton :text="text1" class="btn" @click="openTarif"/>
+                <AppBadButton :text="text2" class="btn" @click="exit" />
             </div>
         </div>
     </section>
@@ -44,6 +44,15 @@
                     this.$emit('update:visibility1', false);
                 }
                 this.$emit('close'); 
+            },
+            openTarif() {
+                this.$emit("isClicked");
+                this.close();
+            },
+            exit() {
+                localStorage.clear();
+                location.reload();
+                location.reload();
             }
         }
     };

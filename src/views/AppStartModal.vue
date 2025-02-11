@@ -8,29 +8,19 @@
         <hr>
         <div class="btn_wrapper">
             <AppGoodButton :text="text" @click="tap"/>
-            <!-- <AppGoodButton :text="text" @click="routNextPage" /> -->
             <AppBadButton :text="text2" />
-            <!-- <div id="VkIdSdkOneTap"></div> -->
-            <!-- <span style="font-size: 14px; position: absolute; bottom: 0; left: 10; cursor: pointer;" @click="result">userVKInfo</span> -->
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
         <img src="@/assets/images/auth_image.png" class="right_image">
     </section>
 </template>
 
-<!-- <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script> -->
 <script>
 
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
-    // import { checkUserAuthorization } from '@/services/auth';
-    import { getToken, addReferer } from '@/services/auth';
+    import { getToken, addReferer, refreshToken } from '@/services/auth';
     import { getUserInfo } from '@/services/user';
-    // import { getUserInfo } from '@/services/user';
-    // import * as VKID from '@vkid/sdk';
-    // import { useRoute } from 'vue-router';
-
-    // const route = useRoute();
 
     export default {
         components: { AppBadButton, AppGoodButton },
@@ -52,21 +42,34 @@
             this.handleUrlParams();
         },
         async created() {
-            if (!localStorage.getItem("first")) localStorage.clear();
-            localStorage.setItem("first", true);
-            const urlParams = new URLSearchParams(window.location.search);
+            // тут делаем редирект в ЛК, если живой пользователь решит перейти в lk.intelektaz.com (а не в /home)
+            const token = localStorage.getItem("token_refresh");
+            if (token) {
+                const resp = await refreshToken(token); // проверяем, что токен валидный
+                if (resp) {
+                    this.$router.push('/home');
+                    return;
+                }
+            }
+
+            if (!localStorage.getItem("first")) localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
+            localStorage.setItem("first", true); // будет редирект с вк сюда, так что нельзя чистить после него
+
+            const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
             localStorage.setItem("referer", urlParams.get('ref'));
         },
         methods: {
             async tap() {
-                const isParams = localStorage.getItem("isParams");
+                // штука, чтобы параметры только один раз генерировались
+                const isParams = localStorage.getItem("isParams"); 
                 if (isParams != "true") {
-                const pkce = await this.generatePKCE();
-                this.code_verifier = pkce.codeVerifier;
-                this.code_challenge = pkce.codeChallenge;
-                localStorage.setItem("isParams", "true");
+                    const pkce = await this.generatePKCE();
+                    this.code_verifier = pkce.codeVerifier;
+                    this.code_challenge = pkce.codeChallenge;
+                    localStorage.setItem("isParams", "true");
                 }
 
+                // схема "Обмен на бэкенде без SDK"
                 const clientId = "52191705";
                 const redirectUri = this.redirectUrl;
                 const state = this.state;
@@ -77,6 +80,8 @@
                 window.location.href = vkAuthUrl;
             },
             async handleUrlParams() {
+
+                // считываем параметры, которые вк отдаёт
                 const params = new URLSearchParams(window.location.search);
                 const code = params.get("code");
                 const state = params.get("state");
@@ -84,17 +89,16 @@
                 const code_verifier = localStorage.getItem("code_verifier");
 
                 if (code && state && device_id) {
-                    console.log("Параметры найдены:", { code, state, device_id });
-
                     const response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
                     if (response.status == 200) {
+                        // оставляем только эти три поля, которые будут использоваться на страницах
                         localStorage.clear();
                         localStorage.setItem("token", response.data.access_token);
                         localStorage.setItem("token_refresh", response.data.refresh_token);
                         localStorage.setItem("is_new_user", response.data.is_new_user);
 
                         const user = await getUserInfo(localStorage.getItem("token"));
-                        const refererId = localStorage.getItem("referer");
+                        const refererId = localStorage.getItem("referer"); // если есть рефер, то отмечаем это
                         if (refererId) {
                             const resp = await addReferer(refererId, user.id);
                             if (!resp.status) console.log(resp.message);
@@ -107,17 +111,6 @@
                 } else {
                     console.warn("Параметры code, state или device_id отсутствуют в URL.");
                 }
-            },
-            async routNextPage() {
-                // ЗДЕСЬ ПРОВЕРКА, АВТОРИЗОВАН ПОЛЬЗОВАТЕЛЬ ИЛИ НЕТ
-                // const isAuthorized = await checkUserAuthorization();
-                // if (isAuthorized) {
-                //     this.$router.push('/home');
-                // } else {
-                //     this.$router.push('/signup_1');
-                // }
-                // this.$router.push('/home');
-                this.$router.push('/signup_1');
             },
 
             // Функция для генерации случайной строки

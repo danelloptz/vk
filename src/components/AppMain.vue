@@ -54,6 +54,9 @@
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser },
+        props: {
+            links: Boolean
+        },
         data() {
             return {
                 text1: "ВЫБРАТЬ ТАРИФ",
@@ -72,6 +75,8 @@
 
             const user = await getUserInfo(localStorage.getItem("token"));
             this.userData = user;
+
+            this.isLinks = this.links;
         },
         methods: {
             openTarif() {
