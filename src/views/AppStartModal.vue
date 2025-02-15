@@ -63,6 +63,7 @@
                 // штука, чтобы параметры только один раз генерировались
                 const isParams = localStorage.getItem("isParams"); 
                 if (isParams != "true") {
+                    console.log("генерируются параметры новые");
                     const pkce = await this.generatePKCE();
                     this.code_verifier = pkce.codeVerifier;
                     this.code_challenge = pkce.codeChallenge;
@@ -75,9 +76,17 @@
                 const state = this.state;
                 const code_challenge = this.code_challenge;
                 const code_challenge_method = this.code_challenge_method;
+                localStorage.setItem('zopa', code_challenge);
 
-                const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}`;
-                window.location.href = vkAuthUrl;
+                const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=video`;
+                try {
+                    window.location.href = vkAuthUrl;
+                } catch(err) {
+                    localStorage.clear();
+                    localStorage.setItem("first", true);
+                    const urlParams = new URLSearchParams(window.location.search);
+                    localStorage.setItem("referer", urlParams.get('ref'));
+                }
             },
             async handleUrlParams() {
 
@@ -107,7 +116,8 @@
                             this.$router.push('/signup_1')
                         else 
                             this.$router.push('/home');
-                    } 
+                    }
+                     
                 } else {
                     console.warn("Параметры code, state или device_id отсутствуют в URL.");
                 }

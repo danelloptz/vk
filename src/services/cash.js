@@ -75,3 +75,23 @@ export async function sendTo(to_user, amount, token) {
         return false; 
     }
 }
+
+export async function putMoney(amount, hash, contractaddress, recipient, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v1/user/balance/pick_up', {
+            "amount": amount,
+            "hash": hash,
+            "contractaddress": contractaddress,
+            "recipient": recipient,
+        }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при пополнении баланса", error);
+        return false; 
+    }
+}

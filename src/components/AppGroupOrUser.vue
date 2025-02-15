@@ -3,7 +3,6 @@
         <img v-if="objectData" :src="objectData.avatar" class="avatar">
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
-                <h2 v-if="objectData && userData.first_name && userData.last_name">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
                 <h2 v-if="objectData && userData.name">{{ userData.name }}</h2>
                 <span v-if="objectData && objectData.package_name != 'Free' || (objectData && objectData.status != 'Free') && objectData.status">{{ objectData.package_name || objectData.status }}</span>
             </div>
@@ -15,9 +14,9 @@
                 <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a> -->
-                <a v-if="objectData"><img src="@/assets/images/vk.png"></a>
-                <a v-if="objectData"><img src="@/assets/images/telegram.png"></a>
-                <a v-if="objectData"><img src="@/assets/images/whatsapp.png"></a>
+                <a v-if="objectData" :href="objectData.social_links?.vk"><img src="@/assets/images/vk.png"></a>
+                <a v-if="objectData" :href="objectData.social_links?.telegram"><img src="@/assets/images/telegram.png"></a>
+                <a v-if="objectData" :href="objectData.social_links?.whatsapp"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
         <span v-if="objectData?.vip_offer" class="business">Business-предложение</span>
@@ -46,6 +45,7 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
+                    console.log(this.userData);
                 }
             }
         }

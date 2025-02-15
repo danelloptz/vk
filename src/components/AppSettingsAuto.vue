@@ -10,7 +10,7 @@
                 v-model="social.link"
             >
             <div class="sub_row">
-                <span v-if="!social.isNew" class="add">ДОБАВИТЬ</span>
+                <span v-if="!social.isNew" class="add" @click="saveSocial(social)">ДОБАВИТЬ</span>
                 <span v-else class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
                 <img 
                     v-if="!social.isNew"
@@ -70,8 +70,12 @@ export default {
             a.href = imageUrl;
             a.download = imageLink;
             a.click();
+        },
+        saveSocial(social) {
+            console.log(social);
+            console.log(this.socials);
         }
-    }
+    },
 };
 </script>
 

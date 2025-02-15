@@ -12,7 +12,7 @@
     <section class="rotation" v-if="isRotation">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
-            <AppGroupOrUser :v-if="groupInfo" :objectData="groupInfo" />
+            <AppGroupOrUser :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" @click="subscribeGroup" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" @click="skipGroup" />
@@ -34,7 +34,7 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
-    import { addInRotation } from "@/services/groups";
+    import { addInRotation, checkGroupSub } from "@/services/groups";
     import { getUserInfo } from "@/services/user";
     // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
@@ -52,13 +52,17 @@
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,
-                addGroups: 19,
+                addGroups: 0,
                 totalGroups: 20,
                 skipCounts: 10,
                 noSubscribe: false,
                 noSkips: false,
                 isPlans: false,
-                userInfo: []
+                userInfo: [],
+                currentGroupIndex: 0,
+                groupPriorities: ["first", "second", "third_and_fourth", "fifth", "other"],
+                currentPriorityIndex: 0,
+                groupsQueue: [],
             }
         },
         async created() {
@@ -68,9 +72,80 @@
                 this.openPlans();
                 this.$emit("update:isTarif", false);
             }
-            this.getGroups();
+            this.groupInfo = {
+                "first": [
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},
+                    ],
+                    "second": [
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/VpClicsvi4pmCaWXsCYRSqYjpXZRaUK8sLIwnqYBnzFpux0hkkWVDd3gt_IWkfeJaFJJht5jb7lhhn1u5t3EDddg.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "KARJALA GREEN | ФЕРМЕРСКАЯ ЗЕЛЕНЬ","social_links": {"vk" : "https://vk.com/karjalagreen","telegram" : "","whatsapp" : "",}},
+
+                    ],
+                    "third_and_fourth": [
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-23.userapi.com/s/v1/ig2/chRW6P1fuOl-7644XvhUbA7qfbvDpaV7_KczOb2gh5_wjq-gTiI_ey0ejNtnifJfE4_6Af3fcbkGd1_li13CAsRz.jpg?quality=95&crop=210,46,534,534&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480&ava=1&cs=200x200","name": "ЗАРЯД  ШАУРМЫ","social_links": {"vk" : "https://vk.com/zaryad_shaurmy","telegram" : "","whatsapp" : "",}},
+                    ],
+                    "fifth": [
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/wRXZgCvHR3J_8C-oL7GhfohlyNXkvqmxi53StIUbiW7qL85ae1z8ywZj5-qcuqJaoXKYaeRtQGp3QHvHnGh8W2yz.jpg?quality=95&crop=414,396,1312,1312&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280&ava=1&cs=200x200","name": "Время есть | Сеть кафе в ПетрГУ","social_links": {"vk" : "https://vk.com/cafe_petrsu","telegram" : "","whatsapp" : "",}},
+                    ],
+                    "other": [
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                        {"avatar" : "https://sun6-22.userapi.com/s/v1/ig2/lTefR5rWvAFQyQhF4abM3tAIuj8QaZrqJZMKG1xBom3nvlJgGne3Dvf1yNxFGeDV6X44dnkpViGpEn6-mMya-qvO.jpg?quality=95&crop=0,0,1000,1000&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200","name": "ГРАД МАСТЕРОВ ∙ Строительная компания","social_links": {"vk" : "https://vk.com/gradmasterov_ptz","telegram" : "","whatsapp" : "",}},
+                    ],
+            }
+            this.updateGroupQueue();
         },
         methods: {
+            updateGroupQueue() {
+                const priorityKey = this.groupPriorities[this.currentPriorityIndex];
+                if (this.groupInfo && this.groupInfo[priorityKey]) {
+                    console.log("обновляем очередь групп");
+                    this.groupsQueue = this.groupInfo[priorityKey].slice(); // Копируем массив групп
+                    this.currentGroupIndex = 0;
+                }
+            },
             makeRotation() {
                 this.isRotationPreview = false;
                 this.isRotationEnd = false;
@@ -83,48 +158,31 @@
                 this.isRotationEnd = true;
                 this.isRotation = false;
             },
-            async getGroups() {
-                // const response = await getGroupInfo(); !!!!! РАССКОМЕНТИТЬ !!!!!
-                // console.log(response);
-                // this.groupInfo = response;
-
-                this.groupInfo = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
-                    "avatar" : "https://geo-media.beatport.com/image_size/1400x1400/f0a20551-14f3-4fb0-896e-993ad866c3ea.jpg",
-                    "first_name" : "Название группы ",
-                    "last_name": "",
-                    "sentence" : "Здесь написано какое-то вип-предложение",
-                    "status": "Leader",
-                    "links": {
-                        "vk" : "https://vk.com/",
-                        "telegram" : "https://telegram.com/",
-                        "whatsapp" : "https://whatsapp.com/",
-                    },
-                    "groupLink" : "https://vk.com/profcom.petrsu",
-                    "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
-                    "last_post": 'https://vk.com/profcom.petrsu?from=search&w=wall-38200854_40249'
-                }
-            },
             async subscribeGroup() {
+                if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
                     const newWindow = window.open(
-                        this.groupInfo.groupLink,
+                        this.groupsQueue[this.currentGroupIndex].social_links.vk,
                         "_blank",
                         "width=800, height=600"
                     );
                     const intervalId = setInterval(async () => {
                         if (newWindow.closed) { 
                             clearInterval(intervalId); 
-                            // const response = await isSubscribe(); !!!! РАССКОМЕНТИТЬ !!!!
-                            // console.log(response);
-                            const response = {
-                                "isSubscribe" :true
-                            };
-                            if (response.isSubscribe) {
+                            const response = await checkGroupSub(this.groupsQueue[this.currentGroupIndex].social_links.vk, this.userInfo.vk_id, "registration");
+                            console.log(response);
+
+                            if (response.status) {
                                 this.addGroups = this.addGroups + 1;
+                                this.groupsQueue.splice(this.currentGroupIndex, 1);
+                                this.noSubscribe = false;
+                                this.noSkips = false;
                                 if (this.addGroups == this.totalGroups) {
-                                    this.endRotation();
+                                    this.$router.push('/signup_3');
                                 }
-                                this.getGroups();
+                                if (this.subscribedCount >= 5 || this.groupsQueue.length === 0) {
+                                    this.nextPriorityGroup();
+                                }
                             }
                              else {
                                 this.noSubscribe = true;
@@ -136,11 +194,26 @@
                 }
             },
             skipGroup() {
+                console.log("пропустили группу");
                 if (this.skipCounts == 0) 
                     this.noSkips = true
                 else {
                     this.skipCounts--;
-                    this.getGroups();
+                    this.groupsQueue.splice(this.currentGroupIndex, 1);
+                    if (this.groupsQueue.length === 0) {
+                        this.nextPriorityGroup();
+                    }
+                }
+            },
+            nextPriorityGroup() {
+                console.log("Новая группа");
+                this.subscribedCount = 0;
+                this.currentPriorityIndex++;
+
+                if (this.currentPriorityIndex < this.groupPriorities.length) {
+                    this.updateGroupQueue();
+                } else {
+                    console.log("Все группы обработаны.");
                 }
             },
             openPlans() {

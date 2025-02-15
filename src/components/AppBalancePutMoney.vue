@@ -67,7 +67,7 @@
     import AppModal from "@/components/AppModal.vue";
 
     import { getUserInfo } from "@/services/user";
-    // import { checkTxid } from "@/services/cash";
+    import { putMoney } from "@/services/cash";
     export default {
         components: { AppGoodButton, AppModalHash, AppModal },
         data() {
@@ -88,7 +88,8 @@
                 txid: "",
                 title: "УСПЕШНО!",
                 msg: "Ваш баланс пополнен",
-                isMoneyPut: false
+                isMoneyPut: false,
+                adressToSend: "TFJpSqMrjrBr9EB1JRG48f5iTyoakJ2x8V"
             }
         },
         async created() {
@@ -104,7 +105,7 @@
                 if ( !(this.usdt != "" && Number(this.usdt) > this.commision))
                     console.log('bad')
                 else {
-                    this.cashout = Number(this.usdt);
+                    this.cashout = Number(this.usdt) + this.commision;
                     this.stepTwo = true;
                 }
             },
@@ -116,8 +117,8 @@
             },
             async check() {
                 if (this.txid != "") {
-                    // const response = await checkTxid(this.txid); !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
-                    // this.isMoneyPut = response.status == true
+                    const response = await putMoney(this.cashout, this.txid, this.adressToSend, this.userInfo.id, localStorage.getItem("token"));
+                    this.isMoneyPut = response.status == true
 
                     this.isMoneyPut = true; // !!!!! УДАЛИТЬ !!!!!!
                 }

@@ -49,7 +49,8 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppModal from '@/components/AppModal.vue';
-    import { getUserInfo, sendNewSettings } from '@/services/user';
+    import { getUserInfo } from '@/services/user';
+    import { setNewUser } from '@/services/auth';
     import { checkGroupLink } from '@/services/groups';
 
     export default {
@@ -86,7 +87,7 @@
                     if (response.status) {
                         localStorage.setItem("vk_link", this.selectedGroup);
                         const dataToSend = this.getAllParams();
-                        await sendNewSettings(dataToSend);
+                        await setNewUser(dataToSend);
                         this.modalVisible = true; // Открыть первое модальное окно
                     } else {
                         this.isErorr= true;
@@ -97,7 +98,7 @@
             },
             async skip() {
                 const dataToSend = this.getAllParams();
-                await sendNewSettings(dataToSend);
+                await setNewUser(dataToSend);
                 this.modalVisible = false; // Закрыть первое модальное окно
                 this.modalEndVisible = true; // Открыть второе модальное окно
             },
@@ -111,12 +112,14 @@
             },
             getAllParams() {
                 const data = {
-                    "vk_id": this.userData.vk_id,
-                    "country": localStorage.getItem("country"),
-                    "city": localStorage.getItem("city"),
-                    "sex": localStorage.getItem("sex"),
-                    "interests": JSON.parse(localStorage.getItem("interests")),
-                    "vk_link": localStorage.getItem("vk_link") ? localStorage.getItem("vk_link") : "",
+                    "payload": {
+                        "vk_id": this.userData.vk_id,
+                        "country": localStorage.getItem("country"),
+                        "city": localStorage.getItem("city"),
+                        "sex": localStorage.getItem("sex"),
+                        "interests": JSON.parse(localStorage.getItem("interests")),
+                        "vk_link": localStorage.getItem("vk_link") ? localStorage.getItem("vk_link") : "",
+                    }
                 }
                 console.log(data);
                 return data;

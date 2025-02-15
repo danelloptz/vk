@@ -57,3 +57,13 @@ export async function addReferer(referer_id, referal_id) {
         return false; 
     }
 }
+
+export async function setNewUser(payload) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/new_user', payload);
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при сохранении нового пользователя", error);
+        return false; 
+    }
+}

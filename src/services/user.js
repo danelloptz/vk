@@ -47,9 +47,15 @@ export async function getGroupInfo() {
     }
 }
 
-export async function sendNewSettings(payload) {
-    axios.post('https://web.intelektaz.com/api/v2/users/new_user', { payload })
+export async function sendNewSettings(payload, token) {
+    axios.patch('https://web.intelektaz.com/api/v1/user', payload, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    })
         .then(response => {
+            console.log(response);
             if (response.data.status)
                 console.log('Настройки сохранены!')
             else 

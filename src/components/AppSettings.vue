@@ -10,9 +10,8 @@
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
-            <span v-if="userData?.social_links?.vk">Вконтакте: {{ userData.social_links.vk }}</span>
-            <span v-if="userData?.social_links?.telegram">Telegram: {{ userData.social_links.telegram }}</span>
-            <span v-if="userData?.social_links?.whatsapp">WhatsApp: {{ userData.social_links.whatsapp }}</span>
+            <span v-if="tgData?.link">Telegram: {{ tgData.link }}</span>
+            <span v-if="whtData?.link">WhatsApp: {{ whtData.link }}</span>
         </div>
         
         <div class="row">
@@ -147,15 +146,13 @@
             class="card"
         />
         <span style="font-size: 14px;"><i>Для продвижения запрещены порнографические материалы, призывы к насилию, оскорбления и другие темы запрещенные законодательством вашей страны и правилами Вконтакте.</i></span>
-        <!-- <AppGoodButton :text="text1" class="btn" @click="saveSettings" /> !!!! РАССКОМЕНТИРОВАТЬ !!!! --> 
-        <AppGoodButton :text="text1" class="btn" /> <!-- УДАЛИТЬ -->
+        <AppGoodButton :text="text1" class="btn" @click="saveSettings" />
    </section>
    <AppSettingsAuto v-if="isAuto" />
 </template>
 
 <script>
-    // import { getUserInfo, sendNewSettings } from "@/services/user";
-    import { getUserInfo } from "@/services/user";
+    import { getUserInfo, sendNewSettings } from "@/services/user";
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppModalSubscribe from '@/components/AppModalSubscribe.vue';
@@ -196,6 +193,8 @@ export default {
             isNotCheckboxChecked: false,
             isAuto: false,
             isModal: false,
+            tgData: null,
+            whtData: null
         };
     },
     computed: {
@@ -268,10 +267,12 @@ export default {
                 this.isAuto = true;
             },
             addTelegram() {
-                 this.userData.social_links.telegram = this.telegramLink;
+                this.tgData = { "type": "telegram", "link": this.telegramLink };
+                this.userData.social_links.push({ "telegram": this.telegramLink });
             },
             addWhatsapp() {
-                 this.userData.social_links.whatsapp = this.whatsappLink;
+                this.whtData     = { "type": "whatsapp", "link": this.whatsappLink };
+                this.userData.social_links.push({ "whatsapp": this.whatsappLink });
             },
             async addVKGroup() {
                 this.userData.group.group_link = this.vkGroupLink;
@@ -279,9 +280,8 @@ export default {
                 console.log(response.status);
             },
             async addVKVideo() {
-                 this.userData.social_links.vk = this.vkVideoLink;
-                 const response = await editVideo(this.vkVideoLink, this.userData.vk_id);
-                 console.log(response.status);
+                const response = await editVideo(this.vkVideoLink, this.userData.vk_id);
+                console.log(response.status);
             },
             closeModal() {
                 this.isModal = false;
@@ -293,14 +293,18 @@ export default {
             },
 
             initLinks() { 
-                if (this.userData.social_links[0]?.link) 
-                    this.telegramLink = this.userData.social_links[0].link;
-                if (this.userData.social_links[1]?.link)
-                    this.whatsappLink = this.userData.social_links[1].link;
+                this.tgData = this.userData.social_links.find(link => link.type === "telegram");
+                this.whtData = this.userData.social_links.find(link => link.type === "whatsapp");
+                if (this.tgData?.link) {
+                    this.telegramLink = this.tgData.link;
+                }
+                if (this.whtData?.link) {
+                    this.whatsappLink = this.whtData.link;
+                }
                 if (this.userData.group?.group_link)
                     this.vkGroupLink = this.userData.group.group_link;
-                if (this.userData.social_links[2]?.link)
-                    this.vkVideoLink = this.userData.social_links[2].link;
+                if (this.userData.video?.video_link)
+                    this.vkVideoLink = this.userData.video?.video_link;
                 if (this.userData.country)
                     this.searchQuery = this.userData.country;
                 if (this.userData.city)
@@ -315,25 +319,20 @@ export default {
                 }
                 console.log(this.searchQuery);
             },
-            // async saveSettings() {  !!!!! РАССКОМЕНТИРОВАТЬ !!!!!
-            //     const payload = {
-            //         links: {
-            //             telegram: this.telegramLink,
-            //             whatsapp: this.whatsappLink,
-            //             vk: this.vkGroupLink,
-            //             videoLink: this.vkVideoLink
-            //         },
-            //         country: this.searchQuery,
-            //         city: this.selectedCity,
-            //         sex: this.searchQueryGender,
-            //         selectedInterests: this.selectedInterests,
-            //         sentence: this.sentence,
-            //         site: this.siteLink,
-            //         groupStat: this.userData?.groupStat,
-            //         videoStat: this.userData?.videoStat
-            //     };
-            //     await sendNewSettings(payload); 
-            // }
+            async saveSettings() {
+                const payload = {
+                    country: this.searchQuery,
+                    city: this.selectedCity,
+                    sex: this.searchQueryGender,
+                    interests: this.selectedInterests,
+                    social_links: this.userData.social_links,
+                    vip_offer: this.sentence,
+                    group_link: this.siteLink,
+                };
+
+                console.log(payload);
+                await sendNewSettings(payload, localStorage.getItem("token")); 
+            }
     }
 };
 </script>
