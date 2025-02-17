@@ -95,3 +95,33 @@ export async function putMoney(amount, hash, contractaddress, recipient, token) 
         return false; 
     }
 }
+
+export async function getTariffs(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/v1/tariffs', { 
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении тарифов", error);
+        return false; 
+    }
+}
+
+export async function getMoney(vk_id, sum_money, wallet, chain) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/withdrawal_money', {
+            "vk_id": vk_id,
+            "sum_money": sum_money,
+            "wallet": wallet,
+            "chain": chain,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при выводе средств", error);
+        return false; 
+    }
+}

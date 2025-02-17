@@ -34,6 +34,7 @@
     // import { checkGroupSub, getGroups } from '@/services/groups';
     import { checkGroupSub } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
+    import { refreshToken } from '@/services/auth';
 
     export default {
         components: { AppGroupOrUser, AppGoodButton, AppBadButton },
@@ -57,7 +58,18 @@
             };
         },
         async created() {
+            const token = localStorage.getItem("token_refresh");
+            if (token) {
+                const resp = await refreshToken(token); // проверяем, что токен валидный
+                if (resp) {
+                    localStorage.setItem("token", resp.access_token);
+                    localStorage.setItem("token_refresh", resp.refresh_token);
+                }
+            } else {
+                this.$router.push('/home');
+            }
             const response = await getUserInfo(localStorage.getItem("token"));
+            if (!response) this.$router.push('/home');
             this.userInfo = response;
             // const groups = await getGroups(this.userInfo.vk_id);
             // this.groupInfo = groups;
@@ -385,7 +397,7 @@
         font-size: 14px;
         color: red;
         position: absolute;
-        bottom: 15px;
+        bottom: 0px;
         right: 50px;
     }
 

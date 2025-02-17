@@ -100,3 +100,17 @@ export async function getGroups(vk_id) {
         return false; 
     }
 }
+
+export async function getRotationGroups(vk_id, tariff) {
+    console.log(typeof vk_id);
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/get_rotation_groups', {
+            "vk_id": vk_id,
+            "tariff": tariff
+        } );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при выдаче групп для подписки", error);
+        return false; 
+    }
+}

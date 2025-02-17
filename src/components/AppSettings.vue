@@ -194,7 +194,8 @@ export default {
             isAuto: false,
             isModal: false,
             tgData: null,
-            whtData: null
+            whtData: null,
+            beforeLinks: null
         };
     },
     computed: {
@@ -208,6 +209,8 @@ export default {
         const response = await getUserInfo(localStorage.getItem("token"));
         this.userData = response;
 
+        this.beforeLinks = [...this.userData.social_links];
+
         try {
             const response = await fetch('https://namaztimes.kz/ru/api/country');
             const data = await response.json();
@@ -220,6 +223,7 @@ export default {
             console.error('Ошибка при загрузке данных о странах:', error);
         }
  
+        console.log("сработал инит");
         this.initLinks();
     },
     watch: {
@@ -268,14 +272,13 @@ export default {
             },
             addTelegram() {
                 this.tgData = { "type": "telegram", "link": this.telegramLink };
-                this.userData.social_links.push({ "telegram": this.telegramLink });
+                this.userData.social_links.push(this.tgData);
             },
             addWhatsapp() {
-                this.whtData     = { "type": "whatsapp", "link": this.whatsappLink };
-                this.userData.social_links.push({ "whatsapp": this.whatsappLink });
+                this.whtData = { "type": "whatsapp", "link": this.whatsappLink };
+                this.userData.social_links.push(this.whtData);
             },
             async addVKGroup() {
-                this.userData.group.group_link = this.vkGroupLink;
                 const response = await editGroup(this.vkGroupLink, this.userData.vk_id);
                 console.log(response.status);
             },
@@ -310,27 +313,29 @@ export default {
                 if (this.userData.city)
                     this.selectedCity = this.userData.city;
                 if (this.userData.sex)
-                    this.searchQueryGender = this.userData.sex == 1 ? "Женский" : "Мужской";
+                    this.searchQueryGender = this.userData.sex_db;
                 if (this.userData.interests) 
-                    this.selectedInterests = this.userData.interests;
-                if (this.userData.group.vip_offer) {
+                    this.selectedInterests = [...this.userData.interests];
+                if (this.userData.group?.vip_offer) {
                     this.sentence = this.userData.group.vip_offer_text;
                     this.siteLink = this.userData.group.group_link;
                 }
-                console.log(this.searchQuery);
             },
             async saveSettings() {
+                console.log(this.beforeLinks);
+
                 const payload = {
-                    country: this.searchQuery,
-                    city: this.selectedCity,
-                    sex: this.searchQueryGender,
-                    interests: this.selectedInterests,
-                    social_links: this.userData.social_links,
+                    country: this.searchQuery != this.userData.country ? this.searchQuery : null,
+                    city: this.selectedCity != this.userData.city ? this.selectedCity : null,
+                    sex: this.searchQueryGender != this.userData.sex_db ? this.searchQueryGender : null,
+                    interests: this.selectedInterests != this.userData.interests ? this.selectedInterests : null,
+                    social_links: this.userData.social_links != this.beforeLinks ? this.userData.social_links : null,
                     vip_offer: this.sentence,
                     group_link: this.siteLink,
                 };
 
                 console.log(payload);
+                console.log(this.userData);
                 await sendNewSettings(payload, localStorage.getItem("token")); 
             }
     }

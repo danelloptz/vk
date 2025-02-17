@@ -1,8 +1,7 @@
 <template>
     <div class="container">
-       
-        <AppHeader @show-help="updateActiveComponent(7)" @isTarif="openTarif" />
-        <AppGroupsAssemble />
+        <AppHeader @show-help="updateActiveComponent(7)" @isTarif="openTarif"/>
+        <AppGroupsAssemble @comeToAssembly="updateActiveComponent(8)" />
         <section class="content">
             <div class="left">
                 <AppNavigation
@@ -52,6 +51,7 @@
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked" />
                 <AppBannerAdds v-if="isClicked" />
                 <AppHelp v-if="selectedComponent === 7" @update-isInstructions="updateActiveComponent(6)" />
+                <AppComeToAssembly v-if="selectedComponent === 8" />
                 <AppAdd
                     :isClicked="isClicked" 
                     @update:isClicked="isClicked = $event" 
@@ -78,12 +78,13 @@
     import AppHelp from '@/components/AppHelp.vue';
     import AppMain from '@/components/AppMain.vue';
     import AppAiGenerator from '@/components/AppAiGenerator.vue';
+    import AppComeToAssembly from '@/components/AppComeToAssembly.vue';
     import { getUserInfo, getVipUser } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly },
         data() {
             return {
                 verticalAddCount: 2,
@@ -100,7 +101,8 @@
                 selectedPage: "",
                 isClicked: false,
                 isTarif: false,
-                vipUser: []
+                vipUser: [],
+                comeToAssembly: false,
             }
         },  
         computed: {

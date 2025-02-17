@@ -335,6 +335,8 @@
 <script>
 import AppModalPayment from "@/components/AppModalPayment.vue";
 import AppGoodButton from "@/components/AppGoodButton.vue";
+import { getTariffs } from "@/services/cash";
+
     export default {
         components: { AppGoodButton, AppModalPayment },
         data() {
@@ -347,6 +349,10 @@ import AppGoodButton from "@/components/AppGoodButton.vue";
                 isModal: false,
                 isGoodPayment: false
             }
+        },
+        async created() {
+            const resp = await getTariffs(localStorage.getItem("token"));
+            console.log(resp);
         },
         methods: {
             selectPackage(pack) {

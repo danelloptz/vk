@@ -123,6 +123,7 @@
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     // import { getUserInfo, getReferInfo } from '@/services/user';
     import { getUserInfo, getReferer } from '@/services/user';
+    import { refreshToken } from '@/services/auth';
 
     export default {
         components: { AppGoodButton, AppGroupOrUser },
@@ -205,6 +206,16 @@
             }
         },
         async created() {
+            const token = localStorage.getItem("token_refresh");
+            if (token) {
+                const resp = await refreshToken(token); // проверяем, что токен валидный
+                if (resp) {
+                    localStorage.setItem("token", resp.access_token);
+                    localStorage.setItem("token_refresh", resp.refresh_token);
+                }
+            } else {
+                this.$router.push('/home');
+            }
             const responseUser = await getUserInfo(localStorage.getItem("token"));
             this.userData = responseUser;
 

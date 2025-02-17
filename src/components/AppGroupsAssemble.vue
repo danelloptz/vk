@@ -14,7 +14,7 @@
                 <span>{{ group.group_name }}</span>
             </div>
         </div>
-        <img src="@/assets/images/plus.png" class="add_group">
+        <img src="@/assets/images/plus.png" class="add_group" @click="addGroup">
     </section>
 </template>
 
@@ -69,6 +69,9 @@
                     console.error("Ссылка на группу отсутствует!");
                 }
             },
+            addGroup() {
+                this.$emit("comeToAssembly");
+            }
         }
     };
 </script>

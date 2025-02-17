@@ -14,9 +14,9 @@
                 <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a> -->
-                <a v-if="objectData" :href="objectData.social_links?.vk"><img src="@/assets/images/vk.png"></a>
-                <a v-if="objectData" :href="objectData.social_links?.telegram"><img src="@/assets/images/telegram.png"></a>
-                <a v-if="objectData" :href="objectData.social_links?.whatsapp"><img src="@/assets/images/whatsapp.png"></a>
+                <a v-if="objectData" :href="tgData?.link"><img src="@/assets/images/vk.png"></a>
+                <a v-if="objectData" :href="whtData?.link"><img src="@/assets/images/telegram.png"></a>
+                <a v-if="objectData" :href="vkData?.link"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
         <span v-if="objectData?.vip_offer" class="business">Business-предложение</span>
@@ -36,7 +36,10 @@ export default {
     data() {
         return {
             correctStatus: ["VIP", "Leader", "Business"],
-            userData: {} // Создаём переменную для хранения данных
+            userData: {},
+            tgData: "",
+            whtData: "",
+            vkData: "",
         }
     },
     watch: {
@@ -45,7 +48,10 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
-                    console.log(this.userData);
+                    this.tgData = this.userData.social_links.find(link => link.type === "telegram");
+                    this.whtData = this.userData.social_links.find(link => link.type === "whatsapp");
+                    this.vkData = this.userData.social_links.find(link => link.type === "vk");
+                    console.log("УСТАНАВЛИВАЕМ ССЫЛКИ", this.tgData);
                 }
             }
         }

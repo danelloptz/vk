@@ -24,7 +24,7 @@
             <div class="item">
                 <input 
                     v-model="adress"
-                    placeholder="Адрес BEP-20"
+                    :placeholder="`Адрес ${choices[activeIndex]}`"
                 >
                 <span>Если вы укажите адрес другой сети, средства будут утеряны безвозвратно!</span>
             </div>
@@ -53,6 +53,7 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppModal from "@/components/AppModal.vue";
     import { getUserInfo } from "@/services/user";
+    import { getMoney } from "@/services/cash";
     export default {
         components: { AppGoodButton, AppModal },
         data() {
@@ -86,14 +87,20 @@
             },
             countCashout() {
                 if (this.usdt != "0" && Number(this.usdt) > this.commision)
-                    this.cashout = Number(this.usdt) - this.commision
+                    this.cashout = Number(this.usdt) + this.commision
                 else 
                     this.cashout = 0;
             },
-            openWaitingModal() {
+            async openWaitingModal() {
                 if (this.userInfo.balance >= this.usdt && this.adress != "" && this.usdt != "") {
-                    this.isError = false;
-                    this.waitingModal = true;
+                    const resp = await getMoney(this.userInfo.vk_id, this.cashout, this.adress, this.choices[this.activeIndex]);
+                    if (resp.status) {
+                        this.isError = false;
+                        this.waitingModal = true;
+                    }
+                    else {
+                        this.isError = true;
+                    }
                 } else {
                     this.isError = true;
                 }

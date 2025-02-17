@@ -34,9 +34,8 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
-    import { addInRotation, checkGroupSub } from "@/services/groups";
+    import { addInRotation, checkGroupSub, getRotationGroups } from "@/services/groups";
     import { getUserInfo } from "@/services/user";
-    // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
@@ -72,6 +71,10 @@
                 this.openPlans();
                 this.$emit("update:isTarif", false);
             }
+
+            const groups = await getRotationGroups(this.userInfo.vk_id, this.userInfo.package_name);
+            console.log(groups);
+
             this.groupInfo = {
                 "first": [
                         {"avatar" : "https://sun6-21.userapi.com/s/v1/ig2/iZ2SPDVQaTLtPhczqLbeR604L4-V_83bxIPkkNK_XRDt0MRJJS3iSMey8_o3G03yzMT3GslodZtGSa5ldtXXLjDI.jpg?quality=95&crop=0,0,1080,1080&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080&ava=1&cs=200x200","name": "Профком обучающихся ПетрГУ","social_links": {"vk" : "https://vk.com/profcom.petrsu","telegram" : "","whatsapp" : "",}},

@@ -50,7 +50,7 @@
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppModal from '@/components/AppModal.vue';
     import { getUserInfo } from '@/services/user';
-    import { setNewUser } from '@/services/auth';
+    import { setNewUser, refreshToken } from '@/services/auth';
     import { checkGroupLink } from '@/services/groups';
 
     export default {
@@ -71,6 +71,16 @@
             };
         },
         async created() {
+            const token = localStorage.getItem("token_refresh");
+            if (token) {
+                const resp = await refreshToken(token); // проверяем, что токен валидный
+                if (resp) {
+                    localStorage.setItem("token", resp.access_token);
+                    localStorage.setItem("token_refresh", resp.refresh_token);
+                }
+            } else {
+                this.$router.push('/home');
+            }
             const response = await getUserInfo(localStorage.getItem("token"));
             this.userData = response;
         },
