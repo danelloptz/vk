@@ -271,11 +271,11 @@ export default {
                 this.isAuto = true;
             },
             addTelegram() {
-                this.tgData = { "type": "telegram", "link": this.telegramLink };
+                this.tgData = { "type": "Telegram", "link": this.telegramLink };
                 this.userData.social_links.push(this.tgData);
             },
             addWhatsapp() {
-                this.whtData = { "type": "whatsapp", "link": this.whatsappLink };
+                this.whtData = { "type": "Whatsapp", "link": this.whatsappLink };
                 this.userData.social_links.push(this.whtData);
             },
             async addVKGroup() {
@@ -296,8 +296,8 @@ export default {
             },
 
             initLinks() { 
-                this.tgData = this.userData.social_links.find(link => link.type === "telegram");
-                this.whtData = this.userData.social_links.find(link => link.type === "whatsapp");
+                this.tgData = this.userData.social_links.find(link => link.type === "Telegram");
+                this.whtData = this.userData.social_links.find(link => link.type === "Whatsapp");
                 if (this.tgData?.link) {
                     this.telegramLink = this.tgData.link;
                 }

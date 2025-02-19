@@ -137,7 +137,7 @@
             this.addDataVertical = otherAdds.left_ads;
             this.addDataHorizontal = otherAdds.bottom_ads;
 
-            const vip = await getVipUser(userInfo.vk_id); // вип юзер слева
+            const vip = await getVipUser(this.userInfo.vk_id); // вип юзер слева
             this.vipUser = vip;
 
             this.checkWindowWidth();

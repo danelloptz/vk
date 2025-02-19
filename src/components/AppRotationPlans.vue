@@ -30,12 +30,7 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>Free</th>
-                    <th>Start</th>
-                    <th>Standart</th>
-                    <th>VIP</th>
-                    <th>Business</th>
-                    <th>Leader</th>
+                    <th v-for="(tarif, index) in tariffs" :key="index" >{{ tarif.package_name }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -294,26 +289,26 @@
                 <tr>
                     <td></td>
                     <td class="column">
-                        <span>0 USDT в месяц</span>
+                        <span>{{ tariffs[0].monthly_cost }} USDT в месяц</span>
                     </td>
                     <td class="column">
-                        <span>10 USDT в месяц</span>
+                        <span>{{ tariffs[1].monthly_cost }} USDT в месяц</span>
                         <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[0])"/>
                     </td>
                     <td class="column">
-                        <span>30 USDT в месяц</span>
+                        <span>{{ tariffs[2].monthly_cost }} USDT в месяц</span>
                         <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[1])"/>
                     </td>
                     <td class="column">
-                        <span>50 USDT в месяц</span>
+                        <span>{{ tariffs[3].monthly_cost }} USDT в месяц</span>
                         <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[2])"/>
                     </td>
                     <td class="column">
-                        <span>25* USDT в месяц</span>
+                        <span>{{ tariffs[4].monthly_cost }}* USDT в месяц</span>
                         <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[3])"/>
                     </td>
                     <td class="column">
-                        <span>42* USDT в месяц</span>
+                        <span>{{ tariffs[5].monthly_cost }}* USDT в месяц</span>
                         <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[4])"/>
                     </td>
                 </tr>
@@ -345,14 +340,16 @@ import { getTariffs } from "@/services/cash";
                 text1: "КУПИТЬ",
                 text2: "ПРОДЛИТЬ",
                 selectedPackage: "",
-                plans: ["Start", "Standart", "VIP", "Business", "Leader"],
+                plans: [],
                 isModal: false,
-                isGoodPayment: false
+                isGoodPayment: false,
+                tariffs: []
             }
         },
         async created() {
             const resp = await getTariffs(localStorage.getItem("token"));
-            console.log(resp);
+            this.tariffs = resp;
+            this.tariffs.forEach(tarif => this.plans.push(tarif.package_name));
         },
         methods: {
             selectPackage(pack) {

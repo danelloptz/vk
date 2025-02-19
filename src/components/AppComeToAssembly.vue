@@ -11,12 +11,12 @@
             </div>
             <div class="group" v-if="userInfo.group">
                 <div class="item">
-                    <img :src="userInfo.group.group_avatar">
+                    <img :src="userInfo.group.group_photo">
                     <div class="text_block">
-                        <span>{{ group.group_name }}</span>
+                        <span>{{ userInfo.group.group_name }}</span>
                     </div>
                 </div>
-                <AppGoodButton :text="text1" class="btn" />
+                <AppGoodButton :text="text1" class="btn" @click="comeToAss" />
             </div>
         </div>
     </section>
@@ -25,6 +25,7 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import { getUserInfo } from "@/services/user";
+    import { setAdds } from "@/services/add";
 
     export default {
         components: { AppGoodButton },
@@ -39,6 +40,16 @@
         async created() {
             const user = await getUserInfo(localStorage.getItem("token"));
             this.userInfo = user;
+        },
+        methods: {
+            async comeToAss() {
+                // имена функций я, конечно, придумывать умею ;)
+                const resp = await setAdds(this.userInfo.group.group_link, this.userInfo.vk_id);
+                if (resp.status)
+                    console.log("группа добавлена")
+                else 
+                    console.log("возникли трудности с добавлением!");
+            }
         }
     };
 </script>

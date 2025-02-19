@@ -10,6 +10,21 @@ export async function getAdds() {
     }
 }
 
+export async function setAdds(vk_link, vk_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/set_group_in_ads', {
+            "payload": {
+                "vk_link": vk_link,
+                "vk_id": vk_id
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при добавлении в рекламную ленту", error);
+        return false; 
+    }
+}
+
 export async function getOtherAdds(vk_id) {
     try {
         const response = await axios.post('https://web.intelektaz.com/api/v2/others/get_ads', {

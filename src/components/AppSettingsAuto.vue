@@ -6,12 +6,12 @@
 
         <div v-for="(social, index) in socials" :key="index" class="row">
             <input 
-                :placeholder="social.platform"
+                :placeholder="social.type"
                 v-model="social.link"
             >
             <div class="sub_row">
-                <span v-if="!social.isNew" class="add" @click="saveSocial(social)">ДОБАВИТЬ</span>
-                <span v-else class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
+                <span class="add" @click="saveSocial">ДОБАВИТЬ</span>
+                <span v-if="social.isNew" class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
                 <img 
                     v-if="!social.isNew"
                     src="@/assets/images/addPlus.png" 
@@ -30,28 +30,41 @@
 </template>
 
 <script>
-import { getUserInfo } from "@/services/user";
+import { getUserInfo, sendNewSettings    } from "@/services/user";
 import { getPosts } from "@/services/posts";
 
 export default {
     data() {
         return {
             socials: [],
-            posts: []
+            posts: [],
+            userInfo: []
         };
     },
     async created() {
         const response = await getUserInfo(localStorage.getItem("token"));
+        this.userInfo = response;
         
-        // Заполняем socials из данных сервера (по умолчанию соцсети без isNew)
-        this.socials = [
-            { platform: "Вконтакте", link: response.group_link || "", isNew: false },
-            { platform: "Instagram", link: response?.social_links?.instagram || "", isNew: false },
-            { platform: "Telegram", link: response?.social_links?.telegram || "", isNew: false },
-            { platform: "TikTok", link: response?.social_links?.tiktok || "", isNew: false },
-            { platform: "WhatsApp", link: response?.social_links?.whatsapp || "", isNew: false },
-            { platform: "Facebook", link: response?.social_links?.facebook || "", isNew: false }
+        const allSocials = [
+            "VK", "Instagram", "Telegram", "TikTok", "Whatsapp", "Facebook"
         ];
+
+        this.socials = allSocials.flatMap(type => {
+            // Все соцсети данного типа из userInfo.social_links
+            const existing = this.userInfo.social_links.filter(social => social.type === type);
+
+            // Если соцсетей нет, добавляем пустую запись
+            if (existing.length === 0) {
+                return [{ type, link: "", isNew: false }];
+            }
+
+            // Первая соцсеть isNew: false, остальные isNew: true
+            return existing.map((social, index) => ({
+                type,
+                link: social.link,
+                isNew: index !== 0
+            }));
+        });
 
         const posts = await getPosts();
         this.posts = posts;
@@ -59,7 +72,7 @@ export default {
     },
     methods: {
         addSocial(social, index) {
-            this.socials.splice(index + 1, 0, { platform: social.platform, link: "", isNew: true });
+            this.socials.splice(index + 1, 0, { type: social.type, link: "", isNew: true });
         },
         removeSocial(index) {
             this.socials.splice(index, 1);
@@ -71,9 +84,34 @@ export default {
             a.download = imageLink;
             a.click();
         },
-        saveSocial(social) {
-            console.log(social);
-            console.log(this.socials);
+        async saveSocial() {
+            const filtered = this.socials.filter(item => item.link != "");
+            Object.values(filtered).forEach(obj => delete obj.isNew);
+
+            this.userInfo.social_links = this.userInfo.social_links.filter(item => {
+                return filtered.some(social => social.type === item.type && social.link === item.link);
+            });
+
+            filtered.forEach(item => {
+                let flag = true;
+                this.userInfo.social_links.forEach(social => {
+                    if (social.type == item.type && social.link == item.link) flag = false;
+                })
+                if (flag) this.userInfo.social_links.push(item);
+            });
+
+            const payload = {
+                country: null,
+                city: null,
+                sex:  null,
+                interests: null,
+                social_links: this.userInfo.social_links,
+                vip_offer: null,
+                group_link: null,
+            };
+
+            console.log(payload);
+            await sendNewSettings(payload, localStorage.getItem("token")); 
         }
     },
 };

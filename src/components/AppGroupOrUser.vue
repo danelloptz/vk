@@ -7,7 +7,7 @@
                 <span v-if="objectData && objectData.package_name != 'Free' || (objectData && objectData.status != 'Free') && objectData.status">{{ objectData.package_name || objectData.status }}</span>
             </div>
             <span v-if="objectData && objectData.vk_id">ID: {{ objectData.vk_id }}</span>
-            <span v-if="objectData && objectData.sentence && correctStatus.includes(objectData.package_name)">{{ objectData.sentence }}</span>
+            <span v-if="objectData && objectData.vip_offer && correctStatus.includes(objectData.package_name)">{{ objectData.sentence }}</span>
             <a v-if="objectData && objectData.group_link" :href="objectData.group_link">Ссылка</a>
             <div class="footer_data_links">
                 <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
@@ -19,7 +19,7 @@
                 <a v-if="objectData" :href="vkData?.link"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
-        <span v-if="objectData?.vip_offer" class="business">Business-предложение</span>
+        <span v-if="objectData && objectData.vip_offer && correctStatus.includes(objectData.package_name)" class="business">Business-предложение</span>
         
     </div>
 </template>
@@ -31,7 +31,6 @@ export default {
             type: Object,
             default: () => ({}), // Указываем пустой объект, чтобы избежать ошибок
         },
-        isBusiness: Boolean
     },
     data() {
         return {
@@ -48,8 +47,9 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
-                    this.tgData = this.userData.social_links.find(link => link.type === "telegram");
-                    this.whtData = this.userData.social_links.find(link => link.type === "whatsapp");
+                    console.log("!!!!!!!!!", this.userData);
+                    this.tgData = this.userData.social_links.find(link => link.type === "Telegram");
+                    this.whtData = this.userData.social_links.find(link => link.type === "Whatsapp");
                     this.vkData = this.userData.social_links.find(link => link.type === "vk");
                     console.log("УСТАНАВЛИВАЕМ ССЫЛКИ", this.tgData);
                 }
@@ -180,8 +180,8 @@ export default {
         font-family: 'OpenSans';
         font-weight: 500;
         position: absolute;
-        bottom: 20px;
-        right: 20px;
+        bottom: 0px;
+        right: 0px;
         cursor: pointer;
     }
 </style>

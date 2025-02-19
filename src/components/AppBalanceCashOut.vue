@@ -24,7 +24,7 @@
             <div class="item">
                 <input 
                     v-model="adress"
-                    :placeholder="`Адрес ${choices[activeIndex]}`"
+                    :placeholder="`Адрес ${choices[activeIndex]}-20`"
                 >
                 <span>Если вы укажите адрес другой сети, средства будут утеряны безвозвратно!</span>
             </div>
@@ -42,7 +42,7 @@
                     :key="index"
                     :class="{ active: index === activeIndex }"
                     @click="setActive(index)"
-                > {{ item }} </span>
+                > {{ item }}-20 </span>
             </div>
             <span>{{ (activeIndex == 0) ? bep_msg : trc_msg }}</span>
         </div>
@@ -59,7 +59,7 @@
         data() {
             return {
                 text1: "ЗАПРОСИТЬ ВЫВОД",
-                choices: ["BEP-20", "TRC-20"],
+                choices: ["bep", "trc"],
                 bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
                 trc_msg: "Обратите внимание, переводы по сети TRC-20 с комиссией 5 USDT",
                 activeIndex: 0,
@@ -203,6 +203,7 @@
         border: 1px solid white;
         transition: .1s ease-in;
         cursor: pointer;
+        text-decoration: up;
         @media (max-width: 450px) {
             font-size: 20px;
             width: 100px;

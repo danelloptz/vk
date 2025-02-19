@@ -64,17 +64,20 @@
             <AppGoodButton :text="text2" class="btn" />
             <AppBadButton :text="text3" class="btn"  />
         </div>
+        <AppStructureBinar v-if="binarTree" :node="binarTree" :lay="1" />
     </section>
 </template>
 
 <script>
 import { getUserInfo } from "@/services/user";
+import { getTree } from "@/services/user";
 import AppGoodButton from "@/components/AppGoodButton.vue";
 import AppBadButton from "@/components/AppBadButton.vue";
 import AppMain from "@/components/AppMain.vue";
+import AppStructureBinar from "@/components/AppStructureBinar.vue";
 
 export default {
-    components: { AppGoodButton, AppBadButton, AppMain },
+    components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar },
     data() {
         return {
             userData: [],
@@ -93,7 +96,8 @@ export default {
                 { "img": "global_bonus.png", "num": 0, "text": "Глобальный бонус, (пул)" },
                 { "img": "fast_start.png", "num": 25, "text": "Быстрый старт, дней осталось" }
             ],
-            isLinks: false
+            isLinks: false,
+            binarTree: null,
         };
     },
     computed: {
@@ -107,6 +111,11 @@ export default {
     async created() {
         const response = await getUserInfo(localStorage.getItem("token"));
         this.userData = response;
+
+        const tree = await getTree(this.userData.vk_id);
+        this.binarTree = tree;
+
+        console.log(this.binarTree);
     },
     methods: {
         setActive(index) {
