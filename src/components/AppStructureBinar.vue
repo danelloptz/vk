@@ -1,16 +1,21 @@
 <template>
     <div class="tree-container">
-      <div class="tree-user">
-        <img v-if="lay > 1" src="@/assets/images/struct_line.png" class="struct_line" :style="{ marginLeft: 35 + 'px' }">
+      <div class="tree-user" :style="{ width: lay != 1 ? (400 / (Math.pow(2, lay-1))) + 'px' : '400px' }">
         <div v-if="node" class="avatar-container">
           <img :src="node.avatar" :alt="node.name" class="avatar" />
         </div>
+
+        <div class="lines" :style="{ justifyContent: (node.left_leg && !node.right_leg) || ((!node.left_leg && node.right_leg)) ? 'end' : 'center'}">
+          <img src="@/assets/images/struct_line1.png" class="struct_line rotated" :style="{ visibility: node.left_leg ? 'visible' : 'hidden', width: (node.left_leg && !node.right_leg) ? (400 / (Math.pow(2, lay))) + 'px' : (400 / (Math.pow(2, lay))) + 'px' }">
+          <img src="@/assets/images/struct_line1.png" class="struct_line" :style="{ visibility: node.right_leg ? 'visible' : 'hidden', width: (!node.left_leg && node.right_leg) ? (400 / (Math.pow(2, lay))) + 'px' : (400 / (Math.pow(2, lay))) + 'px' }">
+        </div>
+      
         <div v-if="(node.left_leg || node.right_leg) && lay < 4" class="children">
           <div v-if="node.left_leg" class="child left">
-            <AppStructureBinar :node="node.left_leg" :lay="lay+1" :style="{ marginRight: 70 + 'px' }" />
+            <AppStructureBinar :node="node.left_leg" :lay="lay+1" :style="{ marginLeft: (node.left_leg && !node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
           </div>
           <div v-if="node.right_leg" class="child right">
-            <AppStructureBinar :node="node.right_leg" :lay="lay+1" :style="{ marginLeft: 70 + 'px' }" />
+            <AppStructureBinar :node="node.right_leg" :lay="lay+1" :style="{ marginRight: (!node.left_leg && node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
           </div>
         </div>
         <!-- <svg v-if="node.left_leg || node.right_leg" class="lines">
@@ -29,6 +34,9 @@
       node: Object,
       lay: Number
     },
+    created() {
+      console.log(this.node);
+    }
   };
   </script>
   
@@ -55,7 +63,6 @@
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    border: 2px solid white;
   }
   
   .name {
@@ -68,7 +75,7 @@
   .children {
     display: flex;
     justify-content: space-around;
-    width: 200px;
+    /* width: 200px; */
     position: relative;
   }
   
@@ -79,10 +86,8 @@
   }
   
   .lines {
-    position: absolute;
-    width: 100%;
-    height: 50px;
-    top: 50px;
+    display: flex;
+    justify-content: center;
   }
   .vert_line {
     width: 2px;
@@ -92,6 +97,9 @@
   }
   .struct_line {
     width: 70px;
+  }
+  .rotated {
+    transform: scaleX(-1);
   }
 </style>
   
