@@ -217,6 +217,7 @@
                 this.$router.push('/home');
             }
             const responseUser = await getUserInfo(localStorage.getItem("token"));
+            
             this.userData = responseUser;
 
             const refer = await getReferer(this.userData.vk_id);

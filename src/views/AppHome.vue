@@ -112,21 +112,17 @@
             },
         },
         async created() {
-            const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-            console.log(isAuthorized);
-            if (isAuthorized) {
-                localStorage.setItem("token", isAuthorized.access_token);
-                localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-            } else {
-                localStorage.clear();
-                this.$router.push('/');
-            }
-            
             const userInfo = await getUserInfo(localStorage.getItem("token"));
             if (!userInfo) {
-                localStorage.clear();
-                this.$router.push('/');
-                return;
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
             }
             this.userInfo = userInfo;
 

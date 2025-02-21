@@ -64,7 +64,7 @@
             <AppGoodButton :text="text2" class="btn" />
             <AppBadButton :text="text3" class="btn"  />
         </div>
-        <AppStructureBinar v-if="binarTree" :node="binarTree" :lay="1" />
+        <AppStructureBinar v-if="binarTree" :node="binarTree" :lay="1" @nextUser="next" />
     </section>
 </template>
 
@@ -98,6 +98,7 @@ export default {
             ],
             isLinks: false,
             binarTree: null,
+            nextUser: false
         };
     },
     computed: {
@@ -112,8 +113,7 @@ export default {
         const response = await getUserInfo(localStorage.getItem("token"));
         this.userData = response;
 
-        const tree = await getTree(this.userData.vk_id);
-        this.binarTree = tree;
+        await this.next(this.userData.vk_id);
 
         console.log(this.binarTree);
     },
@@ -126,6 +126,11 @@ export default {
         },
         openLinks() {
             this.isLinks = true;
+        },
+        async next(vk_id) {
+            console.log("сработал", vk_id);
+            const tree = await getTree(vk_id);
+            this.binarTree = tree;
         }
     }
 };
