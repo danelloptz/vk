@@ -57,18 +57,18 @@
             };
         },
         async created() {
-            const token = localStorage.getItem("token_refresh");
-            if (token) {
-                const resp = await refreshToken(token); // проверяем, что токен валидный
-                if (resp) {
-                    localStorage.setItem("token", resp.access_token);
-                    localStorage.setItem("token_refresh", resp.refresh_token);
-                }
-            } else {
-                this.$router.push('/home');
-            }
             const response = await getUserInfo(localStorage.getItem("token"));
-            if (!response) this.$router.push('/home');
+            if (!response) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userInfo = response;
             const groups = await getGroups(this.userInfo.vk_id);
             this.groupInfo = groups;

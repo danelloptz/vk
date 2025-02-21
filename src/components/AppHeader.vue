@@ -38,6 +38,7 @@
     import { getUserInfo  } from '@/services/user';
     import AppPopup from '@/components/AppPopup.vue';
     import AppModalMini from '@/components/AppModalMini.vue';
+    import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppPopup, AppModalMini },
@@ -67,6 +68,17 @@
         },
         async created() {
             const response = await getUserInfo(localStorage.getItem("token"));
+            if (!response) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userData = response;
             console.log(this.userData);
 

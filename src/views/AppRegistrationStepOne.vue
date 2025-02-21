@@ -206,18 +206,18 @@
             }
         },
         async created() {
-            const token = localStorage.getItem("token_refresh");
-            if (token) {
-                const resp = await refreshToken(token); // проверяем, что токен валидный
-                if (resp) {
-                    localStorage.setItem("token", resp.access_token);
-                    localStorage.setItem("token_refresh", resp.refresh_token);
-                }
-            } else {
-                this.$router.push('/home');
-            }
             const responseUser = await getUserInfo(localStorage.getItem("token"));
-            
+            if (!responseUser) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userData = responseUser;
 
             const refer = await getReferer(this.userData.vk_id);

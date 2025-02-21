@@ -56,6 +56,7 @@
     import AppModal from "@/components/AppModal.vue";
     import { getUserInfo, getUserInfoById } from "@/services/user";
     import { sendTo } from "@/services/cash";
+    import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppGoodButton, AppBadButton, AppModal },
@@ -79,12 +80,34 @@
         },
         async created() {
             const info = await getUserInfo(localStorage.getItem("token"));
+            if (!info) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userInfo = info;
         },
         methods: {
             async send() {
                 if (this.userId != "" && Number(this.userInfo.balance) >= Number(this.usdt)) {
                     const response = await getUserInfoById(this.userId, localStorage.getItem("token"));
+                    if (!response) {
+                        const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                        if (isAuthorized) {
+                            localStorage.setItem("token", isAuthorized.access_token);
+                            localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                        } else {
+                            localStorage.clear();
+                            this.$router.push('/');
+                            return;
+                        }
+                    }
                     this.userToSend = response;
 
                     // this.userToSend = {  // !!!!! УДАЛИТЬ !!!!!

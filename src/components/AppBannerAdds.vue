@@ -236,6 +236,7 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import { getUserInfo } from "@/services/user";
     import { sendOtherAdd, getUserAdds } from "@/services/add";
+    import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppGoodButton },
@@ -288,6 +289,17 @@
         },
         async created() {
             const user_data = await getUserInfo(localStorage.getItem("token"));
+            if (!user_data) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userData = user_data;
 
             const adds = await getUserAdds(this.userData.vk_id);

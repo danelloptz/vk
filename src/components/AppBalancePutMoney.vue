@@ -68,6 +68,8 @@
 
     import { getUserInfo } from "@/services/user";
     import { putMoney } from "@/services/cash";
+    import { refreshToken } from "@/services/auth";
+    
     export default {
         components: { AppGoodButton, AppModalHash, AppModal },
         data() {
@@ -94,6 +96,17 @@
         },
         async created() {
             const info = await getUserInfo(localStorage.getItem("token"));
+            if (!info) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userInfo = info;
         },
         methods: {

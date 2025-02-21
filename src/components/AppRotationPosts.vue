@@ -42,6 +42,7 @@
     // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
     import { addInRotation } from "@/services/groups";
     import { getUserInfo } from "@/services/user";
+    import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
@@ -65,6 +66,17 @@
         },
         async created() {
             const response = await getUserInfo(localStorage.getItem("token"));
+            if (!response) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userInfo = response;
             this.getGroups();
         },

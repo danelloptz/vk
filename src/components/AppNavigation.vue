@@ -30,6 +30,7 @@
 
 <script>
     import { getUserInfo } from "@/services/user";
+    import { refreshToken } from "@/services/auth";
 
     export default {
         props: {
@@ -57,6 +58,17 @@
         },
         async created() {
             const response = await getUserInfo(localStorage.getItem("token"));
+            if (!response) {
+                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                if (isAuthorized) {
+                    localStorage.setItem("token", isAuthorized.access_token);
+                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                } else {
+                    localStorage.clear();
+                    this.$router.push('/');
+                    return;
+                }
+            }
             this.userInfo = response;
         },
         watch: {
