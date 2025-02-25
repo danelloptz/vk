@@ -39,7 +39,7 @@
         components: { AppGroupOrUser, AppGoodButton, AppBadButton },
         data() {
             return {
-                addGroups: 23,
+                addGroups: 0,
                 totalGroups: 25,
                 skipCounts: 10,
                 groupInfo: null,

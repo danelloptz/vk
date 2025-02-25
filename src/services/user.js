@@ -48,22 +48,18 @@ export async function getGroupInfo() {
 }
 
 export async function sendNewSettings(payload, token) {
-    axios.patch('https://web.intelektaz.com/api/v1/user', payload, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => {
-            console.log(response);
-            if (response.data.status)
-                console.log('Настройки сохранены!')
-            else 
-                console.log('Что-то не так!')
-        })
-        .catch(error => {
-            console.error("Ошибка при сохранении настроек:", error);
+    try {
+        const response = await axios.patch('https://web.intelektaz.com/api/v1/user', payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
         });
+        return response.status;
+    } catch(error) {
+        console.error("Ошибка при получении информации пользователя по айди", error);
+        return false; 
+    }
 }
 
 export async function getUserInfoById(user_id, token) {

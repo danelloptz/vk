@@ -50,6 +50,7 @@
             </div>
             <span>Убедитесь, что адрес правильный и относится к той же сети! Транзакции невозможно отменить. После завершения транзакции отправьте ниже хэш (TxID) вашей транзакции. Зачисление средств происходит автоматически только после подтверждения хэша (TxID). </span>
             <a @click="openModal">Инструкция, где взять хэш (TxID)</a>
+            <span v-if="isError" class="error" >{{ errorMessage }}</span>
             <div class="input">
                 <input 
                     v-model="txid"
@@ -91,7 +92,9 @@
                 title: "УСПЕШНО!",
                 msg: "Ваш баланс пополнен",
                 isMoneyPut: false,
-                adressToSend: "TFJpSqMrjrBr9EB1JRG48f5iTyoakJ2x8V"
+                adressToSend: "TFJpSqMrjrBr9EB1JRG48f5iTyoakJ2x8V",
+                isError: false,
+                errorMessage: ""
             }
         },
         async created() {
@@ -131,9 +134,15 @@
             async check() {
                 if (this.txid != "") {
                     const response = await putMoney(this.cashout, this.txid, this.adressToSend, this.userInfo.id, localStorage.getItem("token"));
-                    this.isMoneyPut = response.status == true
-
-                    this.isMoneyPut = true; // !!!!! УДАЛИТЬ !!!!!!
+                    console.log(response);
+                    if (!response.isError) {
+                        this.isMoneyPut = true;
+                        this.isError = false;
+                    }
+                    else {
+                        this.isError = true;
+                        this.errorMessage = response.message;
+                    }
                 }
             },
             closeModalMoneyPut() {
@@ -277,5 +286,8 @@
     a {
         text-decoration: underline;
         cursor: pointer;
+    }
+    .error {
+        color: red !important;
     }
 </style>

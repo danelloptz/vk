@@ -43,20 +43,33 @@
         },
         async created() {
             // тут делаем редирект в ЛК, если живой пользователь решит перейти в lk.intelektaz.com (а не в /home)
+            if (localStorage.length == 0) window.location.reload();
             const token = localStorage.getItem("token_refresh");
             if (token) {
                 const resp = await refreshToken(token); // проверяем, что токен валидный
                 if (resp) {
-                    this.$router.push('/home');
-                    return;
+                    const user = await getUserInfo(localStorage.getItem("token"));
+                    if (user && user.activation) {
+                        this.$router.push('/home');
+                        return;
+                    }
+                    if (user && !user.activation) {
+                        this.$router.push('/signup_1');
+                        return;
+                    }
                 }
             }
 
-            if (!localStorage.getItem("first")) localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
-            localStorage.setItem("first", true); // будет редирект с вк сюда, так что нельзя чистить после него
-
-            const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
-            localStorage.setItem("referer", urlParams.get('ref'));
+            // 210966706
+            console.log(!localStorage.getItem("first"));
+            if (!localStorage.getItem("first")) {
+                localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
+                const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
+                localStorage.setItem("referer", urlParams.get('ref'));
+                console.log(urlParams.get('ref'))
+                localStorage.setItem("first", true); // будет редирект с вк сюда, так что нельзя чистить после него
+        }
+            
         },
         methods: {
             async tap() {
@@ -82,10 +95,10 @@
                 try {
                     window.location.href = vkAuthUrl;
                 } catch(err) {
+                    const ref = localStorage.getItem("referer");
                     localStorage.clear();
                     localStorage.setItem("first", true);
-                    const urlParams = new URLSearchParams(window.location.search);
-                    localStorage.setItem("referer", urlParams.get('ref'));
+                    localStorage.setItem("referer", ref);
                 }
             },
             async handleUrlParams() {
@@ -101,19 +114,24 @@
                     const response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
                     if (response.status == 200) {
                         // оставляем только эти три поля, которые будут использоваться на страницах
+                        const ref = localStorage.getItem("referer");
                         localStorage.clear();
                         localStorage.setItem("token", response.data.access_token);
                         localStorage.setItem("token_refresh", response.data.refresh_token);
                         localStorage.setItem("is_new_user", response.data.is_new_user);
 
                         const user = await getUserInfo(localStorage.getItem("token"));
-                        const refererId = localStorage.getItem("referer"); // если есть рефер, то отмечаем это
-                        if (refererId) {
-                            const resp = await addReferer(refererId, user.id);
-                            if (!resp.status) console.log(resp.message);
+                        const refererId = ref; // если есть рефер, то отмечаем это
+                        console.log("refererId", refererId);
+                        
+                        if (response.data.is_new_user) {
+                            if (refererId) {
+                                const resp = await addReferer(refererId, user.id);
+                                console.log(resp);
+                                if (!resp.status) console.log(resp.message);
+                            }   
+                            this.$router.push('/signup_1');
                         }
-                        if (response.data.is_new_user) 
-                            this.$router.push('/signup_1')
                         else 
                             this.$router.push('/home');
                     }

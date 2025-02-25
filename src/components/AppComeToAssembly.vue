@@ -1,4 +1,10 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @update:visibility1="isModal = $event"
+    />
     <section class="come">
         <h1>Рекламная лента</h1>
         <span>Тысячи пользователей с бизнес интересами ежедневно и многократно посещают кабинет Intelektaz. У нас точно есть ваши клиенты. Покажите им свое предложение по самой низкой цене:</span>
@@ -27,15 +33,19 @@
     import { getUserInfo } from "@/services/user";
     import { setAdds } from "@/services/add";
     import { refreshToken } from "@/services/auth";
+    import AppModal from '@/components/AppModal.vue';
 
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppModal },
         data() {
             return {
                 tarrifs: ["Leader, Business", "VIP", "Start, Standart", "Free"],
                 prices: [1, 1.5, 2, 3],
                 text1: "ПОПАСТЬ В ЛЕНТУ",
                 userInfo: [],
+                isModal: false,
+                title: "",
+                msg: ""
             }
         },
         async created() {
@@ -57,10 +67,9 @@
             async comeToAss() {
                 // имена функций я, конечно, придумывать умею ;)
                 const resp = await setAdds(this.userInfo.group.group_link, this.userInfo.vk_id);
-                if (resp.status)
-                    console.log("группа добавлена")
-                else 
-                    console.log("возникли трудности с добавлением!");
+                this.isModal = true;
+                this.title = resp.status ? "УСПЕШНО!" : "ОШИБКА!";
+                this.msg = resp.status ? "Ваша группа добавлена в рекламную ленту." : "Не удалось добавить группу в рекламную ленту.";
             }
         }
     };

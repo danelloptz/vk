@@ -61,10 +61,11 @@
                 placeholder="Введите ID"
                 type="text"
             />
-            <AppGoodButton :text="text2" class="btn" />
-            <AppBadButton :text="text3" class="btn"  />
+            <AppGoodButton :text="text2" class="btn" @click="searchId" />
+            <AppBadButton :text="text3" class="btn" @click="backup"  />
         </div>
-        <AppStructureBinar v-if="binarTree" :node="binarTree" :lay="1" @nextUser="next" />
+        <AppStructureBinar v-if="binarTree && !notFound" :node="binarTree" :lay="1" @nextUser="next" />
+        <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>
     </section>
 </template>
 
@@ -99,7 +100,10 @@ export default {
             ],
             isLinks: false,
             binarTree: null,
-            nextUser: false
+            nextUser: false,
+            users: [],
+            search: "",
+            notFound: false,
         };
     },
     computed: {
@@ -143,6 +147,27 @@ export default {
             console.log("сработал", vk_id);
             const tree = await getTree(vk_id);
             this.binarTree = tree;
+            this.getAllId(this.binarTree);
+            console.log(this.users);
+        },
+        getAllId(node) {
+            if (!node.vk_id) return
+            else this.users.push(node.vk_id);
+
+            if (node.left_leg) this.getAllId(node.left_leg);
+            if (node.right_leg) this.getAllId(node.right_leg);
+        },
+        async searchId() {
+            if (this.users.includes(+this.search)) {
+                this.notFound = false;
+                this.binarTree = await getTree(+this.search);
+            } else {
+                this.notFound = true;
+            }
+        },
+        async backup() {
+            this.notFound = false;
+            this.binarTree = await getTree(this.userData.vk_id);
         }
     }
 };
@@ -352,5 +377,10 @@ export default {
     }
     .btn {
         width: 130px;
+    }
+    .warning {
+        color: white;
+        font-size: 16px;
+        font-family: 'OpenSans';
     }
 </style>

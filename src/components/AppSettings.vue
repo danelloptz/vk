@@ -1,4 +1,10 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isSaveModal"
+        @update:visibility1="isSaveModal = $event"
+    />
     <AppModalSubscribe
         :visibility1="isModal"
         :checkboxState="isCheckboxChecked"
@@ -156,13 +162,14 @@
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppModalSubscribe from '@/components/AppModalSubscribe.vue';
+    import AppModal from '@/components/AppModal.vue';
     
     import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
     import { editGroup, editVideo } from "@/services/groups";
     import { refreshToken } from "@/services/auth";
 
 export default {
-    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto },
+    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal },
     data() {
         return {
             userData: null,
@@ -196,7 +203,10 @@ export default {
             isModal: false,
             tgData: null,
             whtData: null,
-            beforeLinks: null
+            beforeLinks: null,
+            isSaveModal: false,
+            title: "",
+            msg: "",
         };
     },
     computed: {
@@ -292,11 +302,15 @@ export default {
             },
             async addVKGroup() {
                 const response = await editGroup(this.vkGroupLink, this.userData.vk_id);
-                console.log(response.status);
+                this.isSaveModal = true;
+                this.title = response.status ? "УСПЕШНО!" : "ОШИБКА!";
+                this.msg = response.status ? "Группа была добавлена в ваш личный кабинет" : "При добавлении группы возникла ошибка!";
             },
             async addVKVideo() {
-                const response = await editVideo(this.vkVideoLink, this.userData.vk_id);
-                console.log(response.status);
+                const response = await editVideo(this.vkVideoLink, this.userData.vk_id, localStorage.getItem("token"));
+                this.isSaveModal = true;
+                this.title = response.status ? "УСПЕШНО!" : "ОШИБКА!";
+                this.msg = response.status ? "Видео была добавлено в ваш личный кабинет" : "При добавлении видео возникла ошибка!";
             },
             closeModal() {
                 this.isModal = false;
@@ -334,8 +348,6 @@ export default {
                 }
             },
             async saveSettings() {
-                console.log(this.beforeLinks);
-
                 const payload = {
                     country: this.searchQuery != this.userData.country ? this.searchQuery : null,
                     city: this.selectedCity != this.userData.city ? this.selectedCity : null,
@@ -346,9 +358,11 @@ export default {
                     group_link: this.siteLink,
                 };
 
-                console.log(payload);
-                console.log(this.userData);
-                await sendNewSettings(payload, localStorage.getItem("token")); 
+                const response = await sendNewSettings(payload, localStorage.getItem("token")); 
+                console.log(response);
+                this.isSaveModal = true;
+                this.title = response == 200 ? "УСПЕШНО!" : "ОШИБКА!";
+                this.msg = response == 200 ? "Настройки сохранены." : "При сохранении настроек возникла ошибка!";
             }
     }
 };

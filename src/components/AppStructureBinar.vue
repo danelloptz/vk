@@ -1,17 +1,26 @@
 <template>
     <div class="tree-container">
       <div class="tree-user" :style="{ width: lay != 1 ? (400 / (Math.pow(2, lay-1))) + 'px' : '400px', alignItems: lay == 4 ? 'center' : 'normal' }">
-        <div v-if="node" class="avatar-container">
+        <div v-if="node" class="avatar-container" :style="{ justifyContent: lay == 1 ? 'space-between' : 'center' }">
+          <div class="text_header" v-if="lay == 1">
+            <span><strong>Лево</strong></span>
+            <span>69 рефералов</span>
+            <span>11 601.5 USDT</span>
+          </div>
           <img :src="node.avatar" :alt="node.name" class="avatar" @click="open" />
+          <div class="text_header" v-if="lay == 1">
+            <span><strong>Право</strong></span>
+            <span>263 реферала</span>
+            <span>13 357.44 USDT</span>
+          </div>
         </div>
 
         <div class="lines" :style="{ justifyContent: (node.left_leg && !node.right_leg) || ((!node.left_leg && node.right_leg)) ? 'end' : 'center'}">
           <img src="@/assets/images/struct_line1.png" class="struct_line rotated" :style="{ visibility: node.left_leg ? 'visible' : 'hidden', width: (node.left_leg && !node.right_leg) ? (400 / (Math.pow(2, lay))) + 'px' : (400 / (Math.pow(2, lay))) + 'px' }">
           <img src="@/assets/images/struct_line1.png" class="struct_line" :style="{ visibility: node.right_leg ? 'visible' : 'hidden', width: (!node.left_leg && node.right_leg) ? (400 / (Math.pow(2, lay))) + 'px' : (400 / (Math.pow(2, lay))) + 'px' }">
         </div>
-      
-        <div v-if="(node.left_leg || node.right_leg) && lay < 4" class="children">
-          <div class="modal_wrapper" v-if="visibility">
+
+        <div class="modal_wrapper" v-if="visibility">
             <div class="modal">
               <img src="@/assets/images/close.png" class="close" @click="close">
               <img :src="node.avatar" class="avatar">
@@ -30,6 +39,8 @@
               </div>
             </div>
           </div>
+
+        <div v-if="(node.left_leg || node.right_leg) && lay < 4" class="children">
           <div v-if="node.left_leg" class="child left">
             <AppStructureBinar :node="node.left_leg" :lay="lay+1" :referer="node.vk_id" :style="{ marginLeft: (node.left_leg && !node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
           </div>
@@ -59,11 +70,8 @@
     },
     data() {
       return {
-        visibility: false
+        visibility: false,
       }
-    },
-    created() {
-      console.log(this.node);
     },
     methods: {
       nextUser(node) {
@@ -95,8 +103,19 @@
   
   .avatar-container {
     display: flex;
-    flex-direction: column;
     align-items: center;
+  }
+
+  .text_header {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+  }
+
+  .text_header span {
+    color: white;
+    font-size: 14px;  
+    font-family: 'OpenSans';
   }
   
   .avatar {

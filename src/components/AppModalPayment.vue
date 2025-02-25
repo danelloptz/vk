@@ -20,11 +20,11 @@
                     <img :class="{'rotated': isDropdownVisiblePackage}" src="@/assets/images/arrow_down.png" class="arrow_down">
                     <ul v-if="isDropdownVisiblePackage" class="dropdown-menu">
                         <li
-                            v-for="(price, name) in packages"
-                            :key="name"
-                            @mousedown.prevent="selectPackage(name, price)"
+                            v-for="item in tarrifs"
+                            :key="item.package_name"
+                            @mousedown.prevent="selectPackage(item.package_name, item.monthly_cost)"
                         >
-                            {{ name }}
+                            {{ item.package_name }}
                         </li>
                     </ul>
                 </div>
@@ -66,9 +66,8 @@
             </div>
             <div class="row" v-if="error">
                 <img src="@/assets/images/cross.png" />
-                <span class="error">На васшем счете не хватает 250 USDT. Пополните баланс и попробуйте снова</span>
+                <span class="error">{{ errorMessage }}</span>
             </div>
-
             <img src="@/assets/images/auth_image.png" class="left_image">
             <img src="@/assets/images/auth_image.png" class="right_image">
             <AppGoodButton :text="text1" @click="makePayment" />
@@ -80,6 +79,7 @@
 import { getUserInfo } from "@/services/user";
 import AppGoodButton from "@/components/AppGoodButton.vue";
 import { refreshToken } from "@/services/auth";
+import { buyTariff } from "@/services/cash";
 
 export default {
     components: { AppGoodButton },
@@ -87,18 +87,12 @@ export default {
         visibility1: Boolean,
         visibility2: Boolean,
         package: String,
-        isGoodPayment: Boolean
+        isGoodPayment: Boolean,
+        tarrifs: Array
     },
     data() {
         return {
             userData: [],
-            packages: {
-                "Start": 10,
-                "Standart": 30,
-                "VIP": 50,
-                "Business": 25, 
-                "Leader": 42
-            },
             times: {
                 "1 месяц": 1,
                 "2 месяца": 2,
@@ -113,12 +107,13 @@ export default {
             currTime: 0,
             currPrice: 0,
             text1: "ОПЛАТИТЬ",
-            error: false
+            error: false,
+            currTarif: null,
+            errorMessage: ""
         };
     },
     computed: {
         summary() {
-            console.log('пересчёт');
             return this.currTime * this.currPrice;
         }
     },
@@ -127,7 +122,8 @@ export default {
             immediate: true,
             handler(newValue) {
                 this.selectedPackage = newValue;
-                this.currPrice = this.packages[this.package];
+                this.currTarif = this.tarrifs.find(item => item.package_name == this.package);
+                this.currPrice = this.currTarif?.monthly_cost;
             }
         }
     },
@@ -144,6 +140,7 @@ export default {
         selectPackage(pack, price) {
             this.selectedPackage = pack;
             this.currPrice = price;
+            this.currTarif = this.tarrifs.find(item => item.package_name == pack);
             this.hideDropdownPackage();
         },
         hideDropdownTime() {
@@ -154,12 +151,20 @@ export default {
             this.currTime = count;
             this.hideDropdownTime();
         },
-        makePayment() {
+        async makePayment() {
             if (this.userData.balance >= this.summary) {
-                this.$emit('update:isGoodPayment', true);
-                this.close();
+                const payment = await buyTariff(String(this.currTarif?.id), this.currTime, this.currTarif?.package_name, this.currTarif?.monthly_cost, localStorage.getItem("token"));
+                if (payment.status) {
+                    this.$emit('update:isGoodPayment', true);
+                    this.close();
+                }
+                else {
+                    this.error = true;
+                    this.errorMessage = payment.message[0].msg;
+                }
             } else {
                 this.error = true;
+                this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance} USDT!`;
             }
         }
     },

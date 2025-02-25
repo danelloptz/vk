@@ -62,11 +62,16 @@ export async function editGroup(vk_link, vk_id) {
     }
 }
 
-export async function editVideo(video_link, vk_id) {
+export async function editVideo(video_link, vk_id, token) {
     try {
         const response = await axios.post('https://web.intelektaz.com/api/v2/groups/save_video', {
             "video_link": video_link,
             "vk_id": vk_id,
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
         });
         return response.data;
     } catch (error) {

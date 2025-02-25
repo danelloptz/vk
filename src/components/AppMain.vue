@@ -31,15 +31,15 @@
         <h1>Ваши реферальные ссылки</h1>
         <div class="item2">
             <span>Реферальная ссылка:</span>
-            <strong><span>https://lk.intelektaz.com/?ref={{ userData.id }}</span></strong>
+            <strong><span>https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
         </div>
         <div class="item2">
             <span>Реферальная ссылка для ВК:</span>
-            <strong><span>https://intelektaz.com/12345678</span></strong>
+            <strong><span>https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
         </div>
         <div class="item2">
             <span>Премиальная ссылка для обладателей пакетов Business, Leader:</span>
-            <strong><span v-if="packages.includes(userData.package_name)">https://intelektaz.com/12345678</span></strong>
+            <strong><span v-if="packages.includes(userData.package_name)">https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
             <strong><span v-if="!packages.includes(userData.package_name)">Не доступно</span></strong>
         </div>
         <span>Для максимального охвата аудитории используйте все доступные вам информационные источники. Чем больше пользователей перейдет по вашей реферальной ссылке, тем успешнее будет ваш бизнес - больше подписчиков, больше клиентов, больше доход по партнерской программе.</span>

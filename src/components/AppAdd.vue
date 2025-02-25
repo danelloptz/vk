@@ -115,7 +115,7 @@
         width: 100%;
         object-fit: cover;
         object-position: center;
-        aspect-ratio: 1 / 1;
+        cursor: pointer;
     }
     .add {
         display: flex;

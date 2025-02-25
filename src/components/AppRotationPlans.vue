@@ -3,6 +3,7 @@
         :package="selectedPackage" 
         :visibility1="isModal"
         :isGoodPayment="isGoodPayment"
+        :tarrifs="tariffs"
         @update:visibility1="isModal = $event"
         @update:isGoodPayment="isGoodPayment = $event"
     />
@@ -289,27 +290,27 @@
                 <tr>
                     <td></td>
                     <td class="column">
-                        <span>{{ tariffs[0].monthly_cost }} USDT в месяц</span>
+                        <span>{{ tariffs[0]?.monthly_cost }} USDT в месяц</span>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[1].monthly_cost }} USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[0])"/>
+                        <span>{{ tariffs[1]?.monthly_cost }} USDT в месяц</span>
+                        <AppGoodButton :text="currTarrif?.id == tariffs[1]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[2].monthly_cost }} USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[1])"/>
+                        <span>{{ tariffs[2]?.monthly_cost }} USDT в месяц</span>
+                        <AppGoodButton :text="currTarrif?.id == tariffs[2]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[3].monthly_cost }} USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[2])"/>
+                        <span>{{ tariffs[3]?.monthly_cost }} USDT в месяц</span>
+                        <AppGoodButton :text="currTarrif?.id == tariffs[3]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[4].monthly_cost }}* USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[3])"/>
+                        <span>{{ tariffs[4]?.monthly_cost }}* USDT в месяц</span>
+                        <AppGoodButton :text="currTarrif?.id == tariffs[4]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[4])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[5].monthly_cost }}* USDT в месяц</span>
-                        <AppGoodButton :text="text1" class="btn" @click="selectPackage(plans[4])"/>
+                        <span>{{ tariffs    [5]?.monthly_cost }}* USDT в месяц</span>
+                        <AppGoodButton :text="currTarrif?.package_name == 'Business' ? text3 : currTarrif?.package_name == 'Leader' ? text2 : text1" class="btn" @click="selectPackage(plans[5])"/>
                     </td>
                 </tr>
             </tbody>
@@ -320,7 +321,7 @@
             <div class="col">
                 <span><strong>Booster</strong> - инструмент, который дает мощный всплеск подписчиков, просмотров видео, постов, за счет обнуления показателей внутренней статистики тарифа/пакета. Доступен на тарифе VIP, пакетах Business, Leader</span>
                 <strong><span>Цена 30 USDT</span></strong>
-                <AppGoodButton :text="text1" class="booster_btn"/>
+                <AppGoodButton :text="text1" class="booster_btn" @click="buy"/>
             </div>
             
         </div>
@@ -330,8 +331,9 @@
 <script>
 import AppModalPayment from "@/components/AppModalPayment.vue";
 import AppGoodButton from "@/components/AppGoodButton.vue";
-import { getTariffs } from "@/services/cash";
-
+import { getTariffs, buyBooster } from "@/services/cash";
+import { getUserInfo } from "@/services/user";
+ 
     export default {
         components: { AppGoodButton, AppModalPayment },
         data() {
@@ -339,22 +341,38 @@ import { getTariffs } from "@/services/cash";
                 userData: [],
                 text1: "КУПИТЬ",
                 text2: "ПРОДЛИТЬ",
+                text3: "ПОВЫСИТЬ",
                 selectedPackage: "",
                 plans: [],
                 isModal: false,
                 isGoodPayment: false,
-                tariffs: []
+                tariffs: [],
+                currTarrif: null,
             }
         },
         async created() {
             const resp = await getTariffs(localStorage.getItem("token"));
             this.tariffs = resp;
-            this.tariffs.forEach(tarif => this.plans.push(tarif.package_name));
+            const user = await getUserInfo(localStorage.getItem("token"));
+            this.userData = user;
+            this.tariffs.forEach(tarif => this.plans.push(tarif?.package_name));
+            this.currTarrif = this.tariffs.find(item => item?.package_name == this.userData?.package_name);
+            console.log(this.currTarrif?.id);
+            this.tariffs.forEach(item => console.log(item?.package_name));
+        },
+        watch: {
+            tarrifs(newValue) {
+                this.tariffs = newValue;
+            }
         },
         methods: {
             selectPackage(pack) {
                 this.selectedPackage = pack;
                 this.isModal = true;
+            },
+            async buy() {
+                const payment = await buyBooster(30, localStorage.getItem("token"));
+                console.log(payment);
             }
         }
     };

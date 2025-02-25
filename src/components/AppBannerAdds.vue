@@ -1,4 +1,10 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @update:visibility1="isModal = $event"
+    />
     <section class="adds">
         <h1>Банерная реклама с геотаргетингом по интересам</h1>
         <span>Тысячи пользователей с бизнес интересами ежедневно и многократно посещают кабинет Intelektaz. У нас точно есть ваши клиенты.  Покажите им свое предложение.</span>
@@ -237,9 +243,10 @@
     import { getUserInfo } from "@/services/user";
     import { sendOtherAdd, getUserAdds } from "@/services/add";
     import { refreshToken } from "@/services/auth";
+    import AppModal from '@/components/AppModal.vue';
 
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppModal },
         data() {
             return {
                 countries: [],
@@ -277,7 +284,10 @@
                 userData: [],
                 userAdds: [],
                 img: "",
-                position: ""
+                position: "",
+                isModal: false,
+                title: "",
+                msg: ""
             }
         },
         computed: {
@@ -421,7 +431,7 @@
                 this.daysSummary = this.selectedCounts.reduce((sum, num, index) => sum + (num * this.daysNum[index]), 0);
             },
             async makePayment() {
-                // if (this.userData.balance >= this.priceSummary) {
+                if (this.userData.balance >= this.priceSummary) {
                     const formData = new FormData();
 
                     formData.append("ads_img", this.img.get("file"));
@@ -441,11 +451,10 @@
                     }));
 
                     const payment = await sendOtherAdd(formData);
-                    if (payment.status) {
-                        console.log('ПОБЕДА');
-                    } else {
-                        console.log('Возникли трудности ((');
-                    }
+                    this.isModal = true;
+                    this.title = payment.status ? "УСПЕШНО!" : "ОШИБКА!";
+                    this.msg = payment.status ? "Покупка завершена. Ваша реклама добавлена." : "Не удалось оплатить покупку рекламного банера.";
+                }
             }
         }
     };

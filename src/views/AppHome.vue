@@ -112,12 +112,28 @@
             },
         },
         async created() {
-            const userInfo = await getUserInfo(localStorage.getItem("token"));
+            let userInfo = await getUserInfo(localStorage.getItem("token"));
+            console.log(userInfo);
+            if (userInfo && !userInfo.activation) {
+                this.$router.push('/signup_1');
+                return;
+            }
             if (!userInfo) {
                 const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                console.log("isAuthorized: ", isAuthorized);
                 if (isAuthorized) {
                     localStorage.setItem("token", isAuthorized.access_token);
                     localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                    userInfo = await getUserInfo(localStorage.getItem("token"));
+                    if (!userInfo) {
+                        localStorage.clear();
+                        this.$router.push('/');
+                        return;
+                    }
+                    if (userInfo && !userInfo.activation) {
+                        this.$router.push('/signup_1');
+                        return;
+                    }
                 } else {
                     localStorage.clear();
                     this.$router.push('/');
@@ -251,6 +267,9 @@
         border-radius: 30px;
         object-position: center;
     }
+    .vip a {
+        word-wrap: break-word;
+    }
     .text_wrapper {
         display: flex;
         flex-direction: column;
@@ -271,6 +290,7 @@
         background: #7023EC;
         border-radius: 5px;
         width: max-content;
+        word-wrap: break-word;
     }
     .vip_footer {
         width: 100%;
