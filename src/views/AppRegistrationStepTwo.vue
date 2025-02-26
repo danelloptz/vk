@@ -54,6 +54,8 @@
                 groupsQueue: [],
                 subscribedCount: 0,
                 waitingForCheck: false, // Флаг для отслеживания момента проверки подписки
+                wasBlurred: false,
+                blurTime: 0
             };
         },
         async created() {
@@ -72,16 +74,24 @@
             this.userInfo = response;
             const groups = await getGroups(this.userInfo.vk_id);
             this.groupInfo = groups;
+            console.log(this.groupInfo);
             this.updateGroupQueue();
 
             // Добавляем обработчики событий
-            document.addEventListener("visibilitychange", this.handleVisibilityChange);
-            window.addEventListener("focus", this.handleFocus);
-        },
-        beforeUnmount() {
-            // Убираем обработчики событий при уничтожении компонента
-            document.removeEventListener("visibilitychange", this.handleVisibilityChange);
-            window.removeEventListener("focus", this.handleFocus);
+            window.addEventListener("blur", () => {
+                this.wasBlurred = true;
+                this.blurTime = Date.now();
+            });
+
+            window.addEventListener("focus", () => {
+                if (this.wasBlurred) {
+                    const elapsed = Date.now() - this.blurTime; // Сколько времени вкладка была неактивной
+                    if (elapsed > 500) {
+                        this.handleFocus();
+                    }
+                    this.wasBlurred = false;
+                }
+            });
         },
         methods: {
             updateGroupQueue() {
@@ -96,16 +106,10 @@
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
                     const groupLink = this.groupsQueue[this.currentGroupIndex].social_links.vk;
-                    const newWindow = window.open(groupLink, "_blank", "width=800, height=600");
-
+                    this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
+                    window.open(groupLink, "_blank", "width=800, height=600");
 
-                    const intervalId = setInterval(async () => {
-                        if (newWindow.closed) {
-                            clearInterval(intervalId);
-                            this.checkSubscription(groupLink);
-                        }
-                    }, 500);
                 }
             },
             async checkSubscription(groupLink) {
@@ -160,7 +164,12 @@
             },
             handleFocus() {
                 if (this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                    const elapsed = Date.now() - this.blurTime;
+                    if (elapsed > 5000) { // Например, если прошло более 5 секунд
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                    } else {
+                        console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
+                    }
                 }
             },
         },

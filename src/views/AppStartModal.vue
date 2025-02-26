@@ -48,6 +48,8 @@
             if (token) {
                 const resp = await refreshToken(token); // проверяем, что токен валидный
                 if (resp) {
+                    localStorage.setItem("token_refresh", resp.refresh_token);
+                    localStorage.setItem("token", resp.access_token);
                     const user = await getUserInfo(localStorage.getItem("token"));
                     if (user && user.activation) {
                         this.$router.push('/home');

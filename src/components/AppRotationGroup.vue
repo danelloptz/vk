@@ -74,11 +74,15 @@
                 groupPriorities: ["first", "second", "other"],
                 currentPriorityIndex: 0,
                 groupsQueue: [],
-                groupInfo: [],
+                groupInfo: null,
                 isVideoShown: false,
                 visibility1: false, 
                 isWatched: false, 
-                defaultLink: "https://vkvideo.ru/video-216921982_456239058?t=8s"
+                defaultLink: "https://vkvideo.ru/video-216921982_456239058?t=8s",
+                waitingForCheck: false,
+                subscribedCount: 0,
+                wasBlurred: false,
+                blurTime: 0
             }
         },
         async created() {
@@ -130,6 +134,21 @@
             });
 
             this.updateGroupQueue();
+
+            window.addEventListener("blur", () => {
+                this.wasBlurred = true;
+                this.blurTime = Date.now();
+            });
+
+            window.addEventListener("focus", () => {
+                if (this.wasBlurred) {
+                    const elapsed = Date.now() - this.blurTime; // Сколько времени вкладка была неактивной
+                    if (elapsed > 500) {
+                        this.handleFocus();
+                    }
+                    this.wasBlurred = false;
+                }
+            });
         },
         methods: {
             updateGroupQueue() {
@@ -156,36 +175,33 @@
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const newWindow = window.open(
-                        this.groupsQueue[this.currentGroupIndex].social_links.vk,
-                        "_blank",
-                        "width=800, height=600"
-                    );
-                    const intervalId = setInterval(async () => {
-                        if (newWindow.closed) { 
-                            clearInterval(intervalId); 
-                            const response = await checkGroupSub(this.groupsQueue[this.currentGroupIndex].social_links.vk, this.userInfo.vk_id, "rotation");
-                            console.log(response);
+                    const groupLink = this.groupsQueue[this.currentGroupIndex].social_links.vk;
+                    this.blurTime = Date.now();
+                    this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
+                    window.open(groupLink, "_blank", "width=800, height=600");
 
-                            if (response.status) {
-                                this.addGroups = this.addGroups + 1;
-                                this.groupsQueue.splice(this.currentGroupIndex, 1);
-                                this.noSubscribe = false;
-                                this.noSkips = false;
-                                if (this.addGroups == this.totalGroups) {
-                                    this.isVideoShown = true;
-                                }
-                                if (this.subscribedCount >= 10 || this.groupsQueue.length === 0) {
-                                    this.nextPriorityGroup();
-                                }
-                            }
-                             else {
-                                this.noSubscribe = true;
-                            }
-                        }
-                    }, 500);
-                    
-                        
+                }
+            },
+            async checkSubscription(groupLink) {
+                if (!this.waitingForCheck) return;
+                this.waitingForCheck = false;
+                const response = await checkGroupSub(groupLink, this.userInfo.vk_id, "rotation");
+                console.log(response);
+
+                if (response.status) {
+                    this.addGroups++;
+                    this.groupsQueue.splice(this.currentGroupIndex, 1);
+                    this.subscribedCount++;
+                    this.noSubscribe = false;
+
+                    if (this.addGroups === this.totalGroups) {
+                        this.endRotation();
+                    }
+                    if (this.subscribedCount >= 5 || this.groupsQueue.length === 0) {
+                        this.nextPriorityGroup();
+                    }
+                } else {
+                    this.noSubscribe = true;
                 }
             },
             skipGroup() {
@@ -209,6 +225,21 @@
                     this.updateGroupQueue();
                 } else {
                     console.log("Все группы обработаны.");
+                }
+            },
+            handleVisibilityChange() {
+                if (!document.hidden && this.waitingForCheck) {
+                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                }
+            },
+            handleFocus() {
+                if (this.waitingForCheck) {
+                    const elapsed = Date.now() - this.blurTime;
+                    if (elapsed > 5000) { // Например, если прошло более 5 секунд
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                    } else {
+                        console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
+                    }
                 }
             },
             openPlans() {

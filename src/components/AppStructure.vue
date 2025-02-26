@@ -64,7 +64,7 @@
             <AppGoodButton :text="text2" class="btn" @click="searchId" />
             <AppBadButton :text="text3" class="btn" @click="backup"  />
         </div>
-        <AppStructureBinar v-if="binarTree && !notFound" :node="binarTree" :lay="1" @nextUser="next" />
+        <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :node="binarTree" :lay="1" @nextUser="next" />
         <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>
     </section>
 </template>

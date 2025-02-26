@@ -74,7 +74,7 @@
                 stepTwo: false,
                 errorMsg: "",
                 title: "УСПЕШНО",
-                message: "Баланс был пополнен",
+                msg: "Средства были переведены пользователю",
                 endModal: false,
             }
         },
@@ -110,17 +110,6 @@
                     }
                     this.userToSend = response;
 
-                    // this.userToSend = {  // !!!!! УДАЛИТЬ !!!!!
-                    //     "img" : "send_avatar.png",
-                    //     "name" : "Иванов Иван",
-                    //     "id" : "ID: 842052594",
-                    //     "status": "Leader",
-                    //     "links": {
-                    //         "vk" : "link",
-                    //         "telegram" : "link",
-                    //         "whatsapp" : "link",
-                    //     }
-                    // }
                     if (this.userToSend != null) 
                         this.stepTwo = true
                     else {
