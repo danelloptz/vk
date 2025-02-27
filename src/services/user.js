@@ -115,3 +115,16 @@ export async function getTree(vk_id) {
         return false; 
     }
 }
+
+export async function setLeg(user_id, leg) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/change_current_leg`, { 
+            "user_id": user_id,
+            "leg": leg
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при изменении ноги", error);
+        return false; 
+    }
+}

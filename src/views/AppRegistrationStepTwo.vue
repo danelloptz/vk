@@ -33,7 +33,7 @@
     // import { getGroupInfo, isSubscribe } from '@/services/user';  !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
     import { checkGroupSub, getGroups } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
-    import { refreshToken } from '@/services/auth';
+    import { refreshToken, changeStatus } from '@/services/auth';
 
     export default {
         components: { AppGroupOrUser, AppGoodButton, AppBadButton },
@@ -125,9 +125,13 @@
                     this.noSubscribe = false;
 
                     if (this.addGroups === this.totalGroups) {
-                        this.$router.push("/signup_3");
+                        const updateUser = await changeStatus(this.userInfo.vk_access_token);
+                        if (updateUser.status)
+                            this.$router.push("/signup_3");
                     }
-                    if (this.subscribedCount >= 5 || this.groupsQueue.length === 0) {
+
+                    const curr_group = this.groupPriorities[this.currentGroupIndex];
+                    if ((this.subscribedCount >= 10 && curr_group == "third_and_fourth") || (this.subscribedCount >= 5 && curr_group != "third_and_fourth") || this.groupsQueue.length === 0) {
                         this.nextPriorityGroup();
                     }
                 } else {

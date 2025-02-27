@@ -67,3 +67,23 @@ export async function setNewUser(payload) {
         return false; 
     }
 }
+
+export async function changeStatus(token) {
+    console.log("token: ", token);
+    try {
+        const response = await axios.post(
+            'https://web.intelektaz.com/api/v2/users/change_user_status',
+            {},
+            {
+                headers: {
+                    'Authorization': `${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при изменении статуса пользователя", error);
+        return false; 
+    }
+}

@@ -1,4 +1,26 @@
 <template>
+    <div class="legs">
+      <div class="left">
+        <div class="circle"></div>
+        <div class="col">
+          <h2>Бинарная квалификация</h2>
+          <span v-if="activation">Не активна</span>
+          <span v-else>Активна</span>
+        </div>
+      </div>
+      <div class="right">
+        <div class="legs_item"  
+          v-for="(leg, index) in legs" 
+          :key="leg.label"
+          @click="changeActiveLeg(index, leg.value)"
+        >
+          <div class="check" :class="{ active: activeIndex == index }"></div>
+            <span>{{ leg.label }}</span>
+        </div>
+        <AppGoodButton :text="text1" class="btn" @click="setLeg"/>
+      </div>
+      
+    </div>
     <div class="tree-container">
       <div class="tree-user" :style="{ width: lay != 1 ? (400 / (Math.pow(2, lay-1))) + 'px' : '400px', alignItems: lay == 4 ? 'center' : 'normal' }">
         <div v-if="node" class="avatar-container" :style="{ justifyContent: lay == 1 ? 'space-between' : 'center' }">
@@ -61,16 +83,27 @@
   </template>
   
   <script>
+  import AppGoodButton from '@/components/AppGoodButton.vue';
+  import { setLeg } from '@/services/user';
   export default {
+    components: { AppGoodButton },
     name: "AppStructureBinar",
     props: {
       node: Object,
       lay: Number,
-      referer: Number
+      referer: Number,
+      user: Object
     },
     data() {
       return {
         visibility: false,
+        text1: "УСТАНОВИТЬ",
+        activation: false,
+        activeIndex: 0,
+        currLeg: "",
+        legs: [
+          { label: "Лево", value: "left" }, { label: "Право", value: "right" }, { label: "Авто", value: "auto" },
+        ]
       }
     },
     methods: {
@@ -83,12 +116,73 @@
       },
       close() {
         this.visibility = false;
+      },
+      changeActiveLeg(index, name) {
+        this.activeIndex = index;
+        this.currLeg = name;
+      },
+      async setLeg() {
+        const response = await setLeg(this.user.id, this.currLeg);
+        console.log(response);
       }
     }
   };
   </script>
   
   <style scoped>
+
+  .legs {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .left, .right {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+  }
+  .circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #DA2D2D;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+  }
+  .col h2, .col span {
+    font-size: 20px;
+    color: white;
+    font-family: 'OpenSans';
+  }
+  .legs_item {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+  }
+  .check {
+    width: 18px;
+    height: 18px;
+    outline: 1px solid white;
+    outline-offset: 6px;
+    border-radius: 50%;
+    transition: .2s ease-in;
+  }
+  .active {
+    background: white;
+  }
+  .legs_item span {
+    font-size: 18px;
+    color: white;
+    font-family: 'OpenSans';
+  }
+  .btn {
+    width: 150px;
+  }
+
   .tree-container {
     display: flex;
     justify-content: center;
