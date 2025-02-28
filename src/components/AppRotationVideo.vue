@@ -1,10 +1,10 @@
 <template>
     <AppRotationPlans v-if="isPlans" />
     <AppVideoModal
-        v-if="groupInfo"
+        v-if="videosInfo"
         :visibility1="isVideoShown"
         :isWatched="isWatched"
-        :link="groupInfo.video"
+        :link="videosQueue[currentVideoIndex].video_link"
         @update:visibility1="isVideoShown = $event"
         @update:isWatched="isWatched = $event"
         @close="closeVideo" 
@@ -19,9 +19,9 @@
         </div>
     </section>
     <section class="rotation" v-if="isRotation">
-        <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
+        <span class="counter">Подписки {{ watchedVideos }} из {{ totalVideos }}</span>
         <div class="group">
-            <AppGroupOrUser :v-if="groupInfo" :objectData="groupInfo" />
+            <AppGroupOrUser :v-if="videosInfo" :objectData="videosQueue[currentVideoIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" @click="watchVideo" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" @click="skipGroup" />
@@ -34,7 +34,7 @@
         </div>
     </section>
     <section class="rotation_end" v-if="isRotationEnd">
-        <span class="counter">Просмотрено {{ addGroups }} из {{ totalGroups }}</span>
+        <span class="counter">Просмотрено {{ watchedVideos }} из {{ totalVideos }}</span>
         <strong><span>Вы успешно прошли Ротацию видео!</span></strong>
         <span>Ваше видео добавлено в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше просмотров и подписок без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
         <AppGoodButton :text="text5" @click="openPlans" />
@@ -47,7 +47,7 @@
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppVideoModal from "@/components/AppVideoModal.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
-    import { addInRotation } from "@/services/groups";
+    import { addInRotation, getRotationVideos } from "@/services/groups";
     import { getUserInfo } from "@/services/user";
     import { refreshToken } from "@/services/auth";
     // import { getGroupInfo } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
@@ -64,15 +64,27 @@
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,
-                addGroups: 19,
-                totalGroups: 20,
-                skipCounts: 10,
+                watchedVideos: 0,
+                totalVideos: 20,
                 notWatched: false,
+                
+                skipCounts: 10,
+                noSubscribe: false,
                 noSkips: false,
-                isVideoShown: false,
-                isWatched: false,
                 isPlans: false,
-                userInfo: []
+                userInfo: [],
+                currentVideoIndex: 0,
+                groupPriorities: ["first", "second", "other"],
+                currentPriorityIndex: 0,
+                videosQueue: [],
+                videosInfo: null,
+                isVideoShown: false,
+                visibility1: false, 
+                isWatched: false, 
+                waitingForCheck: false,
+                subscribedCount: 0,
+                wasBlurred: false,
+                blurTime: 0
             }
         },
         async created() {
@@ -89,7 +101,42 @@
                 }
             }
             this.userInfo = response;
-            this.getGroups();
+            if (this.isTarif) {
+                this.openPlans();
+                this.$emit("update:isTarif", false);
+            }
+            switch (this.userInfo.package_name) {
+                case "Free": 
+                    this.totalVideos = 20;
+                    this.skipCounts = 10;
+                    break;
+                case "Start":
+                    this.totalVideos = 15;
+                    this.skipCounts = 7;
+                    break;
+                default:
+                    this.totalVideos = 10;
+                    this.skipCounts = 5;
+                    break;
+            }
+
+            const videos = await getRotationVideos(this.userInfo.vk_id, this.userInfo.package_name);
+            console.log(videos);
+
+            this.videosInfo = videos;
+
+            this.videosInfo.first.forEach(item => {
+                item["package_name"] = "Leader";
+            });
+            this.videosInfo.second.forEach(item => {
+                item["package_name"] = "VIP";
+            });
+            this.videosInfo.other.forEach(item => {
+                item["package_name"] = "Free";
+            });
+
+            this.updateVideosQueue();
+
         },
         methods: {
             makeRotation() {
@@ -97,51 +144,69 @@
                 this.isRotationEnd = false;
                 this.isRotation = true;
             },
+            
+            updateVideosQueue() {
+                const priorityKey = this.groupPriorities[this.currentPriorityIndex];
+                if (this.videosInfo && this.videosInfo[priorityKey]) {
+                    console.log("обновляем очередь групп");
+                    this.videosQueue = this.videosInfo[priorityKey].slice(); // Копируем массив групп
+                    if (this.videosQueue.length == 0) this.nextPriorityVideo();
+                    this.currentVideoIndex = 0;
+                }
+            },
             async endRotation() {
-                const response = await addInRotation(this.userInfo.vk_id, "video");
+                const response = await addInRotation(this.userInfo.vk_id, "group");
                 console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
             },
-            async getGroups() {
-                // const response = await getGroupInfo(); !!!! РАССКОМЕНТИТЬ !!!!
-                // console.log(response);
-                // this.groupInfo = response;
-
-                this.groupInfo = { // !!!!! СТАТИЧНАЯ ВЕРСИЯ, УДАЛИТЬ !!!!!
-                    "avatar" : "https://geo-media.beatport.com/image_size/1400x1400/f0a20551-14f3-4fb0-896e-993ad866c3ea.jpg",
-                    "first_name" : "Название группы ",
-                    "last_name": "",
-                    "sentence" : "Здесь написано какое-то вип-предложение",
-                    "status": "Leader",
-                    "links": {
-                        "vk" : "https://vk.com/",
-                        "telegram" : "https://telegram.com/",
-                        "whatsapp" : "https://whatsapp.com/",
-                    },
-                    "groupLink" : "https://vk.com/profcom.petrsu",
-                    "video": 'https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1',
-                    "last_post": 'https://vk.com/profcom.petrsu?from=search&w=wall-38200854_40249'
-                }
-            },
-            watchVideo() {
-                this.isVideoShown = true;
-            },
             skipGroup() {
+                console.log("пропустили группу");
                 if (this.skipCounts == 0) 
                     this.noSkips = true
                 else {
                     this.skipCounts--;
-                    this.getGroups();
+                    this.videosQueue.splice(this.currentVideoIndex, 1);
+                    if (this.videosQueue.length === 0) {
+                        this.nextPriorityVideo();
+                    }
                 }
+            },
+            nextPriorityVideo() {
+                console.log("Новая группа");
+                this.subscribedCount = 0;
+                this.currentPriorityIndex++;
+
+                if (this.currentPriorityIndex < this.groupPriorities.length) {
+                    this.updateVideosQueue();
+                } else {
+                    console.log("Все группы обработаны.");
+                }
+            },
+            watchVideo() {
+                // if (!this.videosQueue.length) return;
+                console.log(this.videosQueue[this.currentVideoIndex]);
+                this.isVideoShown = true;
             },
             closeVideo() {
                 this.isVideoShown = false;
                 if (this.isWatched) {
+                    this.watchedVideos++;
+                    this.videosQueue.splice(this.currentVideoIndex, 1);
+                    this.subscribedCount++;
+
+                    if (this.watchedVideos === this.totalVideos) {
+                        this.endRotation();
+                    }
+                    if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentVideoIndex] == "other") ||
+                        (this.subscribedCount >= 10 && this.groupPriorities[this.currentVideoIndex] != "other") || 
+                        this.videosQueue.length === 0) {
+                            this.nextPriorityVideo();
+                    }
+
                     this.notWatched = false;
-                    this.addGroups++;
-                    if (this.addGroups == this.totalGroups)
+                    if (this.watchedVideos == this.totalVideos)
                         this.endRotation();
                 } else {
                     this.notWatched = true;

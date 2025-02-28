@@ -119,3 +119,29 @@ export async function getRotationGroups(vk_id, tariff) {
         return false; 
     }
 }
+
+export async function getRotationVideos(vk_id, tariff) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/get_rotation_videos', {
+            "vk_id": vk_id,
+            "tariff": tariff
+        } );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при выдаче видео для ротации", error);
+        return false; 
+    }
+}
+
+export async function getRotationPosts(vk_id, tariff) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/get_rotation_posts', {
+            "vk_id": vk_id,
+            "tariff": tariff
+        } );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при выдаче постов для ротации", error);
+        return false; 
+    }
+}

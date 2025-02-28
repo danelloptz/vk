@@ -125,6 +125,7 @@
                     this.noSubscribe = false;
 
                     if (this.addGroups === this.totalGroups) {
+                        console.log("сработал changestatus", this.addGroups, this.totalGroups);
                         const updateUser = await changeStatus(this.userInfo.vk_access_token);
                         if (updateUser.status)
                             this.$router.push("/signup_3");

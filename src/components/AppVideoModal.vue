@@ -11,7 +11,7 @@
             <div class="video_wrapper">
                 <iframe 
                     ref="videoFrame"
-                    src="https://vkvideo.ru/video_ext.php?oid=-216921982&id=456239058&hash=93cbac827eb46d39&js_api=1" 
+                    :src="`${link}&js_api=1`" 
                     class="video" 
                     frameborder="0" 
                     allowfullscreen
@@ -48,9 +48,6 @@ export default {
                 });
             }
         }
-    },
-    beforeUnmount() {
-        this.clearTimer();
     },
     methods: {
         initVKPlayer() {
@@ -101,6 +98,11 @@ export default {
             }
         },
         close() {
+            this.currTime = 20;
+            this.timerMsg = "Пожалуйста, ждите окончания отсчета таймера";
+            this.intervalId = null;
+            this.isPlaying = false;
+            this.isEnd = false;
             this.$emit("update:visibility1", false);
             this.$emit("close");
             this.clearTimer();

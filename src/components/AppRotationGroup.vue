@@ -176,6 +176,7 @@
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
                     const groupLink = this.groupsQueue[this.currentGroupIndex].social_links.vk;
+                    console.log(this.groupsQueue[this.currentGroupIndex]);
                     this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
                     window.open(groupLink, "_blank", "width=800, height=600");
@@ -197,8 +198,10 @@
                     if (this.addGroups === this.totalGroups) {
                         this.endRotation();
                     }
-                    if (this.subscribedCount >= 5 || this.groupsQueue.length === 0) {
-                        this.nextPriorityGroup();
+                    if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
+                        (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 
+                        this.groupsQueue.length === 0) {
+                            this.nextPriorityGroup();
                     }
                 } else {
                     this.noSubscribe = true;

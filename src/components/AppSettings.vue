@@ -310,7 +310,7 @@ export default {
                 const response = await editVideo(this.vkVideoLink, this.userData.vk_id, localStorage.getItem("token"));
                 this.isSaveModal = true;
                 this.title = response.status ? "УСПЕШНО!" : "ОШИБКА!";
-                this.msg = response.status ? "Видео была добавлено в ваш личный кабинет" : "При добавлении видео возникла ошибка!";
+                this.msg = response.status ? "Видео было добавлено в ваш личный кабинет" : "При добавлении видео возникла ошибка!";
             },
             closeModal() {
                 this.isModal = false;
