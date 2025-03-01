@@ -145,3 +145,20 @@ export async function getRotationPosts(vk_id, tariff) {
         return false; 
     }
 }
+
+export async function checkLike(post_link, group_id, vk_id) {
+    try {
+        const payload = {
+            "payload": {
+                "post_link": post_link,
+                "group_id": group_id,
+                "vk_id": vk_id
+            }
+        }
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/check_like', payload);
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при проверки лайка поста для ротации", error);
+        return false; 
+    }
+}

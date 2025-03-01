@@ -9,8 +9,8 @@
                     <th>Статус</th>
                 </tr>
             </thead>
-            <tbody v-if="paginatedHistory.length">
-                <tr v-for="(item, index) in paginatedHistory" :key="index">
+            <tbody v-if="history.length">
+                <tr v-for="(item, index) in history" :key="index">
                     <td>{{ new Date(item.date_created).toLocaleDateString("ru-RU") }}</td>
                     <td>{{ item.sum }}</td>
                     <td>{{ item.category }}</td>
@@ -20,7 +20,7 @@
         </table>
 
         <div class="switchs" v-if="totalPages > 1">
-            <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" />
+            <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
 
             <span v-for="page in visiblePages" :key="page" @click="goToPage(page)" 
                   :class="{ active: page === currentPage }">
@@ -42,7 +42,8 @@ export default {
         return {
             history: [],
             currentPage: 1,
-            perPage: 5
+            perPage: 5,
+            totalTransactions: 0,
         };
     },
     async created() {
@@ -50,138 +51,11 @@ export default {
         const response = await getTransactions(offset, this.perPage, localStorage.getItem("token"));
         console.log(response);
         this.history = response.data.items;
-        // this.history =  [
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "19.10.2024 | 17:56",
-        //         "sum": "60",
-        //         "description": "Пополнение средств",
-        //         "status": "Успешно"
-        //     },
-
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-        //     {
-        //         "date": "18.10.2024 | 12:47",
-        //         "sum": "-20",
-        //         "description": "Вывод средств",
-        //         "status": "Успешно"
-        //     },
-            
-        // ]
+        this.totalTransactions = response.data.pagination.total;
     },
     computed: {
         totalPages() {
-            return Math.ceil(this.history.length / this.perPage);
-        },
-        paginatedHistory() {
-            const start = (this.currentPage - 1) * this.perPage;
-            return this.history.slice(start, start + this.perPage);
+            return Math.ceil(this.totalTransactions / this.perPage);
         },
         visiblePages() {
             const pages = [];
@@ -199,19 +73,31 @@ export default {
         }
     },
     methods: {
-        goToPage(page) {
+        async goToPage(page) {
             if (page >= 1 && page <= this.totalPages) {
                 this.currentPage = page;
+                const offset = (this.currentPage - 1) * this.perPage;
+                const response = await getTransactions(offset, this.perPage, localStorage.getItem("token"));
+                this.history = response.data.items;
+                this.totalTransactions = response.data.pagination.total;
             }
         },
-        nextPage() {
+        async nextPage() {
             if (this.currentPage < this.totalPages) {
                 this.currentPage++;
+                const offset = (this.currentPage - 1) * this.perPage;
+                const response = await getTransactions(offset, this.perPage, localStorage.getItem("token"));
+                this.history = response.data.items;
+                this.totalTransactions = response.data.pagination.total;
             }
         },
-        prevPage() {
+        async prevPage() {
             if (this.currentPage > 1) {
                 this.currentPage--;
+                const offset = (this.currentPage - 1) * this.perPage;
+                const response = await getTransactions(offset, this.perPage, localStorage.getItem("token"));
+                this.history = response.data.items;
+                this.totalTransactions = response.data.pagination.total;
             }
         }
     }

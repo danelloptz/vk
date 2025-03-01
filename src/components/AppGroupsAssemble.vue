@@ -127,6 +127,9 @@
         padding: 6px;
         border-radius: 10px;
         z-index: 6;
+        @media (max-width: 600px) {
+            display: none;
+        }
     }
     span {
         font-size: 14px;

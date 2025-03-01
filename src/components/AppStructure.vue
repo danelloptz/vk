@@ -65,6 +65,7 @@
             <AppBadButton :text="text3" class="btn" @click="backup"  />
         </div>
         <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :user="userData" :node="binarTree" :lay="1" @nextUser="next" />
+        <AppStructureLinear v-if="activeIndex == 0" />
         <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>
     </section>
 </template>
@@ -76,10 +77,11 @@ import AppGoodButton from "@/components/AppGoodButton.vue";
 import AppBadButton from "@/components/AppBadButton.vue";
 import AppMain from "@/components/AppMain.vue";
 import AppStructureBinar from "@/components/AppStructureBinar.vue";
+import AppStructureLinear from "@/components/AppStructureLinear.vue";
 import { refreshToken } from "@/services/auth";
 
 export default {
-    components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar },
+    components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar, AppStructureLinear },
     data() {
         return {
             userData: [],

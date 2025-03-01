@@ -60,7 +60,7 @@
                 <span>{{ referer }}</span>
               </div>
             </div>
-          </div>
+        </div>
 
         <div v-if="(node.left_leg || node.right_leg) && lay < 4" class="children">
           <div v-if="node.left_leg" class="child left">

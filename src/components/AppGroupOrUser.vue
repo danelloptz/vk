@@ -47,11 +47,9 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
-                    console.log("!!!!!!!!!", this.userData);
-                    this.tgData = this.userData.social_links.find(link => link.type === "Telegram") || [];
-                    this.whtData = this.userData.social_links.find(link => link.type === "Whatsapp") || [];
-                    this.vkData = this.userData.social_links.find(link => link.type === "vk") || [];
-                    console.log("УСТАНАВЛИВАЕМ ССЫЛКИ", this.tgData);
+                    this.tgData = this.userData?.social_links.find(link => link.type === "Telegram") || [];
+                    this.whtData = this.userData?.social_links.find(link => link.type === "Whatsapp") || [];
+                    this.vkData = this.userData?.social_links.find(link => link.type === "vk") || [];
                 }
             }
         }

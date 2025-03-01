@@ -13,7 +13,7 @@
     <section class="rotation" v-if="isRotation">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
-            <AppGroupOrUser :v-if="groupInfo" :objectData="groupInfo" />
+            <AppGroupOrUser :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <span>Необходимо просмотреть и поставить лайк на последний пост в группе, если есть закрепленное сообщение, пропустите его</span>
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" @click="subscribeGroup" />
@@ -40,7 +40,7 @@
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
     // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
-    import { addInRotation, checkGroupSub, getRotationPosts } from "@/services/groups";
+    import { addInRotation, checkLike, getRotationPosts } from "@/services/groups";
     import { getUserInfo } from "@/services/user";
     import { refreshToken } from "@/services/auth";
 
@@ -167,18 +167,18 @@
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const groupLink = this.groupsQueue[this.currentGroupIndex].social_links.vk;
+                    const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
                     console.log(this.groupsQueue[this.currentGroupIndex]);
                     this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
-                    window.open(groupLink, "_blank", "width=800, height=600");
+                    window.open(post_link, "_blank", "width=800, height=600");
 
                 }
             },
-            async checkSubscription(groupLink) {
+            async checkSubscription(post_link, group_id) {
                 if (!this.waitingForCheck) return;
                 this.waitingForCheck = false;
-                const response = await checkGroupSub(groupLink, this.userInfo.vk_id, "rotation");
+                const response = await checkLike(post_link, group_id, this.userInfo.vk_id);
                 console.log(response);
 
                 if (response.status) {
@@ -192,7 +192,7 @@
                     }
                     if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
                         (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 
-                        this.groupsQueue.length === 0) {
+                        this.groupsQueue.length === 0)  {
                             this.nextPriorityGroup();
                     }
                 } else {
@@ -224,14 +224,20 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                    const group_id = this.groupsQueue[this.currentGroupIndex].group_id;
+                    const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
+
+                    this.checkSubscription(post_link, group_id, this.userInfo.vk_id);
                 }
             },
             handleFocus() {
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
                     if (elapsed > 5000) { // Например, если прошло более 5 секунд
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                        const group_id = this.groupsQueue[this.currentGroupIndex].group_id;
+                        const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
+
+                        this.checkSubscription(post_link, group_id, this.userInfo.vk_id);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                     }
