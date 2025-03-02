@@ -39,8 +39,8 @@
         </div>
         <div class="item2">
             <span>Премиальная ссылка для обладателей пакетов Business, Leader:</span>
-            <strong><span v-if="packages.includes(userData.package_name)">https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
-            <strong><span v-if="!packages.includes(userData.package_name)">Не доступно</span></strong>
+            <strong><span v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
+            <strong><span v-if="!packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">Не доступно</span></strong>
         </div>
         <span>Для максимального охвата аудитории используйте все доступные вам информационные источники. Чем больше пользователей перейдет по вашей реферальной ссылке, тем успешнее будет ваш бизнес - больше подписчиков, больше клиентов, больше доход по партнерской программе.</span>
     </section>

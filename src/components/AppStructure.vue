@@ -6,7 +6,7 @@
             <div class="user_col">
                 <div class="user_row">
                     <h2>{{ `${userData.first_name} ${userData.last_name}` }}</h2>
-                    <span v-if="userData.package_name != 'Free'">{{ userData.package_name }}</span>
+                    <span v-if="userData?.packages[userData?.packages.length - 1]?.package_name != 'Free'">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</span>
                 </div>
                 <span>ID: {{ userData.vk_id }}</span>
             </div>
@@ -64,9 +64,9 @@
             <AppGoodButton :text="text2" class="btn" @click="searchId" />
             <AppBadButton :text="text3" class="btn" @click="backup"  />
         </div>
-        <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :user="userData" :node="binarTree" :lay="1" @nextUser="next" />
+        <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :user="userData" :activation="userData.activation" :current_leg="userData.current_leg" :node="binarTree" :lay="1" @nextUser="next" />
         <AppStructureLinear v-if="activeIndex == 0" />
-        <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>
+        <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>   
     </section>
 </template>
 

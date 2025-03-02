@@ -42,8 +42,8 @@
                         </div>
                         <div class="row">
                             <span>{{ item.vk_id }}</span>
-                            <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item.package_name)) ? 'green' : 'red' }"></div>
-                            <span>{{ item.package_name }}</span>
+                            <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item?.packages[item?.packages.length - 1]?.package_name)) ? 'green' : 'red' }"></div>
+                            <span>{{ item?.packages[item?.packages.length - 1]?.package_name }}</span>
                         </div>
                         <span>{{ item.level }}</span>
                         <span>{{ item.among }}</span>

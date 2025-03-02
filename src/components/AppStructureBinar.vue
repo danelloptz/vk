@@ -1,10 +1,10 @@
 <template>
     <div class="legs">
       <div class="left">
-        <div class="circle"></div>
+        <div class="circle" :class="{ binar_active: activation }"></div>
         <div class="col">
           <h2>Бинарная квалификация</h2>
-          <span v-if="activation">Не активна</span>
+          <span v-if="!activation">Не активна</span>
           <span v-else>Активна</span>
         </div>
       </div>
@@ -14,7 +14,7 @@
           :key="leg.label"
           @click="changeActiveLeg(index, leg.value)"
         >
-          <div class="check" :class="{ active: activeIndex == index }"></div>
+          <div class="check" :class="{ active: current_leg == leg.value }"></div>
             <span>{{ leg.label }}</span>
         </div>
         <AppGoodButton :text="text1" class="btn" @click="setLeg"/>
@@ -92,13 +92,14 @@
       node: Object,
       lay: Number,
       referer: Number,
-      user: Object
+      user: Object,
+      activation: Boolean,
+      current_leg: String
     },
     data() {
       return {
         visibility: false,
         text1: "УСТАНОВИТЬ",
-        activation: false,
         activeIndex: 0,
         currLeg: "",
         legs: [
@@ -147,6 +148,9 @@
     height: 30px;
     border-radius: 50%;
     background: #DA2D2D;
+  }
+  .binar_active {
+    background: #1ABE38 !important;
   }
   .col {
     display: flex;

@@ -26,8 +26,8 @@
                 <span>33%</span>
             </div>
             <div class="header_info" @click="openModalUser">
-                <div class="header_info_circle" :class="userData && (userData.package_name !== 'Free' && userData.package_name !== 'Not active' ? 'green' : 'red')"></div>
-                <div v-if="userData" class="header_info_status">{{ userData.package_name }}</div>
+                <div class="header_info_circle" :class="userData && (userData?.packages[userData?.packages.length - 1]?.package_name !== 'Free' && userData?.packages[userData?.packages.length - 1]?.package_name !== 'Not active' ? 'green' : 'red')"></div>
+                <div v-if="userData" class="header_info_status">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</div>
                 <img v-if="userData" :src="userData.avatar" >
             </div>
         </div>

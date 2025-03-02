@@ -1,13 +1,15 @@
 <template>
-    <div class="footer_data">
+    <div class="footer_data" v-if="Object.keys(userData).length !== 0">
         <img v-if="objectData" :src="objectData.avatar" class="avatar">
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
                 <h2 v-if="objectData && userData.name">{{ userData.name }}</h2>
-                <span v-if="objectData && objectData.package_name != 'Free' || (objectData && objectData.status != 'Free') && objectData.status">{{ objectData.package_name || objectData.status }}</span>
+                <span v-if="objectData && (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name !== 'Free' || objectData.status !== 'Free')">
+                    {{ objectData?.packages?.[objectData?.packages?.length - 1]?.package_name ?? objectData.status }}
+                </span>
             </div>
             <span v-if="objectData && objectData.vk_id">ID: {{ objectData.vk_id }}</span>
-            <span v-if="objectData && objectData.vip_offer && correctStatus.includes(objectData.package_name)">{{ objectData.sentence }}</span>
+            <span v-if="objectData && objectData.vip_offer && correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name)">{{ objectData.sentence }}</span>
             <a v-if="objectData && objectData.group_link" :href="objectData.group_link">Ссылка</a>
             <div class="footer_data_links">
                 <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
@@ -19,9 +21,10 @@
                 <a v-if="objectData" :href="vkData?.link"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
-        <span v-if="objectData && objectData.vip_offer && correctStatus.includes(objectData.package_name)" class="business">Business-предложение</span>
+        <span v-if="objectData && objectData.vip_offer && correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name)" class="business">Business-предложение</span>
         
     </div>
+    <span v-else>Подождите, пока загрузятся данные.</span>
 </template>
 
 <script>

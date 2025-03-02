@@ -5,13 +5,13 @@
             <div class="row">
                 <div class="col">
                     <img :src="userData.avatar">
-                    <span class="pckg_name">{{ userData.package_name }}</span>
+                    <span class="pckg_name">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</span>
                 </div>
                 <div class="col">
                     <h2>{{ `${userData.first_name} ${userData.last_name}` }}</h2>
                     <span class="id">ID: {{ userData.vk_id }}</span>
                     <a>Реферальные ссылки</a>
-                    <span>Партнерская программа активна до {{ userData.sub_date_end }}</span>
+                    <span>Партнерская программа активна до {{ endDate }}</span>
                 </div>
             </div>
             <div class="row">
@@ -36,6 +36,17 @@
             return {
                 text1: "Тарифы",
                 text2: "Выход"
+            }
+        },
+        computed: {
+            endDate() {
+                const endDateSeconds = this.userData.packages_datetime.find(el => el.tarif_id == this.userData.packages[this.userData.packages.length - 1].id).date_end;
+                const endDate = new Date(endDateSeconds * 1000);
+                const day = String(endDate.getDate()).padStart(2, '0');
+                const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                const year = endDate.getFullYear();
+
+                return `${day}.${month}.${year}`;
             }
         },
         methods: {

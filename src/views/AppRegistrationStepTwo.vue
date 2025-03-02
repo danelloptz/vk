@@ -131,7 +131,8 @@
                             this.$router.push("/signup_3");
                     }
 
-                    const curr_group = this.groupPriorities[this.currentGroupIndex];
+                    const curr_group = this.groupPriorities[this.currentPriorityIndex];
+                    console.log(curr_group);
                     if ((this.subscribedCount >= 10 && curr_group == "third_and_fourth") || (this.subscribedCount >= 5 && curr_group != "third_and_fourth") || this.groupsQueue.length === 0) {
                         this.nextPriorityGroup();
                     }

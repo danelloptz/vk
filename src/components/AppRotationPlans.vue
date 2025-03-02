@@ -13,15 +13,11 @@
         <div class="row">
             <div class="item">
                 <span>Ваш тариф / пакет:</span>
-                <span><strong>VIP</strong></span>
+                <span><strong>{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</strong></span>
             </div>
-            <div class="item">
-                <span>Осталось дней (Business):</span>
-                <span><strong>320</strong></span>
-            </div>
-            <div class="item">
-                <span>Осталось дней (VIP):</span>
-                <span><strong>28</strong></span>
+            <div class="item" v-for="(item, index) in userData?.packages" :key="index">
+                <span>Осталось дней ({{ item.package_name }}):</span>
+                <span><strong>{{ getDays(item) }}</strong></span>
             </div>
         </div>
         <table>
@@ -294,23 +290,23 @@
                     </td>
                     <td class="column">
                         <span>{{ tariffs[1]?.monthly_cost }} USDT в месяц</span>
-                        <AppGoodButton :text="currTarrif?.id == tariffs[1]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
+                        <AppGoodButton :text="currTarrif.includes(plans[1]) ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
                     </td>
                     <td class="column">
                         <span>{{ tariffs[2]?.monthly_cost }} USDT в месяц</span>
-                        <AppGoodButton :text="currTarrif?.id == tariffs[2]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
+                        <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
                     </td>
                     <td class="column">
                         <span>{{ tariffs[3]?.monthly_cost }} USDT в месяц</span>
-                        <AppGoodButton :text="currTarrif?.id == tariffs[3]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
+                        <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
                     </td>
                     <td class="column">
                         <span>{{ tariffs[4]?.monthly_cost }}* USDT в месяц</span>
-                        <AppGoodButton :text="currTarrif?.id == tariffs[4]?.id ? text2 : text1" class="btn" @click="selectPackage(plans[4])"/>
+                        <AppGoodButton :text="currTarrif.includes(plans[4]) ? text2 : text1" class="btn" @click="selectPackage(plans[4])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs    [5]?.monthly_cost }}* USDT в месяц</span>
-                        <AppGoodButton :text="currTarrif?.package_name == 'Business' ? text3 : currTarrif?.package_name == 'Leader' ? text2 : text1" class="btn" @click="selectPackage(plans[5])"/>
+                        <span>{{ tariffs[5]?.monthly_cost }}* USDT в месяц</span>
+                        <AppGoodButton :text="currTarrif.includes('Business') ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn" @click="selectPackage(plans[5])"/>
                     </td>
                 </tr>
             </tbody>
@@ -347,7 +343,7 @@ import { getUserInfo } from "@/services/user";
                 isModal: false,
                 isGoodPayment: false,
                 tariffs: [],
-                currTarrif: null,
+                currTarrif: [],
             }
         },
         async created() {
@@ -356,8 +352,8 @@ import { getUserInfo } from "@/services/user";
             const user = await getUserInfo(localStorage.getItem("token"));
             this.userData = user;
             this.tariffs.forEach(tarif => this.plans.push(tarif?.package_name));
-            this.currTarrif = this.tariffs.find(item => item?.package_name == this.userData?.package_name);
-            console.log(this.currTarrif?.id);
+            this.currTarrif = this.userData.packages.map(item => item.package_name);
+            console.log(this.currTarrif);
             this.tariffs.forEach(item => console.log(item?.package_name));
         },
         watch: {
@@ -373,6 +369,12 @@ import { getUserInfo } from "@/services/user";
             async buy() {
                 const payment = await buyBooster(30, localStorage.getItem("token"));
                 console.log(payment);
+            },
+            getDays(item) {
+                const end_time = this.userData.packages_datetime.find(el => el.tarif_id == item.id).date_end;
+                const now = Math.floor(Date.now() / 1000);
+                const daysLeft = Math.floor((end_time - now) / 86400);
+                return daysLeft;
             }
         }
     };
@@ -392,6 +394,7 @@ import { getUserInfo } from "@/services/user";
     .row {
         display: flex;
         justify-content: stretch;
+        flex-wrap: wrap;
         background: #2F3251;
         padding: 10px;
         border-radius: 10px;

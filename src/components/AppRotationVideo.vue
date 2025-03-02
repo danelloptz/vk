@@ -84,7 +84,8 @@
                 waitingForCheck: false,
                 subscribedCount: 0,
                 wasBlurred: false,
-                blurTime: 0
+                blurTime: 0,
+                tariff: ""
             }
         },
         async created() {
@@ -101,11 +102,13 @@
                 }
             }
             this.userInfo = response;
+            this.tariff = this.userInfo.packages[this.userInfo.packages.length - 1].package_name;
+
             if (this.isTarif) {
                 this.openPlans();
                 this.$emit("update:isTarif", false);
             }
-            switch (this.userInfo.package_name) {
+            switch (this.tariff) {
                 case "Free": 
                     this.totalVideos = 20;
                     this.skipCounts = 10;
@@ -120,7 +123,7 @@
                     break;
             }
 
-            const videos = await getRotationVideos(this.userInfo.vk_id, this.userInfo.package_name);
+            const videos = await getRotationVideos(this.userInfo.vk_id, this.tariff);
             console.log(videos);
 
             this.videosInfo = videos;
