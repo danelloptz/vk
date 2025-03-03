@@ -128,3 +128,15 @@ export async function setLeg(user_id, leg) {
         return false; 
     }
 }
+
+export async function getReferals(vk_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_referals`, { 
+            "vk_id": vk_id
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении рефералов пользователя", error);
+        return false; 
+    }
+}

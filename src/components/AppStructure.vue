@@ -1,4 +1,10 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isChangeLegModal"
+        @update:visibility1="isChangeLegModal = $event"
+    />
     <AppMain :links="isLinks" v-if="isLinks" />
     <section class="struct" v-if="!isLinks">
         <div class="user">
@@ -64,8 +70,29 @@
             <AppGoodButton :text="text2" class="btn" @click="searchId" />
             <AppBadButton :text="text3" class="btn" @click="backup"  />
         </div>
-        <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :user="userData" :activation="userData.activation" :current_leg="userData.current_leg" :node="binarTree" :lay="1" @nextUser="next" />
-        <AppStructureLinear v-if="activeIndex == 0" />
+        <div class="legs" v-if="activeIndex == 1">
+            <div class="left">
+                <div class="circle" :class="{ binar_active: userData.activation }"></div>
+                <div class="col">
+                <h2>Бинарная квалификация</h2>
+                <span v-if="!userData.activation">Не активна</span>
+                <span v-else>Активна</span>
+                </div>
+            </div>
+            <div class="right">
+                <div class="legs_item"  
+                v-for="(leg, index) in legs" 
+                :key="leg.label"
+                @click="changeActiveLeg(index, leg.value)"
+                >
+                <div class="check" :class="{ activeBinar: leg_index == index }"></div>
+                    <span>{{ leg.label }}</span>
+                </div>
+                <AppGoodButton :text="text4" class="btn" @click="setLeg"/>
+            </div>
+        </div>
+        <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :isRoot="true" :user="userData" :activation="userData.activation" :current_leg="userData.current_leg" :node="binarTree" :lay="1" @nextUser="next" />
+        <AppStructureLinear v-if="activeIndex == 0" :vk_id="userData.vk_id" :lay="1" />
         <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>   
     </section>
 </template>
@@ -79,9 +106,11 @@ import AppMain from "@/components/AppMain.vue";
 import AppStructureBinar from "@/components/AppStructureBinar.vue";
 import AppStructureLinear from "@/components/AppStructureLinear.vue";
 import { refreshToken } from "@/services/auth";
+import { setLeg } from '@/services/user';
+import AppModal from '@/components/AppModal.vue';
 
 export default {
-    components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar, AppStructureLinear },
+    components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar, AppStructureLinear, AppModal },
     data() {
         return {
             userData: [],
@@ -91,6 +120,7 @@ export default {
             text1: "РЕФЕРАЛЬНЫЕ ССЫЛКИ",
             text2: "ПОИСК",
             text3: "СБРОС",
+            text4: "УСТАНОВИТЬ",
             stats_data: [
                 { "img": "marketing.png", "num": 10, "text": "Клиентский маркетинг, (ур.)" },
                 { "img": "binar.png", "num": 10, "text": "Бинар, (%)" },
@@ -106,6 +136,14 @@ export default {
             users: [],
             search: "",
             notFound: false,
+            legs: [
+                { label: "Лево", value: "left" }, { label: "Право", value: "right" }, { label: "Авто", value: "auto" },
+            ],
+            leg_index: 0,
+            currLeg: "",
+            isChangeLegModal: false,
+            title: "",
+            msg: ""
         };
     },
     computed: {
@@ -130,6 +168,9 @@ export default {
             }
         }
         this.userData = response;
+        if (this.userData.current_leg == "left") this.leg_index = 0;
+        if (this.userData.current_leg == "right") this.leg_index = 1;
+        if (this.userData.current_leg == "auto") this.leg_index = 2;
 
         await this.next(this.userData.vk_id);
 
@@ -170,6 +211,18 @@ export default {
         async backup() {
             this.notFound = false;
             this.binarTree = await getTree(this.userData.vk_id);
+        },
+        changeActiveLeg(index, name) {
+            this.leg_index = index;
+            this.currLeg = name;
+        },
+        async setLeg() {
+            const response = await setLeg(this.userData.id, this.currLeg);
+            if (response.status) {
+                this.isChangeLegModal = true;
+                this.title = "УСПЕШНО!";
+                this.msg = "Выбранная нога была установлена.";
+            }
         }
     }
 };
@@ -385,4 +438,60 @@ export default {
         font-size: 16px;
         font-family: 'OpenSans';
     }
+
+
+    .legs {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .left, .right {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+  }
+  .circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #DA2D2D;
+  }
+  .binar_active {
+    background: #1ABE38 !important;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+  }
+  .col h2, .col span {
+    font-size: 20px;
+    color: white;
+    font-family: 'OpenSans';
+  }
+  .legs_item {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+  }
+  .check {
+    width: 18px;
+    height: 18px;
+    outline: 1px solid white;
+    outline-offset: 6px;
+    border-radius: 50%;
+    transition: .2s ease-in;
+  }
+  .activeBinar {
+    background: white;
+  }
+  .legs_item span {
+    font-size: 18px;
+    color: white;
+    font-family: 'OpenSans';
+  }
+  .btn {
+    width: 150px;
+  }
 </style>

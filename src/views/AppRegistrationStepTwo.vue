@@ -133,7 +133,7 @@
 
                     const curr_group = this.groupPriorities[this.currentPriorityIndex];
                     console.log(curr_group);
-                    if ((this.subscribedCount >= 10 && curr_group == "third_and_fourth") || (this.subscribedCount >= 5 && curr_group != "third_and_fourth") || this.groupsQueue.length === 0) {
+                    if ((this.subscribedCount >= 10 && curr_group == "third_and_fourth") || (this.subscribedCount >= 5 && curr_group != "third_and_fourth" && curr_group != "fifth") || this.groupsQueue.length === 0) {
                         this.nextPriorityGroup();
                     }
                 } else {
@@ -171,7 +171,7 @@
             handleFocus() {
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
-                    if (elapsed > 5000) { // Например, если прошло более 5 секунд
+                    if (elapsed > 3000) { // Например, если прошло более 5 секунд
                         this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");

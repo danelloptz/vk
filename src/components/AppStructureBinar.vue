@@ -1,26 +1,4 @@
 <template>
-    <div class="legs">
-      <div class="left">
-        <div class="circle" :class="{ binar_active: activation }"></div>
-        <div class="col">
-          <h2>Бинарная квалификация</h2>
-          <span v-if="!activation">Не активна</span>
-          <span v-else>Активна</span>
-        </div>
-      </div>
-      <div class="right">
-        <div class="legs_item"  
-          v-for="(leg, index) in legs" 
-          :key="leg.label"
-          @click="changeActiveLeg(index, leg.value)"
-        >
-          <div class="check" :class="{ active: current_leg == leg.value }"></div>
-            <span>{{ leg.label }}</span>
-        </div>
-        <AppGoodButton :text="text1" class="btn" @click="setLeg"/>
-      </div>
-      
-    </div>
     <div class="tree-container">
       <div class="tree-user" :style="{ width: lay != 1 ? (400 / (Math.pow(2, lay-1))) + 'px' : '400px', alignItems: lay == 4 ? 'center' : 'normal' }">
         <div v-if="node" class="avatar-container" :style="{ justifyContent: lay == 1 ? 'space-between' : 'center' }">
@@ -83,10 +61,7 @@
   </template>
   
   <script>
-  import AppGoodButton from '@/components/AppGoodButton.vue';
-  import { setLeg } from '@/services/user';
   export default {
-    components: { AppGoodButton },
     name: "AppStructureBinar",
     props: {
       node: Object,
@@ -94,17 +69,14 @@
       referer: Number,
       user: Object,
       activation: Boolean,
-      current_leg: String
+      current_leg: String,
+      isRoot: Boolean
     },
     data() {
       return {
         visibility: false,
-        text1: "УСТАНОВИТЬ",
         activeIndex: 0,
         currLeg: "",
-        legs: [
-          { label: "Лево", value: "left" }, { label: "Право", value: "right" }, { label: "Авто", value: "auto" },
-        ]
       }
     },
     methods: {
@@ -117,14 +89,6 @@
       },
       close() {
         this.visibility = false;
-      },
-      changeActiveLeg(index, name) {
-        this.activeIndex = index;
-        this.currLeg = name;
-      },
-      async setLeg() {
-        const response = await setLeg(this.user.id, this.currLeg);
-        console.log(response);
       }
     }
   };

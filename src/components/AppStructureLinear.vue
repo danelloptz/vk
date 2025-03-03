@@ -15,7 +15,7 @@
                     <div class="modal_wrapper" v-if="visibility">
                         <div class="modal">
                         <img src="@/assets/images/close.png" class="close" @click="close">
-                        <img :src="selectedUser.avatar" class="avatar">
+                        <img :src="selectedUser.avatar_url" class="avatar">
                         <h2>{{ selectedUser.name }}</h2>
                         <div class="row_modal">
                             <span>Первая линия / всего: </span>
@@ -27,23 +27,23 @@
                         </div>
                         <div class="row_modal">
                             <span>Реферер ID:</span>
-                            <span>{{ referer }}</span>
+                            <span>{{ selectedUser.sponsor_vk_id }}</span>
                         </div>
                         </div>
                     </div>
                     
                     <div class="item" @click="open(item)" >
                         <div class="row first">
-                            <div class="plus" @click.stop="toggleExpand(index)"> {{ expandedNodes[index] ? '-' : '+' }}</div>
+                            <div class="plus" @click.stop="toggleExpand(index, item)"> {{ expandedNodes[index] ? '-' : '+' }}</div>
                             <div class="user_small">
-                                <img :src="item.avatar">
+                                <img :src="item.avatar_url">
                                 <span>{{ item.name }}</span>
                             </div>
                         </div>
                         <div class="row">
                             <span>{{ item.vk_id }}</span>
-                            <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item?.packages[item?.packages.length - 1]?.package_name)) ? 'green' : 'red' }"></div>
-                            <span>{{ item?.packages[item?.packages.length - 1]?.package_name }}</span>
+                            <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item.package_name)) ? 'green' : 'red' }"></div>
+                            <span>{{ item.package_name }}</span>
                         </div>
                         <span>{{ item.level }}</span>
                         <span>{{ item.among }}</span>
@@ -53,13 +53,13 @@
                         </div>
                         <div class="row">
                             <img src="@/assets/images/team.png" class="team_icon">
-                            <span>{{ item.team }}</span>
+                            <span>{{ item.total_referrals }}</span>
                         </div>
                     </div>
 
                     <!-- Вложенная таблица -->
                     <div v-if="expandedNodes[index]" class="nested">
-                        <AppStructureLinear :isRoot="false" :referer="item.vk_id" />
+                        <AppStructureLinear :isRoot="false" :referer="item.vk_id" :vk_id="item.vk_id" :lay="lay + 1" @updateUser="updateUser" />
                     </div>
                 </div>
             </div>
@@ -81,10 +81,14 @@
 
 <script>
     import { reactive } from "vue";
+    import { getReferals } from "@/services/user";
+
     export default {
         props: {
             isRoot: { type: Boolean, default: true },
-            referer: Number
+            referer: Number,
+            vk_id: Number,
+            lay: Number
         },
         data() {
             return {
@@ -94,13 +98,19 @@
                 selectedUser: null,
                 currentPage: 1,
                 perPage: 5,
-                openedUsers: []
             };
         },
         async created() {
-            const response = this.getNode();
-            this.node = response;
+            // const response = this.getNode();
+            // this.node = response;
             this.openedUsers = Array.from({ length: this.totalPages }, () => Array(this.perPage).fill(false));
+
+            console.log(this.vk_id);
+            const referals = await getReferals(this.vk_id);
+            this.node = referals.referrals;
+            // ещё дополнительно обратиться к полю referrals, чтобы получить список
+            // сначала вставить ручку сюда, если всё ок, то залить на гит, как бэк, и потом взять два файла стрёмных и попробовать доделать их добавив туда ручку
+            console.log(this.node);
         },
         computed: {
             totalPages() {
@@ -126,32 +136,17 @@
             },
         },
         methods: {
-            getNode() {
-                const node = [
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 1", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 2", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 3", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 4", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 5", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 6", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 7", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 8", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 9", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 10", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 11", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 12", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 13", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 14", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                    { "avatar": "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240", "name": "Пользователь 15", "vk_id": 919191919, "package_name": "Business", "level": 1, "among": 9999, "first_line_referrals": 55, "team": 505, "total_referrals": 500, },
-                ];
-                return node;
-            },
-            toggleExpand(index) {
-                if (!this.expandedNodes[index]) {
-                    this.expandedNodes[index] = true;
-                    this.node[index].children = this.getNode(); // Загружаем вложенные данные
-                } else {
-                    this.expandedNodes[index] = false;
+            toggleExpand(index, item) {
+                if (item.total_referrals > 0) {
+                    if (this.lay == 2) {
+                        console.log("lay == 2");
+                        this.$emit("updateUser", item.vk_id);
+                    }
+                    if (!this.expandedNodes[index] && this.lay < 2) {
+                        this.expandedNodes[index] = true;
+                    } else {
+                        this.expandedNodes[index] = false;
+                    }
                 }
             },
             open(item) {
@@ -177,6 +172,12 @@
                 if (this.currentPage > 1) {
                     this.currentPage--;
                 }
+            },
+            async updateUser(vk_id) {
+                console.log("updateUser: ", vk_id);
+                this.expandedNodes = reactive({});
+                const referals = await getReferals(vk_id);
+                this.node = referals.referrals;
             }
         }
     };
