@@ -40,7 +40,9 @@
         },
         computed: {
             endDate() {
-                const endDateSeconds = this.userData.packages_datetime.find(el => el.tarif_id == this.userData.packages[this.userData.packages.length - 1].id).date_end;
+                const endDateSeconds = this.userData?.packages_datetime.find(el => el.tarif_id == this.userData.packages[this.userData?.packages.length - 1].id)?.date_end;
+                if (!endDateSeconds) return "";
+
                 const endDate = new Date(endDateSeconds * 1000);
                 const day = String(endDate.getDate()).padStart(2, '0');
                 const month = String(endDate.getMonth() + 1).padStart(2, '0');

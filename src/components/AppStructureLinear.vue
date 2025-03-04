@@ -10,6 +10,12 @@
                 <h2>Команда</h2>
             </div>
             <div class="line" v-if="isRoot"></div>
+            <div class="top_pagination" v-if="isRoot">
+                <span v-for="(item, index) in referersStackData" :key="index" @click="updateUser(item.vk_id, index)" class="pagination_item" :class="{ lastPaginationItem: index == referersStackData.length - 1 }">
+                    {{ item.name }}
+                    <span v-if="index != referersStackData.length - 1">></span>
+                </span>
+            </div>
             <div class="items">
                 <div v-for="(item, index) in paginatedHistory" :key="index">
                     <div class="modal_wrapper" v-if="visibility">
@@ -34,7 +40,7 @@
                     
                     <div class="item" @click="open(item)" >
                         <div class="row first">
-                            <div class="plus" @click.stop="toggleExpand(index, item)"> {{ expandedNodes[index] ? '-' : '+' }}</div>
+                            <div class="plus" @click.stop="toggleExpand(index, item)"> {{ openedUsers[currentPage - 1][index] ? '-' : '+' }}</div>
                             <div class="user_small">
                                 <img :src="item.avatar_url">
                                 <span>{{ item.name }}</span>
@@ -58,8 +64,8 @@
                     </div>
 
                     <!-- Вложенная таблица -->
-                    <div v-if="expandedNodes[index]" class="nested">
-                        <AppStructureLinear :isRoot="false" :referer="item.vk_id" :vk_id="item.vk_id" :lay="lay + 1" @updateUser="updateUser" />
+                    <div v-if="openedUsers[currentPage - 1][index]" class="nested">
+                        <AppStructureLinear :isRoot="false" :referer="item.vk_id" :vk_id="item.vk_id" :lay="lay + 1" :referersStack="referersStackData" @updateUser="updateUser" />
                     </div>
                 </div>
             </div>
@@ -80,7 +86,6 @@
 </template>
 
 <script>
-    import { reactive } from "vue";
     import { getReferals } from "@/services/user";
 
     export default {
@@ -88,29 +93,28 @@
             isRoot: { type: Boolean, default: true },
             referer: Number,
             vk_id: Number,
-            lay: Number
+            lay: Number,
+            referersStack: Array
         },
         data() {
             return {
                 node: [],
-                expandedNodes: reactive({}),
                 visibility: false,
                 selectedUser: null,
                 currentPage: 1,
                 perPage: 5,
+                openedUsers: [],
+                referersStackData: []
             };
         },
         async created() {
-            // const response = this.getNode();
-            // this.node = response;
-            this.openedUsers = Array.from({ length: this.totalPages }, () => Array(this.perPage).fill(false));
-
-            console.log(this.vk_id);
             const referals = await getReferals(this.vk_id);
             this.node = referals.referrals;
-            // ещё дополнительно обратиться к полю referrals, чтобы получить список
-            // сначала вставить ручку сюда, если всё ок, то залить на гит, как бэк, и потом взять два файла стрёмных и попробовать доделать их добавив туда ручку
-            console.log(this.node);
+
+            this.openedUsers = Array.from({ length: this.totalPages }, () => Array(this.perPage).fill(false));
+
+            this.referersStackData = this.referersStack;
+            console.log(this.referersStackData);
         },
         computed: {
             totalPages() {
@@ -135,17 +139,29 @@
                 return pages;
             },
         },
+        watch: {
+            referersStack: {
+                handler(newStack) {
+                    this.referersStackData = [...newStack];
+                },
+                deep: true,
+                immediate: true
+            }
+        },
         methods: {
             toggleExpand(index, item) {
                 if (item.total_referrals > 0) {
+                    console.log(this.lay);
                     if (this.lay == 2) {
-                        console.log("lay == 2");
+                        this.referersStackData.push({name: item.name, vk_id: item.vk_id});
                         this.$emit("updateUser", item.vk_id);
                     }
-                    if (!this.expandedNodes[index] && this.lay < 2) {
-                        this.expandedNodes[index] = true;
+                    if (!this.openedUsers[this.currentPage - 1][index] && this.lay < 2) {
+                        this.referersStackData.push({name: item.name, vk_id: item.vk_id});
+                        this.openedUsers[this.currentPage - 1][index] = true;
                     } else {
-                        this.expandedNodes[index] = false;
+                        this.referersStackData.pop();
+                        this.openedUsers[this.currentPage - 1][index] = false;
                     }
                 }
             },
@@ -165,19 +181,29 @@
             },
             nextPage() {
                 if (this.currentPage < this.totalPages) {
+                    this.resetOpenedUsers();
                     this.currentPage++;
                 }
             },
             prevPage() {
                 if (this.currentPage > 1) {
+                    this.resetOpenedUsers();
                     this.currentPage--;
                 }
             },
-            async updateUser(vk_id) {
-                console.log("updateUser: ", vk_id);
-                this.expandedNodes = reactive({});
+            async updateUser(vk_id, index = false) {
+                console.log(index);
+                this.referersStackData = index || index === 0 ? [...this.referersStackData].slice(0, index + 1) : [...this.referersStackData];
+                this.resetOpenedUsers();
                 const referals = await getReferals(vk_id);
                 this.node = referals.referrals;
+            },
+            resetOpenedUsers() {
+                this.openedUsers.forEach((row, i) => {
+                    row.forEach((_, j) => {
+                        this.openedUsers[i][j] = false;
+                    });
+                });
             }
         }
     };
@@ -355,9 +381,35 @@
         padding: 5px 10px;
         border-radius: 5px;
         color: white;
+        font-family: 'OpenSans';
     }
     .switchs span.active {
         background-color: #111433;
         color: white;
+    }
+    .top_pagination {
+        display: flex;
+        column-gap: 15px;
+        flex-wrap: wrap;
+        background: rgba(255, 255, 255, 0.112);
+        padding: 4px 10px;
+        border-radius: 5px;
+    }
+    .top_pagination span {
+        font-size: 16px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .pagination_item {
+        display: flex;
+        align-items: center;
+        column-gap: 15px;
+        transition: .2s ease-in;
+    }
+    .lastPaginationItem {
+        background: linear-gradient(to right, #A139DE, #E14ABB, #E14A7A);
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+        color: transparent !important;
     }
 </style>

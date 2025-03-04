@@ -91,9 +91,10 @@
                 const state = this.state;
                 const code_challenge = this.code_challenge;
                 const code_challenge_method = this.code_challenge_method;
-                localStorage.setItem('zopa', code_challenge);
+                const scopes = "offline";
+                localStorage.setItem('zopa', code_challenge);   
 
-                const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=video`;
+                const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=${scopes}`;
                 try {
                     window.location.href = vkAuthUrl;
                 } catch(err) {

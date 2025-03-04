@@ -140,3 +140,15 @@ export async function getReferals(vk_id) {
         return false; 
     }
 }
+
+export async function getStructureInfo(vk_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_structure`, { 
+            "vk_id": vk_id
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении данных для раздела структуры", error);
+        return false; 
+    }
+}

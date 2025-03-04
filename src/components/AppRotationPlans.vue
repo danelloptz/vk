@@ -371,10 +371,13 @@ import { getUserInfo } from "@/services/user";
                 console.log(payment);
             },
             getDays(item) {
-                const end_time = this.userData.packages_datetime.find(el => el.tarif_id == item.id).date_end;
-                const now = Math.floor(Date.now() / 1000);
-                const daysLeft = Math.floor((end_time - now) / 86400);
-                return daysLeft;
+                const end_time = this.userData.packages_datetime.find(el => el.tarif_id == item.id)?.date_end;
+                if (end_time) {
+                    const now = Math.floor(Date.now() / 1000);
+                    const daysLeft = Math.floor((end_time - now) / 86400);
+                    return daysLeft;
+                }
+                return "";
             }
         }
     };

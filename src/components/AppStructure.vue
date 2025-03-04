@@ -56,7 +56,7 @@
             </div>
             <div class="text_row_item">
                 <h2>Первая линия / всего: </h2>
-                <span>51 / 131</span>
+                <span>{{ binarTree?.first_line_referrals }} / {{ binarTree?.total_referrals }}</span>
             </div>
         </div>
         <div class="search">
@@ -92,7 +92,7 @@
             </div>
         </div>
         <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :isRoot="true" :user="userData" :activation="userData.activation" :current_leg="userData.current_leg" :node="binarTree" :lay="1" @nextUser="next" />
-        <AppStructureLinear v-if="activeIndex == 0" :vk_id="userData.vk_id" :lay="1" />
+        <AppStructureLinear v-if="activeIndex == 0" :vk_id="userData.vk_id" :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" :lay="1" />
         <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>   
     </section>
 </template>
@@ -106,7 +106,7 @@ import AppMain from "@/components/AppMain.vue";
 import AppStructureBinar from "@/components/AppStructureBinar.vue";
 import AppStructureLinear from "@/components/AppStructureLinear.vue";
 import { refreshToken } from "@/services/auth";
-import { setLeg } from '@/services/user';
+import { setLeg, getStructureInfo } from '@/services/user';
 import AppModal from '@/components/AppModal.vue';
 
 export default {
@@ -121,15 +121,6 @@ export default {
             text2: "ПОИСК",
             text3: "СБРОС",
             text4: "УСТАНОВИТЬ",
-            stats_data: [
-                { "img": "marketing.png", "num": 10, "text": "Клиентский маркетинг, (ур.)" },
-                { "img": "binar.png", "num": 10, "text": "Бинар, (%)" },
-                { "img": "stonks.png", "num": 10000, "text": "До следующего ранг. бонуса, (USDT)" },
-                { "img": "rang.png", "num": 0, "text": "Ранг" },
-                { "img": "bonus.png", "num": 5, "text": "Matching bonus, (ур.)" },
-                { "img": "global_bonus.png", "num": 0, "text": "Глобальный бонус, (пул)" },
-                { "img": "fast_start.png", "num": 25, "text": "Быстрый старт, дней осталось" }
-            ],
             isLinks: false,
             binarTree: null,
             nextUser: false,
@@ -143,7 +134,8 @@ export default {
             currLeg: "",
             isChangeLegModal: false,
             title: "",
-            msg: ""
+            msg: "",
+            struct_info: {}
         };
     },
     computed: {
@@ -152,6 +144,17 @@ export default {
                 ...item,
                 num: this.showNums ? item.num : '*'.repeat(item.num.toString().length)
             }));
+        },
+        stats_data() {
+            return [
+                { "img": "marketing.png", "num": this.struct_info.clients_marketing, "text": "Клиентский маркетинг, (ур.)" },
+                { "img": "binar.png", "num": this.struct_info.binar, "text": "Бинар, (%)" },
+                { "img": "stonks.png", "num": this.struct_info.next_rank_sum, "text": "До следующего ранг. бонуса, (USDT)" },
+                { "img": "rang.png", "num": this.struct_info.rank, "text": "Ранг" },
+                { "img": "bonus.png", "num": this.struct_info.matching_bonus, "text": "Matching bonus, (ур.)" },
+                { "img": "global_bonus.png", "num": this.struct_info.global_bonus, "text": "Глобальный бонус, (пул)" },
+                { "img": "fast_start.png", "num": this.struct_info.fast_start_days, "text": "Быстрый старт, дней осталось" }
+            ]
         }
     },
     async created() {
@@ -173,6 +176,9 @@ export default {
         if (this.userData.current_leg == "auto") this.leg_index = 2;
 
         await this.next(this.userData.vk_id);
+
+        this.struct_info = await getStructureInfo(this.userData.vk_id);
+        console.log(this.struct_info);  
 
         console.log(this.binarTree);
     },
