@@ -4,14 +4,14 @@
         <div v-if="node" class="avatar-container" :style="{ justifyContent: lay == 1 ? 'space-between' : 'center' }">
           <div class="text_header" v-if="lay == 1">
             <span><strong>Лево</strong></span>
-            <span>69 рефералов</span>
-            <span>11 601.5 USDT</span>
+            <span>Рефералы: {{ root_info.left.referals }}</span>
+            <span>{{ root_info.left.volume }} USDT</span>
           </div>
           <img :src="node.avatar" :alt="node.name" class="avatar" @click="open" />
           <div class="text_header" v-if="lay == 1">
             <span><strong>Право</strong></span>
-            <span>263 реферала</span>
-            <span>13 357.44 USDT</span>
+            <span>Рефералы: {{ root_info.right.referals }}</span>
+            <span>Оборот: {{ root_info.right.volume }} USDT</span>
           </div>
         </div>
 
@@ -70,7 +70,8 @@
       user: Object,
       activation: Boolean,
       current_leg: String,
-      isRoot: Boolean
+      isRoot: Boolean,
+      root_info: Object
     },
     data() {
       return {

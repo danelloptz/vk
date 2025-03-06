@@ -7,7 +7,7 @@
         </div>
         <hr>
         <div class="btn_wrapper">
-            <AppGoodButton :text="text" @click="tap"/>
+            <AppGoodButton :text="text" :disabled="isDisabled" @click="tap"/>
             <AppBadButton :text="text2" />
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
@@ -36,6 +36,7 @@
                 code: "",
                 device_id: "",
                 redirectUrl: "https://lk.intelektaz.com",
+                isDisabled: true,
             }
         },
         mounted() {
@@ -44,6 +45,7 @@
         async created() {
             // тут делаем редирект в ЛК, если живой пользователь решит перейти в lk.intelektaz.com (а не в /home)
             if (localStorage.length == 0) window.location.reload();
+            this.isDisabled = localStorage.getItem("isDisabled") || false;
             const token = localStorage.getItem("token_refresh");
             if (token) {
                 const resp = await refreshToken(token); // проверяем, что токен валидный
@@ -75,34 +77,39 @@
         },
         methods: {
             async tap() {
-                // штука, чтобы параметры только один раз генерировались
-                const isParams = localStorage.getItem("isParams"); 
-                if (isParams != "true") {
-                    console.log("генерируются параметры новые");
-                    const pkce = await this.generatePKCE();
-                    this.code_verifier = pkce.codeVerifier;
-                    this.code_challenge = pkce.codeChallenge;
-                    localStorage.setItem("isParams", "true");
-                }
+                if (!this.isDisabled) {
+                    this.isDisabled = true;
+                    localStorage.setItem("isDisabled", this.isDisabled);
+                    // штука, чтобы параметры только один раз генерировались
+                    const isParams = localStorage.getItem("isParams"); 
+                    if (isParams != "true") {
+                        console.log("генерируются параметры новые");
+                        const pkce = await this.generatePKCE();
+                        this.code_verifier = pkce.codeVerifier;
+                        this.code_challenge = pkce.codeChallenge;
+                        localStorage.setItem("isParams", "true");
+                    }
 
-                // схема "Обмен на бэкенде без SDK"
-                const clientId = "52191705";
-                const redirectUri = this.redirectUrl;
-                const state = this.state;
-                const code_challenge = this.code_challenge;
-                const code_challenge_method = this.code_challenge_method;
-                const scopes = "offline";
-                localStorage.setItem('zopa', code_challenge);   
+                    // схема "Обмен на бэкенде без SDK"
+                    const clientId = "52191705";
+                    const redirectUri = this.redirectUrl;
+                    const state = this.state;
+                    const code_challenge = this.code_challenge;
+                    const code_challenge_method = this.code_challenge_method;
+                    const scopes = "groups,photos,wall,video";
+                    localStorage.setItem('zopa', code_challenge);   
 
-                const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=${scopes}`;
-                try {
-                    window.location.href = vkAuthUrl;
-                } catch(err) {
-                    const ref = localStorage.getItem("referer");
-                    localStorage.clear();
-                    localStorage.setItem("first", true);
-                    localStorage.setItem("referer", ref);
+                    const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=${scopes}`;
+                    try {
+                        window.location.href = vkAuthUrl;
+                    } catch(err) {
+                        const ref = localStorage.getItem("referer");
+                        localStorage.clear();
+                        localStorage.setItem("first", true);
+                        localStorage.setItem("referer", ref);
+                    }
                 }
+                
             },
             async handleUrlParams() {
 

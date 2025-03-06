@@ -50,7 +50,7 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
-    import { getUserInfoById, getUserInfo } from "@/services/user";
+    import { getUserInfo, getReferer } from "@/services/user";
     import { refreshToken } from "@/services/auth";
 
     export default {
@@ -71,20 +71,6 @@
             }
         },
         async created() {
-            const refer = await getUserInfoById(842052594, localStorage.getItem("token"));
-            if (!refer) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.referData = refer;
-
             const user = await getUserInfo(localStorage.getItem("token"));
             if (!user) {
                 const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
@@ -99,6 +85,9 @@
             }
 
             this.userData = user;
+
+            const refer = await getReferer(this.userData.vk_id);
+            this.referData = refer;
 
             this.isLinks = this.links;
         },

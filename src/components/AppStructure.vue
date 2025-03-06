@@ -52,7 +52,7 @@
         <div class="text_row">
             <div class="text_row_item">
                 <h2>Оборот: </h2>
-                <span>5340</span>
+                <span>{{ struct_info.left.volume + struct_info.right.volume }}</span>
             </div>
             <div class="text_row_item">
                 <h2>Первая линия / всего: </h2>
@@ -91,8 +91,24 @@
                 <AppGoodButton :text="text4" class="btn" @click="setLeg"/>
             </div>
         </div>
-        <AppStructureBinar v-if="binarTree && !notFound && activeIndex == 1" :isRoot="true" :user="userData" :activation="userData.activation" :current_leg="userData.current_leg" :node="binarTree" :lay="1" @nextUser="next" />
-        <AppStructureLinear v-if="activeIndex == 0" :vk_id="userData.vk_id" :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" :lay="1" />
+        <AppStructureBinar 
+            v-if="binarTree && !notFound && activeIndex == 1" 
+            :isRoot="true" 
+            :user="userData" 
+            :activation="userData.activation" 
+            :current_leg="userData.current_leg" 
+            :node="binarTree" 
+            :lay="1" 
+            :root_info="{ left: struct_info.left, right: struct_info.right }"
+            @nextUser="next" 
+        />
+        <AppStructureLinear v-if="activeIndex == 0" 
+            :vk_id="root_vk_id" 
+            :key="root_vk_id"
+            :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
+            :lay="1" 
+            @notFound="linearNotFound"
+        />
         <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>   
     </section>
 </template>
@@ -135,7 +151,8 @@ export default {
             isChangeLegModal: false,
             title: "",
             msg: "",
-            struct_info: {}
+            struct_info: {},
+            root_vk_id: 0
         };
     },
     computed: {
@@ -171,6 +188,8 @@ export default {
             }
         }
         this.userData = response;
+        this.root_vk_id = this.userData.vk_id;
+
         if (this.userData.current_leg == "left") this.leg_index = 0;
         if (this.userData.current_leg == "right") this.leg_index = 1;
         if (this.userData.current_leg == "auto") this.leg_index = 2;
@@ -207,12 +226,18 @@ export default {
             if (node.right_leg) this.getAllId(node.right_leg);
         },
         async searchId() {
-            if (this.users.includes(+this.search)) {
-                this.notFound = false;
-                this.binarTree = await getTree(+this.search);
+            this.notFound = false;
+            if (this.activeIndex == 1) {
+                if (this.users.includes(+this.search)) {
+                    this.binarTree = await getTree(+this.search);
+                } else {
+                    this.notFound = true;
+                }
             } else {
-                this.notFound = true;
+                this.root_vk_id = +this.search;
+                console.log(this.root_vk_id);
             }
+            
         },
         async backup() {
             this.notFound = false;
@@ -229,6 +254,9 @@ export default {
                 this.title = "УСПЕШНО!";
                 this.msg = "Выбранная нога была установлена.";
             }
+        },
+        linearNotFound() {
+            this.notFound = true;
         }
     }
 };

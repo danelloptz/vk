@@ -9,123 +9,165 @@
             >{{ item }}</span>
         </div> 
         <h1>Для создания качественного контент плана вам необходимо заполнить подробный бриф:</h1> 
-        <div class="container">
-            <div class="item">
-                <h2>Название компании:</h2>
-                <input 
-                    type="text"
-                    v-model="label"
-                    placeholder="Название"
-                    :class="{ saved: isSaved }"
-                >
-                <h2>Год основания компании:</h2>
-                <input 
-                    type="number"
-                    v-model="year"
-                    placeholder="Год"
-                    :class="{ saved: isSaved }"
-                >
+        <div class="brief" v-if="activeIndex == 0">
+            <div class="container">
+                <div class="item">
+                    <h2>Название компании:</h2>
+                    <input 
+                        type="text"
+                        v-model="label"
+                        placeholder="Название"
+                        :class="{ saved: isSaved }"
+                    >
+                    <h2>Год основания компании:</h2>
+                    <input 
+                        type="number"
+                        v-model="year"
+                        placeholder="Год"
+                        :class="{ saved: isSaved }"
+                    >
+                </div>
+                <div class="item">
+                    <h2>Описание компании:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Какие продукты или услуги предлагает компания?" v-model="description_company"></textarea>
+                </div>
+                <div class="item">
+                    <h2>Конкурентные преимущества:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Что выделяет компанию среди конкурентов?" v-model="pros"></textarea>
+                </div>
+                <div class="item">
+                    <h2>Описание продукта / услуги:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Подробное описание продуктов или услуг, которые необходимо продвигать" v-model="description_product"></textarea>
+                </div>
+                <div class="item">
+                    <h2>Какие боли или проблемы решает ваш продукт?</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Чем ваш продукт может помочь клиентам?" v-model="whats_solve"></textarea>
+                </div>
+                <div class="item">
+                    <h2>Уникальные характеристики продукта:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Что отличает ваш продукт от других на рынке?" v-model="characteristics"></textarea>
+                </div>
+                <div class="item">
+                    <h2>Цена и ценовая политика:</h2>
+                    <input 
+                        type="text"
+                        v-model="price"
+                        placeholder="Цена"
+                        :class="{ saved: isSaved }"
+                    >
+                    <h2>Какой тип партнерской программы в компании?</h2>
+                    <input 
+                        type="number"
+                        v-model="type"
+                        placeholder="Типа"
+                        :class="{ saved: isSaved }"
+                    >
+                </div>
+                <div class="item">
+                    <h2>Кто ваша основная целевая аудитория?</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Возраст, пол, профессия, уровень дохода" v-model="audience"></textarea>
+                </div>
+                <div class="item">
+                    <h2>Ссылка:</h2>
+                    <input 
+                        type="text"
+                        v-model="link"
+                        placeholder="Ссылка"
+                        :class="{ saved: isSaved }"
+                    >
+                </div>
+                <div class="item">
+                    <h2>Какую реакцию вы хотите получить от вашей аудитории?</h2>
+                    <input 
+                        type="text"
+                        v-model="reaction"
+                        placeholder="Покупки, регистрация в системе"
+                        :class="{ saved: isSaved }"
+                    >
+                </div>
             </div>
-            <div class="item">
-                <h2>Описание компании:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Какие продукты или услуги предлагает компания?" v-model="description_company"></textarea>
-            </div>
-            <div class="item">
-                <h2>Конкурентные преимущества:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Что выделяет компанию среди конкурентов?" v-model="pros"></textarea>
-            </div>
-            <div class="item">
-                <h2>Описание продукта / услуги:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Подробное описание продуктов или услуг, которые необходимо продвигать" v-model="description_product"></textarea>
-            </div>
-            <div class="item">
-                <h2>Какие боли или проблемы решает ваш продукт?</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Чем ваш продукт может помочь клиентам?" v-model="whats_solve"></textarea>
-            </div>
-            <div class="item">
-                <h2>Уникальные характеристики продукта:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Что отличает ваш продукт от других на рынке?" v-model="characteristics"></textarea>
-            </div>
-            <div class="item">
-                <h2>Цена и ценовая политика:</h2>
-                <input 
-                    type="text"
-                    v-model="price"
-                    placeholder="Цена"
-                    :class="{ saved: isSaved }"
-                >
-                <h2>Какой тип партнерской программы в компании?</h2>
-                <input 
-                    type="number"
-                    v-model="type"
-                    placeholder="Типа"
-                    :class="{ saved: isSaved }"
-                >
-            </div>
-            <div class="item">
-                <h2>Кто ваша основная целевая аудитория?</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Возраст, пол, профессия, уровень дохода" v-model="audience"></textarea>
-            </div>
-            <div class="item">
-                <h2>Ссылка:</h2>
-                <input 
-                    type="text"
-                    v-model="link"
-                    placeholder="Ссылка"
-                    :class="{ saved: isSaved }"
-                >
-            </div>
-            <div class="item">
-                <h2>Какую реакцию вы хотите получить от вашей аудитории?</h2>
-                <input 
-                    type="text"
-                    v-model="reaction"
-                    placeholder="Покупки, регистрация в системе"
-                    :class="{ saved: isSaved }"
-                >
+            <div class="row">
+                <AppGoodButton :text="text1" @click="saveSettings"/>
+                <AppGoodButton :text="text2" @click="editSettings" />
+                <AppGoodButton :text="text3" @click="generateThemes" />
+            </div>  
+            <table>
+                <thead>
+                    <tr class="head">
+                        <th>
+                            <input type="checkbox" v-model="allCheckboxes">
+                        </th>
+                        <th>День</th>
+                        <th>Тема</th>
+                        <th>Пост</th>
+                        <th>Баннер</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in themes" :key="index">
+                        <td>
+                            <input type="checkbox" :checked="allCheckboxes">
+                        </td>
+                        <td>
+                            <span>{{ index + 1 }}</span>
+                        </td>
+                        <td>
+                            <span :contenteditable="isEditable">{{ themes?.[index] }}</span>
+                        </td>
+                        <td>
+                            <span :contenteditable="isEditable">{{ posts?.[index] }}</span>
+                        </td>
+                        <td>
+                            <img :src="banners?.[index]" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="row">
+                <AppGoodButton :text="text4" />
+                <AppGoodButton :text="text5" />
+                <AppGoodButton :text="text6" @click="editInfo" />
             </div>
         </div>
-        <div class="row">
-            <AppGoodButton :text="text1" @click="saveSettings"/>
-            <AppGoodButton :text="text2" @click="editSettings" />
-            <AppGoodButton :text="text3" @click="generateThemes" />
-        </div>  
-        <table>
-            <thead>
-                <tr class="head">
-                    <th>
-                        <input type="checkbox" v-model="allCheckboxes">
-                    </th>
-                    <th>День</th>
-                    <th>Тема</th>
-                    <th>Пост</th>
-                    <th>Баннер</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in themes" :key="index">
-                    <td>
-                        <input type="checkbox" :checked="allCheckboxes">
-                    </td>
-                    <td>
-                        <span>{{ index + 1 }}</span>
-                    </td>
-                    <td>
-                        <span :contenteditable="isEditable">{{ themes?.[index] }}</span>
-                    </td>
-                    <td>
-                        <span :contenteditable="isEditable">{{ posts?.[index] }}</span>
-                    </td>
-                    <td>
-                        <img :src="banners?.[index]" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="row">
-            <AppGoodButton :text="text4" />
-            <AppGoodButton :text="text5" />
-            <AppGoodButton :text="text6" @click="editInfo" />
+        <div class="content" v-if="activeIndex == 1">
+            <table>
+                <thead>
+                    <tr class="head">
+                        <th>
+                            <input type="checkbox" v-model="allCheckboxesContent">
+                        </th>
+                        <th>День</th>
+                        <th>Тема</th>
+                        <th>Пост</th>
+                        <th>Баннер</th>
+                        <th>Дата / время публикации</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in themes" :key="index">
+                        <td>
+                            <input type="checkbox" :checked="allCheckboxesContent">
+                        </td>
+                        <td>
+                            <span class="content_text">{{ index + 1 }}</span>
+                        </td>
+                        <td>
+                            <span  class="content_text">{{ themes?.[index] }}</span>
+                        </td>
+                        <td>
+                            <span  class="content_text">{{ posts?.[index] }}</span>
+                        </td>
+                        <td>
+                            <img :src="banners?.[index]" />
+                        </td>
+                        <td class="col">
+                            <span  class="content_text" :contenteditable="isEditableContent">12.11.2024 12:00</span>
+                            <span class="change_text" @click="changeEditableContent">Изменить</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <AppGoodButton :text="text7" />
         </div>
     </section>
     
@@ -145,6 +187,7 @@
                 text4: "ОДОБРИТЬ",
                 text5: "ЗАМЕНИТЬ",
                 text6: "РЕДАКТИРОВАТЬ",
+                text7: "УДАЛИТЬ",
                 themes: [
                     "Обзор сервиса Best Followers. Видео-инструктаж о том, как сервис может помочь в развитии вашего Telegram-канала и увеличении доходов",
                     "Обзор сервиса Noise Pollution. Видео-инструктаж о том, как сервис может помочь в развитии вашего Telegram-канала и увеличении доходов",
@@ -161,8 +204,10 @@
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvkUFmp5jSF-DhrD5102bzHU7RbidetfqYfA&s",
                 ],
                 allCheckboxes: false,
+                allCheckboxesContent: false,
                 isSaved: false,
                 isEditable: false,
+                isEditableContent: false
             }
         },
         methods: {
@@ -183,6 +228,9 @@
             generateThemes() {
                 this.saveSettings();
                 // TODO: просить сервер сгенерировать темы по текущему брифу 
+            },
+            changeEditableContent() {
+                this.isEditableContent = true;
             }
         },
     };
@@ -244,6 +292,9 @@
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+    }
+    .brief {
+        width: 100%;
     }
     .container {
         width: 100%;
@@ -374,7 +425,7 @@
     .dropdown-menu li:hover {
         background: #0c103e;
     }
-    .table {
+    table {
         border: none;
         border-collapse: collapse;
         width: 100%;
@@ -407,5 +458,28 @@
     }
     .saved {
         border-color: #4caf4f8e; 
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+        row-gap: 50px;
+    }
+    .col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 26px;
+    }
+    .change_text {
+        text-decoration: underline;
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .content_text {
+        font-size: 14px;
     }
 </style>

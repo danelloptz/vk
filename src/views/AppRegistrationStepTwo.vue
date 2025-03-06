@@ -326,7 +326,7 @@
             justify-content: center;
             column-gap: 30px;
         }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             flex-direction: column;
             row-gap: 30px;
             align-items: center;
@@ -335,7 +335,7 @@
     .groups_block_btns {
         display: flex;
         column-gap: 20px;
-        @media (max-width: 1300px) {
+        @media (max-width: 1400px) {
             flex-direction: column;
             row-gap: 20px;
         }

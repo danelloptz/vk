@@ -9,17 +9,24 @@
             >{{ item }}</span>
         </div>  
         <AppAiGeneratorContent v-if="activeIndex == 0" />
+        <AppAiAnalytics v-if="activeIndex == 1" />
+        <AppAiScene v-if="activeIndex == 2" />
+        <AppAiChat v-if="activeIndex == 3" />
     </section>
 </template>
 
 <script>
     import AppAiGeneratorContent from '@/components/AppAiGeneratorContent.vue';
+    import AppAiAnalytics from '@/components/AppAiAnalytics.vue';
+    import AppAiScene from '@/components/AppAiScene.vue';
+    import AppAiChat from '@/components/AppAiChat.vue';
+    
     export default {
-        components: { AppAiGeneratorContent },
+        components: { AppAiGeneratorContent, AppAiAnalytics, AppAiScene, AppAiChat },
         data() {
             return {
                 activeIndex: 0,
-                listSwtich: ["ИИ контент", "ИИ анализ", "ИИ сценарий", "Помощник", "ИИ менеджер"],
+                listSwtich: ["ИИ контент", "ИИ анализ", "ИИ сценарий", "ИИ помощник", "ИИ менеджер"],
             }
         },
         methods: {

@@ -11,8 +11,6 @@ export async function checkUserAuthorization() {
 }
 
 export function getToken(code, state, code_verifier, device_id, redirect_uri) {
-    console.log(code_verifier);
-    localStorage.setItem("POST CODE_VERIFIER", code_verifier);
     return axios.post('https://web.intelektaz.com/api/v1/auth/', {
         code, 
         state,
@@ -21,13 +19,11 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
         redirect_uri
     })
     .then((response) => {
-        console.log("Response status:", response.status);
-        console.log("Response data:", response.data);
-        return response; // Возвращаем ответ, чтобы вызвать .then на результат
+        return response;
     })
     .catch((error) => {
         console.error("Error during request:", error.response || error);
-        throw error; // Пробрасываем ошибку для обработки в вызвавшем коде
+        throw error;
     });
 }
 
