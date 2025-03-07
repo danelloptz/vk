@@ -56,7 +56,7 @@
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser },
         props: {
-            links: Boolean
+            links: Boolean,  
         },
         data() {
             return {
@@ -90,6 +90,11 @@
             this.referData = refer;
 
             this.isLinks = this.links;
+            if (this.links) {
+                this.openLinks();
+                this.$emit("update:links", false);
+            }
+            console.log(this.links, this.isLinks);
         },
         methods: {
             openTarif() {

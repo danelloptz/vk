@@ -4,13 +4,13 @@
         @update:visibility1="isMessageModal = $event"
     />
     <section class="help" v-if="!isQu">
-        <h1>Для начала посмотрите раздел «Инструкции», здесь есть ответы  на большинство вопросов: </h1>
+        <span class="big">Для начала посмотрите раздел «Инструкции», здесь есть ответы  на большинство вопросов: </span>
         <AppGoodButton :text="text1" @click="gotoInstructions" />
         <span>Также рекомендуем обратиться к вашему рефереру:</span>
         <AppGroupOrUser :objectData="refererData" />
         <div class="row">
-            <span>Если вы не смогли найти ответ на ваш вопрос, то напишите в службу поддержки Intelektaz, и мы обязательно ответим вам:</span>
-            <AppGoodButton :text="text2" @click="openQu" />
+            <span style="width: 70%;">Если вы не смогли найти ответ на ваш вопрос, то напишите в службу поддержки Intelektaz, и мы обязательно ответим вам:</span>
+            <AppGoodButton :text="text2" @click="openQu" class="btn" />
         </div>
     </section>
     <section class="qu" v-if="isQu">
@@ -26,7 +26,7 @@
             </div>
         </div>
         <span>Если вы не нашли ответ на свой вопрос, напишите оператору, указав в первом сообщении ваш ID, если необходимо, группу и всю детальную информацию по вашему вопросу текстом.</span>
-        <AppGoodButton :text="text3" @click="openModalMessage" />
+        <AppGoodButton :text="text3" @click="openModalMessage" class="btn2"/>
     </section>
     
 </template>
@@ -117,8 +117,9 @@
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+        width: 100%;
     }
-    h1 {
+    .big {
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
@@ -137,9 +138,11 @@
         cursor: pointer;
     }
     .row {
+        width: 100%;
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        column-gap: 20px;
+        justify-content: space-between;
     }
     h2 {
         font-size: 20px;
@@ -182,5 +185,13 @@
         display: flex;
         flex-direction: column;
         row-gap: 38px;
+    }
+    .btn {
+        width: 200px;
+        font-size: 16px;
+    }
+    .btn2 {
+        width: 230px;
+        font-size: 16px;
     }
 </style>

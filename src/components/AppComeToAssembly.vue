@@ -8,6 +8,7 @@
     <section class="come">
         <h1>Рекламная лента</h1>
         <span>Тысячи пользователей с бизнес интересами ежедневно и многократно посещают кабинет Intelektaz. У нас точно есть ваши клиенты. Покажите им свое предложение по самой низкой цене:</span>
+        <span class="error" v-if="isError">{{ errorMsg }}</span>
         <div class="content">
             <div class="prices">
                 <div class="row" v-for="(tarrif, index) in tarrifs" :key="index">
@@ -40,12 +41,15 @@
         data() {
             return {
                 tarrifs: ["Leader, Business", "VIP", "Start, Standart", "Free"],
-                prices: [1, 1.5, 2, 3],
+                prices: [1, 1, 1.5, 2, 2, 3],
                 text1: "ПОПАСТЬ В ЛЕНТУ",
                 userInfo: [],
                 isModal: false,
                 title: "",
-                msg: ""
+                msg: "",
+                errorMsg: "",
+                isError: false,
+                price: 3
             }
         },
         async created() {
@@ -65,6 +69,32 @@
         },
         methods: {
             async comeToAss() {
+                if (!this.userInfo.group.group_link) {
+                    this.isError = true;
+                    this.errorMsg = "У вас не привязана группа вк!";
+                    return;
+                }
+                const tariff = this.userInfo.packages[this.userInfo.packages.length - 1].package_name;
+                switch (tariff) {
+                    case "Leader" || "Business":
+                        this.price = 1;
+                        break;
+                    case "VIP":
+                        this.price = 1.5;
+                        break;
+                    case "Start" || "Standart":
+                        this.price = 2;
+                        break;
+                    default: 
+                        this.price = 3;
+                        break;
+                }
+                if (this.userInfo.balance < this.price) {
+                    this.isError = true;
+                    this.errorMsg = "Не хватает средств на балансе!";
+                    return;
+                }
+                this.isError = false;
                 // имена функций я, конечно, придумывать умею ;)
                 const resp = await setAdds(this.userInfo.group.group_link, this.userInfo.vk_id);
                 this.isModal = true;
@@ -164,5 +194,8 @@
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
+    }
+    .error {
+        color: red;
     }
 </style>

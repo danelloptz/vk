@@ -17,12 +17,12 @@
             </div>
             <div class="item" v-for="(item, index) in userData?.packages" :key="index">
                 <span>Осталось дней ({{ item.package_name }}):</span>
-                <span><strong>{{ getDays(item) }}</strong></span>
+                <span><strong>{{ getDays(item) || "∞" }}</strong></span>
             </div>
         </div>
         <table>
             <div class="bg"></div>
-            <div class="gradient-column" style="left: calc(100% * 5 / 6.95); width: calc((100% / 7.7));"></div>
+            <div class="gradient-column" style="left: 71%; width: calc((100% / 7.7));"></div>
             <div class="gradient-column2" style="left: calc(100% * 6 / 6.95); width: calc(100% / 7.7);"></div>
             <thead>
                 <tr>
@@ -286,26 +286,26 @@
                 <tr>
                     <td></td>
                     <td class="column">
-                        <span>{{ tariffs[0]?.monthly_cost }} USDT в месяц</span>
+                        <span><span class="big_letters">{{ tariffs[0]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[1]?.monthly_cost }} USDT в месяц</span>
+                        <span><span class="big_letters">{{ tariffs[1]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes(plans[1]) ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[2]?.monthly_cost }} USDT в месяц</span>
+                        <span><span class="big_letters">{{ tariffs[2]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[3]?.monthly_cost }} USDT в месяц</span>
+                        <span><span class="big_letters">{{ tariffs[3]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[4]?.monthly_cost }}* USDT в месяц</span>
+                        <span><span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes(plans[4]) ? text2 : text1" class="btn" @click="selectPackage(plans[4])"/>
                     </td>
                     <td class="column">
-                        <span>{{ tariffs[5]?.monthly_cost }}* USDT в месяц</span>
+                        <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes('Business') ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn" @click="selectPackage(plans[5])"/>
                     </td>
                 </tr>
@@ -401,6 +401,8 @@ import { getUserInfo } from "@/services/user";
         background: #2F3251;
         padding: 10px;
         border-radius: 10px;
+        column-gap: 50px;
+        row-gap: 15px;
     }
     .item {
         display: flex;
@@ -431,6 +433,9 @@ import { getUserInfo } from "@/services/user";
         padding: 10px;
         position: relative;
     }
+    span {
+        padding: 0 !important;
+    }
     img {
         width: 26px;
         height: 19px;
@@ -448,6 +453,7 @@ import { getUserInfo } from "@/services/user";
     }
     .column span {
         font-family: 'Tektur';
+        font-size: 13px;
     }
     td:nth-child(6), th:nth-child(6) {
         position: relative;
@@ -512,9 +518,18 @@ import { getUserInfo } from "@/services/user";
         font-family: 'OpenSans';
         text-align: start;
         align-self: auto;
-        width: 60%;
+        width: 100%;
     }
     .booster_btn {
         width: 130px;
+    }
+    .large_letters {
+        font-size: 32px !important;
+    }
+    .big_letters {
+        font-size: 27px !important;
+    }
+    .medium_letters {
+        font-size: 15px !important;
     }
 </style>

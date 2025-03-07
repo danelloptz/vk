@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <AppHeader @show-help="updateActiveComponent(7)" @isTarif="openTarif"/>
+        <AppHeader @show-help="updateActiveComponent(7)" @isTarif="openTarif" @isReff="openReff"/>
         <AppGroupsAssemble @comeToAssembly="updateActiveComponent(8)" />
         <section class="content">
             <div class="left">
@@ -42,16 +42,16 @@
                     :isBusiness="isBusiness"
                     class="card"
                 />
-                <AppBalance v-if="selectedComponent === 0 && !isClicked" />
-                <AppMain v-if="selectedComponent === 1 && !isClicked" @update-isTarif="openTarif" @update-isRot="openRot" />
-                <AppAiGenerator v-if="selectedComponent === 2 && !isClicked" />
-                <AppStructure v-if="selectedComponent === 3 && !isClicked" />
-                <AppRotation v-if="selectedComponent === 4 && !isClicked" :isTarif="isTarif" @update:isTarif="isTarif == $event" />
-                <AppSettings v-if="selectedComponent === 5 && !isClicked" />
-                <AppFAQ v-if="selectedComponent === 6 && !isClicked" />
-                <AppBannerAdds v-if="isClicked" />
-                <AppHelp v-if="selectedComponent === 7" @update-isInstructions="updateActiveComponent(6)" />
-                <AppComeToAssembly v-if="selectedComponent === 8" />
+                <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" />
+                <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :links="isReff" @update:links="isReff == $event" @update-isTarif="openTarif" @update-isRot="openRot" />
+                <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" />
+                <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" />
+                <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :isTarif="isTarif" @update:isTarif="isTarif == $event" />
+                <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" />
+                <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
+                <AppBannerAdds v-if="isClicked && !isReff" />
+                <AppHelp v-if="selectedComponent === 7 && !isReff" @update-isInstructions="updateActiveComponent(6)" />
+                <AppComeToAssembly v-if="selectedComponent === 8 && !isReff" />
                 <AppAdd
                     :isClicked="isClicked" 
                     @update:isClicked="isClicked = $event" 
@@ -103,6 +103,7 @@
                 isTarif: false,
                 vipUser: [],
                 comeToAssembly: false,
+                isReff: false,
             }
         },  
         computed: {
@@ -167,6 +168,8 @@
             updateActiveComponent(index) {
                 // в навигации выбираем элемент и selectedComponent переключает видимость блоков
                 this.selectedComponent = index;
+                console.log("Я ПОСТАВИЛ FALSE!!!!!!");
+                this.isTarif = false;
             },
             updateIsClicked(flag) {
                 // не помню уже для чего, лучше не трогать :)))
@@ -175,11 +178,18 @@
             openTarif() {
                 // вызываем это, когда где-то захотят открыть Тарифы
                 this.isTarif = true;
+                console.log("Я ПОСТАВИЛ TRUE!!!!!!");
                 this.selectedComponent = 4;
             },
             openRot() {
                 // если откуда-то захотят открыть Ротацию
+                this.isTarif = false;
                 this.selectedComponent = 4;
+            },
+            openReff() {
+                console.log('home open reff');
+                this.selectedComponent = 1;
+                // this.isReff = true;
             }
         },
     };

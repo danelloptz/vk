@@ -9,7 +9,7 @@
         @update:isWatched="isWatched = $event"
         @close="closeVideo" 
     />
-    <section class="rotation_preview" v-if="isRotationPreview">
+    <section class="rotation_preview" v-if="isRotationPreview && !isPlans">
         <span>Вы можете получать целевые просмотры своего ВК видео совершенно бесплатно за счет прохождения Ротации. </span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных ВК видео по 20 секунд, и в ответ получаете 10 просмотров своего ВК видео.</span>
         <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Активировать тариф».</span>
@@ -18,7 +18,7 @@
             <AppGoodButton :text="text2" @click="openPlans" />
         </div>
     </section>
-    <section class="rotation" v-if="isRotation">
+    <section class="rotation" v-if="isRotation && !isPlans">
         <span class="counter">Подписки {{ watchedVideos }} из {{ totalVideos }}</span>
         <div class="group">
             <AppGroupOrUser :v-if="videosInfo" :objectData="videosQueue[currentVideoIndex]" />
@@ -33,7 +33,7 @@
             </div>
         </div>
     </section>
-    <section class="rotation_end" v-if="isRotationEnd">
+    <section class="rotation_end" v-if="isRotationEnd && !isPlans">
         <span class="counter">Просмотрено {{ watchedVideos }} из {{ totalVideos }}</span>
         <strong><span>Вы успешно прошли Ротацию видео!</span></strong>
         <span>Ваше видео добавлено в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше просмотров и подписок без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>

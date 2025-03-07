@@ -10,7 +10,7 @@
                 <div class="col">
                     <h2>{{ `${userData.first_name} ${userData.last_name}` }}</h2>
                     <span class="id">ID: {{ userData.vk_id }}</span>
-                    <a>Реферальные ссылки</a>
+                    <a style="cursor: pointer;" @click="openRef">Реферальные ссылки</a>
                     <span>Партнерская программа активна до {{ endDate }}</span>
                 </div>
             </div>
@@ -66,6 +66,11 @@
                 localStorage.clear();
                 location.reload();
                 location.reload();
+            },
+            openRef() {
+                console.log('modal mini');
+                this.$emit("isReffs");
+                this.close();
             }
         }
     };

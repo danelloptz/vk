@@ -10,7 +10,7 @@
             <AppGoodButton :text="text2" @click="openPlans" />
         </div>
     </section>
-    <section class="rotation" v-if="isRotation">
+    <section class="rotation" v-if="isRotation && !isPlans">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
             <AppGroupOrUser :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
@@ -26,7 +26,7 @@
             </div>
         </div>
     </section>
-    <section class="rotation_end" v-if="isRotationEnd">
+    <section class="rotation_end" v-if="isRotationEnd && !isPlans">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <strong><span>Вы успешно прошли Ротацию групп!</span></strong>
         <span>Ваша группа добавлена в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>

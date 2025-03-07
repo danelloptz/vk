@@ -1,6 +1,6 @@
 <template>
     <section class="balance">
-        <div class="switch">
+        <div class="switch" v-if="!isPackage" :key="isPackage">
             <span
                 v-for="(item, index) in listSwtich"
                 :key="index"
@@ -8,7 +8,7 @@
                 @click="setActive(index)"
             >{{ item }}</span>
         </div>
-            <AppRotationGroup v-if="activeIndex === 0" :isTarif="isPackage" @update:isTarif="isPackage == $event" />
+            <AppRotationGroup v-if="activeIndex === 0" :isTarif="isPackage" @update:isTarif="changeIsTariff($event)" />
             <AppRotationVideo v-if="activeIndex === 1"  />
             <AppRotationPosts v-if="activeIndex === 2" />
     </section>
@@ -24,6 +24,7 @@
             isTarif: Boolean
         },
         async created() {
+            console.log("isTarif в rotation: ", this.isTarif);
             this.isPackage = this.isTarif;
             this.$emit("update:isTarif", false);
         },
@@ -38,12 +39,17 @@
             setActive(index) {
                 this.activeIndex = index;
             },
+            changeIsTariff(status) {
+                console.log('ИЗМЕНЕНИЕ ТАРИФА: ', status);
+                this.isPackage = status;
+            }
         },
         watch: {
             isTarif(newValue) {
                 console.log('поменялось значение');
                 if (newValue) {
                     this.isPackage = true;
+                    this.$emit("update:isTarif", false);
                 }
             }
         }

@@ -11,7 +11,7 @@
           <div class="text_header" v-if="lay == 1">
             <span><strong>Право</strong></span>
             <span>Рефералы: {{ root_info.right.referals }}</span>
-            <span>Оборот: {{ root_info.right.volume }} USDT</span>
+            <span>{{ root_info.right.volume }} USDT</span>
           </div>
         </div>
 

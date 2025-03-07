@@ -86,7 +86,7 @@
                     >
                 </div>
             </div>
-            <div class="row">
+            <div class="row" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text1" @click="saveSettings"/>
                 <AppGoodButton :text="text2" @click="editSettings" />
                 <AppGoodButton :text="text3" @click="generateThemes" />
@@ -123,7 +123,7 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="row">
+            <div class="row" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text4" />
                 <AppGoodButton :text="text5" />
                 <AppGoodButton :text="text6" @click="editInfo" />

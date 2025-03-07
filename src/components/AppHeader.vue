@@ -11,6 +11,7 @@
             @update:visibility1="modalUser = $event"
             @isClicked="sendClick"
             @close="close" 
+            @isReffs="openReff"
         />
         <div class="header_title">
             <img src="@/assets/images/main_logo.png" >
@@ -64,6 +65,10 @@
             },
             sendClick() {
                 this.$emit("isTarif");
+            },
+            openReff() {
+                console.log('header');
+                this.$emit("isReff");
             }
         },
         async created() {

@@ -4,7 +4,12 @@
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
                 <h2 v-if="objectData && userData.name">{{ userData.name }}</h2>
-                <span v-if="objectData && (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name !== 'Free' || objectData.status !== 'Free')">
+                <span v-if="objectData && 
+                    (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Business' ||
+                     objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Leader' || 
+                     (objectData.status && objectData.status == 'Business' ||
+                        objectData.status == 'Leader'
+                     ))">
                     {{ objectData?.packages?.[objectData?.packages?.length - 1]?.package_name ?? objectData.status }}
                 </span>
             </div>
