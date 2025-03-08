@@ -17,16 +17,19 @@
                 <span>ID: {{ userData.vk_id }}</span>
             </div>
         </div>
-        <div class="switch">
-            <span
-                v-for="(item, index) in listSwtich"
-                :key="index"
-                :class="{ active: activeIndex === index }"
-                @click="setActive(index)"
-            >{{ item }}</span>
+        <div class="switch_wrapper">
+            <div class="switch">
+                <span
+                    v-for="(item, index) in listSwtich"
+                    :key="index"
+                    :class="{ active: activeIndex === index }"
+                    @click="setActive(index)"
+                >{{ item }}</span>
+            </div>
             <img src="@/assets/images/eye.png" class="eye" v-if="showNums" @click="switchShowNums">
             <img src="@/assets/images/close_eye.png" class="eye" v-if="!showNums" @click="switchShowNums">
         </div>
+        
         <div class="stats">
             <div class="stats_row first">
                 <div class="stats_item" v-for="(item, index) in maskedStats.slice(0, 3)" :key="index">
@@ -164,13 +167,13 @@ export default {
         },
         stats_data() {
             return [
-                { "img": "marketing.png", "num": this.struct_info.clients_marketing, "text": "Клиентский маркетинг, (ур.)" },
-                { "img": "binar.png", "num": this.struct_info.binar, "text": "Бинар, (%)" },
-                { "img": "stonks.png", "num": this.struct_info.next_rank_sum, "text": "До следующего ранг. бонуса, (USDT)" },
-                { "img": "rang.png", "num": this.struct_info.rank, "text": "Ранг" },
-                { "img": "bonus.png", "num": this.struct_info.matching_bonus, "text": "Matching bonus, (ур.)" },
-                { "img": "global_bonus.png", "num": this.struct_info.global_bonus, "text": "Глобальный бонус, (пул)" },
-                { "img": "fast_start.png", "num": this.struct_info.fast_start_days, "text": "Быстрый старт, дней осталось" }
+                { "img": "marketing.png", "num": this.formatNumber(this.struct_info.clients_marketing), "text": "Клиентский маркетинг, (ур.)" },
+                { "img": "binar.png", "num": this.formatNumber(this.struct_info.binar), "text": "Бинар, (%)" },
+                { "img": "stonks.png", "num": this.formatNumber(this.struct_info.next_rank_sum), "text": "До следующего ранг. бонуса, (USDT)" },
+                { "img": "rang.png", "num": this.formatNumber(this.struct_info.rank), "text": "Ранг" },
+                { "img": "bonus.png", "num": this.formatNumber(this.struct_info.matching_bonus), "text": "Matching bonus, (ур.)" },
+                { "img": "global_bonus.png", "num": this.formatNumber(this.struct_info.global_bonus), "text": "Глобальный бонус, (пул)" },
+                { "img": "fast_start.png", "num": this.formatNumber(this.struct_info.fast_start_days), "text": "Быстрый старт, дней осталось" }
             ]
         }
     },
@@ -257,6 +260,12 @@ export default {
         },
         linearNotFound() {
             this.notFound = true;
+        },
+        formatNumber(value) {
+            if (typeof value === 'number') {
+                return value.toLocaleString('ru-RU'); // Форматирование с пробелами
+            }
+            return value; // Если не число, возвращаем как есть
         }
     }
 };
@@ -317,22 +326,26 @@ export default {
         font-family: 'OpenSans';
     }
 
-    .switch {
+    .switch_wrapper {
         width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .switch {
+        width: 490px;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         position: relative;
+        @media (max-width: 900px) {
+            width: 80%;
+        }
     }
 
     .eye {
         width: 30px;
         height: 30px;
-        object-position: center;
-        object-fit: cover;
         cursor: pointer;
-        position: absolute;
-        right: 0;
-        top: 10%;
     }
 
     .switch span {
@@ -385,7 +398,7 @@ export default {
 
     .stats_item {
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
         padding: 20px 10px;
         background: #2F3251;
@@ -401,6 +414,7 @@ export default {
     .item_col {
         display: flex;
         flex-direction: column;
+        align-items: flex-end;
         row-gap: 15px;
     }
 
@@ -409,6 +423,7 @@ export default {
         font-family: 'OpenSans';
         font-weight: normal;
         color: white;
+        text-align: end;
     }
 
     .item_col span {
@@ -416,6 +431,7 @@ export default {
         font-family: 'OpenSans';
         font-weight: normal;
         color: white;
+        text-align: end;
     }
 
     .text_row {

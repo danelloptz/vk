@@ -22,9 +22,9 @@
                     <a :href="vipUser.group_link">{{ vipUser.group_link }}</a>
                     <div class="vip_footer">
                         <div class="vip_links">
-                            <img src="@/assets/images/vk.png">
-                            <img src="@/assets/images/telegram.png">
-                            <img src="@/assets/images/whatsapp.png">
+                            <a :href="vkData.link"><img src="@/assets/images/vk.png"></a>
+                            <a :href="tgData.link"><img src="@/assets/images/telegram.png"></a>
+                            <a :href="whtData.link"><img src="@/assets/images/whatsapp.png"></a>
                         </div>
                         <span>VIP-предложение</span>
                     </div>
@@ -38,16 +38,16 @@
             </div>
             <div class="right">
                 <AppGroupOrUser 
-                    :objectData="userInfo"
+                    :objectData="businessUser"
                     :isBusiness="isBusiness"
                     class="card"
                 />
                 <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" />
-                <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :links="isReff" @update:links="isReff == $event" @update-isTarif="openTarif" @update-isRot="openRot" />
+                <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
                 <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" />
                 <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :isTarif="isTarif" @update:isTarif="isTarif == $event" />
-                <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" />
+                <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :businessUser="businessUser" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
                 <AppBannerAdds v-if="isClicked && !isReff" />
                 <AppHelp v-if="selectedComponent === 7 && !isReff" @update-isInstructions="updateActiveComponent(6)" />
@@ -97,13 +97,17 @@
                 userInfo: null,
                 isMobileView: false,
                 isBusiness: false,
-                selectedComponent: 0,
+                selectedComponent: 1,
                 selectedPage: "",
                 isClicked: false,
                 isTarif: false,
                 vipUser: [],
+                businessUser: [],
                 comeToAssembly: false,
                 isReff: false,
+                tgData: [],
+                vkData: [],
+                whtData: []
             }
         },  
         computed: {
@@ -151,7 +155,14 @@
             this.addDataHorizontal = otherAdds.bottom_ads;
 
             const vip = await getVipUser(this.userInfo.vk_id); // вип юзер слева
-            this.vipUser = vip;
+            this.vipUser = vip.vip;
+            this.businessUser = vip.business;
+            this.tgData = this.vipUser?.social_links.find(link => link.type === "Telegram") || [];
+            this.whtData = this.vipUser?.social_links.find(link => link.type === "Whatsapp") || [];
+            this.vkData = this.vipUser?.social_links.find(link => link.type === "VK") || [];
+
+            console.log(this.vipUser);
+            console.log(this.businessUser);
 
             this.checkWindowWidth();
             window.addEventListener("resize", this.checkWindowWidth);
@@ -165,11 +176,14 @@
                 this.orientation = window.innerWidth <= 1000 ? this.orientationH : this.orientationV;
                 console.log(this.orientation);
             },
-            updateActiveComponent(index) {
+            async updateActiveComponent(index) {
                 // в навигации выбираем элемент и selectedComponent переключает видимость блоков
                 this.selectedComponent = index;
-                console.log("Я ПОСТАВИЛ FALSE!!!!!!");
+                const vip = await getVipUser(this.userInfo.vk_id); // вип юзер слева
+                this.vipUser = vip.vip;
+                this.businessUser = vip.business;
                 this.isTarif = false;
+                this.isReff = false;
             },
             updateIsClicked(flag) {
                 // не помню уже для чего, лучше не трогать :)))
@@ -189,8 +203,12 @@
             openReff() {
                 console.log('home open reff');
                 this.selectedComponent = 1;
-                // this.isReff = true;
-            }
+                this.isReff = true;
+            },
+            // changeReff(event) {
+            //     this.isReff = event;
+            //     console.log(this.isReff);
+            // }
         },
     };
 </script>
@@ -216,6 +234,10 @@
         display: flex;
         flex-direction: column;
         row-gap: 46px;
+        @media (min-width: 1440px) {
+            width: 1160px;
+            padding: 0;
+        }
         @media (max-width: 1200px) {
             padding: 0px 50px;
         }
@@ -325,7 +347,7 @@
     }
 
     .card {
-        height: 276px;
+        width: 100%;
         background: #2F3251;
         border-radius: 10px;
         padding: 30px 50px;

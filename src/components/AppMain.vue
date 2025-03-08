@@ -11,7 +11,7 @@
             <span>&mdash; Зарабатывайте неприлично много в максимально выгодном маркетинге в истории партнерских программ — гибридный бинар с бесконечной глубиной, до 96% в сеть.</span>
             <div class="row">
                 <AppGoodButton :text="text2" class="ref_btn" @click="openLinks"/>
-                <AppBadButton :text="text3" class="ref_btn"/>
+                <AppBadButton :text="text3" class="ref_btn" @click="openPres"/>
             </div>
         </div>
         <div class="item">
@@ -31,15 +31,27 @@
         <h1>Ваши реферальные ссылки</h1>
         <div class="item2">
             <span>Реферальная ссылка:</span>
-            <strong><span>https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
+            <div class="row2">
+                <strong><span>{{ refLink }}</span></strong>
+                <img src="@/assets/images/copy.png" @click="copyLink(refLink, 1)">
+                <span class="green" v-if="isCopy == 1">Скопировано!</span>
+            </div>
         </div>
         <div class="item2">
             <span>Реферальная ссылка для ВК:</span>
-            <strong><span>https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
+            <div class="row2">
+                <strong><span>{{ refVkLink }}</span></strong>
+                <img src="@/assets/images/copy.png" @click="copyLink(refVkLink, 2)">
+                <span class="green" v-if="isCopy == 2">Скопировано!</span>
+            </div>
         </div>
         <div class="item2">
             <span>Премиальная ссылка для обладателей пакетов Business, Leader:</span>
-            <strong><span v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">https://lk.intelektaz.com/?ref={{ userData.vk_id }}</span></strong>
+            <div class="row2">
+                <strong><span v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">{{ refPremiumLink }}</span></strong>
+                <img src="@/assets/images/copy.png" @click="copyLink(refPremiumLink, 3)">
+                <span class="green" v-if="isCopy == 3">Скопировано!</span>
+            </div>
             <strong><span v-if="!packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">Не доступно</span></strong>
         </div>
         <span>Для максимального охвата аудитории используйте все доступные вам информационные источники. Чем больше пользователей перейдет по вашей реферальной ссылке, тем успешнее будет ваш бизнес - больше подписчиков, больше клиентов, больше доход по партнерской программе.</span>
@@ -67,7 +79,26 @@
                 referData: [],
                 userData: [],
                 packages: ["Business", "Leader"],
-                isLinks: false
+                isLinks: false,
+                isCopy: 0
+            }
+        },
+        computed: {
+            refLink() {
+                return `https://lk.intelektaz.com/?ref=${this.userData.vk_id}`;
+            },
+            refVkLink() {
+                return `https://lk.intelektaz.com/?ref=${this.userData.vk_id}`;
+            },
+            refPremiumLink() {
+                return `https://lk.intelektaz.com/?ref=${this.userData.vk_id}`;
+            }
+        },
+        watch: {
+            links(newValue) {
+                this.isLinks = newValue;
+                // this.$emit("update:links", false);
+                console.log("КИНУЛ FALSE"); 
             }
         },
         async created() {
@@ -92,7 +123,7 @@
             this.isLinks = this.links;
             if (this.links) {
                 this.openLinks();
-                this.$emit("update:links", false);
+                // this.$emit("update:links", false);
             }
             console.log(this.links, this.isLinks);
         },
@@ -105,6 +136,16 @@
             },
             openLinks() {
                 this.isLinks = true;
+            },
+            async copyLink(link, index) {
+                this.isCopy = index;
+                console.log(this.isCopy);
+                await navigator.clipboard.writeText(link);
+                setTimeout(() => { this.isCopy = 0; console.log(this.isCopy);}, 2000);
+                console.log(this.isCopy);
+            },
+            openPres() {
+                window.open("/Intelektaz.pdf", "_blank");
             }
         }
     };
@@ -147,6 +188,19 @@
         display: flex;
         column-gap: 30px;
     }
+    .row2 {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
+    .row2 img {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    .row2 span {
+        line-height: 2;
+    }
     .footer {
         width: 100%;
         display: flex;
@@ -166,5 +220,15 @@
         display: flex;
         flex-direction: column;
         row-gap: 10px;
+    }
+    .green {
+        color: green;
+        animation: ShowEasy 2s ease-in;
+        opacity: 0;
+    }
+    @keyframes ShowEasy {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
     }
 </style>

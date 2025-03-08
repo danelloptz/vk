@@ -90,7 +90,7 @@
                 v-model="vkGroupLink" 
                 placeholder="ВК группа" >
             <span @click="addVKGroup">ДОБАВИТЬ</span>
-            <h3 v-if="userData">Подписки: {{ userData.group?.rotation_count }}</h3>
+            <h3 v-if="userData">Подписки: {{ userData.group?.count_subs_from_service }}</h3>
         </div>
         <div class="row2">
             <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
@@ -103,7 +103,7 @@
                 v-model="vkVideoLink" 
                 placeholder="ВК видео" >
             <span @click="addVKVideo">ДОБАВИТЬ</span>
-            <h3 v-if="userData">Просмотры: {{ userData.videoStat }}</h3>
+            <h3 v-if="userData">Просмотры: {{ userData.videoStat || 0 }}</h3>
         </div>
 
         <div v-if="selectedInterests.length > 0" class="selected-countries">
@@ -135,8 +135,8 @@
         <span v-if="isNotSelectInterest" class="error_message">Не выбраны интересы!</span>
         <a @click="nextStep">Автопродвижение</a>
         <div class="auto">
-            <span>Блок <strong>«Ваше предложение»</strong> - отображается только у обладателей пакетов <strong>Business и Leader</strong> в виде большого центрального рекламного блока, и на тарифе <strong>VIP и пакетах Business и Leader</strong>  в левом рекламном блоке. У пользователей  Free, Start и Standard - эта информация отображается только в разделе структура.</span>
-            <span><i><strong>Сделайте свое предложение пользователям INTELEKTAZ, прямо сейчас</strong></i></span>
+            <span>Блок <strong>«Ваше предложение»</strong> - отображается только у обладателей пакетов <strong>Business и Leader</strong> в виде большого центрального рекламного блока, и на тарифе <strong>VIP и пакетах Business и Leader</strong>  в левом рекламном блоке.</span>
+            <span><i><strong>Сделайте свое предложение пользователям INTELEKTAZ, прямо сейчас:</strong></i></span>
         </div>
         <h3>Ваше предложение:</h3>
         <textarea
@@ -147,7 +147,7 @@
             v-model="siteLink" 
             placeholder="Сайт" >
         <AppGroupOrUser 
-            :objectData="userData"
+            :objectData="businessUser"
             :isBusiness="isBusiness"
             class="card"
         />
@@ -170,6 +170,9 @@
 
 export default {
     components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal },
+    props: { 
+        businessUser: Object
+    },
     data() {
         return {
             userData: null,
@@ -342,10 +345,10 @@ export default {
                     this.searchQueryGender = this.userData.sex_db;
                 if (this.userData.interests) 
                     this.selectedInterests = [...this.userData.interests];
-                if (this.userData.group?.vip_offer) {
-                    this.sentence = this.userData.group.vip_offer_text;
-                    this.siteLink = this.userData.group.group_link;
-                }
+                // if (this.userData.group?.vip_offer) {
+                    this.sentence = this.userData?.vip_offer_text;
+                    this.siteLink = this.userData?.vip_offer_link;
+                // }
             },
             async saveSettings() {
                 const payload = {
@@ -354,8 +357,8 @@ export default {
                     sex: this.searchQueryGender != this.userData.sex_db ? this.searchQueryGender : null,
                     interests: this.selectedInterests != this.userData.interests ? this.selectedInterests : null,
                     social_links: this.userData.social_links != this.beforeLinks ? this.userData.social_links : null,
-                    vip_offer: this.sentence,
-                    group_link: this.siteLink,
+                    vip_offer_text: this.sentence,
+                    vip_offer_link: this.siteLink,
                 };
 
                 const response = await sendNewSettings(payload, localStorage.getItem("token")); 
@@ -390,7 +393,7 @@ export default {
         }
     }
     .card {
-        height: 276px;
+        width: 100%;
         background: #2F3251;
         border-radius: 10px;
         padding: 30px 50px;

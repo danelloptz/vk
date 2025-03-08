@@ -17,13 +17,14 @@
             </div>
             <div class="item" v-for="(item, index) in userData?.packages" :key="index">
                 <span>Осталось дней ({{ item.package_name }}):</span>
-                <span><strong>{{ getDays(item) || "∞" }}</strong></span>
+                <span v-if="getDays(item)"><strong>{{ getDays(item) }}</strong></span>
+                <span v-else style="font-size: 40px;"><strong>{{ "∞" }}</strong></span>
             </div>
         </div>
         <table>
             <div class="bg"></div>
-            <div class="gradient-column" style="left: 71%; width: calc((100% / 7.7));"></div>
-            <div class="gradient-column2" style="left: calc(100% * 6 / 6.95); width: calc(100% / 7.7);"></div>
+            <div class="gradient-column" style="left: calc(100% * 5 / 7.05); width: calc((100% / 7.7));"></div>
+            <div class="gradient-column2" style="left: calc(100% * 6 / 6.993); width: calc(100% / 7.7);"></div>
             <thead>
                 <tr>
                     <th></th>
@@ -315,7 +316,7 @@
         <div class="booster">
             <div class="booster-img"></div>
             <div class="col">
-                <span><strong>Booster</strong> - инструмент, который дает мощный всплеск подписчиков, просмотров видео, постов, за счет обнуления показателей внутренней статистики тарифа/пакета. Доступен на тарифе VIP, пакетах Business, Leader</span>
+                <span><strong>Booster</strong> - инструмент, который дает мощный всплеск подписчиков, просмотров видео, постов, за счет обнуления показателей внутренней статистики тарифа/пакета. Доступен на тарифе VIP, пакетах Business, Leader.</span>
                 <strong><span>Цена 30 USDT</span></strong>
                 <AppGoodButton :text="text1" class="booster_btn" @click="buy"/>
             </div>
@@ -406,12 +407,12 @@ import { getUserInfo } from "@/services/user";
     }
     .item {
         display: flex;
+        align-items: center;
         column-gap: 7px;
     }
     table {
         width: 100%;
         border-radius: 10px;
-        border-collapse: collapse;
         position: relative;
         z-index: 9;
     }
@@ -447,6 +448,7 @@ import { getUserInfo } from "@/services/user";
     .minus {
         align-self: center;
         justify-self: center;
+        margin: auto;
         width: 30px;
         height: 2px;
         background: white;

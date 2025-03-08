@@ -9,7 +9,7 @@
                 <h2>{{ userInfo.group.group_name }}</h2>
             </div>
             <div class="group_card_item">
-                <span>{{ userInfo.group?.group_subscribes || 700 }} подписчиков</span>
+                <span>{{ userInfo.group?.count_subs_vk }} подписчиков</span>
             </div>
         </div>
 

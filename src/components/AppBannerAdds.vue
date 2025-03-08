@@ -6,9 +6,9 @@
         @update:visibility1="isModal = $event"
     />
     <section class="adds">
-        <h1>Банерная реклама с геотаргетингом по интересам</h1>
-        <span>Тысячи пользователей с бизнес интересами ежедневно и многократно посещают кабинет Intelektaz. У нас точно есть ваши клиенты.  Покажите им свое предложение.</span>
-        <span>Вы можете выбрать свою целевую аудиторию, которой ваша реклама будет показываться в приоритете. Этим действием вы не заузите общее количество показов, если в моменте вашей аудитории нет, то баннер все равно будет показан по близким к вашей аудитории параметрам.</span>
+        <h1 class="normal">Баннерная реклама с геотаргетингом по интересам</h1>
+        <span class="normal">Тысячи пользователей с бизнес интересами ежедневно и многократно посещают кабинет Intelektaz. У нас точно есть ваши клиенты.  Покажите им свое предложение.</span>
+        <span class="normal">Вы можете выбрать свою целевую аудиторию, которой ваша реклама будет показываться в приоритете. Этим действием вы не заузите общее количество показов, если в моменте вашей аудитории нет, то баннер все равно будет показан по близким к вашей аудитории параметрам.</span>
         <div class="container">
             <div class="item">
                 <h2>Выбрать страну:</h2>
@@ -436,7 +436,18 @@
 
                     formData.append("ads_img", this.img.get("file"));
                     
-                    formData.append("days_count", this.daysSummary);
+                    const days_count = {
+                        "days_1": this.selectedCounts[0],
+                        "days_7": this.selectedCounts[1],
+                        "days_30": this.selectedCounts[2],
+                        "days_90": this.selectedCounts[3],
+                        "days_180": this.selectedCounts[4],
+                        "days_365": this.selectedCounts[5],
+                    };
+
+                    console.log(days_count);
+                    
+                    formData.append("days_count", JSON.stringify(days_count));
                     formData.append("vk_id", this.userData.vk_id);
                     formData.append("ads_text", "text");
                     formData.append("ads_url", this.link);
@@ -454,6 +465,10 @@
                     this.isModal = true;
                     this.title = payment.status ? "УСПЕШНО!" : "ОШИБКА!";
                     this.msg = payment.status ? "Покупка завершена. Ваша реклама добавлена." : "Не удалось оплатить покупку рекламного банера.";
+                } else {
+                    this.isModal = true;
+                    this.title = "ОШИБКА!"
+                    this.msg = "Недостаточно средств на балансе";
                 }
             }
         }
@@ -508,10 +523,7 @@
         font-family: 'OpenSans';
         position: relative;
         @media (max-width: 1300px) {
-            width: 45%;
-        }
-        @media (max-width: 500px) {
-            width: 70vw;
+            width: 100%ж
         }
     }
     .arrow_down {
@@ -697,5 +709,9 @@
     .edit img {
         width: 20px;
         height: 20px;
+    }
+    .normal {
+        text-align: start !important;
+        padding: 0 !important;
     }
 </style>

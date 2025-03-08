@@ -32,7 +32,7 @@
 
             <div class="item">
                 <h2>Срок оформления:</h2>
-                <div class="dropdown">
+                <div class="dropdown" :style="{ pointerEvents : isYear ? 'none' : 'all'}">
                     <input
                         v-model="selectedTime"
                         type="text"
@@ -109,11 +109,14 @@ export default {
             text1: "ОПЛАТИТЬ",
             error: false,
             currTarif: null,
-            errorMessage: ""
+            errorMessage: "",
+            isYear: false
         };
     },
     computed: {
         summary() {
+            if (this.selectedPackage == "Leader") return 500;
+            if (this.selectedPackage == "Business") return 300;
             return this.currTime * this.currPrice;
         }
     },
@@ -124,6 +127,11 @@ export default {
                 this.selectedPackage = newValue;
                 this.currTarif = this.tarrifs.find(item => item.package_name == this.package);
                 this.currPrice = this.currTarif?.monthly_cost;
+                if (newValue == "Leader" || newValue == "Business") {
+                    this.isYear = true;
+                    this.currTime = 12;
+                    this.selectedTime = "1 год";
+                } 
             }
         }
     },
@@ -141,6 +149,13 @@ export default {
             this.selectedPackage = pack;
             this.currPrice = price;
             this.currTarif = this.tarrifs.find(item => item.package_name == pack);
+            if (this.selectedPackage == "Leader" || this.selectedPackage == "Business") {
+                this.isYear = true;
+                this.currTime = 12;
+                this.selectedTime = "1 год";
+            } else {
+                this.isYear = false;
+            }
             this.hideDropdownPackage();
         },
         hideDropdownTime() {

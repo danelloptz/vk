@@ -13,7 +13,7 @@
             <div class="prices">
                 <div class="row" v-for="(tarrif, index) in tarrifs" :key="index">
                     <span>{{ tarrif }}</span>
-                    <strong><span>{{ prices[index] }}</span></strong>
+                    <strong><span>{{ prices[index] }} USDT</span></strong>
                 </div>
             </div>
             <div class="group" v-if="userInfo.group">
