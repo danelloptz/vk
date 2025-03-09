@@ -200,10 +200,11 @@
             },
             openTarif() {
                 // вызываем это, когда где-то захотят открыть Тарифы
-                this.isReff = false;
-                this.isTarif = true;
+                // this.isReff = false;
+                // this.isTarif = true;
                 console.log("Я ПОСТАВИЛ TRUE!!!!!!");
-                this.selectedComponent = 4;
+                this.selectedComponent = 9;
+                localStorage.setItem("page", 9);
             },
             openRot() {
                 // если откуда-то захотят открыть Ротацию
