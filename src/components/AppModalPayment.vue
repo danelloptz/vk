@@ -20,7 +20,7 @@
                     <img :class="{'rotated': isDropdownVisiblePackage}" src="@/assets/images/arrow_down.png" class="arrow_down">
                     <ul v-if="isDropdownVisiblePackage" class="dropdown-menu">
                         <li
-                            v-for="item in tarrifs"
+                            v-for="item in newTarrifs"
                             :key="item.package_name"
                             @mousedown.prevent="selectPackage(item.package_name, item.monthly_cost)"
                         >
@@ -70,7 +70,7 @@
             </div>
             <img src="@/assets/images/auth_image.png" class="left_image">
             <img src="@/assets/images/auth_image.png" class="right_image">
-            <AppGoodButton :text="text1" @click="makePayment" />
+            <AppGoodButton :text="text1" @click="makePayment" class="btn" />
         </section>
     </div>
 </template>
@@ -110,7 +110,8 @@ export default {
             error: false,
             currTarif: null,
             errorMessage: "",
-            isYear: false
+            isYear: false,
+            newTarrifs: []
         };
     },
     computed: {
@@ -140,6 +141,7 @@ export default {
             if (this.visibility1) {
                 this.$emit('update:visibility1', false);
             }
+            this.error = false;
             this.$emit('close');
         },
         hideDropdownPackage() {
@@ -156,6 +158,7 @@ export default {
             } else {
                 this.isYear = false;
             }
+            this.error = false;
             this.hideDropdownPackage();
         },
         hideDropdownTime() {
@@ -164,6 +167,7 @@ export default {
         selectTime(label, count) {
             this.selectedTime = label;
             this.currTime = count;
+            this.error = false;
             this.hideDropdownTime();
         },
         async makePayment() {
@@ -197,6 +201,9 @@ export default {
             }
         }
         this.userData = response;
+        this.newTarrifs = this.tarrifs.filter(item => item.package_name != "Free");
+        console.log(this.newTarrifs);
+
     }
 };
 </script>
@@ -235,36 +242,38 @@ export default {
         display: flex;
         flex-direction: column;
         row-gap: 10px;
+        margin-top: 20px;
+        position: relative;
     }
     .modal_wrapper {
         width: 100vw;
         height: 100vh;
-        position: absolute;
+        position: fixed;
         left: 0;
         top: 0;
         z-index: 900;
         background: #070a29;
         display: flex;
         justify-content: center;
-        align-items: center;
+        /* align-items: center; */
     }
 
     .modal {
         width: 760px;
         border-radius: 10px;
         position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
-        display: flex;
+        /* display: flex;
         flex-direction: column;
-        /* align-items: center; */
-        justify-content: center;
+         align-items: center; 
+        justify-content: center; */
         padding: 80px 50px;
         z-index: 2;
-        overflow-y: auto;
+        overflow-y: scroll;
         scrollbar-width: none;
         row-gap: 20px;
         box-sizing: border-box;
-        margin-top: -50px;
-        align-self: center;
+        /* margin-top: -50px; */
+        /* align-self: center; */
         @media (max-width: 1000px) {
             width: 80vw;
         }
@@ -301,7 +310,7 @@ export default {
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: 120%;
         background: url("@/assets/images/background.png");
         background-color: #1B1E3D;
         background-size: contain;
@@ -449,6 +458,12 @@ export default {
     .error {
         color: red;
     }
+    .row {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
     .row img {
         width: 30px;
         height: 30px;
@@ -457,5 +472,9 @@ export default {
     }
     .row span {
         font-size: 18px;
+    }
+    .btn {
+        margin-top: 20px;
+        position: relative;
     }
 </style>

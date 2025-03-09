@@ -85,13 +85,13 @@
         },
         computed: {
             refLink() {
-                return `https://lk.intelektaz.com/?ref=${this.userData.vk_id}`;
+                return `https://intelektaz.com/?ref=${this.userData.vk_id}`;
             },
             refVkLink() {
-                return `https://lk.intelektaz.com/?ref=${this.userData.vk_id}`;
+                return `https://intelektaz.com/?ref=${this.userData.vk_id}`;
             },
             refPremiumLink() {
-                return `https://lk.intelektaz.com/?ref=${this.userData.vk_id}`;
+                return `https://intelektaz.com/?ref=${this.userData.vk_id}`;
             }
         },
         watch: {

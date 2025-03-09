@@ -211,14 +211,14 @@
                         <span>{{ index + 1 }}</span>
                     </td>
                     <td>
-                        <img :src="item.add_img" >
+                        <img :src="item.add_img" class="image" >
                     </td>
                     <td>
                         <span v-if="item.status">активно</span>
                         <span v-if="!item.status">неактивно</span>
                     </td>
                     <td>
-                        <span>{{ item.time_left }}</span>
+                        <span>{{ item.time_left + 1 }}</span>
                     </td>
                     <td>
                         <div class="edit">
@@ -314,7 +314,8 @@
 
             const adds = await getUserAdds(this.userData.vk_id);
             this.userAdds = adds.ads;
-            console.log(this.userAdds);
+            this.userAdds = this.userAdds.reverse();
+            console.log("РЕКЛАМЫ ПОЛЬЗОВАТЕЛЯ: ", this.userAdds);
             try {
                 const response = await fetch('https://namaztimes.kz/ru/api/country');
                 const data = await response.json();
@@ -713,5 +714,9 @@
     .normal {
         text-align: start !important;
         padding: 0 !important;
+    }
+    .image {
+        max-width: 200px;
+        max-height: 150px;
     }
 </style>

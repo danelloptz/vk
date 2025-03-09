@@ -19,7 +19,8 @@
                 :src="item.ads_img"
                 :style="{
                     // aspectRatio: orientation === 'vertical' ? '1/1' : 'auto',
-                    height: orientation === 'vertical' ? 'auto' : '160px'
+                    height: orientation === 'vertical' ? 'auto' : '140px',
+                    maxWidth: orientation === 'vertical' ? 'auto' : '740px'
                 }"
                 @click="openLink(item.ads_url)"
             >

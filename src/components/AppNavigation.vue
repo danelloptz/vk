@@ -88,9 +88,14 @@
         },
         methods: {
             setActive(index) {
+                if (this.activeIndex == index) {
+                    this.$emit("update-repeatClick", index);
+                } else {
+                    this.$emit("update-active-index", index);
+                }
                 this.activeIndex = index;
-                this.$emit("update-active-index", index);
                 this.$emit("update-isClicked", false);
+                console.log('СРАБОТАЛ setActive');
                 if (this.isShown ) this.setShown();
             },
             setShown() {

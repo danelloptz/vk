@@ -7,7 +7,8 @@
                 <AppNavigation
                     :indexPage="selectedComponent" 
                     @update:indexPage="selectedComponent = $event" 
-                    @update-active-index="updateActiveComponent" 
+                    @update-active-index="updateActiveComponent"
+                    @update-repeatClick="updateActiveComponent" 
                     @update-isClicked="updateIsClicked"
                 />
                 <div class="vip" v-if="vipUser">
@@ -19,12 +20,12 @@
                         </div>
                     </div>
                     <span>{{ vipUser.vip_offer_text }}</span>
-                    <a :href="vipUser.group_link">{{ vipUser.group_link }}</a>
+                    <a :href="vipUser.group_link" target="_blank">Ссылка</a>
                     <div class="vip_footer">
                         <div class="vip_links">
-                            <a :href="vkData.link"><img src="@/assets/images/vk.png"></a>
-                            <a :href="tgData.link"><img src="@/assets/images/telegram.png"></a>
-                            <a :href="whtData.link"><img src="@/assets/images/whatsapp.png"></a>
+                            <a :href="vkData.link" target="_blank"><img src="@/assets/images/vk.png"></a>
+                            <a :href="tgData.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
+                            <a :href="whtData.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
                         </div>
                         <span>VIP-предложение</span>
                     </div>
@@ -52,6 +53,7 @@
                 <AppBannerAdds v-if="isClicked && !isReff" />
                 <AppHelp v-if="selectedComponent === 7 && !isReff" @update-isInstructions="updateActiveComponent(6)" />
                 <AppComeToAssembly v-if="selectedComponent === 8 && !isReff" />
+                <AppRotationPlans v-if="selectedComponent === 9 && !isReff" /> 
                 <AppAdd
                     :isClicked="isClicked" 
                     @update:isClicked="isClicked = $event" 
@@ -79,12 +81,13 @@
     import AppMain from '@/components/AppMain.vue';
     import AppAiGenerator from '@/components/AppAiGenerator.vue';
     import AppComeToAssembly from '@/components/AppComeToAssembly.vue';
+    import AppRotationPlans from '@/components/AppRotationPlans.vue';
     import { getUserInfo, getVipUser } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans },
         data() {
             return {
                 verticalAddCount: 2,
@@ -147,6 +150,10 @@
             }
             this.userInfo = userInfo;
 
+            if (!localStorage.getItem("page")) this.selectedComponent = 1;
+            this.selectedComponent = +localStorage.getItem("page");
+            console.log(+localStorage.getItem("page"), this.selectedComponent);
+
             if (["Leader", "Business"].includes(this.userInfo.package_name)) this.isBusiness = true;
 
             const otherAdds = await getOtherAdds(userInfo.vk_id); // рекламные банеры слева и снизу
@@ -177,13 +184,15 @@
                 console.log(this.orientation);
             },
             async updateActiveComponent(index) {
-                // в навигации выбираем элемент и selectedComponent переключает видимость блоков
+                localStorage.setItem("page", index);
                 this.selectedComponent = index;
                 const vip = await getVipUser(this.userInfo.vk_id); // вип юзер слева
                 this.vipUser = vip.vip;
                 this.businessUser = vip.business;
                 this.isTarif = false;
                 this.isReff = false;
+                console.log('СРАБОТАЛО ОБНОВЛЕНИЕ НАВИГАЦИИ');
+                if (this.selectedComponent == 4) this.openRot();
             },
             updateIsClicked(flag) {
                 // не помню уже для чего, лучше не трогать :)))
@@ -191,19 +200,23 @@
             },
             openTarif() {
                 // вызываем это, когда где-то захотят открыть Тарифы
+                this.isReff = false;
                 this.isTarif = true;
                 console.log("Я ПОСТАВИЛ TRUE!!!!!!");
                 this.selectedComponent = 4;
             },
             openRot() {
                 // если откуда-то захотят открыть Ротацию
+                this.isReff = false;
                 this.isTarif = false;
                 this.selectedComponent = 4;
+                console.log('ОТКРЫВАЮ РОТАЦИЮ!', this.isTarif);
             },
             openReff() {
                 console.log('home open reff');
                 this.selectedComponent = 1;
                 this.isReff = true;
+                this.isTarif = false;
             },
             // changeReff(event) {
             //     this.isReff = event;
@@ -230,16 +243,13 @@
     a { text-decoration: underline; }
     .container {
         width: 100%;
-        padding: 0px 140px;
+        padding: 0px 50px;
         display: flex;
         flex-direction: column;
         row-gap: 46px;
         @media (min-width: 1440px) {
             width: 1160px;
             padding: 0;
-        }
-        @media (max-width: 1200px) {
-            padding: 0px 50px;
         }
         @media (max-width: 400px) {
             padding: 0px 25px;

@@ -47,8 +47,8 @@
         watch: {
             isTarif(newValue) {
                 console.log('поменялось значение');
+                this.isPackage = newValue;
                 if (newValue) {
-                    this.isPackage = true;
                     this.$emit("update:isTarif", false);
                 }
             }

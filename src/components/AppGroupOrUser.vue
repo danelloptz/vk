@@ -16,17 +16,17 @@
                     {{ objectData?.packages?.[objectData?.packages?.length - 1]?.package_name ?? objectData.status ?? objectData?.package_name}}
                 </span>
             </div>
-            <span v-if="objectData && objectData.vk_id">ID: {{ objectData.vk_id }}</span>
+            <span v-if="objectData && objectData.vk_id && !objectData?.group_link">ID: {{ objectData.vk_id }}</span>
             <span style="margin-top: 20px;" v-if="objectData && (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || objectData?.vip_offer_text)">{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span>
-            <a v-if="objectData && (objectData.group?.group_link || objectData?.group_link)" :href="objectData.group?.group_link || objectData?.group_link">Ссылка</a>
+            <a v-if="objectData && (objectData.group?.group_link || objectData?.group_link)" :href="objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
             <div class="footer_data_links" style="margin-top: 20px;">
                 <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
                 <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a> -->
-                <a v-if="objectData" :href="vkData?.link"><img src="@/assets/images/vk.png"></a>
-                <a v-if="objectData" :href="tgData?.link"><img src="@/assets/images/telegram.png"></a>
-                <a v-if="objectData" :href="whtData?.link"><img src="@/assets/images/whatsapp.png"></a>
+                <a v-if="objectData" :href="vkData?.link"  target="_blank"><img src="@/assets/images/vk.png"></a>
+                <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
+                <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
         <span v-if="objectData && (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || objectData?.vip_offer_text)" class="business">Business-предложение</span>

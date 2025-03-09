@@ -15,7 +15,7 @@
                 <span>Ваш тариф / пакет:</span>
                 <span><strong>{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</strong></span>
             </div>
-            <div class="item" v-for="(item, index) in userData?.packages" :key="index">
+            <div class="item" v-for="(item, index) in newTarrif" :key="index">
                 <span>Осталось дней ({{ item.package_name }}):</span>
                 <span v-if="getDays(item)"><strong>{{ getDays(item) }}</strong></span>
                 <span v-else style="font-size: 40px;"><strong>{{ "∞" }}</strong></span>
@@ -23,8 +23,8 @@
         </div>
         <table>
             <div class="bg"></div>
-            <div class="gradient-column" style="left: calc(100% * 5 / 7.05); width: calc((100% / 7.7));"></div>
-            <div class="gradient-column2" style="left: calc(100% * 6 / 6.993); width: calc(100% / 7.7);"></div>
+            <div class="gradient-column" style="width: calc((100% / 7.7));"></div>
+            <div class="gradient-column2" style="width: calc(100% / 7.7);"></div>
             <thead>
                 <tr>
                     <th></th>
@@ -39,7 +39,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Автопостинг</td>
@@ -48,7 +48,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>ИИ менеджер продаж</td>
@@ -57,7 +57,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>SEO оптимизация и поисковый трафик</td>
@@ -66,7 +66,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>ИИ анализ группы</td>
@@ -75,7 +75,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>ИИ сценарии для видео</td>
@@ -84,7 +84,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>ИИ помощник</td>
@@ -93,7 +93,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>VIP предложение</td>
@@ -102,7 +102,7 @@
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Business предложение</td>
@@ -111,7 +111,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Автоподписка</td>
@@ -120,7 +120,7 @@
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Рефподписка</td>
@@ -129,7 +129,7 @@
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Баннерная реклама</td>
@@ -138,7 +138,7 @@
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Рекламная лента, USDT</td>
@@ -147,7 +147,7 @@
                     <td><span>2</span></td>
                     <td><span>1.5</span></td>
                     <td><span>1</span></td>
-                    <td><span>1</span></td>
+                    <td style="border-right: none;"><span>1</span></td>
                 </tr>
                 <tr>
                     <td>Ежемесячный розыгрыш VIP тарифа</td>
@@ -156,7 +156,7 @@
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Ротация групп</td>
@@ -165,7 +165,7 @@
                     <td><span>10/10</span></td>
                     <td><span>10/10</span></td>
                     <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
+                    <td style="border-right: none;"><span>10/10</span></td>
                 </tr>
                 <tr>
                     <td>Ротация видео</td>
@@ -174,7 +174,7 @@
                     <td><span>10/10</span></td>
                     <td><span>10/10</span></td>
                     <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
+                    <td style="border-right: none;"><span>10/10</span></td>
                 </tr>
                 <tr>
                     <td>Ротация постов</td>
@@ -183,7 +183,7 @@
                     <td><span>10/10</span></td>
                     <td><span>10/10</span></td>
                     <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
+                    <td style="border-right: none;"><span>10/10</span></td>
                 </tr>
                 <tr>
                     <td>Booster (30 USDT) </td>
@@ -192,7 +192,7 @@
                     <td><div class="minus"></div></td>
                     <td><span>Доступен, вкл. 0 шт.</span></td>
                     <td><span>Включено 12 шт. (360 USDT)</span></td>
-                    <td><span>Включено 12 шт. (360 USDT)</span></td>
+                    <td style="border-right: none;"><span>Включено 12 шт. (360 USDT)</span></td>
                 </tr>
                 <tr>
                     <td>Клиентский маркетинг, ур.</td>
@@ -201,7 +201,7 @@
                     <td><span>5</span></td>
                     <td><span>7</span></td>
                     <td><span>8</span></td>
-                    <td><span>10-15</span></td>
+                    <td style="border-right: none;"><span>10-15</span></td>
                 </tr>
                 <tr>
                     <td>Бинар, %</td>
@@ -210,7 +210,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><span>8%</span></td>
-                    <td><span>10-12%</span></td>
+                    <td style="border-right: none;"><span>10-12%</span></td>
                 </tr>
                 <tr>
                     <td>Быстрый старт</td>
@@ -219,7 +219,7 @@
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Matching bonus, ур.</td>
@@ -228,7 +228,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
-                    <td>5-10</td>
+                    <td style="border-right: none;">5-10</td>
                 </tr>
                 <tr>
                     <td>Ранг бонус</td>
@@ -237,7 +237,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Бонус Глобальный 1</td>
@@ -246,7 +246,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Бонус Глобальный 2</td>
@@ -255,7 +255,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Бонус Глобальный 3</td>
@@ -264,7 +264,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Авто-продвижение сервиса</td>
@@ -273,7 +273,7 @@
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok_green.png"></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
                     <td>Новые функции</td>
@@ -282,32 +282,32 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><img src="@/assets/images/ok.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
+                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
-                    <td></td>
-                    <td class="column">
+                    <td style="border-bottom: none;"></td>
+                    <td class="column first_col" style="border-bottom: none;">
                         <span><span class="big_letters">{{ tariffs[0]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                     </td>
-                    <td class="column">
+                    <td class="column"  style="border-bottom: none;">
                         <span><span class="big_letters">{{ tariffs[1]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes(plans[1]) ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
                     </td>
-                    <td class="column">
+                    <td class="column" style="border-bottom: none;">
                         <span><span class="big_letters">{{ tariffs[2]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
                     </td>
-                    <td class="column">
+                    <td class="column" style="border-bottom: none;">
                         <span><span class="big_letters">{{ tariffs[3]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                         <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
                     </td>
-                    <td class="column">
+                    <td class="column" style="border-bottom: none;">
                         <span><span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                        <AppGoodButton :text="currTarrif.includes(plans[4]) ? text2 : text1" class="btn" @click="selectPackage(plans[4])"/>
+                        <AppGoodButton :text="currTarrif.includes('Business') ? text2 : text1" class="btn" @click="selectPackage(plans[4])"/>
                     </td>
-                    <td class="column">
+                    <td class="column" style="border-right: none; border-bottom: none;">
                         <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                        <AppGoodButton :text="currTarrif.includes('Business') ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn" @click="selectPackage(plans[5])"/>
+                        <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader')) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn" @click="selectPackage(plans[5])"/>
                     </td>
                 </tr>
             </tbody>
@@ -345,6 +345,7 @@ import { getUserInfo } from "@/services/user";
                 isGoodPayment: false,
                 tariffs: [],
                 currTarrif: [],
+                newTarrif: []
             }
         },
         async created() {
@@ -356,6 +357,8 @@ import { getUserInfo } from "@/services/user";
             this.currTarrif = this.userData.packages.map(item => item.package_name);
             console.log(this.currTarrif);
             this.tariffs.forEach(item => console.log(item?.package_name));
+            this.newTarrif = (this.userData.packages.length == 1 && this.userData.packages[0].package_name == "Free") ?  this.userData.packages : this.userData.packages.filter(item => item.package_name != "Free");
+            console.log(this.newTarrif);
         },
         watch: {
             tarrifs(newValue) {
@@ -420,6 +423,10 @@ import { getUserInfo } from "@/services/user";
         border-bottom: 1px solid rgba(255, 255, 255, 0.5);
         border-right: 1px solid rgba(255, 255, 255, 0.5);
         padding: 0px 10px;
+        width: 125px;
+    }
+    .first_col {
+        min-width: 110px !important;
     }
     th {
         line-height: 3;
@@ -478,8 +485,19 @@ import { getUserInfo } from "@/services/user";
         z-index: -1;
         border-radius: 10px;
     }
+
+    .gradient-column {
+        left: 72.292% !important;
+        @media (min-width: 1440px) {
+            left: 72% !important;
+        }
+    }
     .gradient-column2 {
+        left: 86.401% !important;
         background: linear-gradient(45deg, #D19981, #DB40E6);
+        @media (min-width: 1440px) {
+            left: 86.15% !important;
+        }
     }
     .bg {
         position: absolute;

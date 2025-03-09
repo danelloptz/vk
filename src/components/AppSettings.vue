@@ -142,12 +142,13 @@
         <textarea
             v-model="sentence"
             placeholder="Описание"
+            maxlength="60"
         ></textarea>
         <input  
             v-model="siteLink" 
             placeholder="Сайт" >
         <AppGroupOrUser 
-            :objectData="businessUser"
+            :objectData="userData"
             :isBusiness="isBusiness"
             class="card"
         />

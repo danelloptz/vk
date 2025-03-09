@@ -275,7 +275,9 @@
                     console.log('Я СРАБОТАЛ!!!');
                     this.openPlans();
                     // this.$emit("update:isTarif", false);
-                } 
+                } else {
+                    this.isPlans = newValue;
+                }
             }
         }
     };
