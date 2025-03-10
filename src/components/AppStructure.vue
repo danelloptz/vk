@@ -55,11 +55,11 @@
         <div class="text_row">
             <div class="text_row_item">
                 <h2>Оборот: </h2>
-                <span>{{ struct_info.left.volume + struct_info.right.volume }}</span>
+                <span>{{ maskedStructInfo.left.volume + maskedStructInfo.right.volume }}</span>
             </div>
             <div class="text_row_item">
                 <h2>Первая линия / всего: </h2>
-                <span>{{ binarTree?.first_line_referrals }} / {{ binarTree?.total_referrals }}</span>
+                <span>{{ maskedData?.first_line_referrals }} / {{ maskedData?.total_referrals }}</span>
             </div>
         </div>
         <div class="search">
@@ -100,9 +100,9 @@
             :user="userData" 
             :activation="userData.activation" 
             :current_leg="userData.current_leg" 
-            :node="binarTree" 
+            :node="maskedData" 
             :lay="1" 
-            :root_info="{ left: struct_info.left, right: struct_info.right }"
+            :root_info="{ left: maskedStructInfo.left, right: maskedStructInfo.right }"
             @nextUser="next" 
         />
         <AppStructureLinear v-if="activeIndex == 0" 
@@ -110,6 +110,7 @@
             :key="root_vk_id"
             :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
             :lay="1" 
+            :showNums="showNums"
             @notFound="linearNotFound"
         />
         <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>   
@@ -165,6 +166,18 @@ export default {
                 num: this.showNums ? item.num : '*'.repeat(item.num.toString().length)
             }));
         },
+        maskedStructInfo() {
+            return {
+                left: {
+                    referals: this.showNums ? this.struct_info.left.referals : '*'.repeat(this.struct_info.left.referals.toString().length),
+                    volume: this.showNums ? this.struct_info.left.volume : '*'.repeat(this.struct_info.left.volume.toString().length)
+                },
+                right: {
+                    referals: this.showNums ? this.struct_info.right.referals : '*'.repeat(this.struct_info.right.referals.toString().length),
+                    volume: this.showNums ? this.struct_info.right.volume : '*'.repeat(this.struct_info.right.volume.toString().length)
+                }
+            };
+        },
         stats_data() {
             return [
                 { "img": "marketing.png", "num": this.formatNumber(this.struct_info.clients_marketing), "text": "Клиентский маркетинг, (ур.)" },
@@ -175,7 +188,37 @@ export default {
                 { "img": "global_bonus.png", "num": this.formatNumber(this.struct_info.global_bonus), "text": "Глобальный бонус, (пул)" },
                 { "img": "fast_start.png", "num": this.formatNumber(this.struct_info.fast_start_days), "text": "Быстрый старт, дней осталось" }
             ]
+        },
+        maskedData() {
+            const maskNumbers = (node) => {
+                if (!node || typeof node !== "object") return node;
+
+                let maskedNode = { ...node };
+
+                if ("first_line_referrals" in maskedNode) {
+                    maskedNode.first_line_referrals = this.showNums 
+                        ? maskedNode.first_line_referrals 
+                        : '*'.repeat(maskedNode.first_line_referrals.toString().length);
+                }
+                if ("total_referrals" in maskedNode) {
+                    maskedNode.total_referrals = this.showNums 
+                        ? maskedNode.total_referrals 
+                        : '*'.repeat(maskedNode.total_referrals.toString().length);
+                }
+
+                if ("left_leg" in maskedNode) {
+                    maskedNode.left_leg = maskNumbers(maskedNode.left_leg);
+                }
+                if ("right_leg" in maskedNode) {
+                    maskedNode.right_leg = maskNumbers(maskedNode.right_leg);
+                }
+
+                return maskedNode;
+            };
+
+            return maskNumbers(this.binarTree);
         }
+
     },
     async created() {
         const response = await getUserInfo(localStorage.getItem("token"));
@@ -203,6 +246,7 @@ export default {
         console.log(this.struct_info);  
 
         console.log(this.binarTree);
+        console.log(this.maskedData);
     },
     methods: {
         setActive(index) {

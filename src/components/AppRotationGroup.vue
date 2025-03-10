@@ -251,8 +251,9 @@
                 }
             },
             openPlans() {
-                this.isPlans = true;
-                this.$emit("update:isTarif", true);
+                // this.isPlans = true;
+                // this.$emit("update:isTarif", true);
+                this.$emit('openPlans');
             },
             watchVideo() {
                 this.isVideoShown = true;

@@ -8,7 +8,7 @@
                 @click="setActive(index)"
             >{{ item }}</span>
         </div>
-            <AppRotationGroup v-if="activeIndex === 0" :isTarif="isPackage" @update:isTarif="changeIsTariff($event)" />
+            <AppRotationGroup v-if="activeIndex === 0" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
             <AppRotationVideo v-if="activeIndex === 1"  />
             <AppRotationPosts v-if="activeIndex === 2" />
     </section>
@@ -42,6 +42,9 @@
             changeIsTariff(status) {
                 console.log('ИЗМЕНЕНИЕ ТАРИФА: ', status);
                 this.isPackage = status;
+            },
+            openPlans() {
+                this.$emit('openPlans');
             }
         },
         watch: {

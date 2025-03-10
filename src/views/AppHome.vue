@@ -47,10 +47,10 @@
                 <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
                 <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" />
-                <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :isTarif="isTarif" @update:isTarif="isTarif == $event" />
+                <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
                 <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :businessUser="businessUser" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
-                <AppBannerAdds v-if="isClicked && !isReff" />
+                <AppBannerAdds v-if="selectedComponent == 10 && !isReff" />
                 <AppHelp v-if="selectedComponent === 7 && !isReff" @update-isInstructions="updateActiveComponent(6)" />
                 <AppComeToAssembly v-if="selectedComponent === 8 && !isReff" />
                 <AppRotationPlans v-if="selectedComponent === 9 && !isReff" /> 
@@ -59,7 +59,8 @@
                     @update:isClicked="isClicked = $event" 
                     v-if="addDataHorizontal"
                     :orientation="orientationH" 
-                    :data="addDataHorizontal" />
+                    :data="addDataHorizontal"    
+                />
             </div>
         </section>
     </div>
@@ -118,6 +119,11 @@
                 // это нужно для расположения реклам, которые слева
                 return window.innerWidth <= 600 ? 'vertical' : 'horizontal';
             },
+        },
+        watch: {
+            isClicked(newValue) {
+                this.selectedComponent = newValue ? 10 : this.selectedComponent;
+            }
         },
         async created() {
             let userInfo = await getUserInfo(localStorage.getItem("token"));

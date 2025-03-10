@@ -4,6 +4,7 @@
         :message="msg" 
         :visibility1="endModal"
         @update:visibility1="endModal = $event"
+        @close="reload"
     />
     <section class="send" v-if="!stepTwo">
         <div class="row">
@@ -131,6 +132,9 @@
                     this.endModal = true;
                     this.stepTwo = false;
                 } 
+            },
+            reload() {
+                window.location.reload();
             }
         }
     };

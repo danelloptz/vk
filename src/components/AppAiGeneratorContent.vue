@@ -21,7 +21,7 @@
                     >
                     <h2>Год основания компании:</h2>
                     <input 
-                        type="number"
+                        type="text"
                         v-model="year"
                         placeholder="Год"
                         :class="{ saved: isSaved }"
@@ -57,7 +57,7 @@
                     >
                     <h2>Какой тип партнерской программы в компании?</h2>
                     <input 
-                        type="number"
+                        type="text"
                         v-model="type"
                         placeholder="Типа"
                         :class="{ saved: isSaved }"
@@ -175,6 +175,8 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
+    import { sendBrief } from "@/services/ai";
+
     export default {
         components: { AppGoodButton },
         data() {
@@ -207,16 +209,44 @@
                 allCheckboxesContent: false,
                 isSaved: false,
                 isEditable: false,
-                isEditableContent: false
+                isEditableContent: false,
+                label: "",
+                year: "",
+                description_company: "",
+                pros: "",
+                description_product: "",
+                whats_solve: "",
+                characteristics: "",
+                price: "",
+                type: "",
+                audience: "",
+                link: "",
+                reaction: ""
             }
         },
         methods: {
             setActive(index) {
                 this.activeIndex = index;
             },
-            saveSettings() {
+            async saveSettings() {
                 // TODO: отправка на сервер данных брифа
                 this.isSaved = true;
+                const payload = {
+                    "name_company": this.label,
+                    "year_foundation_of_company": this.year,
+                    "description_company": this.description_company,
+                    "competitive_advantages": this.pros,
+                    "description_product": this.description_product,
+                    "what_problems_solve": this.whats_solve,
+                    "unique_characters_of_product": this.characteristics,
+                    "price_policy": this.price,
+                    "target_audience": this.audience,
+                    "type_loyalty_programm": this.type,
+                    "link": this.link,
+                    "feedback_from_audience": this.reaction
+                };
+                const resp = await sendBrief(payload, localStorage.getItem("token"));
+                console.log(resp);
             },
             editSettings() {
                 this.isSaved = false; 

@@ -19,7 +19,7 @@
         </div>
     </section>
     <section class="rotation" v-if="isRotation && !isPlans">
-        <span class="counter">Подписки {{ watchedVideos }} из {{ totalVideos }}</span>
+        <span class="counter">Просмотры {{ watchedVideos }} из {{ totalVideos }}</span>
         <div class="group">
             <AppGroupOrUser :v-if="videosInfo" :objectData="videosQueue[currentVideoIndex]" />
             <div class="groups_block_btns">
@@ -50,6 +50,7 @@
     import { addInRotation, getRotationVideos } from "@/services/groups";
     import { getUserInfo } from "@/services/user";
     import { refreshToken } from "@/services/auth";
+    import { addView } from "@/services/groups";
     // import { getGroupInfo } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
@@ -158,7 +159,7 @@
                 }
             },
             async endRotation() {
-                const response = await addInRotation(this.userInfo.vk_id, "group");
+                const response = await addInRotation(this.userInfo.vk_id, "video");
                 console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
@@ -192,9 +193,12 @@
                 console.log(this.videosQueue[this.currentVideoIndex]);
                 this.isVideoShown = true;
             },
-            closeVideo() {
+            async closeVideo() {
                 this.isVideoShown = false;
                 if (this.isWatched) {
+                    this.isWatched = false;
+                    const resp = await addView(this.userInfo.id, this.videosQueue[this.currentVideoIndex].db_id);
+                    console.log(this.userInfo.id, this.videosQueue[this.currentVideoIndex].db_id, resp);
                     this.watchedVideos++;
                     this.videosQueue.splice(this.currentVideoIndex, 1);
                     this.subscribedCount++;

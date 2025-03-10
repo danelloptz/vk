@@ -41,7 +41,7 @@
                         @blur="hideDropdownTime"
                         readonly 
                     />
-                    <img :class="{'rotated': isDropdownVisibleTime}" src="@/assets/images/arrow_down.png" class="arrow_down">
+                    <!-- <img :class="{'rotated': isDropdo  wnVisibleTime}" src="@/assets/images/arrow_down.png" class="arrow_down"> -->
                     <ul v-if="isDropdownVisibleTime" class="dropdown-menu">
                         <li
                             v-for="(count, label) in times"
@@ -132,7 +132,11 @@ export default {
                     this.isYear = true;
                     this.currTime = 12;
                     this.selectedTime = "1 год";
-                } 
+                } else {
+                    this.isYear = true;
+                    this.currTime = 1;
+                    this.selectedTime = "1 месяц";
+                }
             }
         }
     },
@@ -142,7 +146,7 @@ export default {
                 this.$emit('update:visibility1', false);
             }
             this.error = false;
-            this.$emit('close');
+            // this.$emit('close');
         },
         hideDropdownPackage() {
             this.isDropdownVisiblePackage = false;
@@ -156,7 +160,9 @@ export default {
                 this.currTime = 12;
                 this.selectedTime = "1 год";
             } else {
-                this.isYear = false;
+                this.isYear = true;
+                this.currTime = 1;
+                this.selectedTime = "1 месяц";
             }
             this.error = false;
             this.hideDropdownPackage();

@@ -4,6 +4,7 @@
         :message="msg" 
         :visibility1="isModal"
         @update:visibility1="isModal = $event"
+        @close="reload"
     />
     <section class="come">
         <h1>Рекламная лента</h1>
@@ -34,6 +35,7 @@
     import { getUserInfo } from "@/services/user";
     import { setAdds } from "@/services/add";
     import { refreshToken } from "@/services/auth";
+    import { getConfig } from "@/services/config";
     import AppModal from '@/components/AppModal.vue';
 
     export default {
@@ -41,7 +43,6 @@
         data() {
             return {
                 tarrifs: ["Leader, Business", "VIP", "Start, Standart", "Free"],
-                prices: [1, 1, 1.5, 2, 2, 3],
                 text1: "ПОПАСТЬ В ЛЕНТУ",
                 userInfo: [],
                 isModal: false,
@@ -49,7 +50,8 @@
                 msg: "",
                 errorMsg: "",
                 isError: false,
-                price: 3
+                price: 3,
+                priceData: null
             }
         },
         async created() {
@@ -66,7 +68,19 @@
                 }
             }   
             this.userInfo = user;
+
+            this.priceData = await getConfig("groups_add_price", localStorage.getItem("token"));
         },
+        computed: {
+            prices() {
+                return [this.priceData.leader_business, 
+                        this.priceData.leader_business, 
+                        this.priceData.vip, 
+                        this.priceData.start_standart, 
+                        this.priceData.start_standart, 
+                        this.priceData.free];
+            }
+        },  
         methods: {
             async comeToAss() {
                 if (!this.userInfo.group.group_link) {
@@ -100,6 +114,9 @@
                 this.isModal = true;
                 this.title = resp.status ? "УСПЕШНО!" : "ОШИБКА!";
                 this.msg = resp.status ? "Ваша группа добавлена в рекламную ленту." : "Не удалось добавить группу в рекламную ленту.";
+            },
+            reload() {
+                window.location.reload();
             }
         }
     };

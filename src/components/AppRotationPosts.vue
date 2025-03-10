@@ -11,7 +11,7 @@
         </div>
     </section>
     <section class="rotation" v-if="isRotation && !isPlans">
-        <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
+        <span class="counter">Просмотры {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
             <AppGroupOrUser :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <span>Необходимо просмотреть и поставить лайк на последний пост в группе, если есть закрепленное сообщение, пропустите его</span>
@@ -160,7 +160,7 @@
                 this.isRotation = true;
             },
             async endRotation() {
-                const response = await addInRotation(this.userInfo.vk_id, "group");
+                const response = await addInRotation(this.userInfo.vk_id, "post");
                 console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;

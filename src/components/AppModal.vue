@@ -19,6 +19,11 @@ export default {
         visibility1: Boolean,
         visibility2: Boolean,
     },
+    watch: {
+        visibility1(newValue) {
+            console.log("ЭТО В МОДАЛ: ", newValue);
+        }
+    },
     methods: {
         close() {
             if (this.visibility1) {

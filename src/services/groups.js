@@ -162,3 +162,16 @@ export async function checkLike(post_link, group_id, vk_id) {
         return false; 
     }
 }
+
+export async function addView(user_id, video_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/video_viewed', {
+            "video_id": video_id,
+            "user_id": user_id
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при добавлении просмотра к видео", error);
+        return false; 
+    }
+}

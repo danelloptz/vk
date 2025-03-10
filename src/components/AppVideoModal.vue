@@ -6,7 +6,7 @@
                     <span class="timer" v-if="!isEnd">{{ currTime }}</span>
                     <span class="timer_msg">{{ timerMsg }}</span>
                 </div>
-                <span class="quit" @click="close">ПЕРЕЙТИ</span>
+                <span class="quit" @click="close">ЗАКРЫТЬ</span>
             </div>
             <div class="video_wrapper">
                 <iframe 
@@ -100,12 +100,12 @@ export default {
         close() {
             this.currTime = 20;
             this.timerMsg = "Пожалуйста, ждите окончания отсчета таймера";
-            this.intervalId = null;
+            // this.intervalId = null;
             this.isPlaying = false;
             this.isEnd = false;
+            this.clearTimer();
             this.$emit("update:visibility1", false);
             this.$emit("close");
-            this.clearTimer();
         }
     }
 };

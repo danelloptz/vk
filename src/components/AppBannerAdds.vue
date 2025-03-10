@@ -4,6 +4,7 @@
         :message="msg" 
         :visibility1="isModal"
         @update:visibility1="isModal = $event"
+        @close="reload"
     />
     <section class="adds">
         <h1 class="normal">Баннерная реклама с геотаргетингом по интересам</h1>
@@ -145,7 +146,7 @@
                 </div>
             </div>
         </div>
-        <span>Загрузите баннер 200х250 для бокового блока или 740х140 для нижнего блока. Вес файла не более 2 мб.</span>
+        <span style="text-align: left;">Загрузите баннер 200х250 для бокового блока или 740х140 для нижнего блока. Вес файла не более 2 мб.</span>
         <span v-if="isError" class="error">Не подходящий размер изображения!</span>
         <AppGoodButton :text="text1" @click="triggerFileUpload" />
         <input 
@@ -243,6 +244,7 @@
     import { getUserInfo } from "@/services/user";
     import { sendOtherAdd, getUserAdds } from "@/services/add";
     import { refreshToken } from "@/services/auth";
+    import { getConfig } from "@/services/config";
     import AppModal from '@/components/AppModal.vue';
 
     export default {
@@ -277,7 +279,6 @@
                 isImageUploaded: false,
                 days: ["1 день - ", "7 дней - ", "30 дней - ", "90 дней - ", "180 дней - ", "365 дней - "],
                 daysNum: [1, 7, 30, 90, 180, 365],
-                prices: [10, 50, 150, 400, 700, 990],
                 selectedCounts: [0, 0, 0, 0, 0, 0],
                 daysSummary: 0,
                 priceSummary: 0,
@@ -287,7 +288,8 @@
                 position: "",
                 isModal: false,
                 title: "",
-                msg: ""
+                msg: "",
+                pricesData: null
             }
         },
         computed: {
@@ -296,6 +298,13 @@
                     country.toLowerCase().startsWith(this.searchQuery.toLowerCase())
                 );
             },
+            prices() {
+                let values = [];
+                for (let value of Object.values(this.pricesData)) {
+                    values.push(value);
+                }
+                return values;
+            }  
         },
         async created() {
             const user_data = await getUserInfo(localStorage.getItem("token"));
@@ -311,6 +320,8 @@
                 }
             }
             this.userData = user_data;
+
+            this.pricesData = await getConfig("add_price", localStorage.getItem("token"));
 
             const adds = await getUserAdds(this.userData.vk_id);
             this.userAdds = adds.ads;
@@ -471,6 +482,9 @@
                     this.title = "ОШИБКА!"
                     this.msg = "Недостаточно средств на балансе";
                 }
+            },
+            reload() {
+                window.location.reload();
             }
         }
     };

@@ -1,7 +1,7 @@
 <template>
     <section class="main" v-if="!isLinks">
         <div class="item">
-            <h1>РАСШИРЬТЕ ГРАНИЦЫ СВОЕГО БИЗНЕЦА С ИИ Intelektaz</h1>
+            <h1>РАСШИРЬТЕ ГРАНИЦЫ СВОЕГО БИЗНЕСА С ИИ Intelektaz</h1>
             <span>Подключите эффективное продвижения с искуственным интеллектом. Выберите тариф прямо сейчас:</span>
             <AppGoodButton :text="text1" class="tarif_btn" @click="openTarif" />
         </div>

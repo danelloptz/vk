@@ -7,6 +7,20 @@
         @update:visibility1="isModal = $event"
         @update:isGoodPayment="isGoodPayment = $event"
     />
+    <AppModal 
+        :title="title1" 
+        :message="msg1" 
+        :visibility1="isGoodPayment"
+        @update:visibility1="isGoodPayment = $event"
+        @close="reload"
+    />
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isBooster"
+        @update:visibility1="isBooster = $event"
+        @close="reload"
+    />
 
     <section class="plans">
         <h2>Выберите свой идеальный вариант продвижения. Доверьте ИИ стремительный рост вашего бизнеса</h2>
@@ -328,11 +342,14 @@
 <script>
 import AppModalPayment from "@/components/AppModalPayment.vue";
 import AppGoodButton from "@/components/AppGoodButton.vue";
+import AppModal from "@/components/AppModal.vue";
+import { getConfig } from "@/services/config";
+
 import { getTariffs, buyBooster } from "@/services/cash";
 import { getUserInfo } from "@/services/user";
  
     export default {
-        components: { AppGoodButton, AppModalPayment },
+        components: { AppGoodButton, AppModalPayment, AppModal },
         data() {
             return {
                 userData: [],
@@ -345,14 +362,27 @@ import { getUserInfo } from "@/services/user";
                 isGoodPayment: false,
                 tariffs: [],
                 currTarrif: [],
-                newTarrif: []
+                newTarrif: [],
+                title: "",
+                msg: "",
+                title1: "УСПЕШНО",
+                msg1: "Тариф был приобретён.",
+                isBooster: false,
+                boosterPrice: 100 // просто так
             }
         },
         async created() {
             const resp = await getTariffs(localStorage.getItem("token"));
             this.tariffs = resp;
+
             const user = await getUserInfo(localStorage.getItem("token"));
             this.userData = user;
+
+            const booster = await getConfig("booster", localStorage.getItem("token"));
+            console.log(booster);
+            this.boosterPrice = booster.price;
+            console.log(this.boosterPrice);
+
             this.tariffs.forEach(tarif => this.plans.push(tarif?.package_name));
             this.currTarrif = this.userData.packages.map(item => item.package_name);
             console.log(this.currTarrif);
@@ -371,8 +401,22 @@ import { getUserInfo } from "@/services/user";
                 this.isModal = true;
             },
             async buy() {
-                const payment = await buyBooster(30, localStorage.getItem("token"));
-                console.log(payment);
+                if (this.userData.packages.length != 1) {
+                    const payment = await buyBooster(this.boosterPrice, localStorage.getItem("token"));
+                    this.isBooster = true;
+                    if (payment.status) {
+                        this.title = "УСПЕШНО";
+                        this.msg = "Бустер приобретён.";
+                    } else {
+                        this.title = "ОШИБКА";
+                        this.msg = "Во время приобретения бустера возникла ошибка.";
+                    }
+                } else {
+                    this.isBooster = true;
+                    this.title = "ОШИБКА";
+                    this.msg = "У вас должен быть приобретён один из тарифов, чтобы купить бустер.";
+                }
+                
             },
             getDays(item) {
                 const end_time = this.userData.packages_datetime.find(el => el.tarif_id == item.id)?.date_end;
@@ -382,6 +426,9 @@ import { getUserInfo } from "@/services/user";
                     return daysLeft;
                 }
                 return "";
+            },
+            reload() {
+                window.location.reload();
             }
         }
     };
@@ -488,16 +535,16 @@ import { getUserInfo } from "@/services/user";
 
     .gradient-column {
         left: 72.292% !important;
-        @media (min-width: 1440px) {
+        /* @media (min-width: 1440px) {
             left: 72% !important;
-        }
+        } */
     }
     .gradient-column2 {
         left: 86.401% !important;
         background: linear-gradient(45deg, #D19981, #DB40E6);
-        @media (min-width: 1440px) {
+        /* @media (min-width: 1440px) {
             left: 86.15% !important;
-        }
+        } */
     }
     .bg {
         position: absolute;

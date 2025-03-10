@@ -54,10 +54,13 @@
                     localStorage.setItem("token", resp.access_token);
                     const user = await getUserInfo(localStorage.getItem("token"));
                     if (user && user.activation) {
+                        localStorage.setItem("page", 1);
+                        localStorage.setItem("points", 0);
                         this.$router.push('/home');
                         return;
                     }
                     if (user && !user.activation) {
+                        localStorage.setItem("points", 0);
                         this.$router.push('/signup_1');
                         return;
                     }
@@ -140,10 +143,13 @@
                                 console.log(resp);
                                 if (!resp.status) console.log(resp.message);
                             }   
+                            localStorage.setItem("points", 0);
                             this.$router.push('/signup_1');
                         }
-                        else 
+                        else {
+                            localStorage.setItem("points", 0);
                             this.$router.push('/home');
+                        }
                     }
                      
                 } else {

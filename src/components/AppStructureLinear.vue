@@ -52,7 +52,7 @@
                             <span>{{ item.package_name }}</span>
                         </div>
                         <span>{{ item.level }}</span>
-                        <span>{{ item.among }}</span>
+                        <span>{{ item.all_volume }}</span>
                         <div class="row">
                             <img src="@/assets/images/team.png" class="team_icon">
                             <span>{{ item.first_line_referrals }}</span>
@@ -65,7 +65,15 @@
 
                     <!-- Вложенная таблица -->
                     <div v-if="openedUsers[currentPage - 1][index]" class="nested">
-                        <AppStructureLinear :isRoot="false" :referer="item.vk_id" :vk_id="item.vk_id" :lay="lay + 1" :referersStack="referersStackData" @updateUser="updateUser" />
+                        <AppStructureLinear 
+                            :isRoot="false" 
+                            :referer="item.vk_id" 
+                            :vk_id="item.vk_id" 
+                            :lay="lay + 1" 
+                            :showNums="isHide" 
+                            :referersStack="referersStackData" 
+                            @updateUser="updateUser" 
+                        />
                     </div>
                 </div>
             </div>
@@ -94,7 +102,8 @@
             referer: Number,
             vk_id: Number,
             lay: Number,
-            referersStack: Array
+            referersStack: Array,
+            showNums: { type: Boolean, default: true }
         },
         data() {
             return {
@@ -104,7 +113,8 @@
                 currentPage: 1,
                 perPage: 5,
                 openedUsers: [],
-                referersStackData: []
+                referersStackData: [],
+                isHide: false,
             };
         },
         async created() {
@@ -114,15 +124,16 @@
             this.openedUsers = Array.from({ length: this.totalPages }, () => Array(this.perPage).fill(false));
 
             this.referersStackData = this.referersStack;
-            console.log(this.referersStackData);
+            this.isHide = this.showNums;
+
         },
         computed: {
             totalPages() {
-                return Math.ceil(this.node.length / this.perPage);
+                return Math.ceil(this.maskedNode.length / this.perPage);
             },
             paginatedHistory() {
                 const start = (this.currentPage - 1) * this.perPage;
-                return this.node.slice(start, start + this.perPage);
+                return this.maskedNode.slice(start, start + this.perPage);
             },
             visiblePages() {
                 const pages = [];
@@ -138,6 +149,16 @@
 
                 return pages;
             },
+            maskedNode() {
+                return this.node.map(item => ({
+                    ...item,
+                    all_volume: this.isHide ? item.all_volume : '*'.repeat(item.all_volume.toString().length),
+                    level: this.isHide ? item.level : '*'.repeat(item.level.toString().length),
+                    first_line_referrals: this.isHide ? item.first_line_referrals : '*'.repeat(item.first_line_referrals.toString().length),
+                    total_referrals_buf: item.total_referrals,
+                    total_referrals: this.isHide ? item.total_referrals : '*'.repeat(item.total_referrals.toString().length),
+                }));
+            }
         },
         watch: {
             referersStack: {
@@ -146,11 +167,18 @@
                 },
                 deep: true,
                 immediate: true
-            }
+            },
+            showNums: {
+                handler(newValue) {
+                    this.isHide = newValue;
+                },
+                deep: true,
+                immediate: true
+            },
         },
         methods: {
             toggleExpand(index, item) {
-                if (item.total_referrals > 0) {
+                if (item.total_referrals_buf > 0) {
                     console.log(this.lay);
                     if (this.lay == 2) {
                         this.referersStackData.push({name: item.name, vk_id: item.vk_id});

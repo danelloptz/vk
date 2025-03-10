@@ -19,12 +19,12 @@
                     placeholder="USDT"
                     @input="countCashout"
                 >
-                <span>Комиссия 1 USDT включена</span>
+                <span>Комиссия {{ commision }} USDT включена</span>
             </div>
             <div class="item">
                 <input 
                     v-model="adress"
-                    :placeholder="`Адрес ${choices[activeIndex]}-20`"
+                    :placeholder="`Адрес ${choices[activeIndex].toUpperCase()}-20`"
                 >
                 <span>Если вы укажите адрес другой сети, средства будут утеряны безвозвратно!</span>
             </div>
@@ -42,6 +42,7 @@
                     :key="index"
                     :class="{ active: index === activeIndex }"
                     @click="setActive(index)"
+                    style="text-transform: uppercase;"
                 > {{ item }}-20 </span>
             </div>
             <span>{{ (activeIndex == 0) ? bep_msg : trc_msg }}</span>
@@ -55,6 +56,7 @@
     import { getUserInfo } from "@/services/user";
     import { getMoney } from "@/services/cash";
     import { refreshToken } from "@/services/auth";
+    import { getConfig } from "@/services/config";
     export default {
         components: { AppGoodButton, AppModal },
         data() {
@@ -62,7 +64,6 @@
                 text1: "ЗАПРОСИТЬ ВЫВОД",
                 choices: ["bep", "trc"],
                 bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
-                trc_msg: "Обратите внимание, переводы по сети TRC-20 с комиссией 5 USDT",
                 activeIndex: 0,
                 commision: 1,
                 userInfo: null,
@@ -73,8 +74,14 @@
                 title: "ОЖИДАЙТЕ!",
                 msg: "Запрос на вывод обрабатывается. Вы всегда можете отменить вывод в разделе «История»",
                 isError: false,
-                errMsg: ""
+                errMsg: "",
+                commisionData: null
             }
+        },
+        computed: {
+            trc_msg() {
+                return `Обратите внимание, переводы по сети TRC-20 с комиссией ${this.commisionData.trc} USDT`
+            } 
         },
         async created() {
             const info = await getUserInfo(localStorage.getItem("token"));
@@ -90,11 +97,15 @@
                 }
             }
             this.userInfo = info;
+
+            this.commisionData = await getConfig("commissions", localStorage.getItem("token"));
+            this.commision = this.commisionData.bep;
+            console.log(this.commisionData);
         },
         methods: {
             setActive(index) {
                 this.activeIndex = index;
-                this.commision = (index == 0) ? 1 : 5;
+                this.commision = (index == 0) ? this.commisionData.bep : this.commisionData.trc;
                 this.countCashout();
             },
             countCashout() {
@@ -125,6 +136,7 @@
             },
             closeModalWaiting() {
                 this.waitingModal = false;
+                window.location.reload();
             }
         }
     };

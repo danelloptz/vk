@@ -140,12 +140,12 @@ export async function buyTariff(tariff_id, count_month, tariff_name, tariff_pric
 export async function buyBooster(price, token) {
     console.log(token);
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/user/tariffs/buy_booster',  { 
+        const response = await axios.post('https://web.intelektaz.com/api/v1/user/tariffs/buy_booster', {}, { 
             params: {
                 price: price
             },
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${token}`, 
                 'Content-Type': 'application/json'
             }
          });

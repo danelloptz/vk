@@ -7,7 +7,7 @@
             <span>Розыгрыш проходит 1го числа каждого месяца. После розыгрыша все балы обнуляются. Условия участия в розыгрыше VIP тарифа:</span>
             <span>1. Собери 100 балов. 1 клик = 1 балл. Доступно 1 раз в час. <br>
                     2. Должно быть включено автопродвижение. Если оно выключено, то при нажатии на «Получить 1 балл», автопродвижение включается автоматически.</span>
-            <AppGoodButton :text="text1" />
+            <AppGoodButton :text="text1" @click="getPoint" />
             <img src="@/assets/images/auth_image.png" class="left_image">
             <img src="@/assets/images/auth_image.png" class="right_image">
             <img src="@/assets/images/gift_box.png" class="gift_image">
@@ -16,7 +16,7 @@
 </template>
 
 <script>
-    import AppGoodButton from "@/components/AppGoodButton.vue"
+    import AppGoodButton from "@/components/AppGoodButton.vue";
     export default {
         components: { AppGoodButton },
         props: {
@@ -24,7 +24,9 @@
         },
         data() {
             return {
-                text1: "ПОЛУЧИТЬ 1 БАЛЛ"
+                text1: "ПОЛУЧИТЬ 1 БАЛЛ",
+                title: "",
+                msg: "",
             }
         },  
         methods: {
@@ -33,6 +35,19 @@
                     this.$emit('update:visibility1', false);
                 }
                 this.$emit('close'); 
+            },
+            getPoint() {
+                const time = localStorage.getItem("last_point") || 86400000;
+                const points = localStorage.getItem("points");
+                const dif = new Date().getTime() - time;
+                this.isModal = true;
+                    if (dif > 60 * 60 * 1000 && points < 100) {
+                    localStorage.setItem("points", +points + 1);
+                    localStorage.setItem("last_point", new Date().getTime());
+                    this.$emit('clicked');
+                } else {
+                    this.$emit('error');
+                }
             }
         }
     };

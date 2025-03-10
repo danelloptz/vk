@@ -3,6 +3,14 @@
         :visibility1="popupVisible" 
         @update:visibility1="popupVisible = $event"
         @close="close" 
+        @clicked="takedPoint"
+        @error="error"
+    />
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @update:visibility1="isModal = $event"
     />
     <section class="header">
         <AppModalMini 
@@ -24,7 +32,7 @@
         <div class="header_user">
             <div class="header_gift" @click="open">
                 <img src="@/assets/images/gift.png" >
-                <span>33%</span>
+                <span>{{ points }}%</span>
             </div>
             <div class="header_info" @click="openModalUser">
                 <div class="header_info_circle" :class="userData && (userData?.packages[userData?.packages.length - 1]?.package_name !== 'Free' && userData?.packages[userData?.packages.length - 1]?.package_name !== 'Not active' ? 'green' : 'red')"></div>
@@ -39,15 +47,18 @@
     import { getUserInfo  } from '@/services/user';
     import AppPopup from '@/components/AppPopup.vue';
     import AppModalMini from '@/components/AppModalMini.vue';
+    import AppModal from "@/components/AppModal.vue";
     import { refreshToken } from "@/services/auth";
 
     export default {
-        components: { AppPopup, AppModalMini },
+        components: { AppPopup, AppModalMini, AppModal },
         data() {
             return {
                 popupVisible: false,
                 modalUser: false,
-                userData: null
+                userData: null,
+                points: -1,
+                isModal: false,
             }
         },
         methods: {
@@ -69,6 +80,20 @@
             openReff() {
                 console.log('header');
                 this.$emit("isReff");
+            },
+            takedPoint() {
+                this.points = localStorage.getItem("points");
+                this.success();
+            },
+            success() {
+                this.isModal = true;
+                this.title = "УСПЕШНО";
+                this.msg = `Вы заработали 1 балл. Всего баллов: ${this.points}`;
+            },
+            error() {
+                this.isModal = true;
+                this.title = "ОШИБКА";
+                this.msg = "Балл можно получить каждый час. Вернитесь позже и повторите попытку."
             }
         },
         async created() {
@@ -85,8 +110,8 @@
                 }
             }
             this.userData = response;
-            console.log(this.userData);
-
+            
+            this.points = localStorage.getItem("points");
         }
     };
 </script>

@@ -13,7 +13,7 @@
                 <tr v-for="(item, index) in history" :key="index">
                     <td>{{ new Date(item.date_created).toLocaleDateString("ru-RU") }}</td>
                     <td>{{ item.sum }}</td>
-                    <td>{{ item.category }}</td>
+                    <td>{{ formatedMessage(item) }}</td>
                     <td>{{ item.status }}</td>
                 </tr>
             </tbody>
@@ -99,6 +99,10 @@ export default {
                 this.history = response.data.items;
                 this.totalTransactions = response.data.pagination.total;
             }
+        },
+        formatedMessage(item) {
+            if (item.category == "Перевод") return `Перевод на ${item.to_user}`;
+            return item.category;
         }
     }
 };

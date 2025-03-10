@@ -46,7 +46,7 @@
             </div>
             <div class="item">
                 <span>Для пополнения отправьте {{ cashout }} USDT (сеть {{ choices[activeIndex] }}) на кошелек: </span>
-                <span><strong>TFJpSqMrjrBr9EB1JRG48f5iTyoakJ2x8V</strong></span>
+                <span><strong>{{ hash }}</strong></span>
             </div>
             <span>Убедитесь, что адрес правильный и относится к той же сети! Транзакции невозможно отменить. После завершения транзакции отправьте ниже хэш (TxID) вашей транзакции. Зачисление средств происходит автоматически только после подтверждения хэша (TxID). </span>
             <a @click="openModal">Инструкция, где взять хэш (TxID)</a>
@@ -70,6 +70,7 @@
     import { getUserInfo } from "@/services/user";
     import { putMoney } from "@/services/cash";
     import { refreshToken } from "@/services/auth";
+    import { getConfig } from "@/services/config";
     
     export default {
         components: { AppGoodButton, AppModalHash, AppModal },
@@ -79,7 +80,6 @@
                 text2: "Я ОПЛАТИЛ",
                 choices: ["BEP-20", "TRC-20"],
                 bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
-                trc_msg: "Обратите внимание, комиссия сети TRC-20 выше, чем по сети BEP-20",
                 activeIndex: 0,
                 commision: 1,
                 userInfo: null,
@@ -94,7 +94,17 @@
                 isMoneyPut: false,
                 adressToSend: "TFJpSqMrjrBr9EB1JRG48f5iTyoakJ2x8V",
                 isError: false,
-                errorMessage: ""
+                errorMessage: "",
+                commisionData: null,
+                depositData: null
+            }
+        },
+        computed: {
+            trc_msg() {
+                return `Обратите внимание, переводы по сети TRC-20 с комиссией ${this.commisionData.trc} USDT`
+            },
+            hash() {
+                return this.activeIndex == 0 ? this.depositData.bsc : this.depositData.trc;
             }
         },
         async created() {
@@ -111,11 +121,14 @@
                 }
             }
             this.userInfo = info;
+            this.commisionData = await getConfig("commissions", localStorage.getItem("token"));
+            this.commision = this.commisionData.bep;
+            this.depositData = await getConfig("deposit_addresses", localStorage.getItem("token"));
         },
         methods: {
             setActive(index) {
                 this.activeIndex = index;
-                this.commision = (index == 0) ? 1 : 5;
+                this.commision = (index == 0) ? this.commisionData.bep : this.commisionData.trc;
             },
             checkCash() {
                 if ( !(this.usdt != "" && Number(this.usdt) > this.commision))
@@ -148,6 +161,7 @@
             closeModalMoneyPut() {
                 this.isMoneyPut = false;
                 this.stepTwo = false;
+                window.location.reload();
             }
         }
     };
