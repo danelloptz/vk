@@ -152,3 +152,28 @@ export async function getStructureInfo(vk_id) {
         return false; 
     }
 }
+
+export async function addGiftScore(vk_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/add_gift_score`, { 
+            "vk_id": vk_id
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при сохранении балла", error);
+        return false; 
+    }
+}
+
+export async function setAutoposting(user_id, status) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/set_autoposting`, { 
+            "user_id": user_id,
+            "status": status
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при установки значения автопостинга", error);
+        return false; 
+    }
+}

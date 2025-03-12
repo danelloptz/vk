@@ -16,7 +16,7 @@
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
-            <span>Вконтакте: {{ userData.group?.group_link }}</span>
+            <span>Вконтакте: https://vk.com/id{{ userData.vk_id }}</span>
             <span v-if="tgData?.link">Telegram: {{ tgData.link }}</span>
             <span v-if="whtData?.link">WhatsApp: {{ whtData.link }}</span>
         </div>

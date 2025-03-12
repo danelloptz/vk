@@ -169,6 +169,7 @@
             <div class="price" v-for="(day, index) in days" :key="index"> 
                 <div class="price_item">
                     <span>{{ day }}</span>
+                    <strong v-if="index != 0"><span style="text-decoration: line-through; opacity: .5;">{{ fullPrices[index] }} / </span></strong>
                     <strong><span>{{ prices[index] }} USDT</span></strong>
                 </div>
                 <div class="price_item">
@@ -300,11 +301,18 @@
             },
             prices() {
                 let values = [];
-                for (let value of Object.values(this.pricesData)) {
-                    values.push(value);
+                for (let value of Object.values(this.pricesData.current)) {
+                    values.push(value.toLocaleString("ru-RU"));
                 }
                 return values;
-            }  
+            },
+            fullPrices() {
+                let values = [];
+                for (let value of Object.values(this.pricesData.full)) {
+                    values.push(value.toLocaleString("ru-RU"));
+                }
+                return values;
+            }
         },
         async created() {
             const user_data = await getUserInfo(localStorage.getItem("token"));
@@ -322,6 +330,7 @@
             this.userData = user_data;
 
             this.pricesData = await getConfig("add_price", localStorage.getItem("token"));
+            console.log(this.pricesData);
 
             const adds = await getUserAdds(this.userData.vk_id);
             this.userAdds = adds.ads;
@@ -653,13 +662,14 @@
     }
     .price_item {
         display: flex;
-        column-gap: 10px;
         align-items: center;
+        column-gap: 9px;
     }
     .price_item span {
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
+        padding: 0;
     }
     .price_item img {
         cursor: pointer;

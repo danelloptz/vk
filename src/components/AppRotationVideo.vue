@@ -213,8 +213,6 @@
                     }
 
                     this.notWatched = false;
-                    if (this.watchedVideos == this.totalVideos)
-                        this.endRotation();
                 } else {
                     this.notWatched = true;
                 }

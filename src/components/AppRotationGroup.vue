@@ -4,6 +4,7 @@
         :visibility1="isVideoShown"
         :isWatched="isWatched"
         :link="groupInfo.videos?.[0]?.link || defaultLink"
+        :uncloseable="true"
         @update:visibility1="isVideoShown = $event"
         @update:isWatched="isWatched = $event"
         @close="closeVideo" 
@@ -120,6 +121,7 @@
                 default:
                     this.totalGroups = 10;
                     this.skipCounts = 5;
+                    this.addGroups = 9;
                     break;
             }
 
@@ -201,7 +203,7 @@
                     this.noSubscribe = false;
 
                     if (this.addGroups === this.totalGroups) {
-                        this.endRotation();
+                        this.watchVideo();
                     }
                     if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
                         (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 

@@ -16,7 +16,7 @@
                         <img :src="vipUser.avatar">
                         <div class="text_wrapper">
                             <h2>{{ vipUser.name }}</h2>
-                            <span>VIP</span>
+                            <span>{{ vipUser.package_name }}</span>
                         </div>
                     </div>
                     <span>{{ vipUser.vip_offer_text }}</span>

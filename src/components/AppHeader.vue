@@ -1,6 +1,8 @@
 <template>
      <AppPopup 
         :visibility1="popupVisible" 
+        :vk_id="userData.vk_id"
+        :id="userData.id"
         @update:visibility1="popupVisible = $event"
         @close="close" 
         @clicked="takedPoint"
@@ -57,7 +59,7 @@
                 popupVisible: false,
                 modalUser: false,
                 userData: null,
-                points: -1,
+                points: 0,
                 isModal: false,
             }
         },
@@ -111,7 +113,7 @@
             }
             this.userData = response;
             
-            this.points = localStorage.getItem("points");
+            this.points = this.userData.gift_score;
         }
     };
 </script>

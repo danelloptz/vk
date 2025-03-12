@@ -74,9 +74,7 @@
         computed: {
             prices() {
                 return [this.priceData.leader_business, 
-                        this.priceData.leader_business, 
                         this.priceData.vip, 
-                        this.priceData.start_standart, 
                         this.priceData.start_standart, 
                         this.priceData.free];
             }

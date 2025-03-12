@@ -14,7 +14,14 @@
                     <td>{{ new Date(item.date_created).toLocaleDateString("ru-RU") }}</td>
                     <td>{{ item.sum }}</td>
                     <td>{{ formatedMessage(item) }}</td>
-                    <td>{{ item.status }}</td>
+                    <td style="display: flex; flex-direction: column; row-gap: 5px;">
+                        {{ item.status }} 
+                        <span 
+                            v-if="item.category == 'Вывод' && item.status == 'В процессе'" 
+                            @click="cancelTrans(item)"
+                            style="text-decoration: underline; cursor: pointer;"
+                        >Отменить</span>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -103,6 +110,9 @@ export default {
         formatedMessage(item) {
             if (item.category == "Перевод") return `Перевод на ${item.to_user}`;
             return item.category;
+        },
+        cancelTrans(item) {
+            console.log(item);
         }
     }
 };

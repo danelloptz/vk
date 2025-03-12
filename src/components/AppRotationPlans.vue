@@ -23,7 +23,7 @@
     />
 
     <section class="plans">
-        <h2>Выберите свой идеальный вариант продвижения. Доверьте ИИ стремительный рост вашего бизнеса</h2>
+        <h2>Выберите свой идеальный вариант продвижения. <br> Доверьте ИИ стремительный рост вашего бизнеса.</h2>
         <div class="row">
             <div class="item">
                 <span>Ваш тариф / пакет:</span>
@@ -37,12 +37,12 @@
         </div>
         <table>
             <div class="bg"></div>
-            <div class="gradient-column" style="width: calc((100% / 7.7));"></div>
-            <div class="gradient-column2" style="width: calc(100% / 7.7);"></div>
+            <div class="gradient-column"></div>
+            <div class="gradient-column2"></div>
             <thead>
                 <tr>
                     <th></th>
-                    <th v-for="(tarif, index) in tariffs" :key="index" >{{ tarif.package_name }}</th>
+                    <th v-for="(tarif, index) in tariffs" :key="index" :class="{ strong: tarif.package_name == 'Business' || tarif.package_name == 'Leader' }" >{{ tarif.package_name }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -299,29 +299,39 @@
                     <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
                 </tr>
                 <tr>
-                    <td style="border-bottom: none;"></td>
+                    <td style="border-bottom: none;" class="start_col"></td>
                     <td class="column first_col" style="border-bottom: none;">
                         <span><span class="big_letters">{{ tariffs[0]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                     </td>
                     <td class="column"  style="border-bottom: none;">
-                        <span><span class="big_letters">{{ tariffs[1]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                        <AppGoodButton :text="currTarrif.includes(plans[1]) ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
+                        <div class="col2">
+                            <span><span class="big_letters">{{ tariffs[1]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                            <AppGoodButton :text="currTarrif.includes(plans[1]) ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
+                        </div>
                     </td>
                     <td class="column" style="border-bottom: none;">
-                        <span><span class="big_letters">{{ tariffs[2]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                        <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
+                        <div class="col2">
+                            <span><span class="big_letters">{{ tariffs[2]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                            <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
+                        </div>
                     </td>
                     <td class="column" style="border-bottom: none;">
-                        <span><span class="big_letters">{{ tariffs[3]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                        <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
+                        <div class="col2">
+                            <span><span class="big_letters">{{ tariffs[3]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                            <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
+                        </div>
                     </td>
-                    <td class="column" style="border-bottom: none;">
-                        <span><span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                        <AppGoodButton :text="currTarrif.includes('Business') ? text2 : text1" class="btn" @click="selectPackage(plans[4])"/>
+                    <td class="column top_col" style="border-bottom: none;">
+                        <div class="col2">
+                            <span><span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                            <AppGoodButton :text="currTarrif.includes('Business') ? text2 : text1" class="btn_big" @click="selectPackage(plans[4])"/>
+                        </div>
                     </td>
-                    <td class="column" style="border-right: none; border-bottom: none;">
-                        <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                        <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader')) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn" @click="selectPackage(plans[5])"/>
+                    <td class="column top_col" style="border-right: none; border-bottom: none;">
+                        <div class="col2">
+                            <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                            <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader')) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn_big" @click="selectPackage(plans[5])"/>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -414,7 +424,7 @@ import { getUserInfo } from "@/services/user";
                 } else {
                     this.isBooster = true;
                     this.title = "ОШИБКА";
-                    this.msg = "У вас должен быть приобретён один из тарифов, чтобы купить бустер.";
+                    this.msg = "Booster доступен на тарифе VIP и пакетах Leader, Business.";
                 }
                 
             },
@@ -470,13 +480,19 @@ import { getUserInfo } from "@/services/user";
         border-bottom: 1px solid rgba(255, 255, 255, 0.5);
         border-right: 1px solid rgba(255, 255, 255, 0.5);
         padding: 0px 10px;
-        width: 125px;
+        min-width: 100px;
+        max-width: 100px;
+        font-size: 13.86px !important;
     }
     .first_col {
         min-width: 110px !important;
     }
     th {
         line-height: 3;
+        font-weight: normal;
+    }
+    .strong {
+        font-weight: 700;
     }
     span, td, th {
         color: white;
@@ -520,27 +536,31 @@ import { getUserInfo } from "@/services/user";
         z-index: 8;
     }
     .btn {
-        width: 100px;
+        width: 80px;
+        font-size: 12px;
+    }
+    .btn_big {
+        width: 120px;
     }
     .gradient-column, .gradient-column2 {
         position: absolute;
         top: 20px;
         bottom: 0;
         left: 0;
-        width: 100%;
+        width: 17.587%;
         background: linear-gradient(to right,  #7023EC, #A585DA);
         z-index: -1;
         border-radius: 10px;
     }
 
     .gradient-column {
-        left: 72.292% !important;
+        left: 62.532% !important;
         /* @media (min-width: 1440px) {
             left: 72% !important;
         } */
     }
     .gradient-column2 {
-        left: 86.401% !important;
+        left: 81.601% !important;
         background: linear-gradient(45deg, #D19981, #DB40E6);
         /* @media (min-width: 1440px) {
             left: 86.15% !important;
@@ -570,6 +590,12 @@ import { getUserInfo } from "@/services/user";
         flex-direction: column;
         row-gap: 15px;
     }
+    .col2 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 10px;
+    }
     .booster-img {
         width: 173px;
         height: 244px;
@@ -598,5 +624,12 @@ import { getUserInfo } from "@/services/user";
     }
     .medium_letters {
         font-size: 15px !important;
+    }
+    .top_col {
+        min-width: 160px;
+    }
+    .start_col {
+        min-width: 110px;
+        max-width: 110px;
     }
 </style>

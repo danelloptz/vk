@@ -17,10 +17,14 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
+    import { addGiftScore, setAutoposting } from "@/services/user";
     export default {
         components: { AppGoodButton },
         props: {
             visibility1: Boolean,
+            vk_id: Number,
+            autoposting: Boolean,
+            id: String
         },
         data() {
             return {
@@ -36,15 +40,22 @@
                 }
                 this.$emit('close'); 
             },
-            getPoint() {
+            async getPoint() {
                 const time = localStorage.getItem("last_point") || 86400000;
                 const points = localStorage.getItem("points");
                 const dif = new Date().getTime() - time;
                 this.isModal = true;
-                    if (dif > 60 * 60 * 1000 && points < 100) {
+                if (dif > 60 * 60 * 1000 && points < 100) {
+                    const resp = await addGiftScore(this.vk_id);
+                    if (!this.autoposting) {
+                        const set_autoposting = await setAutoposting(this.id, true);
+                        console.log("set_autoposting: ", set_autoposting);
+                    }
+                    console.log(resp);
                     localStorage.setItem("points", +points + 1);
                     localStorage.setItem("last_point", new Date().getTime());
                     this.$emit('clicked');
+                    window.location.reload();
                 } else {
                     this.$emit('error');
                 }

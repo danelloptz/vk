@@ -148,6 +148,7 @@
                         }
                         else {
                             localStorage.setItem("points", 0);
+                            localStorage.setItem("page", 1);
                             this.$router.push('/home');
                         }
                     }

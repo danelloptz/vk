@@ -6,7 +6,7 @@
                     <span class="timer" v-if="!isEnd">{{ currTime }}</span>
                     <span class="timer_msg">{{ timerMsg }}</span>
                 </div>
-                <span class="quit" @click="close">ЗАКРЫТЬ</span>
+                <span class="quit" v-if="!uncloseable || isEnd" @click="close">ЗАКРЫТЬ</span>
             </div>
             <div class="video_wrapper">
                 <iframe 
@@ -29,7 +29,8 @@ export default {
     props: {
         visibility1: Boolean,
         link: String,
-        isWatched: Boolean
+        isWatched: Boolean,
+        uncloseable: Boolean
     },
     data() {
         return {
@@ -48,6 +49,9 @@ export default {
                 });
             }
         }
+    },
+    mounted() {
+        document.addEventListener("visibilitychange", this.handleVisibilityChange);
     },
     methods: {
         initVKPlayer() {
@@ -106,6 +110,29 @@ export default {
             this.clearTimer();
             this.$emit("update:visibility1", false);
             this.$emit("close");
+        },
+        handleVisibilityChange() {
+            if (document.hidden) {
+                console.log("сработало переключение");
+                this.isPlaying = false;
+                this.clearTimer();
+            } else {
+                this.isPlaying = true;
+                this.startTimer();
+            }
+            console.log(this.isPlaying);
+        },
+        handleBlur() {
+            console.log('blur');
+            this.isPlaying = false;
+            this.clearTimer();
+        },
+        handleFocus() {
+            if (this.isPlaying === false) {
+                this.isPlaying = true;
+                this.startTimer();
+                console.log("Пользователь вернулся в окно");
+            }
         }
     }
 };
@@ -133,9 +160,10 @@ export default {
         width: 100%;
     }
     .timer_wrapper {
+        width: 100%;
         height: 100%;
         display: flex;
-        justify-content: space-between;
+        column-gap: 20px;
         padding: 0px 30px;
         align-items: center;
         background: #1B1E3D;

@@ -1,36 +1,51 @@
 <template>
     <div class="container">
-        <h2>Автопродвижение вашего бизнеса Intelektaz</h2>
-        <span>Сервис Intelektaz автоматизирует продвижение вашего бизнеса, помогая развивать партнерскую сеть и экономя ваше время.</span>
-        <span>Доверьте продвижение в социальных сетях Intelektaz: добавьте нужные социальные сети и группы, и мы ежедневно рандомно будем публиковать продающие посты с вашей реферальной ссылкой.</span>
-
-        <div v-for="(social, index) in socials" :key="index" class="row">
-            <input 
-                :placeholder="social.type"
-                v-model="social.link"
+        <div class="row">
+            <h2>Автопродвижение вашего бизнеса Intelektaz</h2>
+            <div class="switch" 
+                @click="switchChange"
+                :style="{ background: isAutoposting ? '#7023EC' : 'none' }"    
             >
-            <div class="sub_row">
-                <span class="add" @click="saveSocial">ДОБАВИТЬ</span>
-                <span v-if="social.isNew" class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
-                <img 
-                    v-if="!social.isNew"
-                    src="@/assets/images/addPlus.png" 
-                    @click="addSocial(social, index)"
-                >
+                <div 
+                    class="switch_circle"
+                    :style="{ left: isAutoposting ? '0px' : '33.12px' }"    
+                ></div>
             </div>
         </div>
+        <div v-if="isAutoposting" class="container">
+            <span  >Сервис Intelektaz автоматизирует продвижение вашего бизнеса, помогая развивать партнерскую сеть и экономя ваше время.</span>
+            <span  >Доверьте продвижение в социальных сетях Intelektaz: добавьте нужные социальные сети и группы, и мы ежедневно рандомно будем публиковать продающие посты с вашей реферальной ссылкой.</span>
 
-        <div v-for="(post, index) in posts" :key="index" class="row2">
-            <span>{{ index + 1 }}</span>
-            <span>{{ post.text }}</span>
-            <img :src="post.image" >
-            <a href="#" @click.prevent="downloadImage(post.image)">Скачать</a>
-        </div> 
+            <div v-for="(social, index) in socials" :key="index" class="row">
+                <input 
+                    :placeholder="social.type"
+                    v-model="social.link"
+                    
+                >
+                <div class="sub_row"  >
+                    <span class="add" @click="saveSocial">ДОБАВИТЬ</span>
+                    <span v-if="social.isNew" class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
+                    <img 
+                        v-if="!social.isNew"
+                        src="@/assets/images/addPlus.png" 
+                        @click="addSocial(social, index)"
+                    >
+                </div>
+            </div>
+
+            <div v-for="(post, index) in posts" :key="index" class="row2">
+                <span  >{{ index + 1 }}</span>
+                <span  >{{ post.text }}</span>
+                <img   :src="post.image" >
+                <a   href="#" @click.prevent="downloadImage(post.image)">Скачать</a>
+            </div> 
+        </div>
+        
     </div>
 </template>
 
 <script>
-import { getUserInfo, sendNewSettings    } from "@/services/user";
+import { getUserInfo, sendNewSettings, setAutoposting } from "@/services/user";
 import { getPosts } from "@/services/posts";
 import { refreshToken } from "@/services/auth";
 
@@ -39,7 +54,8 @@ export default {
         return {
             socials: [],
             posts: [],
-            userInfo: []
+            userInfo: [],
+            isAutoposting: true
         };
     },
     async created() {
@@ -56,6 +72,7 @@ export default {
             }
         }
         this.userInfo = response;
+        this.isAutoposting = this.userInfo.autoposting;
         
         const allSocials = [
             "VK", "Instagram", "Telegram", "TikTok", "Whatsapp", "Facebook"
@@ -124,6 +141,11 @@ export default {
 
             console.log(payload);
             await sendNewSettings(payload, localStorage.getItem("token")); 
+        },
+        async switchChange() {
+            this.isAutoposting = !this.isAutoposting;
+            if (this.isAutoposting) await setAutoposting(this.userInfo.id, true)
+            else await setAutoposting(this.userInfo.id, false)
         }
     },
 };
@@ -264,5 +286,27 @@ export default {
             align-self: start;
         }
         
+    }
+    .switch {
+        width: 62px;
+        height: 27px;
+        border-radius: 13.5px;
+        outline: 1px solid white;
+        outline-offset: 4px;
+        position: relative;
+        background: #7023EC;
+        cursor: pointer;
+        transition: .3s ease-in;
+    }
+    .switch_circle {
+        content: "";
+        position: absolute;
+        left: 0px;
+        top: -1px;
+        width: 28.88px;
+        height: 28.88px;
+        border-radius: 50%;
+        background: white;
+        transition: .3s ease-in;
     }
 </style>
