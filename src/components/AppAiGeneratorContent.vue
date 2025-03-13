@@ -175,7 +175,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief } from "@/services/ai";
+    import { sendBrief, getBrief, updateBrief } from "@/services/ai";
 
     export default {
         components: { AppGoodButton },
@@ -221,8 +221,34 @@
                 type: "",
                 audience: "",
                 link: "",
-                reaction: ""
+                reaction: "",
+                isNewBrief: false,
+                idBrief: ""
             }
+        },
+        async created() {
+            const resp = await getBrief(localStorage.getItem("token"));
+            if (resp) {
+                this.isNewBrief = false;
+                this.label = resp.name_company;
+                this.year = resp.year_foundation_of_company;
+                this.description_company = resp.description_company;
+                this.pros = resp.competitive_advantages;
+                this.description_product = resp.description_product;
+                this.whats_solve = resp.what_problems_solve;
+                this.characteristics = resp.unique_characters_of_product;
+                this.price = resp.price_policy;
+                this.audience = resp.target_audience;
+                this.link = resp.link;
+                this.reaction = resp.feedback_from_audience;
+                this.type = resp.type_loyalty_programm;
+                this.idBrief = resp.id;
+                console.log(resp);
+            } else {
+                this.isNewBrief = true;
+                console.log("БРИФ ЕЩЁ НЕ СОЗДАН!");
+            }
+            
         },
         methods: {
             setActive(index) {
@@ -245,8 +271,16 @@
                     "link": this.link,
                     "feedback_from_audience": this.reaction
                 };
-                const resp = await sendBrief(payload, localStorage.getItem("token"));
-                console.log(resp);
+                if (this.isNewBrief) {
+                    this.isNewBrief = false;
+                    const resp = await sendBrief(payload, localStorage.getItem("token"));
+                    console.log(resp);
+                } else {
+                    console.log(this.idBrief);
+                    const resp = await updateBrief(this.idBrief, payload, localStorage.getItem("token"));
+                    console.log(resp);
+                }
+                
             },
             editSettings() {
                 this.isSaved = false; 

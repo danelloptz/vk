@@ -46,7 +46,11 @@
             </div>
             <div class="item">
                 <span>Для пополнения отправьте {{ cashout }} USDT (сеть {{ choices[activeIndex] }}) на кошелек: </span>
-                <span><strong>{{ hash }}</strong></span>
+                <div class="hash">
+                    <span><strong>{{ hash }}</strong></span>
+                    <img src="@/assets/images/copy.png" @click="copy(hash)">
+                    <span v-if="isCopy" class="green">Скопировано!</span>
+                </div>
             </div>
             <span>Убедитесь, что адрес правильный и относится к той же сети! Транзакции невозможно отменить. После завершения транзакции отправьте ниже хэш (TxID) вашей транзакции. Зачисление средств происходит автоматически только после подтверждения хэша (TxID). </span>
             <a @click="openModal">Инструкция, где взять хэш (TxID)</a>
@@ -96,7 +100,8 @@
                 isError: false,
                 errorMessage: "",
                 commisionData: null,
-                depositData: null
+                depositData: null,
+                isCopy: false
             }
         },
         computed: {
@@ -131,10 +136,10 @@
                 this.commision = (index == 0) ? this.commisionData.bep : this.commisionData.trc;
             },
             checkCash() {
-                if ( !(this.usdt != "" && Number(this.usdt) > this.commision))
+                if ( !(this.usdt != ""))
                     console.log('bad')
                 else {
-                    this.cashout = Number(this.usdt) + this.commision;
+                    this.cashout = Number(this.usdt);
                     this.stepTwo = true;
                 }
             },
@@ -162,6 +167,11 @@
                 this.isMoneyPut = false;
                 this.stepTwo = false;
                 window.location.reload();
+            },
+            async copy(link) {
+                this.isCopy = true;
+                await navigator.clipboard.writeText(link);
+                setTimeout(() => { this.isCopy = false; }, 2000);
             }
         }
     };
@@ -303,5 +313,28 @@
     }
     .error {
         color: red !important;
+    }
+    .green {
+        color: green;
+        animation: ShowEasy 2s ease-in;
+        opacity: 0;
+    }
+    @keyframes ShowEasy {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+    .hash {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
+    .hash img {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    .hash span {
+        line-height: 2;
     }
 </style>

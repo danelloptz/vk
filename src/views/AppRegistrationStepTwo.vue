@@ -105,7 +105,7 @@
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const groupLink = this.groupsQueue[this.currentGroupIndex].social_links.vk;
+                    const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
                     this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
                     window.open(groupLink, "_blank", "width=800, height=600");

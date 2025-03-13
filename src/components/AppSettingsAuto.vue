@@ -12,24 +12,26 @@
                 ></div>
             </div>
         </div>
-        <div v-if="isAutoposting" class="container">
+        <div class="container">
             <span  >Сервис Intelektaz автоматизирует продвижение вашего бизнеса, помогая развивать партнерскую сеть и экономя ваше время.</span>
             <span  >Доверьте продвижение в социальных сетях Intelektaz: добавьте нужные социальные сети и группы, и мы ежедневно рандомно будем публиковать продающие посты с вашей реферальной ссылкой.</span>
 
-            <div v-for="(social, index) in socials" :key="index" class="row">
-                <input 
-                    :placeholder="social.type"
-                    v-model="social.link"
-                    
-                >
-                <div class="sub_row"  >
-                    <span class="add" @click="saveSocial">ДОБАВИТЬ</span>
-                    <span v-if="social.isNew" class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
-                    <img 
-                        v-if="!social.isNew"
-                        src="@/assets/images/addPlus.png" 
-                        @click="addSocial(social, index)"
+            <div class="social_wrapper" v-if="isAutoposting">
+                <div v-for="(social, index) in socials" :key="index" class="row">
+                    <input 
+                        :placeholder="social.type"
+                        v-model="social.link"
+                        
                     >
+                    <div class="sub_row"  >
+                        <span class="add" @click="saveSocial">ДОБАВИТЬ</span>
+                        <span v-if="social.isNew" class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
+                        <img 
+                            v-if="!social.isNew"
+                            src="@/assets/images/addPlus.png" 
+                            @click="addSocial(social, index)"
+                        >
+                    </div>
                 </div>
             </div>
 
@@ -308,5 +310,10 @@ export default {
         border-radius: 50%;
         background: white;
         transition: .3s ease-in;
+    }
+    .social_wrapper {
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
     }
 </style>

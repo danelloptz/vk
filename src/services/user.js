@@ -177,3 +177,16 @@ export async function setAutoposting(user_id, status) {
         return false; 
     }
 }
+
+export async function findParents(vk_id, search_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/search_referal`, { 
+            "vk_id": vk_id,
+            "search_id": search_id
+         });
+        return response.data.response;
+    } catch (error) {
+        console.error("Ошибка при получении родителей искомого реферала", error);
+        return false; 
+    }
+}

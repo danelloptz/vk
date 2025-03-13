@@ -63,7 +63,7 @@
             return {
                 text1: "ЗАПРОСИТЬ ВЫВОД",
                 choices: ["bep", "trc"],
-                bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
+                bep_msg: "Обратите внимание, выводы по сети BEP-20 с минимальными комиссиями",
                 activeIndex: 0,
                 commision: 1,
                 userInfo: null,
@@ -80,7 +80,7 @@
         },
         computed: {
             trc_msg() {
-                return `Обратите внимание, переводы по сети TRC-20 с комиссией ${this.commisionData.trc} USDT`
+                return `Обратите внимание, выводы по сети TRC-20 с комиссией ${this.commisionData.trc} USDT`
             } 
         },
         async created() {
@@ -110,7 +110,7 @@
             },
             countCashout() {
                 if (this.usdt != "0" && Number(this.usdt) > this.commision)
-                    this.cashout = Number(this.usdt) + this.commision
+                    this.cashout = Number(this.usdt) - this.commision
                 else 
                     this.cashout = 0;
             },

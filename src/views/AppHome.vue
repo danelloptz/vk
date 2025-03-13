@@ -23,7 +23,7 @@
                     <a :href="vipUser.group_link" target="_blank">Ссылка</a>
                     <div class="vip_footer">
                         <div class="vip_links">
-                            <a :href="vkData.link" target="_blank"><img src="@/assets/images/vk.png"></a>
+                            <a :href="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
                             <a :href="tgData.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
                             <a :href="whtData.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
                         </div>
@@ -40,7 +40,7 @@
             <div class="right">
                 <AppGroupOrUser 
                     :objectData="businessUser"
-                    :isBusiness="isBusiness"
+                    :isBusiness="true"
                     class="card"
                 />
                 <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" />
@@ -172,7 +172,7 @@
             this.businessUser = vip.business;
             this.tgData = this.vipUser?.social_links.find(link => link.type === "Telegram") || [];
             this.whtData = this.vipUser?.social_links.find(link => link.type === "Whatsapp") || [];
-            this.vkData = this.vipUser?.social_links.find(link => link.type === "VK") || [];
+            this.vkData = `https://vk.com/id${this.vipUser.vk_id}`;
 
             console.log(this.vipUser);
             console.log(this.businessUser);
@@ -351,6 +351,9 @@
         display: flex;
         align-items: center;
         column-gap: 10px;
+    }
+    .vip_links a {
+        cursor: pointer;
     }
     .vip_links img {
         width: 15px;

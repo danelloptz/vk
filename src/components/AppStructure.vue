@@ -107,7 +107,8 @@
         />
         <AppStructureLinear v-if="activeIndex == 0" 
             :vk_id="root_vk_id" 
-            :key="root_vk_id"
+            :key="searchUsers"
+            :searchUsers="searchUsers"
             :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
             :lay="1" 
             :showNums="showNums"
@@ -126,7 +127,7 @@ import AppMain from "@/components/AppMain.vue";
 import AppStructureBinar from "@/components/AppStructureBinar.vue";
 import AppStructureLinear from "@/components/AppStructureLinear.vue";
 import { refreshToken } from "@/services/auth";
-import { setLeg, getStructureInfo } from '@/services/user';
+import { setLeg, getStructureInfo, findParents } from '@/services/user';
 import AppModal from '@/components/AppModal.vue';
 
 export default {
@@ -156,7 +157,8 @@ export default {
             title: "",
             msg: "",
             struct_info: {},
-            root_vk_id: 0
+            root_vk_id: 0,
+            searchUsers: []
         };
     },
     computed: {
@@ -280,9 +282,13 @@ export default {
                 } else {
                     this.notFound = true;
                 }
-            } else {
-                this.root_vk_id = +this.search;
-                console.log(this.root_vk_id);
+            } else {    
+                this.searchUsers = await findParents(this.userData.vk_id, +this.search);
+                if (this.searchUsers.length > 0) {
+                    this.searchUsers = this.searchUsers.slice(0, this.searchUsers.indexOf(+this.userData.vk_id) + 1);
+                    console.log(this.searchUsers);
+                }
+                
             }
             
         },

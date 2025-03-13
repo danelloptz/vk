@@ -14,3 +14,37 @@ export async function sendBrief(payload, token) {
         return false; 
     }
 }
+
+export async function getBrief(token) {
+    console.log(token);
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/v1/brif', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении брифа", error);
+        return false; 
+    }
+}
+
+export async function updateBrief(brif_id, payload,  token) {
+    try {
+        const response = await axios.patch(`https://web.intelektaz.com/api/v1/brif/${brif_id}`, payload, {
+            params: {
+                brif_id: brif_id
+            },
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.status;
+    } catch(error) {
+        console.error("Ошибка при получении брифа", error);
+        return false; 
+    }
+}

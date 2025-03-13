@@ -12,7 +12,7 @@
     <section class="rotation_preview" v-if="isRotationPreview && !isPlans">
         <span>Вы можете получать целевые просмотры своего ВК видео совершенно бесплатно за счет прохождения Ротации. </span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных ВК видео по 20 секунд, и в ответ получаете 10 просмотров своего ВК видео.</span>
-        <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Активировать тариф».</span>
+        <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
         <div class="rotation_preview_btns">
             <AppBadButton :text="text1" @click="makeRotation"/>
             <AppGoodButton :text="text2" @click="openPlans" />
@@ -21,7 +21,7 @@
     <section class="rotation" v-if="isRotation && !isPlans">
         <span class="counter">Просмотры {{ watchedVideos }} из {{ totalVideos }}</span>
         <div class="group">
-            <AppGroupOrUser :v-if="videosInfo" :objectData="videosQueue[currentVideoIndex]" />
+            <AppGroupOrUser style="min-width: 550px;" :v-if="videosInfo" :objectData="videosQueue[currentVideoIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" @click="watchVideo" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" @click="skipGroup" />
@@ -37,7 +37,7 @@
         <span class="counter">Просмотрено {{ watchedVideos }} из {{ totalVideos }}</span>
         <strong><span>Вы успешно прошли Ротацию видео!</span></strong>
         <span>Ваше видео добавлено в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше просмотров и подписок без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
-        <AppGoodButton :text="text5" @click="openPlans" />
+        <AppGoodButton :text="text2" @click="openPlans" />
     </section>
 </template>
 
@@ -58,10 +58,9 @@
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
-                text2: "АКТИВИРОВАТЬ ТАРИФ",
+                text2: "ВЫБРАТЬ ТАРИФ",
                 text3: "ЗАПУСТИТЬ ВИДЕО",
                 text4: "ПРОПУСТИТЬ",
-                text5: "ВЫБРАТЬ ТАРИФ",
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,
@@ -129,15 +128,15 @@
 
             this.videosInfo = videos;
 
-            this.videosInfo.first.forEach(item => {
-                item["package_name"] = "Leader";
-            });
-            this.videosInfo.second.forEach(item => {
-                item["package_name"] = "VIP";
-            });
-            this.videosInfo.other.forEach(item => {
-                item["package_name"] = "Free";
-            });
+            // this.videosInfo.first.forEach(item => {
+            //     item["package_name"] = "Leader";
+            // });
+            // this.videosInfo.second.forEach(item => {
+            //     item["package_name"] = "VIP";
+            // });
+            // this.videosInfo.other.forEach(item => {
+            //     item["package_name"] = "Free";
+            // });
 
             this.updateVideosQueue();
 

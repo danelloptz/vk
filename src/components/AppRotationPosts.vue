@@ -4,7 +4,7 @@
         <span>Вы можете получать целевые просмотры и реакции на свой последний  пост совершенно бесплатно за счет прохождения Ротации постов.</span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных постов ВК,
             и в ответ получаете 10 просмотров вашего последнего поста. </span>
-        <span>Если у Вас активен премиальный тариф, то Вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Активировать тариф».</span>
+        <span>Если у Вас активен премиальный тариф, то Вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
         <div class="rotation_preview_btns">
             <AppBadButton :text="text1" @click="makeRotation"/>
             <AppGoodButton :text="text2" @click="openPlans" />
@@ -13,7 +13,7 @@
     <section class="rotation" v-if="isRotation && !isPlans">
         <span class="counter">Просмотры {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
-            <AppGroupOrUser :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
+            <AppGroupOrUser style="min-width: 550px;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <span>Необходимо просмотреть и поставить лайк на последний пост в группе, если есть закрепленное сообщение, пропустите его</span>
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" @click="subscribeGroup" />
@@ -49,7 +49,7 @@
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
-                text2: "АКТИВИРОВАТЬ ТАРИФ",
+                text2: "ВЫБРАТЬ ТАРИФ",
                 text3: "ПОСМОТРЕТЬ ПОСТ",
                 text4: "ПРОПУСТИТЬ",
                 isRotation: false,
@@ -117,15 +117,15 @@
 
             this.groupInfo = groups;
 
-            this.groupInfo.first.forEach(item => {
-                item["package_name"] = "Leader";
-            });
-            this.groupInfo.second.forEach(item => {
-                item["package_name"] = "VIP";
-            });
-            this.groupInfo.other.forEach(item => {
-                item["package_name"] = "Free";
-            });
+            // this.groupInfo.first.forEach(item => {
+            //     item["package_name"] = "Leader";
+            // });
+            // this.groupInfo.second.forEach(item => {
+            //     item["package_name"] = "VIP";
+            // });
+            // this.groupInfo.other.forEach(item => {
+            //     item["package_name"] = "Free";
+            // });
 
             this.updateGroupQueue();
 

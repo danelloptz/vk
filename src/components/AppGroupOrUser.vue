@@ -16,20 +16,20 @@
                     {{ objectData?.packages?.[objectData?.packages?.length - 1]?.package_name ?? objectData.status ?? objectData?.package_name}}
                 </span>
             </div>
-            <span v-if="objectData && objectData.vk_id && !objectData?.group_link">ID: {{ objectData.vk_id }}</span>
-            <span style="margin-top: 20px;" v-if="objectData && (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || objectData?.vip_offer_text)">{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span>
-            <a v-if="objectData && (objectData.group?.group_link || objectData?.group_link)" :href="objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
+            <span v-if="objectData && objectData.vk_id && !objectData?.group_link && !objectData?.post_link && !objectData?.video_link">ID: {{ objectData.vk_id }}</span>
+            <span style="margin-top: 20px;" v-if="shouldDisplayText" >{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span>
+            <a v-if="objectData && ((correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
             <div class="footer_data_links" style="margin-top: 20px;">
                 <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
                 <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a> -->
-                <a v-if="objectData" :href="vkData?.link"  target="_blank"><img src="@/assets/images/vk.png"></a>
+                <a v-if="objectData" :href="vkData"  target="_blank"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
-        <span v-if="objectData && (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || objectData?.vip_offer_text)" class="business">Business-предложение</span>
+        <span v-if="isBusiness" class="business">Business-предложение</span>
         
     </div>
     <span v-else>Подождите, пока загрузятся данные.</span>
@@ -42,6 +42,7 @@ export default {
             type: Object,
             default: () => ({}), // Указываем пустой объект, чтобы избежать ошибок
         },
+        isBusiness: Boolean
     },
     data() {
         return {
@@ -58,12 +59,25 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
-                    this.tgData = this.userData?.social_links.find(link => link.type === "Telegram") || [];
-                    this.whtData = this.userData?.social_links.find(link => link.type === "Whatsapp") || [];
-                    this.vkData = this.userData?.social_links.find(link => link.type === "VK") || [];
+                    this.tgData = this.objectData?.social_links.find(link => link.type === "Telegram") || [];
+                    this.whtData = this.objectData?.social_links.find(link => link.type === "Whatsapp") || [];
+                    this.vkData = `https://vk.com/id${this.objectData.vk_id}`;
                 }
             }
         }
+    },
+    computed: {
+    shouldDisplayText() {
+        const { objectData, correctStatus } = this;
+        console.log(objectData.group?.vip_offer_text !== '""' && objectData?.vip_offer_text !== '""');
+        return (
+        objectData &&
+        (objectData.group?.vip_offer_text !== '""' && objectData?.vip_offer_text !== '""') &&
+        ((correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) ||
+            correctStatus.includes(objectData?.package_name)) &&
+        objectData?.vip_offer_text
+        ));
+    },
     },
     async created() {
         console.log('data', this.objectData);

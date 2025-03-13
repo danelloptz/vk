@@ -22,7 +22,7 @@
     <section class="rotation" v-if="isRotation && !isPlans && !isTarif">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
-            <AppGroupOrUser :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
+            <AppGroupOrUser style="min-width: 550px;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" @click="subscribeGroup" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" @click="skipGroup" />
@@ -121,7 +121,6 @@
                 default:
                     this.totalGroups = 10;
                     this.skipCounts = 5;
-                    this.addGroups = 9;
                     break;
             }
 
@@ -130,15 +129,15 @@
 
             this.groupInfo = groups;
 
-            this.groupInfo.first.forEach(item => {
-                item["package_name"] = "Leader";
-            });
-            this.groupInfo.second.forEach(item => {
-                item["package_name"] = "VIP";
-            });
-            this.groupInfo.other.forEach(item => {
-                item["package_name"] = "Free";
-            });
+            // this.groupInfo.first.forEach(item => {
+            //     item["package_name"] = "Leader";
+            // });
+            // this.groupInfo.second.forEach(item => {
+            //     item["package_name"] = "VIP";
+            // });
+            // this.groupInfo.other.forEach(item => {
+            //     item["package_name"] = "Free";
+            // });
 
             this.updateGroupQueue();
 
@@ -182,8 +181,7 @@
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const groupLink = this.groupsQueue[this.currentGroupIndex].social_links.vk;
-                    console.log(this.groupsQueue[this.currentGroupIndex]);
+                    const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
                     this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
                     window.open(groupLink, "_blank", "width=800, height=600");
@@ -193,6 +191,7 @@
             async checkSubscription(groupLink) {
                 if (!this.waitingForCheck) return;
                 this.waitingForCheck = false;
+                console.log(groupLink);
                 const response = await checkGroupSub(groupLink, this.userInfo.vk_id, "rotation");
                 console.log(response);
 
@@ -239,14 +238,14 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
                 }
             },
             handleFocus() {
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
                     if (elapsed > 5000) { // Например, если прошло более 5 секунд
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                     }

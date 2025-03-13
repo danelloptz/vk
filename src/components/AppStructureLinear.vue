@@ -103,7 +103,8 @@
             vk_id: Number,
             lay: Number,
             referersStack: Array,
-            showNums: { type: Boolean, default: true }
+            showNums: { type: Boolean, default: true },
+            searchUsers: Array
         },
         data() {
             return {
@@ -175,6 +176,14 @@
                 deep: true,
                 immediate: true
             },
+            searchUsers: {
+                handler(newValue) {
+                    console.log(newValue, "СРАБОТАЛ");
+                    if (this.newValue && this.newValue.length > 0) this.referersStackData = [...this.newValue];
+                },
+                deep: true,
+                immediate: true
+            }
         },
         methods: {
             toggleExpand(index, item) {
