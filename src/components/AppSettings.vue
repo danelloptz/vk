@@ -24,14 +24,16 @@
         <div class="row">
             <input 
                 v-model="telegramLink" 
-                placeholder="Telegram">
+                placeholder="Telegram (введите имя пользователя)">
             <span @click="addTelegram">ДОБАВИТЬ</span>
         </div>
         <div class="row">
             <input 
                 v-model="whatsappLink" 
-                placeholder="WhatsApp">
+                type="number"
+                placeholder="WhatsApp (введите номер телефона)">
             <span @click="addWhatsapp">ДОБАВИТЬ</span>
+            <!-- <span class="error_message" v-if="notTelegram">Введите номер телефона</span> -->
         </div>
         <h3>Региональные данные</h3>
         <div class="dropdown">
@@ -140,16 +142,27 @@
             <span><i><strong>Сделайте свое предложение пользователям INTELEKTAZ, прямо сейчас:</strong></i></span>
         </div>
         <h3>Ваше предложение:</h3>
-        <textarea
-            v-model="sentence"
-            placeholder="Описание"
-            maxlength="60"
-        ></textarea>
+        <span>*В вип-предложении будет показываться только первые 60 символов. Полностью предложение будет видно в бизнес-предложении.</span>
+        <div class="row">
+            <textarea
+                v-model="sentence"
+                placeholder="Ваше предложение"
+                maxlength="200"
+            ></textarea>
+            <AppVipUser 
+                style="height: 100%;"
+                :vipUser="newUserData" 
+                :vkData="vkData"
+                :tgData="tgData"
+                :whtData="whtData"
+            />
+        </div>
         <input  
             v-model="siteLink" 
             placeholder="Сайт" >
         <AppGroupOrUser 
-            :objectData="userData"
+            :objectData="newUserData"
+            :isSettings="true"
             :isBusiness="isBusiness"
             class="card"
         />
@@ -165,13 +178,13 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppModalSubscribe from '@/components/AppModalSubscribe.vue';
     import AppModal from '@/components/AppModal.vue';
-    
+    import AppVipUser from "@/components/AppVipUser.vue";
     import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
     import { editGroup, editVideo } from "@/services/groups";
     import { refreshToken } from "@/services/auth";
 
 export default {
-    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal },
+    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser },
     props: { 
         businessUser: Object
     },
@@ -212,6 +225,7 @@ export default {
             isSaveModal: false,
             title: "",
             msg: "",
+            notTelegram: false
         };
     },
     computed: {
@@ -219,6 +233,30 @@ export default {
             return this.countries.filter((country) =>
                 country.toLowerCase().startsWith(this.searchQuery.toLowerCase())
             );
+        },
+        first60Chars() {
+            // Первые 60 символов
+            return this.sentence.slice(0, 60);
+        },
+        remainingChars() {
+            // Остальные символы
+            return this.sentence.slice(60);
+        },
+        newUserData() {
+            return {
+                "avatar": this.userData.avatar,
+                "name": this.userData.name,
+                "package_name": this.userData.packages.at(-1).package_name,
+                "vip_offer_text": this.sentence,
+                "group_link": this.siteLink,
+                "group": this.userData.group,
+                "packages": this.userData.packages,
+                "vk_id": this.userData.vk_id,
+                "social_links": this.userData.social_links
+            }
+        },
+        vkData() {
+            return `https://vk.com/id${this.userData.vk_id}`;
         },
     },
     async created() {
@@ -262,7 +300,7 @@ export default {
                     this.whatsappLink = newData.social_links.whatsapp || "";
                 }
             }
-        }
+        },
     },
     methods: {
         selectCountry(country) {
@@ -298,11 +336,12 @@ export default {
                 this.isAuto = true;
             },
             addTelegram() {
-                this.tgData = { "type": "Telegram", "link": this.telegramLink };
+                this.telegramLink = this.telegramLink.replace("@", "");
+                this.tgData = { "type": "Telegram", "link": `https://t.me/${this.telegramLink}`};
                 this.userData.social_links.push(this.tgData);
             },
             addWhatsapp() {
-                this.whtData = { "type": "Whatsapp", "link": this.whatsappLink };
+                this.whtData = { "type": "Whatsapp", "link": `https://wa.me/${this.whatsappLink}` };
                 this.userData.social_links.push(this.whtData);
             },
             async addVKGroup() {
@@ -327,13 +366,14 @@ export default {
             },
 
             initLinks() { 
-                this.tgData = this.userData.social_links.find(link => link.type === "Telegram");
-                this.whtData = this.userData.social_links.find(link => link.type === "Whatsapp");
+                this.tgData = this.userData.social_links.filter(link => link.type === "Telegram").at(-1);
+                this.whtData = this.userData.social_links.filter(link => link.type === "Whatsapp").at(-1);
+                console.log(this.whtData);
                 if (this.tgData?.link) {
-                    this.telegramLink = this.tgData.link;
+                    this.telegramLink = this.tgData.link.replace("https://t.me/", "");
                 }
                 if (this.whtData?.link) {
-                    this.whatsappLink = this.whtData.link;
+                    this.whatsappLink = +this.whtData.link.replace("https://wa.me/", "");
                 }
                 if (this.userData.group?.group_link)
                     this.vkGroupLink = this.userData.group.group_link;
@@ -382,6 +422,11 @@ export default {
     @font-face {
         font-family: 'OpenSans';
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
+    }
+
+    .textarea-container {
+        position: relative;
+        width: 100%;
     }
 
     .btn {
@@ -516,16 +561,45 @@ export default {
         padding: 20px;
         box-sizing: border-box;
         font-size: 16px;
-        color: rgba(255, 255, 255, 0.5);
         background: none;
         border: 1px solid white;
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
+        z-index: 888;
+        color: rgba(255, 255, 255, 0.5);
+        word-wrap: break-word;
+        resize: none;
         @media (max-width: 500px) {
             width: 70vw;
         }
     }
+    .highlighted-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 360px;
+        height: 190px;
+        padding: 20px;
+        box-sizing: border-box;
+        font-size: 16px;
+        /* color: rgba(255, 255, 255, 0.5); */
+        pointer-events: none; /* Чтобы клики проходили через div к textarea */
+        z-index: 899;
+        white-space: pre-wrap; /* Сохраняет пробелы и переводы строк */
+        color: transparent; /* Скрываем текст, чтобы он не перекрывал textarea */
+        word-wrap: break-word;
+    }
+
+    .bold {
+        font-weight: bold;
+        line-height: normal;
+    }
+    .normal {
+        font-weight: normal;
+        line-height: normal;
+    }
+
 
     .arrow_down {
         position: absolute;

@@ -1,24 +1,26 @@
 <template>
     <div class="footer_data" v-if="Object.keys(userData).length !== 0">
-        <img v-if="objectData" :src="objectData.avatar" class="avatar" style="margin-top: 15px;">
+        <img v-if="objectData" :src="isSettings ? objectData.group.group_photo : objectData.avatar" class="avatar" style="margin-top: 15px;">
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
-                <h2 v-if="objectData && userData.name">{{ userData.name }}</h2>
-                <span v-if="objectData && 
+                <h2 v-if="objectData && userData.name">{{ isSettings ? objectData.group.group_name : userData.name }} <span v-if="objectData && 
                     (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Business' ||
                      objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Leader' || 
-                     (objectData.status && objectData.status == 'Business' ||
-                        objectData.status == 'Leader'
+                     objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'VIP' || 
+                     (objectData.status && (objectData.status == 'Business' ||
+                        objectData.status == 'Leader' || objectData.status == 'VIP')
                      )) ||
                      (objectData?.package_name == 'Business' ||
-                     objectData?.package_name == 'Leader')
-                     ">
+                     objectData?.package_name == 'Leader' ||
+                     objectData?.package_name == 'VIP')
+                     " style="margin-left: 10px;">
                     {{ objectData?.packages?.[objectData?.packages?.length - 1]?.package_name ?? objectData.status ?? objectData?.package_name}}
-                </span>
+                </span></h2>
+                
             </div>
             <span v-if="objectData && objectData.vk_id && !objectData?.group_link && !objectData?.post_link && !objectData?.video_link">ID: {{ objectData.vk_id }}</span>
             <span style="margin-top: 20px;" v-if="shouldDisplayText" >{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span>
-            <a v-if="objectData && ((correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
+            <a v-if="objectData && (isSettings || (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
             <div class="footer_data_links" style="margin-top: 20px;">
                 <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
                 <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
@@ -29,7 +31,7 @@
                 <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
-        <span v-if="isBusiness" class="business">Business-предложение</span>
+        <span v-if="isBusiness || isSettings" class="business">Business-предложение</span>
         
     </div>
     <span v-else>Подождите, пока загрузятся данные.</span>
@@ -42,7 +44,8 @@ export default {
             type: Object,
             default: () => ({}), // Указываем пустой объект, чтобы избежать ошибок
         },
-        isBusiness: Boolean
+        isBusiness: Boolean,
+        isSettings: Boolean
     },
     data() {
         return {
@@ -59,8 +62,8 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
-                    this.tgData = this.objectData?.social_links.find(link => link.type === "Telegram") || [];
-                    this.whtData = this.objectData?.social_links.find(link => link.type === "Whatsapp") || [];
+                    this.tgData = this.objectData?.social_links.filter(link => link.type === "Telegram").at(-1) || [];
+                    this.whtData = this.objectData?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
                     this.vkData = `https://vk.com/id${this.objectData.vk_id}`;
                 }
             }
@@ -69,14 +72,13 @@ export default {
     computed: {
     shouldDisplayText() {
         const { objectData, correctStatus } = this;
-        console.log(objectData.group?.vip_offer_text !== '""' && objectData?.vip_offer_text !== '""');
         return (
-        objectData &&
+        objectData && ( this.isSettings ||
         (objectData.group?.vip_offer_text !== '""' && objectData?.vip_offer_text !== '""') &&
         ((correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) ||
             correctStatus.includes(objectData?.package_name)) &&
         objectData?.vip_offer_text
-        ));
+        )));
     },
     },
     async created() {
@@ -141,7 +143,7 @@ export default {
     .footer_data_row {
         display: flex;
         column-gap: 20px;
-        align-items: center;
+        align-items: start;
         @media (max-width: 650px) {
             flex-direction: column-reverse;
             align-items: start;
@@ -150,12 +152,13 @@ export default {
     .footer_data_row h2 {
         color: white;
         font-size: 20px;
-        text-wrap: nowrap;
+        text-wrap: wrap;
+        line-height: 1.5;
         @media (max-width: 560px) {
             text-wrap: wrap;
         }
     }
-    .footer_data_row span {
+    /* .footer_data_row span {
         color: white;
         font-size: 14px;
         padding: 0px 18px;
@@ -165,6 +168,17 @@ export default {
             padding: 0 15px;
             line-height: 1.2;
         }
+    } */
+    .footer_data_row span {
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        font-family: 'OpenSans';
+        padding: 1px 18px;
+        background: #7023EC;
+        border-radius: 5px;
+        width: max-content;
+        word-wrap: break-word;
     }
     .footer_data_links {
         display: flex;

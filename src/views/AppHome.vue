@@ -11,7 +11,7 @@
                     @update-repeatClick="updateActiveComponent" 
                     @update-isClicked="updateIsClicked"
                 />
-                <div class="vip" v-if="vipUser">
+                <!-- <div class="vip" v-if="vipUser">
                     <div class="vip_user">
                         <img :src="vipUser.avatar">
                         <div class="text_wrapper">
@@ -29,7 +29,13 @@
                         </div>
                         <span>VIP-предложение</span>
                     </div>
-                </div>
+                </div> -->
+                <AppVipUser 
+                    :vipUser="vipUser"
+                    :vkData="vkData"
+                    :tgData="tgData"
+                    :whtData="whtData"
+                    v-if="vipUser" />
                 <AppAdd 
                     v-if="addDataVertical"
                     :isClicked="isClicked"
@@ -83,12 +89,13 @@
     import AppAiGenerator from '@/components/AppAiGenerator.vue';
     import AppComeToAssembly from '@/components/AppComeToAssembly.vue';
     import AppRotationPlans from '@/components/AppRotationPlans.vue';
+    import AppVipUser from '@/components/AppVipUser.vue';
     import { getUserInfo, getVipUser } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans, AppVipUser },
         data() {
             return {
                 verticalAddCount: 2,
@@ -163,6 +170,7 @@
             if (["Leader", "Business"].includes(this.userInfo.package_name)) this.isBusiness = true;
 
             const otherAdds = await getOtherAdds(userInfo.vk_id); // рекламные банеры слева и снизу
+            console.log(otherAdds);
 
             this.addDataVertical = otherAdds.left_ads;
             this.addDataHorizontal = otherAdds.bottom_ads;
@@ -170,11 +178,11 @@
             const vip = await getVipUser(this.userInfo.vk_id); // вип юзер слева
             this.vipUser = vip.vip;
             this.businessUser = vip.business;
-            this.tgData = this.vipUser?.social_links.find(link => link.type === "Telegram") || [];
-            this.whtData = this.vipUser?.social_links.find(link => link.type === "Whatsapp") || [];
+            this.tgData = this.vipUser?.social_links.filter(link => link.type === "Telegram").at(-1) || [];
+            this.whtData = this.vipUser?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
             this.vkData = `https://vk.com/id${this.vipUser.vk_id}`;
 
-            console.log(this.vipUser);
+            console.log(this.vipUser, this.whtData);
             console.log(this.businessUser);
 
             this.checkWindowWidth();
@@ -194,6 +202,9 @@
                 this.selectedComponent = index;
                 const vip = await getVipUser(this.userInfo.vk_id); // вип юзер слева
                 this.vipUser = vip.vip;
+                this.tgData = this.vipUser?.social_links.filter(link => link.type === "Telegram").at(-1) || [];
+                this.whtData = this.vipUser?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
+                this.vkData = `https://vk.com/id${this.vipUser.vk_id}`;
                 this.businessUser = vip.business;
                 this.isTarif = false;
                 this.isReff = false;

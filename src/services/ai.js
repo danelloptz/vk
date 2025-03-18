@@ -48,3 +48,33 @@ export async function updateBrief(brif_id, payload,  token) {
         return false; 
     }
 }
+
+export async function getContentPlan(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/v1/content_plan/', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении контент плана", error);
+        return false; 
+    }
+}
+
+export async function generateTopics(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/generate_topics', {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при генерации тем контент плана", error);
+        return false; 
+    }
+}

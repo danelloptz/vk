@@ -88,7 +88,8 @@ export default {
         visibility2: Boolean,
         package: String,
         isGoodPayment: Boolean,
-        tarrifs: Array
+        tarrifs: Array,
+        daysForBusiness: String
     },
     data() {
         return {
@@ -116,7 +117,14 @@ export default {
     },
     computed: {
         summary() {
-            if (this.selectedPackage == "Leader") return 500;
+            if (this.selectedPackage == "Leader") {
+                const leader_pack = this.newTarrifs.find(item => item.package_name == "Leader");
+                const business_pack = this.newTarrifs.find(item => item.package_name == "Business");
+                console.log(leader_pack, business_pack, this.daysForBusiness);
+                if (this.daysForBusiness != 0) {
+                    return (leader_pack.monthly_cost * 12 - 4)  - Math.floor(+this.daysForBusiness / 30) * business_pack.monthly_cost;
+                } else return 500;
+            } 
             if (this.selectedPackage == "Business") return 300;
             return this.currTime * this.currPrice;
         }

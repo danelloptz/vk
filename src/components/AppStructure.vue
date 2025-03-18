@@ -11,7 +11,7 @@
             <img :src="userData.avatar">
             <div class="user_col">
                 <div class="user_row">
-                    <h2>{{ `${userData.first_name} ${userData.last_name}` }}</h2>
+                    <h2>{{ `${userData.name}` }}</h2>
                     <span v-if="userData?.packages[userData?.packages.length - 1]?.package_name != 'Free'">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</span>
                 </div>
                 <span>ID: {{ userData.vk_id }}</span>
@@ -75,10 +75,10 @@
         </div>
         <div class="legs" v-if="activeIndex == 1">
             <div class="left">
-                <div class="circle" :class="{ binar_active: userData.activation }"></div>
+                <div class="circle" :class="{ binar_active: struct_info.qualification }"></div>
                 <div class="col">
                 <h2>Бинарная квалификация</h2>
-                <span v-if="!userData.activation">Не активна</span>
+                <span v-if="!struct_info.qualification">Не активна</span>
                 <span v-else>Активна</span>
                 </div>
             </div>
@@ -98,16 +98,16 @@
             v-if="binarTree && !notFound && activeIndex == 1" 
             :isRoot="true" 
             :user="userData" 
-            :activation="userData.activation" 
+            :activation="struct_info.qualification" 
             :current_leg="userData.current_leg" 
             :node="maskedData" 
             :lay="1" 
             :root_info="{ left: maskedStructInfo.left, right: maskedStructInfo.right }"
             @nextUser="next" 
         />
-        <AppStructureLinear v-if="activeIndex == 0" 
+        <AppStructureLinear v-if="activeIndex == 0 && !notFound" 
             :vk_id="root_vk_id" 
-            :key="searchUsers"
+            :key="root_vk_id"
             :searchUsers="searchUsers"
             :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
             :lay="1" 
@@ -284,17 +284,20 @@ export default {
                 }
             } else {    
                 this.searchUsers = await findParents(this.userData.vk_id, +this.search);
+                this.searchUsers.reverse();
                 if (this.searchUsers.length > 0) {
-                    this.searchUsers = this.searchUsers.slice(0, this.searchUsers.indexOf(+this.userData.vk_id) + 1);
-                    console.log(this.searchUsers);
+                    this.notFound = false;
+                    this.root_vk_id = +this.search;
                 }
-                
+                else this.notFound = true;
             }
             
         },
         async backup() {
             this.notFound = false;
             this.binarTree = await getTree(this.userData.vk_id);
+            this.searchUsers = [];
+            this.root_vk_id = this.userData.vk_id;
         },
         changeActiveLeg(index, name) {
             this.leg_index = index;

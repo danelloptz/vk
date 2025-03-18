@@ -4,6 +4,7 @@
         :visibility1="isModal"
         :isGoodPayment="isGoodPayment"
         :tarrifs="tariffs"
+        :daysForBusiness="daysForBusiness"
         @update:visibility1="isModal = $event"
         @update:isGoodPayment="isGoodPayment = $event"
     />
@@ -300,7 +301,7 @@
                 </tr>
                 <tr>
                     <td style="border-bottom: none;" class="start_col"></td>
-                    <td class="column first_col" style="border-bottom: none;">
+                    <td class="column" style="border-bottom: none;">
                         <span><span class="big_letters">{{ tariffs[0]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                     </td>
                     <td class="column"  style="border-bottom: none;">
@@ -315,7 +316,7 @@
                             <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
                         </div>
                     </td>
-                    <td class="column" style="border-bottom: none;">
+                    <td class="column vip_col" style="border-bottom: none;">
                         <div class="col2">
                             <span><span class="big_letters">{{ tariffs[3]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                             <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
@@ -330,13 +331,13 @@
                     <td class="column top_col" style="border-right: none; border-bottom: none;">
                         <div class="col2">
                             <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                            <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader')) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn_big" @click="selectPackage(plans[5])"/>
+                            <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader') && +daysForBusiness >= 30) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn_big" @click="selectPackage(plans[5])"/>
                         </div>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <span>*Пакеты Business и Leader активируются сроком только на 1 год с максимальной скидкой и полным функционалом сервиса с дальнейшими доработками. Это несоизмеримо выгоднее, чем любой другой тариф.</span>
+        <span style="text-align: start;">*Пакеты Business и Leader активируются сроком только на 1 год с максимальной скидкой и полным функционалом сервиса с дальнейшими доработками. Это несоизмеримо выгоднее, чем любой другой тариф.</span>
         <div class="booster">
             <div class="booster-img"></div>
             <div class="col">
@@ -378,12 +379,14 @@ import { getUserInfo } from "@/services/user";
                 title1: "УСПЕШНО",
                 msg1: "Тариф был приобретён.",
                 isBooster: false,
-                boosterPrice: 100 // просто так
+                boosterPrice: 100, // просто так,
+                daysForBusiness: 0
             }
         },
         async created() {
             const resp = await getTariffs(localStorage.getItem("token"));
             this.tariffs = resp;
+            console.log(this.tariffs);
 
             const user = await getUserInfo(localStorage.getItem("token"));
             this.userData = user;
@@ -399,6 +402,14 @@ import { getUserInfo } from "@/services/user";
             this.tariffs.forEach(item => console.log(item?.package_name));
             this.newTarrif = (this.userData.packages.length == 1 && this.userData.packages[0].package_name == "Free") ?  this.userData.packages : this.userData.packages.filter(item => item.package_name != "Free");
             console.log(this.newTarrif);
+
+            if (!(this.userData.packages.filter(item => item.package_name == "Leader").length > 0)) {
+                console.log(this.userData.packages)
+                this.userData.packages.forEach(item => {
+                    if (item.package_name == "Business") this.daysForBusiness = this.getDays(item);
+                });
+            }
+           
         },
         watch: {
             tarrifs(newValue) {
@@ -411,7 +422,7 @@ import { getUserInfo } from "@/services/user";
                 this.isModal = true;
             },
             async buy() {
-                if (this.userData.packages.length != 1) {
+                if (["VIP", "Business", "Leader"].includes(this.userData.packages.at(-1).package_name)) {
                     const payment = await buyBooster(this.boosterPrice, localStorage.getItem("token"));
                     this.isBooster = true;
                     if (payment.status) {
@@ -554,13 +565,13 @@ import { getUserInfo } from "@/services/user";
     }
 
     .gradient-column {
-        left: 62.532% !important;
+        left: 62.882% !important;
         /* @media (min-width: 1440px) {
             left: 72% !important;
         } */
     }
     .gradient-column2 {
-        left: 81.601% !important;
+        left: 81.751% !important;
         background: linear-gradient(45deg, #D19981, #DB40E6);
         /* @media (min-width: 1440px) {
             left: 86.15% !important;
@@ -631,5 +642,9 @@ import { getUserInfo } from "@/services/user";
     .start_col {
         min-width: 110px;
         max-width: 110px;
+    }
+    .vip_col {
+        min-width: 120px;
+        max-width: 120px;
     }
 </style>

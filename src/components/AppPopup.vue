@@ -24,7 +24,8 @@
             visibility1: Boolean,
             vk_id: Number,
             autoposting: Boolean,
-            id: String
+            id: String,
+            time: Number    
         },
         data() {
             return {
@@ -41,7 +42,7 @@
                 this.$emit('close'); 
             },
             async getPoint() {
-                const time = localStorage.getItem("last_point") || 86400000;
+                const time = this.time * 1000 || 86400000;
                 const points = localStorage.getItem("points");
                 const dif = new Date().getTime() - time;
                 this.isModal = true;

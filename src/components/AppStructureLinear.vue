@@ -122,11 +122,13 @@
             const referals = await getReferals(this.vk_id);
             this.node = referals.referrals;
 
-            this.openedUsers = Array.from({ length: this.totalPages }, () => Array(this.perPage).fill(false));
+            this.updateOpenedUsers();
 
-            this.referersStackData = this.referersStack;
+            console.log('ОТРИСОВАЛ!', this.searchUsers, this.referersStack);
+            if (this.searchUsers.length == 0) this.referersStackData = this.referersStack
+            else this.referersStackData = [...this.searchUsers];
             this.isHide = this.showNums;
-
+            console.log(this.referersStackData);
         },
         computed: {
             totalPages() {
@@ -164,7 +166,8 @@
         watch: {
             referersStack: {
                 handler(newStack) {
-                    this.referersStackData = [...newStack];
+                    if (this.searchUsers.length == 0) this.referersStackData = [...newStack]
+                    else this.referersStackData = [...this.searchUsers];
                 },
                 deep: true,
                 immediate: true
@@ -179,16 +182,31 @@
             searchUsers: {
                 handler(newValue) {
                     console.log(newValue, "СРАБОТАЛ");
-                    if (this.newValue && this.newValue.length > 0) this.referersStackData = [...this.newValue];
+                    this.referersStackData = this.newValue && this.newValue.length > 0 ? [...this.newValue] : [];
                 },
                 deep: true,
                 immediate: true
+            },
+            node: {
+                handler() {
+                    this.updateOpenedUsers();
+                },
+                deep: true
             }
         },
         methods: {
             toggleExpand(index, item) {
                 if (item.total_referrals_buf > 0) {
                     console.log(this.lay);
+
+                    if (!this.openedUsers[this.currentPage - 1]) {
+                        this.updateOpenedUsers();
+                    }
+
+                    if (this.openedUsers[this.currentPage - 1][index] === undefined) {
+                        this.$set(this.openedUsers[this.currentPage - 1], index, false);
+                    }
+                    
                     if (this.lay == 2) {
                         this.referersStackData.push({name: item.name, vk_id: item.vk_id});
                         this.$emit("updateUser", item.vk_id);
@@ -229,9 +247,10 @@
                 }
             },
             async updateUser(vk_id, index = false) {
-                console.log(index);
+                console.log(vk_id, index, this.referersStackData);
                 this.referersStackData = index || index === 0 ? [...this.referersStackData].slice(0, index + 1) : [...this.referersStackData];
-                this.resetOpenedUsers();
+                console.log(this.referersStackData, this.currentPage);
+                // this.resetOpenedUsers();
                 const referals = await getReferals(vk_id);
                 this.node = referals.referrals;
             },
@@ -241,6 +260,9 @@
                         this.openedUsers[i][j] = false;
                     });
                 });
+            },
+            updateOpenedUsers() {
+                this.openedUsers = Array.from({ length: this.totalPages || 1 }, () => Array(this.perPage).fill(false));
             }
         }
     };

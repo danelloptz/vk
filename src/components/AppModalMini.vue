@@ -8,7 +8,7 @@
                     <span class="pckg_name">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</span>
                 </div>
                 <div class="col">
-                    <h2>{{ `${userData.first_name} ${userData.last_name}` }}</h2>
+                    <h2>{{ `${userData.name}` }}</h2>
                     <span class="id">ID: {{ userData.vk_id }}</span>
                     <a style="cursor: pointer;" @click="openRef">Реферальные ссылки</a>
                     <span>Партнерская программа активна до {{ endDate }}</span>

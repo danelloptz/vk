@@ -38,7 +38,8 @@ export default {
             timerMsg: "Пожалуйста, ждите окончания отсчета таймера",
             intervalId: null,
             isPlaying: false,
-            isEnd: false
+            isEnd: false,
+            paused: false,
         };
     },
     watch: {
@@ -65,10 +66,11 @@ export default {
 
                 player.on("started", () => {
                     this.isPlaying = true;
-                    this.startTimer();
+                    if (!this.paused) this.startTimer();
                 });
                 player.on("paused", () => {
                     this.isPlaying = false;
+                    this.paused = true;
                     this.clearTimer();
                 });
                 player.on("resumed", () => {
@@ -82,10 +84,10 @@ export default {
             }
         },
         startTimer() {
-            if (this.intervalId || this.currTime === 0) return;
+            if (this.intervalId || this.currTime === 0 || !this.isPlaying) return;
 
             this.intervalId = setInterval(() => {
-                if (this.currTime > 0) {
+                if (this.currTime > 0 && this.isPlaying) {
                     this.currTime--;
                 } else {
                     this.clearTimer();
@@ -107,6 +109,7 @@ export default {
             // this.intervalId = null;
             this.isPlaying = false;
             this.isEnd = false;
+            this.paused = false;
             this.clearTimer();
             this.$emit("update:visibility1", false);
             this.$emit("close");
@@ -117,8 +120,9 @@ export default {
                 this.isPlaying = false;
                 this.clearTimer();
             } else {
-                this.isPlaying = true;
-                this.startTimer();
+                if (this.isPlaying) {
+                    this.startTimer();
+                }
             }
             console.log(this.isPlaying);
         },
@@ -128,8 +132,7 @@ export default {
             this.clearTimer();
         },
         handleFocus() {
-            if (this.isPlaying === false) {
-                this.isPlaying = true;
+            if (this.isPlaying) {
                 this.startTimer();
                 console.log("Пользователь вернулся в окно");
             }

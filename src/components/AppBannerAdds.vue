@@ -224,11 +224,11 @@
                     </td>
                     <td>
                         <div class="edit">
-                            <div class="row">
-                                <img src="@/assets/images/edit.png">
+                            <div class="row" @click="edit(item)">
+                                <img src="@/assets/images/edit.png" style="cursor: pointer;">
                                 <a>редактировать</a>
                             </div>
-                            <div class="row">
+                            <div class="row" style="cursor: pointer;" @click="deleteAdd(item, index)">
                                 <img src="@/assets/images/delete.png">
                                 <a>удалить</a>
                             </div>
@@ -243,7 +243,7 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import { getUserInfo } from "@/services/user";
-    import { sendOtherAdd, getUserAdds } from "@/services/add";
+    import { sendOtherAdd, getUserAdds, deleteAdd, editOtherAdd } from "@/services/add";
     import { refreshToken } from "@/services/auth";
     import { getConfig } from "@/services/config";
     import AppModal from '@/components/AppModal.vue';
@@ -290,7 +290,13 @@
                 isModal: false,
                 title: "",
                 msg: "",
-                pricesData: null
+                pricesData: null,
+                old_pay: 0,
+                isEdit: false,
+                ad_id: null,
+                timestamp: null,
+                daysBefore: 0,
+                posBefore: ""
             }
         },
         computed: {
@@ -452,10 +458,24 @@
                 this.daysSummary = this.selectedCounts.reduce((sum, num, index) => sum + (num * this.daysNum[index]), 0);
             },
             async makePayment() {
-                if (this.userData.balance >= this.priceSummary) {
+                if (this.userData.balance >= this.priceSummary && (this.priceSummary > 0 || this.isEdit) && (this.img != "" || this.uploadedImage != "")) {
                     const formData = new FormData();
 
-                    formData.append("ads_img", this.img.get("file"));
+                    if (this.img != "") formData.append("ads_img", this.img.get("file"))
+                    else {
+                        console.log(this.uploadedImage);
+                        const response = await fetch(this.uploadedImage);
+                        const blob = await response.blob();
+
+                        // 2. Создаём объект File
+                        const file = new File([blob], "image.jpg", { type: blob.type });
+
+                        // 3. Формируем данные для отправки 
+                        formData.append("ads_img", file);
+                        console.log(file);
+                    }
+
+                    if (this.img != "") console.log("ФОРМАТ ОТПРАВКИ ФАЙЛА: ", this.img.get("file"));
                     
                     const days_count = {
                         "days_1": this.selectedCounts[0],
@@ -472,7 +492,8 @@
                     formData.append("vk_id", this.userData.vk_id);
                     formData.append("ads_text", "text");
                     formData.append("ads_url", this.link);
-                    formData.append("position", this.position);
+                    if (this.position != "") formData.append("position", this.position)
+                    else formData.append("position", this.posBefore);
                     
                     formData.append("auditorium", JSON.stringify({
                         city: this.selectedCities,
@@ -482,18 +503,47 @@
                         tarif: this.selectedPackages
                     }));
 
-                    const payment = await sendOtherAdd(formData);
+                    console.log(formData);
+
+                    const payment = this.isEdit ? await editOtherAdd(formData, this.ad_id, this.timestamp * 1000 + this.daysSummary * 24*60*60*1000) : await sendOtherAdd(formData);
                     this.isModal = true;
                     this.title = payment.status ? "УСПЕШНО!" : "ОШИБКА!";
                     this.msg = payment.status ? "Покупка завершена. Ваша реклама добавлена." : "Не удалось оплатить покупку рекламного банера.";
+                    this.isEdit = false;
                 } else {
                     this.isModal = true;
                     this.title = "ОШИБКА!"
-                    this.msg = "Недостаточно средств на балансе";
+                    if (this.userData.balance < this.priceSummary) this.msg = "Недостаточно средств на балансе.";
+                    if (this.priceSummary == 0) this.msg = "Не выбрали срок для рекламы.";
+                    if (this.img == "") this.msg = "Не выбрали баннер для рекламы.";
                 }
             },
             reload() {
-                window.location.reload();
+                if (this.title != "ОШИБКА!") window.location.reload();
+            },
+            async deleteAdd(item, index) {
+                const resp = await deleteAdd(item.ad_id);
+                if (resp.status) {
+                    this.userAdds.splice(index, 1);
+                }
+            },
+            edit(add) {
+                this.isEdit = true;
+                const data = add.data;
+
+                this.selectedCities = data.auditorium.city;
+                this.selectedCountries = data.auditorium.country;
+                this.selectedSexes = data.auditorium.sex;
+                this.selectedInterests = data.auditorium.interests;
+                this.selectedPackages = data.auditorium.tarif;
+                this.link = data.ads_url;
+                this.uploadedImage = data.ads_img;
+                this.ad_id = add.ad_id;
+                this.timestamp = data.date_view_end;
+                this.posBefore = data.position;
+
+                this.isImageUploaded = true;
+                console.log( data.ads_img);
             }
         }
     };
@@ -632,6 +682,7 @@
         align-items: center;
         column-gap: 26px;
         width: 100%;
+        cursor: pointer;
     }
     .row input {
         width: 100%;

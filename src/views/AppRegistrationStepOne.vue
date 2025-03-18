@@ -97,7 +97,7 @@
             
                 <div class="agreement">
                     <input type="checkbox" v-model="isCheckboxChecked">
-                    <span>Мне исполнилось 18 лет и я принимаю <a>пользовательское соглашение</a>.</span>
+                    <span>Мне исполнилось 18 лет и я принимаю <a href="https://docs.google.com/viewer?url=https://api.intelektaz.com/assets/610b8919-c766-4311-9f0d-e893dfd4541a"  target="_blank" >пользовательское соглашение</a>.</span>
                 </div>
                 <span v-if="isNotCheckboxChecked" class="error_message">Нет соглашения!</span>
 

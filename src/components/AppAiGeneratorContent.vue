@@ -104,21 +104,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in themes" :key="index">
+                    <tr v-for="(item, index) in plan" :key="index">
                         <td>
                             <input type="checkbox" :checked="allCheckboxes">
                         </td>
                         <td>
                             <span>{{ index + 1 }}</span>
                         </td>
-                        <td>
-                            <span :contenteditable="isEditable">{{ themes?.[index] }}</span>
+                        <td class="plan_item">
+                            <span :contenteditable="isEditable">{{ item?.topic_name }}</span>
                         </td>
-                        <td>
-                            <span :contenteditable="isEditable">{{ posts?.[index] }}</span>
+                        <td class="plan_item">
+                            <span :contenteditable="isEditable">{{ item?.post_text[0] }}</span>
                         </td>
-                        <td>
-                            <img :src="banners?.[index]" />
+                        <td class="plan_item">
+                            <img :src="item?.image_links[0]" />
                         </td>
                     </tr>
                 </tbody>
@@ -152,7 +152,7 @@
                             <span class="content_text">{{ index + 1 }}</span>
                         </td>
                         <td>
-                            <span  class="content_text">{{ themes?.[index] }}</span>
+                            <span class="content_text">{{ themes?.[index] }}</span>
                         </td>
                         <td>
                             <span  class="content_text">{{ posts?.[index] }}</span>
@@ -175,7 +175,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief, getBrief, updateBrief } from "@/services/ai";
+    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics } from "@/services/ai";
 
     export default {
         components: { AppGoodButton },
@@ -223,7 +223,8 @@
                 link: "",
                 reaction: "",
                 isNewBrief: false,
-                idBrief: ""
+                idBrief: "",
+                plan: null
             }
         },
         async created() {
@@ -248,7 +249,10 @@
                 this.isNewBrief = true;
                 console.log("БРИФ ЕЩЁ НЕ СОЗДАН!");
             }
-            
+
+            const r = await getContentPlan(localStorage.getItem("token"));
+            this.plan = r || [];
+
         },
         methods: {
             setActive(index) {
@@ -289,9 +293,10 @@
                 this.isEditable = true;
 
             },
-            generateThemes() {
+            async generateThemes() {
                 this.saveSettings();
-                // TODO: просить сервер сгенерировать темы по текущему брифу 
+                const topics = await generateTopics(localStorage.getItem("token"));
+                this.plan = topics;
             },
             changeEditableContent() {
                 this.isEditableContent = true;
@@ -500,7 +505,7 @@
     td {
         padding: 0px 10px;
     }
-    span, td, th {
+    td, th {
         color: white;
         font-family: 'OpenSans';
         font-size: 20px;
@@ -508,6 +513,15 @@
         align-self: center;
         z-index: 9;
         padding: 10px;
+        position: relative;
+    }
+    span {
+        color: white;
+        font-family: 'OpenSans';
+        font-size: 20px;
+        z-index: 9;
+        /* padding: 10px; */
+        align-self: center;
         position: relative;
     }
     tr:nth-child(2n+1) {
@@ -545,5 +559,10 @@
     }
     .content_text {
         font-size: 14px;
+    }
+    .plan_item {
+        width: 270px;
+        padding: 15px 20px;
+        text-align: start !important;
     }
 </style>

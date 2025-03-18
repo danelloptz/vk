@@ -165,14 +165,14 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
                 }
             },
             handleFocus() {
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
                     if (elapsed > 3000) { // Например, если прошло более 5 секунд
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.social_links.vk);
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                     }
@@ -322,10 +322,7 @@
         display: flex;
         justify-content: space-between;
         align-items: end;
-        @media (max-width: 1300px) {
-            justify-content: center;
-            column-gap: 30px;
-        }
+        column-gap: 20px;
         @media (max-width: 1100px) {
             flex-direction: column;
             row-gap: 30px;
@@ -335,10 +332,8 @@
     .groups_block_btns {
         display: flex;
         column-gap: 20px;
-        @media (max-width: 1400px) {
-            flex-direction: column;
-            row-gap: 20px;
-        }
+        flex-direction: column;
+        row-gap: 20px;
         @media (max-width: 900px) {
             justify-content: center;
             flex-direction: row;

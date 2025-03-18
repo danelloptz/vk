@@ -3,6 +3,7 @@
         :visibility1="popupVisible" 
         :vk_id="userData.vk_id"
         :id="userData.id"
+        :time="userData.last_gift_time"
         @update:visibility1="popupVisible = $event"
         @close="close" 
         @clicked="takedPoint"
@@ -95,7 +96,7 @@
             error() {
                 this.isModal = true;
                 this.title = "ОШИБКА";
-                this.msg = "Балл можно получить каждый час. Вернитесь позже и повторите попытку."
+                this.msg = "Балл можно получить 1 раз в час. \n  Вернитесь позже и повторите попытку."
             }
         },
         async created() {

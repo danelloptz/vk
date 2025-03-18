@@ -61,13 +61,15 @@ export async function sendTo(to_user, amount, token) {
     }
 }
 
-export async function putMoney(amount, hash, contractaddress, recipient, token) {
+export async function putMoney(amount, hash, contractaddress, recipient, chain, token) {
+    console.log(amount, hash, contractaddress, recipient, chain);
     try {
         const response = await axios.post('https://web.intelektaz.com/api/v1/user/balance/pick_up', {
             "amount": amount,
             "hash": hash,
             "contractaddress": contractaddress,
             "recipient": recipient,
+            "chain": chain
         }, {
             headers: {
                 Authorization: `Bearer ${token}`,

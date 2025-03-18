@@ -107,17 +107,18 @@ export default {
         },
         removeSocial(index) {
             this.socials.splice(index, 1);
+            this.saveSocial();
         },
         downloadImage(imageLink) {
             const imageUrl = imageLink;
             const a = document.createElement("a");
-            a.href = imageUrl;
+            a.href = imageUrl + '?download';
             a.download = imageLink;
             a.click();
         },
         async saveSocial() {
             const filtered = this.socials.filter(item => item.link != "");
-            Object.values(filtered).forEach(obj => delete obj.isNew);
+            // Object.values(filtered).forEach(obj => delete obj.isNew);
 
             this.userInfo.social_links = this.userInfo.social_links.filter(item => {
                 return filtered.some(social => social.type === item.type && social.link === item.link);

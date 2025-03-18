@@ -39,7 +39,7 @@
             <div class="user">
                 <img :src="userToSend.avatar">
                 <div class="text_wrapper">
-                    <h3>{{ `${userToSend.first_name} ${userToSend.last_name}` }}</h3>
+                    <h3>{{ `${userToSend.name}` }}</h3>
                     <span>ID: {{ userToSend.vk_id }}</span>
                 </div>
             </div>

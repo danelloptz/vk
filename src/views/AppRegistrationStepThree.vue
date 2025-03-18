@@ -19,7 +19,7 @@
                 <input
                     v-model="selectedGroup" 
                     placeholder="Вставьте ссылку" >
-                <span v-if="isErorr" class="error">Не существует такой группы!</span>
+                <span v-if="isErorr" class="error">Не существует такой ВК группы или тип вашего сообщества - закрытое!</span>
                 <span>*Вы в любое время можете добавить или изменить свою группу для продвижения в разделе «Настройки» в личном кабинете.</span>
                 <div class="wrapper_btn">
                     <AppGoodButton :text="text1" @click="checkLink" />

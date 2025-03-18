@@ -96,7 +96,6 @@
                 title: "УСПЕШНО!",
                 msg: "Ваш баланс пополнен",
                 isMoneyPut: false,
-                adressToSend: "TFJpSqMrjrBr9EB1JRG48f5iTyoakJ2x8V",
                 isError: false,
                 errorMessage: "",
                 commisionData: null,
@@ -151,16 +150,25 @@
             },
             async check() {
                 if (this.txid != "") {
-                    const response = await putMoney(this.cashout, this.txid, this.adressToSend, this.userInfo.id, localStorage.getItem("token"));
-                    console.log(response);
-                    if (!response.isError) {
-                        this.isMoneyPut = true;
-                        this.isError = false;
-                    }
-                    else {
+                    const contract = this.activeIndex == 0 ? this.depositData.bsc_contract_address : this.depositData.trc_contract_address;
+                    const wallet =  this.activeIndex == 0 ? this.depositData.bsc : this.depositData.trc;
+                    try {
+                        const response = await putMoney(this.cashout, this.txid, contract, wallet, ["BSC20", "TRC20"][this.activeIndex], localStorage.getItem("token"));
+                        console.log(response);
+                        if (!response.isError) {
+                            this.isMoneyPut = true;
+                            this.isError = false;
+                        }
+                        else {
+                            this.isError = true;
+                            if (response.message.indexOf("been used")) this.errorMessage = "Этот хэш уже был использован!"
+                            else this.errorMessage = response.message;
+                        }
+                    } catch(e) {
                         this.isError = true;
-                        this.errorMessage = response.message;
+                        this.errorMessage = "Неправильный хэш!";
                     }
+                    
                 }
             },
             closeModalMoneyPut() {
@@ -315,7 +323,7 @@
         color: red !important;
     }
     .green {
-        color: green;
+        color: green !important;
         animation: ShowEasy 2s ease-in;
         opacity: 0;
     }
