@@ -10,14 +10,58 @@
                 <h2>Команда</h2>
             </div>
             <div class="line" v-if="isRoot"></div>
-            <div class="top_pagination" v-if="isRoot">
+            <div class="top_pagination" v-if="isRoot" :key="referersStackData">
                 <span v-for="(item, index) in referersStackData" :key="index" @click="updateUser(item.vk_id, index)" class="pagination_item" :class="{ lastPaginationItem: index == referersStackData.length - 1 }">
                     {{ item.name }}
                     <span v-if="index != referersStackData.length - 1">></span>
                 </span>
             </div>
             <div class="items">
-                <div v-for="(item, index) in paginatedHistory" :key="index">
+                <div class="modal_wrapper" v-if="visibility && currUser" :key="currUser">
+                    <div class="modal">
+                    <img src="@/assets/images/close.png" class="close" @click="close">
+                    <img :src="currUser.avatar_url" class="avatar">
+                    <h2>{{ currUser.name }}</h2>
+                    <div class="row_modal">
+                        <span>Первая линия / всего: </span>
+                        <span>{{ currUser?.first_line_referrals }}/{{ currUser?.total_referrals }}</span>
+                    </div>
+                    <div class="row_modal">
+                        <span>ID:</span>
+                        <span>{{ currUser.vk_id }}</span>
+                    </div>
+                    <div class="row_modal">
+                        <span>Реферер ID:</span>
+                        <span>{{ currUser.sponsor_vk_id }}</span>
+                    </div>
+                    </div>
+                </div>
+                
+                <div class="item" @click="open(currUser)" v-if="currUser" :key="currUser" >
+                    <div class="row first">
+                        <div class="plus" @click.stop="toggleExpand(index, item)">{{ currUser?.first_line_referrals > 0 ? '-' : '' }}</div>
+                        <div class="user_small">
+                            <img :src="currUser.avatar_url">
+                            <span>{{ currUser.name }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <span>{{ currUser.vk_id }}</span>
+                        <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(currUser.package_name)) ? 'green' : 'red' }"></div>
+                        <span>{{ currUser.package_name }}</span>
+                    </div>
+                    <span>{{ currUser?.level }}</span>
+                    <span>{{ currUser?.all_volume }}</span>
+                    <div class="row">
+                        <img src="@/assets/images/team.png" class="team_icon">
+                        <span>{{ currUser?.first_line_referrals }}</span>
+                    </div>
+                    <div class="row">
+                        <img src="@/assets/images/team.png" class="team_icon">
+                        <span>{{ currUser?.total_referrals }}</span>
+                    </div>
+                </div>
+                <div v-for="(item, index) in paginatedHistory" :key="index" :style="{ marginLeft: currUser ? '40px' : '0px' }">
                     <div class="modal_wrapper" v-if="visibility">
                         <div class="modal">
                         <img src="@/assets/images/close.png" class="close" @click="close">
@@ -104,7 +148,8 @@
             lay: Number,
             referersStack: Array,
             showNums: { type: Boolean, default: true },
-            searchUsers: Array
+            searchUsers: Array,
+            currUser: Object
         },
         data() {
             return {
@@ -116,6 +161,8 @@
                 openedUsers: [],
                 referersStackData: [],
                 isHide: false,
+                isNewLay: false,
+                totalOpened: 0
             };
         },
         async created() {
@@ -188,10 +235,18 @@
                 immediate: true
             },
             node: {
-                handler() {
+                handler(newValue) {
+                    console.log("NODE: ", newValue);
                     this.updateOpenedUsers();
                 },
                 deep: true
+            },
+            currUser: {
+                handler(newValue) {
+                    console.log("currUser: ", newValue);
+                },
+                deep: true,
+                immediate: true
             }
         },
         methods: {
@@ -207,17 +262,31 @@
                         this.$set(this.openedUsers[this.currentPage - 1], index, false);
                     }
                     
-                    if (this.lay == 2) {
-                        this.referersStackData.push({name: item.name, vk_id: item.vk_id});
+                    if (this.lay % 2 == 0) {
+                        console.log("ЖОПААААААААААААА_1", this.referersStackData);
                         this.$emit("updateUser", item.vk_id);
-                    }
-                    if (!this.openedUsers[this.currentPage - 1][index] && this.lay < 2) {
+                        console.log("ЖОПААААААААААААА_2", this.referersStackData);
                         this.referersStackData.push({name: item.name, vk_id: item.vk_id});
-                        this.openedUsers[this.currentPage - 1][index] = true;
+                        console.log("ЖОПААААААААААААА_3", this.referersStackData);
+                        this.isNewLay = true; 
+                        this.totalOpened = 0;
+                        console.log("ЖОПААААААААААААА_4", this.referersStackData);
                     } else {
-                        this.referersStackData.pop();
-                        this.openedUsers[this.currentPage - 1][index] = false;
+                        if (!this.openedUsers[this.currentPage - 1][index] && this.lay < 2) {
+                            this.resetOpenedUsers();
+                            this.totalOpened++;
+                                console.log("ЖОПА");
+                            if (this.totalOpened > 1) this.referersStackData.pop(); // поставить другой флаг: флаг что несколько челов открыто
+                            this.referersStackData.push({name: item.name, vk_id: item.vk_id});
+                            this.openedUsers[this.currentPage - 1][index] = true;
+                        } else {
+                            console.log("ЖОПА_X2");
+                            if (this.referersStackData.length > 1) this.referersStackData.pop();
+                            this.openedUsers[this.currentPage - 1][index] = false;
+                            this.totalOpened--;
+                        }
                     }
+                    
                 }
             },
             open(item) {
@@ -247,6 +316,9 @@
                 }
             },
             async updateUser(vk_id, index = false) {
+                if (!this.isNewLay) this.$emit("cleanCurrSearchUser");
+                this.isNewLay = false;
+
                 console.log(vk_id, index, this.referersStackData);
                 this.referersStackData = index || index === 0 ? [...this.referersStackData].slice(0, index + 1) : [...this.referersStackData];
                 console.log(this.referersStackData, this.currentPage);

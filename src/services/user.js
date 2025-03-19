@@ -184,7 +184,7 @@ export async function findParents(vk_id, search_id) {
             "vk_id": vk_id,
             "search_id": search_id
          });
-        return response.data.response;
+        return response.data;
     } catch (error) {
         console.error("Ошибка при получении родителей искомого реферала", error);
         return false; 

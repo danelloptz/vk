@@ -111,8 +111,10 @@
             :searchUsers="searchUsers"
             :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
             :lay="1" 
+            :currUser="currUser"
             :showNums="showNums"
             @notFound="linearNotFound"
+            @cleanCurrSearchUser="cleanCurrSearchUser"
         />
         <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>   
     </section>
@@ -158,7 +160,8 @@ export default {
             msg: "",
             struct_info: {},
             root_vk_id: 0,
-            searchUsers: []
+            searchUsers: [],
+            currUser: null
         };
     },
     computed: {
@@ -283,8 +286,13 @@ export default {
                     this.notFound = true;
                 }
             } else {    
-                this.searchUsers = await findParents(this.userData.vk_id, +this.search);
+                const resp = await findParents(this.userData.vk_id, +this.search);
+                this.searchUsers = resp.referrers;
+                this.currUser = resp.searched_user;
+                console.log(this.currUser);
+
                 this.searchUsers.reverse();
+                // this.searchUsers.push({ "vk_id": this.currUser.vk_id, "name": this.currUser.name });
                 if (this.searchUsers.length > 0) {
                     this.notFound = false;
                     this.root_vk_id = +this.search;
@@ -294,6 +302,7 @@ export default {
             
         },
         async backup() {
+            this.cleanCurrSearchUser();
             this.notFound = false;
             this.binarTree = await getTree(this.userData.vk_id);
             this.searchUsers = [];
@@ -319,6 +328,11 @@ export default {
                 return value.toLocaleString('ru-RU'); // Форматирование с пробелами
             }
             return value; // Если не число, возвращаем как есть
+        },
+        cleanCurrSearchUser() {
+            console.log('cleanCurrUser');
+            this.currUser = null;
+            // this.searchUsers = [];
         }
     }
 };
