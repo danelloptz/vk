@@ -12,8 +12,8 @@
         <div class="vip_footer">
             <div class="vip_links">
                 <a :href="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
-                <a :href="tgData.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
-                <a :href="whtData.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
+                <a :href="tgData?.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
+                <a :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
             </div>
             <span>VIP-предложение</span>
         </div>
@@ -27,6 +27,11 @@
             vkData: String,
             tgData: Object,
             whtData: Object
+        },
+        watch: {
+            vipUser(newValue) {
+                console.log(newValue);
+            }
         }
     };
 </script>

@@ -142,7 +142,7 @@
             <span><i><strong>Сделайте свое предложение пользователям INTELEKTAZ, прямо сейчас:</strong></i></span>
         </div>
         <h3>Ваше предложение:</h3>
-        <span>*В вип-предложении будет показываться только первые 60 символов. Полностью предложение будет видно в бизнес-предложении.</span>
+        <span>*В вип-предложении будет показываться только первые 90 символов. Полностью предложение будет видно в бизнес-предложении.</span>
         <div class="row">
             <textarea
                 v-model="sentence"
@@ -236,23 +236,19 @@ export default {
         },
         first60Chars() {
             // Первые 60 символов
-            return this.sentence.slice(0, 60);
-        },
-        remainingChars() {
-            // Остальные символы
-            return this.sentence.slice(60);
+            return this.sentence.slice(0, 90);
         },
         newUserData() {
             return {
-                "avatar": this.userData.avatar,
-                "name": this.userData.name,
-                "package_name": this.userData.packages.at(-1).package_name,
+                "avatar": this.userData?.avatar,
+                "name": this.userData?.name,
+                "package_name": this.userData?.packages.at(-1)?.package_name,
                 "vip_offer_text": this.sentence,
                 "group_link": this.siteLink,
-                "group": this.userData.group,
-                "packages": this.userData.packages,
-                "vk_id": this.userData.vk_id,
-                "social_links": this.userData.social_links
+                "group": this.userData?.group,
+                "packages": this.userData?.packages,
+                "vk_id": this.userData?.vk_id,
+                "social_links": this.userData?.social_links
             }
         },
         vkData() {
