@@ -10,9 +10,6 @@
                 <h2>Команда</h2>
             </div>
             <div class="line" v-if="isRoot"></div>
-            <div v-if="isRoot" :key="pagination.length">
-                <span style="color: white;">{{ lay}}</span>
-            </div>
             <div class="top_pagination" v-if="isRoot" :key="pagination.length">
                 <span v-for="(item, index) in pagination" :key="index" @click="updateUser(item.vk_id, index)" class="pagination_item" :class="{ lastPaginationItem: index == pagination.length - 1 }">
                     {{ item.name }}
@@ -169,6 +166,7 @@
                 isNewLay: false,
                 totalOpened: 0,
                 isZopa: false,
+                zopaIndex: false,
             };
         },
         async created() {
@@ -221,17 +219,18 @@
         watch: {
             referersStack: {
                 handler(newStack) {
-                    if (this.isUser) {
-                        this.referersStackData = [...newStack];
-                        console.log("СРАБОТАЛ referersStack if: ", this.referersStackData, newStack, this.searchUsers);
-                    } 
-                    else {
-                        if (this.searchUsers.length != 0) this.referersStackData = [...this.searchUsers]
-                        else this.referersStackData = [...newStack];
-                        
-                        console.log("СРАБОТАЛ referersStack else: ", this.referersStackData, this.searchUsers, newStack);
-                    } 
-                    
+                    if (!this.zopaIndex) {
+                        if (this.isUser) {
+                            this.referersStackData = [...newStack];
+                            console.log("СРАБОТАЛ referersStack if: ", this.referersStackData, newStack, this.searchUsers);
+                        } 
+                        else {
+                            if (this.searchUsers.length != 0) this.referersStackData = [...this.searchUsers]
+                            else this.referersStackData = [...newStack];
+                            
+                            console.log("СРАБОТАЛ referersStack else: ", this.referersStackData, this.searchUsers, newStack);
+                        } 
+                    }
                     // вот тут очко, всё везде добавляется но в конце здесь берётся старое значение из сёрчюзерс
                 },
                 deep: true,
@@ -353,6 +352,7 @@
                 console.log(this.referersStackData);
                 if (!this.isNewLay) this.$emit("cleanCurrSearchUser", this.referersStackData, index);
                 this.isNewLay = false;
+                this.zopaIndex = index;
 
                 console.log("UPDATE USER before slice: ", this.referersStackData);
                 this.referersStackData = index || index === 0 ? [...this.referersStackData].slice(0, index + 1) : [...this.referersStackData];
