@@ -111,6 +111,7 @@
             :searchUsers="searchUsers"
             :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
             :lay="1" 
+            :isUser="isUser"
             :currUser="currUser"
             :showNums="showNums"
             @notFound="linearNotFound"
@@ -161,7 +162,8 @@ export default {
             struct_info: {},
             root_vk_id: 0,
             searchUsers: [],
-            currUser: null
+            currUser: null,
+            isUser: true,
         };
     },
     computed: {
@@ -292,7 +294,7 @@ export default {
                 console.log(this.currUser);
 
                 this.searchUsers.reverse();
-                // this.searchUsers.push({ "vk_id": this.currUser.vk_id, "name": this.currUser.name });
+                this.searchUsers.push({ "vk_id": this.currUser.vk_id, "name": this.currUser.name });
                 if (this.searchUsers.length > 0) {
                     this.notFound = false;
                     this.root_vk_id = +this.search;
@@ -329,10 +331,14 @@ export default {
             }
             return value; // Если не число, возвращаем как есть
         },
-        cleanCurrSearchUser() {
+        cleanCurrSearchUser(stackData, flag) {
             console.log('cleanCurrUser');
             this.currUser = null;
-            // this.searchUsers = [];
+            this.isUser = false;
+            if (!flag && flag !== 0) {
+                this.searchUsers = stackData;
+                console.log("ПОД ФЛАГОМ: ", this.searchUsers);
+            } 
         }
     }
 };

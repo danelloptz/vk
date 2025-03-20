@@ -78,3 +78,19 @@ export async function generateTopics(token) {
         return false; 
     }
 }
+
+export async function generatePostsText(posts, token) {
+    try {
+        console.log(posts);
+        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/generate_posts_text', posts, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при генерации постов контент плана", error);
+        return false; 
+    }
+}

@@ -106,7 +106,7 @@
                 <tbody>
                     <tr v-for="(item, index) in plan" :key="index">
                         <td>
-                            <input type="checkbox" :checked="allCheckboxes">
+                            <input type="checkbox" v-model="aprovedPostsIndexes[index]" :checked="allCheckboxes">
                         </td>
                         <td>
                             <span>{{ index + 1 }}</span>
@@ -124,7 +124,7 @@
                 </tbody>
             </table>
             <div class="row" style="margin-top: 50px; margin-bottom: 44px;">
-                <AppGoodButton :text="text4" />
+                <AppGoodButton :text="text4" @click="confirmCurrentPosts" />
                 <AppGoodButton :text="text5" />
                 <AppGoodButton :text="text6" @click="editInfo" />
             </div>
@@ -175,7 +175,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics } from "@/services/ai";
+    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText } from "@/services/ai";
 
     export default {
         components: { AppGoodButton },
@@ -224,7 +224,8 @@
                 reaction: "",
                 isNewBrief: false,
                 idBrief: "",
-                plan: null
+                plan: null,
+                aprovedPostsIndexes: []
             }
         },
         async created() {
@@ -253,8 +254,18 @@
             const r = await getContentPlan(localStorage.getItem("token"));
             this.plan = r || [];
 
+            this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+            console.log(this.aprovedPostsIndexes);
         },
         methods: {
+            async confirmCurrentPosts() {
+                console.log(this.aprovedPostsIndexes);
+                this.plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
+                this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+                console.log(this.plan);
+                const resp = await generatePostsText(this.plan, localStorage.getItem("token"));
+                console.log(resp);
+            },
             setActive(index) {
                 this.activeIndex = index;
             },

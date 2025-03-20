@@ -10,10 +10,13 @@
                 <h2>Команда</h2>
             </div>
             <div class="line" v-if="isRoot"></div>
-            <div class="top_pagination" v-if="isRoot" :key="referersStackData">
-                <span v-for="(item, index) in referersStackData" :key="index" @click="updateUser(item.vk_id, index)" class="pagination_item" :class="{ lastPaginationItem: index == referersStackData.length - 1 }">
+            <div v-if="isRoot" :key="pagination.length">
+                <span style="color: white;">{{ lay}}</span>
+            </div>
+            <div class="top_pagination" v-if="isRoot" :key="pagination.length">
+                <span v-for="(item, index) in pagination" :key="index" @click="updateUser(item.vk_id, index)" class="pagination_item" :class="{ lastPaginationItem: index == pagination.length - 1 }">
                     {{ item.name }}
-                    <span v-if="index != referersStackData.length - 1">></span>
+                    <span v-if="index != pagination.length - 1">></span>
                 </span>
             </div>
             <div class="items">
@@ -116,6 +119,7 @@
                             :lay="lay + 1" 
                             :showNums="isHide" 
                             :referersStack="referersStackData" 
+                            :searchUsers="[]"
                             @updateUser="updateUser" 
                         />
                     </div>
@@ -143,6 +147,7 @@
     export default {
         props: {
             isRoot: { type: Boolean, default: true },
+            isUser: { type: Boolean, default: true },
             referer: Number,
             vk_id: Number,
             lay: Number,
@@ -162,7 +167,8 @@
                 referersStackData: [],
                 isHide: false,
                 isNewLay: false,
-                totalOpened: 0
+                totalOpened: 0,
+                isZopa: false,
             };
         },
         async created() {
@@ -171,11 +177,10 @@
 
             this.updateOpenedUsers();
 
-            console.log('ОТРИСОВАЛ!', this.searchUsers, this.referersStack);
             if (this.searchUsers.length == 0) this.referersStackData = this.referersStack
             else this.referersStackData = [...this.searchUsers];
             this.isHide = this.showNums;
-            console.log(this.referersStackData);
+            console.log("СРАБОТАЛ created: ", this.referersStackData);
         },
         computed: {
             totalPages() {
@@ -208,13 +213,26 @@
                     total_referrals_buf: item.total_referrals,
                     total_referrals: this.isHide ? item.total_referrals : '*'.repeat(item.total_referrals.toString().length),
                 }));
+            },
+            pagination() {
+                return [...this.referersStackData];
             }
         },
         watch: {
             referersStack: {
                 handler(newStack) {
-                    if (this.searchUsers.length == 0) this.referersStackData = [...newStack]
-                    else this.referersStackData = [...this.searchUsers];
+                    if (this.isUser) {
+                        this.referersStackData = [...newStack];
+                        console.log("СРАБОТАЛ referersStack if: ", this.referersStackData, newStack, this.searchUsers);
+                    } 
+                    else {
+                        if (this.searchUsers.length != 0) this.referersStackData = [...this.searchUsers]
+                        else this.referersStackData = [...newStack];
+                        
+                        console.log("СРАБОТАЛ referersStack else: ", this.referersStackData, this.searchUsers, newStack);
+                    } 
+                    
+                    // вот тут очко, всё везде добавляется но в конце здесь берётся старое значение из сёрчюзерс
                 },
                 deep: true,
                 immediate: true
@@ -228,7 +246,7 @@
             },
             searchUsers: {
                 handler(newValue) {
-                    console.log(newValue, "СРАБОТАЛ");
+                    console.log(newValue, "СРАБОТАЛ searchUsers");
                     this.referersStackData = this.newValue && this.newValue.length > 0 ? [...this.newValue] : [];
                 },
                 deep: true,
@@ -244,6 +262,14 @@
             currUser: {
                 handler(newValue) {
                     console.log("currUser: ", newValue);
+                },
+                deep: true,
+                immediate: true
+            },
+            referersStackData: {
+                handler(newValue) {
+                    console.log(newValue);
+                    this.referersStackData = newValue;
                 },
                 deep: true,
                 immediate: true
@@ -263,7 +289,8 @@
                     }
                     
                     if (this.lay % 2 == 0) {
-                        console.log("ЖОПААААААААААААА_1", this.referersStackData);
+                        this.isZopa = true;
+                        console.log("ЖОПААААААААААААА_1 toogleExpand", this.referersStackData);
                         this.$emit("updateUser", item.vk_id);
                         console.log("ЖОПААААААААААААА_2", this.referersStackData);
                         this.referersStackData.push({name: item.name, vk_id: item.vk_id});
@@ -275,13 +302,19 @@
                         if (!this.openedUsers[this.currentPage - 1][index] && this.lay < 2) {
                             this.resetOpenedUsers();
                             this.totalOpened++;
-                                console.log("ЖОПА");
-                            if (this.totalOpened > 1) this.referersStackData.pop(); // поставить другой флаг: флаг что несколько челов открыто
+                            console.log("ЖОПА", this.totalOpened);
+                            if (this.totalOpened > 1) {
+                                this.referersStackData.pop();
+                                console.log("ПОПНУЛ: ", this.referersStackData);
+                            } 
                             this.referersStackData.push({name: item.name, vk_id: item.vk_id});
                             this.openedUsers[this.currentPage - 1][index] = true;
                         } else {
                             console.log("ЖОПА_X2");
-                            if (this.referersStackData.length > 1) this.referersStackData.pop();
+                            if (this.referersStackData.length > 1) {
+                                this.referersStackData.pop();
+                                console.log("ПОПНУЛ X2: ", this.referersStackData);
+                            } 
                             this.openedUsers[this.currentPage - 1][index] = false;
                             this.totalOpened--;
                         }
@@ -316,12 +349,14 @@
                 }
             },
             async updateUser(vk_id, index = false) {
-                if (!this.isNewLay) this.$emit("cleanCurrSearchUser");
+                this.totalOpened = 0;
+                console.log(this.referersStackData);
+                if (!this.isNewLay) this.$emit("cleanCurrSearchUser", this.referersStackData, index);
                 this.isNewLay = false;
 
-                console.log(vk_id, index, this.referersStackData);
+                console.log("UPDATE USER before slice: ", this.referersStackData);
                 this.referersStackData = index || index === 0 ? [...this.referersStackData].slice(0, index + 1) : [...this.referersStackData];
-                console.log(this.referersStackData, this.currentPage);
+                console.log("UPDATE USER after slice: ", this.referersStackData);
                 // this.resetOpenedUsers();
                 const referals = await getReferals(vk_id);
                 this.node = referals.referrals;

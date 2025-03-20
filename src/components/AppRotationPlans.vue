@@ -243,7 +243,7 @@
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
                     <td><div class="minus"></div></td>
-                    <td style="border-right: none;">5-10</td>
+                    <td style="border-right: none;"><span>5-10</span></td>
                 </tr>
                 <tr>
                     <td>Ранг бонус</td>
