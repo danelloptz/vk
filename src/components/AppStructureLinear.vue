@@ -217,6 +217,13 @@
             }
         },
         watch: {
+            vk_id: {
+                handler(newValue) {
+                    console.log("НОВОЕ ЗНАЧЕНИЕ!!!!!: ", newValue);
+                },
+                deep: true,
+                immediate: true
+            },
             referersStack: {
                 handler(newStack) {
                     if (!this.zopaIndex) {
@@ -259,8 +266,10 @@
                 deep: true
             },
             currUser: {
-                handler(newValue) {
+                async handler(newValue) {
                     console.log("currUser: ", newValue);
+                    const referals = await getReferals(newValue.vk_id);
+                    this.node = referals.referrals;
                 },
                 deep: true,
                 immediate: true
@@ -289,30 +298,23 @@
                     
                     if (this.lay % 2 == 0) {
                         this.isZopa = true;
-                        console.log("ЖОПААААААААААААА_1 toogleExpand", this.referersStackData);
+                        console.log(item.vk_id);
                         this.$emit("updateUser", item.vk_id);
-                        console.log("ЖОПААААААААААААА_2", this.referersStackData);
                         this.referersStackData.push({name: item.name, vk_id: item.vk_id});
-                        console.log("ЖОПААААААААААААА_3", this.referersStackData);
                         this.isNewLay = true; 
                         this.totalOpened = 0;
-                        console.log("ЖОПААААААААААААА_4", this.referersStackData);
                     } else {
                         if (!this.openedUsers[this.currentPage - 1][index] && this.lay < 2) {
                             this.resetOpenedUsers();
                             this.totalOpened++;
-                            console.log("ЖОПА", this.totalOpened);
                             if (this.totalOpened > 1) {
                                 this.referersStackData.pop();
-                                console.log("ПОПНУЛ: ", this.referersStackData);
                             } 
                             this.referersStackData.push({name: item.name, vk_id: item.vk_id});
                             this.openedUsers[this.currentPage - 1][index] = true;
                         } else {
-                            console.log("ЖОПА_X2");
                             if (this.referersStackData.length > 1) {
                                 this.referersStackData.pop();
-                                console.log("ПОПНУЛ X2: ", this.referersStackData);
                             } 
                             this.openedUsers[this.currentPage - 1][index] = false;
                             this.totalOpened--;
@@ -348,6 +350,7 @@
                 }
             },
             async updateUser(vk_id, index = false) {
+                console.log("updateUser");
                 this.totalOpened = 0;
                 console.log(this.referersStackData);
                 if (!this.isNewLay) this.$emit("cleanCurrSearchUser", this.referersStackData, index);

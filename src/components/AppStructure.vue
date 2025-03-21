@@ -110,7 +110,7 @@
             :key="root_vk_id"
             :searchUsers="searchUsers"
             :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
-            :lay="1" 
+            :lay="lay" 
             :isUser="isUser"
             :currUser="currUser"
             :showNums="showNums"
@@ -164,6 +164,7 @@ export default {
             searchUsers: [],
             currUser: null,
             isUser: true,
+            lay: 1,
         };
     },
     computed: {
@@ -298,6 +299,7 @@ export default {
                 if (this.searchUsers.length > 0) {
                     this.notFound = false;
                     this.root_vk_id = +this.search;
+                    console.log(this.root_vk_id);
                 }
                 else this.notFound = true;
             }
