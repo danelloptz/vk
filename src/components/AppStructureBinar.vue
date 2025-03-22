@@ -37,6 +37,15 @@
                 <span>Реферер ID:</span>
                 <span>{{ referer }}</span>
               </div>
+              <div class="row" v-if="lay == 2" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
+                  <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
+                  <a :href="tgData?.link" v-if="tgData?.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
+                  <a :href="whtData?.link" v-if="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
+              </div>
+              <div class="row_col_modal">
+                  <span>Дата регистрации: </span>
+                  <span>{{ formatedDate(node?.date_created) }}</span>
+              </div>
             </div>
         </div>
 
@@ -78,6 +87,10 @@
         visibility: false,
         activeIndex: 0,
         currLeg: "",
+        tgData: null,
+        vkData: null,
+        whtData: null,
+        isFirstLine: false
       }
     },
     methods: {
@@ -87,9 +100,22 @@
       },
       open() {
         this.visibility = true;
+        console.log(this.node);
+        this.tgData = this.node.social_links.filter(link => link.type === "Telegram").at(-1) || [];
+        this.whtData = this.node.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
+        this.vkData = `https://vk.com/id${this.node.vk_id}`;
       },
       close() {
         this.visibility = false;
+      },
+      formatedDate(dateString) {
+          const date = new Date(dateString);
+
+          const day = String(date.getUTCDate()).padStart(2, '0');
+          const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+          const year = date.getUTCFullYear(); // Год
+
+          return `${day}.${month}.${year}`;
       }
     }
   };
@@ -105,7 +131,7 @@
   }
   .left, .right {
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     column-gap: 20px;
   }
   .circle {
@@ -247,7 +273,17 @@
     font-size: 14px;
     font-family: 'OpenSans';
   }
-
+  .row_col_modal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 5px;
+    }
+    .row_col_modal span {
+        color: white;
+        font-size: 14px;
+        font-family: 'OpenSans';
+    }
   
   .child {
     flex: 1;

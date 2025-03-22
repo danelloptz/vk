@@ -114,6 +114,7 @@
             :isUser="isUser"
             :currUser="currUser"
             :showNums="showNums"
+            :rootUser="userData"
             @notFound="linearNotFound"
             @cleanCurrSearchUser="cleanCurrSearchUser"
         />
@@ -251,10 +252,6 @@ export default {
         await this.next(this.userData.vk_id);
 
         this.struct_info = await getStructureInfo(this.userData.vk_id);
-        console.log(this.struct_info);  
-
-        console.log(this.binarTree);
-        console.log(this.maskedData);
     },
     methods: {
         setActive(index) {
@@ -267,11 +264,9 @@ export default {
             this.isLinks = true;
         },
         async next(vk_id) {
-            console.log("сработал", vk_id);
             const tree = await getTree(vk_id);
             this.binarTree = tree;
             this.getAllId(this.binarTree);
-            console.log(this.users);
         },
         getAllId(node) {
             if (!node.vk_id) return
@@ -292,14 +287,12 @@ export default {
                 const resp = await findParents(this.userData.vk_id, +this.search);
                 this.searchUsers = resp.referrers;
                 this.currUser = resp.searched_user;
-                console.log(this.currUser);
 
                 this.searchUsers.reverse();
                 this.searchUsers.push({ "vk_id": this.currUser.vk_id, "name": this.currUser.name });
                 if (this.searchUsers.length > 0) {
                     this.notFound = false;
                     this.root_vk_id = +this.search;
-                    console.log(this.root_vk_id);
                 }
                 else this.notFound = true;
             }
@@ -334,12 +327,10 @@ export default {
             return value; // Если не число, возвращаем как есть
         },
         cleanCurrSearchUser(stackData, flag) {
-            console.log('cleanCurrUser');
             this.currUser = null;
             this.isUser = false;
             if (!flag && flag !== 0) {
                 this.searchUsers = stackData;
-                console.log("ПОД ФЛАГОМ: ", this.searchUsers);
             } 
         }
     }

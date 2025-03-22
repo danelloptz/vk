@@ -34,6 +34,15 @@
                         <span>Реферер ID:</span>
                         <span>{{ currUser.sponsor_vk_id }}</span>
                     </div>
+                    <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
+                        <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
+                        <a :href="tgData?.link" v-if="tgData?.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
+                        <a :href="whtData?.link" v-if="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
+                    </div>
+                    <div class="row_col_modal">
+                        <span>Дата регистрации: </span>
+                        <span>{{ formatedDate(currUser?.date_created) }}</span>
+                    </div>
                     </div>
                 </div>
                 
@@ -78,6 +87,15 @@
                         <div class="row_modal">
                             <span>Реферер ID:</span>
                             <span>{{ selectedUser.sponsor_vk_id }}</span>
+                        </div>
+                        <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
+                            <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
+                            <a :href="tgData?.link" v-if="tgData" target="_blank"><img src="@/assets/images/telegram.png"></a>
+                            <a :href="whtData?.link" v-if="whtData" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
+                        </div>
+                        <div class="row_col_modal">
+                            <span>Дата регистрации: </span>
+                            <span>{{ formatedDate(item.date_created) }}</span>
                         </div>
                         </div>
                     </div>
@@ -151,7 +169,8 @@
             referersStack: Array,
             showNums: { type: Boolean, default: true },
             searchUsers: Array,
-            currUser: Object
+            currUser: Object,
+            rootUser: Object
         },
         data() {
             return {
@@ -167,18 +186,24 @@
                 totalOpened: 0,
                 isZopa: false,
                 zopaIndex: false,
+                isFirstLine: false,
+                tgData: null,
+                vkData: null,
+                whtData: null
             };
         },
         async created() {
+            if (this.vk_id == this.rootUser?.vk_id || (this.currUser && this.currUser?.vk_id === this.rootUser?.vk_id)) this.isFirstLine = true
+            else this.isFirstLine = false;
             const referals = await getReferals(this.vk_id);
             this.node = referals.referrals;
+            console.log(this.node);
 
             this.updateOpenedUsers();
 
             if (this.searchUsers.length == 0) this.referersStackData = this.referersStack
             else this.referersStackData = [...this.searchUsers];
             this.isHide = this.showNums;
-            console.log("СРАБОТАЛ created: ", this.referersStackData);
         },
         computed: {
             totalPages() {
@@ -217,25 +242,15 @@
             }
         },
         watch: {
-            vk_id: {
-                handler(newValue) {
-                    console.log("НОВОЕ ЗНАЧЕНИЕ!!!!!: ", newValue);
-                },
-                deep: true,
-                immediate: true
-            },
             referersStack: {
                 handler(newStack) {
                     if (!this.zopaIndex) {
                         if (this.isUser) {
                             this.referersStackData = [...newStack];
-                            console.log("СРАБОТАЛ referersStack if: ", this.referersStackData, newStack, this.searchUsers);
                         } 
                         else {
                             if (this.searchUsers.length != 0) this.referersStackData = [...this.searchUsers]
                             else this.referersStackData = [...newStack];
-                            
-                            console.log("СРАБОТАЛ referersStack else: ", this.referersStackData, this.searchUsers, newStack);
                         } 
                     }
                     // вот тут очко, всё везде добавляется но в конце здесь берётся старое значение из сёрчюзерс
@@ -252,22 +267,21 @@
             },
             searchUsers: {
                 handler(newValue) {
-                    console.log(newValue, "СРАБОТАЛ searchUsers");
-                    this.referersStackData = this.newValue && this.newValue.length > 0 ? [...this.newValue] : [];
+                    this.referersStackData = this.newValue && this.newValue.length > 0 ? [...newValue] : [];
                 },
                 deep: true,
                 immediate: true
             },
             node: {
-                handler(newValue) {
-                    console.log("NODE: ", newValue);
+                handler() {
                     this.updateOpenedUsers();
                 },
                 deep: true
             },
             currUser: {
                 async handler(newValue) {
-                    console.log("currUser: ", newValue);
+                    if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && this.currUser?.vk_id === this.rootUser?.vk_id)) this.isFirstLine = true
+                    else this.isFirstLine = false;
                     const referals = await getReferals(newValue.vk_id);
                     this.node = referals.referrals;
                 },
@@ -276,7 +290,6 @@
             },
             referersStackData: {
                 handler(newValue) {
-                    console.log(newValue);
                     this.referersStackData = newValue;
                 },
                 deep: true,
@@ -286,7 +299,6 @@
         methods: {
             toggleExpand(index, item) {
                 if (item.total_referrals_buf > 0) {
-                    console.log(this.lay);
 
                     if (!this.openedUsers[this.currentPage - 1]) {
                         this.updateOpenedUsers();
@@ -298,7 +310,6 @@
                     
                     if (this.lay % 2 == 0) {
                         this.isZopa = true;
-                        console.log(item.vk_id);
                         this.$emit("updateUser", item.vk_id);
                         this.referersStackData.push({name: item.name, vk_id: item.vk_id});
                         this.isNewLay = true; 
@@ -324,9 +335,14 @@
                 }
             },
             open(item) {
-                console.log(item.name);
                 this.selectedUser = item;
                 this.visibility = true;
+                if (this.isFirstLine) {
+                    console.log(item);
+                    this.tgData = item?.social_links.filter(link => link.type === "Telegram").at(-1) || [];
+                    this.whtData = item?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
+                    this.vkData = `https://vk.com/id${item.vk_id}`;
+                }
             },
             close() {
                 this.visibility = false;
@@ -350,17 +366,17 @@
                 }
             },
             async updateUser(vk_id, index = false) {
-                console.log("updateUser");
                 this.totalOpened = 0;
-                console.log(this.referersStackData);
                 if (!this.isNewLay) this.$emit("cleanCurrSearchUser", this.referersStackData, index);
                 this.isNewLay = false;
                 this.zopaIndex = index;
 
-                console.log("UPDATE USER before slice: ", this.referersStackData);
                 this.referersStackData = index || index === 0 ? [...this.referersStackData].slice(0, index + 1) : [...this.referersStackData];
-                console.log("UPDATE USER after slice: ", this.referersStackData);
                 // this.resetOpenedUsers();
+                    
+                if (vk_id == this.rootUser?.vk_id || (this.currUser && this.currUser?.vk_id === this.rootUser?.vk_id)) this.isFirstLine = true
+                else this.isFirstLine = false;
+                
                 const referals = await getReferals(vk_id);
                 this.node = referals.referrals;
             },
@@ -373,6 +389,15 @@
             },
             updateOpenedUsers() {
                 this.openedUsers = Array.from({ length: this.totalPages || 1 }, () => Array(this.perPage).fill(false));
+            },
+            formatedDate(dateString) {
+                const date = new Date(dateString);
+
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const year = date.getUTCFullYear(); // Год
+
+                return `${day}.${month}.${year}`;
             }
         }
     };
@@ -528,6 +553,24 @@
         width: 100%;
     }
     .row_modal span {
+        color: white;
+        font-size: 14px;
+        font-family: 'OpenSans';
+    }
+    .row_modal a {
+        cursor: pointer;
+    }
+    .row_modal img {
+        width: 34px;
+        height: 34px;
+    }
+    .row_col_modal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 5px;
+    }
+    .row_col_modal span {
         color: white;
         font-size: 14px;
         font-family: 'OpenSans';
