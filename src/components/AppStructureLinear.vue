@@ -193,7 +193,7 @@
             };
         },
         async created() {
-            if (this.vk_id == this.rootUser?.vk_id || (this.currUser && this.currUser?.vk_id === this.rootUser?.vk_id)) this.isFirstLine = true
+            if (this.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
             else this.isFirstLine = false;
             const referals = await getReferals(this.vk_id);
             this.node = referals.referrals;
@@ -280,10 +280,12 @@
             },
             currUser: {
                 async handler(newValue) {
-                    if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && this.currUser?.vk_id === this.rootUser?.vk_id)) this.isFirstLine = true
+                    if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                     else this.isFirstLine = false;
-                    const referals = await getReferals(newValue.vk_id);
-                    this.node = referals.referrals;
+                    if (newValue?.vk_id) {
+                        const referals = await getReferals(newValue.vk_id);
+                        this.node = referals.referrals;
+                    }
                 },
                 deep: true,
                 immediate: true
@@ -373,8 +375,8 @@
 
                 this.referersStackData = index || index === 0 ? [...this.referersStackData].slice(0, index + 1) : [...this.referersStackData];
                 // this.resetOpenedUsers();
-                    
-                if (vk_id == this.rootUser?.vk_id || (this.currUser && this.currUser?.vk_id === this.rootUser?.vk_id)) this.isFirstLine = true
+                
+                if (vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                 else this.isFirstLine = false;
                 
                 const referals = await getReferals(vk_id);

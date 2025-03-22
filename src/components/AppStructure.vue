@@ -178,12 +178,12 @@ export default {
         maskedStructInfo() {
             return {
                 left: {
-                    referals: this.showNums ? this.struct_info.left.referals : '*'.repeat(this.struct_info.left.referals.toString().length),
-                    volume: this.showNums ? this.struct_info.left.volume : '*'.repeat(this.struct_info.left.volume.toString().length)
+                    referals: this.showNums ? this.struct_info.left?.referals : '*'.repeat(this.struct_info.left?.referals.toString().length) || "",
+                    volume: this.showNums ? this.struct_info.left?.volume : '*'.repeat(this.struct_info.left?.volume.toString().length) || ""
                 },
                 right: {
-                    referals: this.showNums ? this.struct_info.right.referals : '*'.repeat(this.struct_info.right.referals.toString().length),
-                    volume: this.showNums ? this.struct_info.right.volume : '*'.repeat(this.struct_info.right.volume.toString().length)
+                    referals: this.showNums ? this.struct_info.right?.referals : '*'.repeat(this.struct_info.right.referals.toString().length) || "",
+                    volume: this.showNums ? this.struct_info.right?.volume : '*'.repeat(this.struct_info.right.volume.toString().length) || ""
                 }
             };
         },
