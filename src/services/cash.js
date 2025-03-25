@@ -160,3 +160,37 @@ export async function buyBooster(price, token) {
         }; 
     }
 }
+
+export async function cancelTransaction(transaction_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/cancel_withdrawal_money', {
+            "transaction_id": transaction_id,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при отмене перевода", error);
+        return false; 
+    }
+}
+
+export async function upgradeToLeader(amount, token) {
+    console.log(amount);
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v1/user/upgrade_to_leader', {}, { 
+            params: {
+                amount: amount
+            },
+            headers: {
+                'Authorization': `Bearer ${token}`, 
+                'Content-Type': 'application/json'
+            }
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при апгрейде до лидера", error);
+        return { 
+            "isError": true,
+            "message": error.response.data.detail
+        }; 
+    }
+}

@@ -22,6 +22,7 @@
                     <img src="@/assets/images/close.png" class="close" @click="close">
                     <img :src="currUser.avatar_url" class="avatar">
                     <h2>{{ currUser.name }}</h2>
+                    <span class="package_name">{{ currUser.package_name }}</span>
                     <div class="row_modal">
                         <span>Первая линия / всего: </span>
                         <span>{{ currUser?.first_line_referrals }}/{{ currUser?.total_referrals }}</span>
@@ -76,6 +77,7 @@
                         <img src="@/assets/images/close.png" class="close" @click="close">
                         <img :src="selectedUser.avatar_url" class="avatar">
                         <h2>{{ selectedUser.name }}</h2>
+                        <span class="package_name">{{ selectedUser.package_name }}</span>
                         <div class="row_modal">
                             <span>Первая линия / всего: </span>
                             <span>{{ selectedUser.first_line_referrals }}/{{ selectedUser.total_referrals }}</span>
@@ -90,8 +92,8 @@
                         </div>
                         <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
                             <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
-                            <a :href="tgData?.link" v-if="tgData" target="_blank"><img src="@/assets/images/telegram.png"></a>
-                            <a :href="whtData?.link" v-if="whtData" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
+                            <a :href="tgData?.link" v-if="tgData?.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
+                            <a :href="whtData?.link" v-if="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
                         </div>
                         <div class="row_col_modal">
                             <span>Дата регистрации: </span>
@@ -102,7 +104,9 @@
                     
                     <div class="item" @click="open(item)" >
                         <div class="row first">
-                            <div class="plus" @click.stop="toggleExpand(index, item)"> {{ openedUsers[currentPage - 1][index] ? '-' : '+' }}</div>
+                            <div class="plus" @click.stop="toggleExpand(index, item)">
+                                {{ item?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
+                            </div>
                             <div class="user_small">
                                 <img :src="item.avatar_url">
                                 <span>{{ item.name }}</span>
@@ -625,5 +629,18 @@
         -webkit-background-clip: text !important;
         background-clip: text !important;
         color: transparent !important;
+    }
+    .package_name {
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        font-family: 'OpenSans';
+        padding: 1px 18px;
+        background: #7023EC;
+        border-radius: 5px;
+        width: max-content;
+        word-wrap: break-word;
+        margin-top: 22px;
+        margin-bottom: 10px;
     }
 </style>

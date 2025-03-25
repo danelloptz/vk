@@ -7,11 +7,12 @@
                     <span class="timer_msg">{{ timerMsg }}</span>
                 </div>
                 <span class="quit" v-if="!uncloseable || isEnd" @click="close">ЗАКРЫТЬ</span>
+                <span class="skip" v-if="uncloseable && !noskips" @click="skip">ПРОПУСТИТЬ</span>
             </div>
             <div class="video_wrapper">
                 <iframe 
                     ref="videoFrame"
-                    :src="`${link}&js_api=1`" 
+                    :src="`${listOfLinks[videoIndex].link}&js_api=1`" 
                     class="video" 
                     frameborder="0" 
                     allowfullscreen
@@ -28,9 +29,9 @@
 export default {
     props: {
         visibility1: Boolean,
-        link: String,
         isWatched: Boolean,
-        uncloseable: Boolean
+        uncloseable: Boolean,
+        listOfLinks: Array
     },
     data() {
         return {
@@ -40,7 +41,12 @@ export default {
             isPlaying: false,
             isEnd: false,
             paused: false,
+            videoIndex: 0,
+            noskips: false
         };
+    },
+    async created() {
+        console.log(this.listOfLinks);
     },
     watch: {
         visibility1(newVal) {
@@ -49,12 +55,28 @@ export default {
                     this.initVKPlayer();
                 });
             }
+        },
+        isEnd(newVal) {
+            if (newVal) {
+                this.noskips = true;
+            }
         }
     },
     mounted() {
         document.addEventListener("visibilitychange", this.handleVisibilityChange);
     },
     methods: {
+        skip() {
+            if (this.videoIndex < this.listOfLinks.length - 1) {
+                this.videoIndex++;
+                this.clearTimer();
+                this.currTime = 20;
+                this.isPlaying = false;
+                this.isEnd = false;
+                this.paused = false;
+                if (this.videoIndex == this.listOfLinks.length - 1) this.noskips = true;
+            }
+        },
         initVKPlayer() {
             let iframe = this.$refs.videoFrame;
             if (!iframe) return console.error("iframe не найден!");
@@ -184,7 +206,7 @@ export default {
         font-family: 'OpenSans';
         color: white;
     }
-    .quit {
+    .quit, .skip {
         font-size: 20px;
         font-family: 'Tektur';
         font-weight: bold;

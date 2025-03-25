@@ -94,3 +94,36 @@ export async function generatePostsText(posts, token) {
         return false; 
     }
 }
+
+export async function regenerateThemes(posts, token) {
+    try {
+        console.log(posts);
+        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/regenerate_topics', posts, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при регенерации тем контент плана", error);
+        return false; 
+    }
+}
+
+export async function generateBanners(posts, token) {
+    try {
+        console.log(posts);
+        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/generate_banners', posts, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(response.data);
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при генерации баннеров контент плана", error);
+        return false; 
+    }
+}

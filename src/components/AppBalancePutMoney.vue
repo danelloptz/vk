@@ -105,7 +105,7 @@
         },
         computed: {
             trc_msg() {
-                return `Обратите внимание, переводы по сети TRC-20 с комиссией ${this.commisionData.trc} USDT`
+                return `Обратите внимание, комиссия сети TRC-20 выше, чем по сети BEP-20`
             },
             hash() {
                 return this.activeIndex == 0 ? this.depositData.bsc : this.depositData.trc;
@@ -130,7 +130,8 @@
             this.depositData = await getConfig("deposit_addresses", localStorage.getItem("token"));
         },
         methods: {
-            setActive(index) {
+            async setActive(index) {
+                this.commisionData = await getConfig("commissions", localStorage.getItem("token"));
                 this.activeIndex = index;
                 this.commision = (index == 0) ? this.commisionData.bep : this.commisionData.trc;
             },

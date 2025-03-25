@@ -4,14 +4,14 @@
         <div v-if="node" class="avatar-container" :style="{ justifyContent: lay == 1 ? 'space-between' : 'center' }">
           <div class="text_header" v-if="lay == 1">
             <span><strong>Лево</strong></span>
-            <span>Рефералы: {{ root_info.left.referals }}</span>
-            <span>{{ root_info.left.volume }} USDT</span>
+            <span>Рефералы: {{ node.left.referals }}</span>
+            <span>{{ node.left.volume }} USDT</span>
           </div>
           <img :src="node.avatar" :alt="node.name" class="avatar" @click="open" />
           <div class="text_header" v-if="lay == 1">
             <span><strong>Право</strong></span>
-            <span>Рефералы: {{ root_info.right.referals }}</span>
-            <span>{{ root_info.right.volume }} USDT</span>
+            <span>Рефералы: {{ node.right.referals }}</span>
+            <span>{{ node.right.volume }} USDT</span>
           </div>
         </div>
 
@@ -23,8 +23,9 @@
         <div class="modal_wrapper" v-if="visibility">
             <div class="modal">
               <img src="@/assets/images/close.png" class="close" @click="close">
-              <img :src="node.avatar" class="avatar">
+              <img :src="node.avatar" @click="nextUser(node)" class="avatar">
               <h2>{{ node.name }}</h2>
+              <span class="package_name" v-if="root_info?.packages.at(-1)?.package_name == 'Business' || root_info?.packages.at(-1)?.package_name == 'Leader'">{{ node.package_name }}</span>
               <div class="row">
                 <span>Первая линия / всего: </span>
                 <span>{{ node.first_line_referrals }}/{{ node.total_referrals }}</span>
@@ -35,7 +36,7 @@
               </div>
               <div class="row">
                 <span>Реферер ID:</span>
-                <span>{{ referer }}</span>
+                <span>{{ node.sponsor_vk_id }}</span>
               </div>
               <div class="row" v-if="lay == 2" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
                   <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
@@ -51,10 +52,10 @@
 
         <div v-if="(node.left_leg || node.right_leg) && lay < 4" class="children">
           <div v-if="node.left_leg" class="child left">
-            <AppStructureBinar :node="node.left_leg" :lay="lay+1" :referer="node.vk_id" :style="{ marginLeft: (node.left_leg && !node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
+            <AppStructureBinar :node="node.left_leg" :lay="lay+1" :root_info="root_info" :referer="node.vk_id" :style="{ marginLeft: (node.left_leg && !node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
           </div>
           <div v-if="node.right_leg" class="child right">
-            <AppStructureBinar :node="node.right_leg" :lay="lay+1" :referer="node.vk_id" :style="{ marginRight: (!node.left_leg && node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
+            <AppStructureBinar :node="node.right_leg" :lay="lay+1" :root_info="root_info" :referer="node.vk_id" :style="{ marginRight: (!node.left_leg && node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
           </div>
         </div>
         <div class="plus" v-if="lay == 4" @click="nextUser(node)">
@@ -95,7 +96,9 @@
     },
     methods: {
       nextUser(node) {
-        console.log(node);
+        this.close();
+        this.$parent.$emit("nextUser", node.vk_id);
+        this.$parent.$parent.$emit("nextUser", node.vk_id);
         this.$parent.$parent.$parent.$emit("nextUser", node.vk_id);
       },
       open() {
@@ -322,5 +325,18 @@
     color: white;
     font-weight: bold;
   }
+  .package_name {
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        font-family: 'OpenSans';
+        padding: 1px 18px;
+        background: #7023EC;
+        border-radius: 5px;
+        width: max-content;
+        word-wrap: break-word;
+        margin-top: 22px;
+        margin-bottom: 10px;
+    }
 </style>
   

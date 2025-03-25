@@ -1,7 +1,7 @@
 <template>
     <div v-if="visibility1" class="modal_wrapper" id="modal_wrapper">
         <section class="modal">
-            <div class="modal-background"></div>
+            <!-- <div class="modal-background"></div> -->
             <img src="@/assets/images/close.png" class="close" @click="close">
             <h1>ОПЛАТА</h1>
             <span>Баланс: {{ userData.balance }}</span>
@@ -79,7 +79,7 @@
 import { getUserInfo } from "@/services/user";
 import AppGoodButton from "@/components/AppGoodButton.vue";
 import { refreshToken } from "@/services/auth";
-import { buyTariff } from "@/services/cash";
+import { buyTariff, upgradeToLeader } from "@/services/cash";
 
 export default {
     components: { AppGoodButton },
@@ -186,7 +186,13 @@ export default {
         },
         async makePayment() {
             if (this.userData.balance >= this.summary) {
-                const payment = await buyTariff(String(this.currTarif?.id), this.currTime, this.currTarif?.package_name, this.currTarif?.monthly_cost, localStorage.getItem("token"));
+                let payment;
+                if (this.daysForBusiness != 0) {
+                    payment = await upgradeToLeader(this.summary, localStorage.getItem("token"));
+                } else {
+                    payment = await buyTariff(String(this.currTarif?.id), this.currTime, this.currTarif?.package_name, this.currTarif?.monthly_cost, localStorage.getItem("token"));
+                }
+                
                 if (payment.status) {
                     this.$emit('update:isGoodPayment', true);
                     this.close();
@@ -269,27 +275,39 @@ export default {
         background: #070a29;
         display: flex;
         justify-content: center;
+        scrollbar-width: none;
+        box-sizing: border-box;
+        overflow-y: scroll;
         /* align-items: center; */
     }
 
     .modal {
         width: 760px;
+        /* max-height: 500px; */
+        align-self: center;
         border-radius: 10px;
         position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
-        /* display: flex;
-        flex-direction: column;
-         align-items: center; 
-        justify-content: center; */
         padding: 80px 50px;
         z-index: 2;
         overflow-y: scroll;
         scrollbar-width: none;
         row-gap: 20px;
         box-sizing: border-box;
-        /* margin-top: -50px; */
-        /* align-self: center; */
+        background: url("@/assets/images/background1.png");
+        background-color: #141843;
+        background-size: contain;
+        background-position: center;
+        background-blend-mode: soft-light;
+        background-repeat: repeat-y;
+        /* opacity: 0.25;  */
+        background-size: 300%;
+        filter: brightness(100%) contrast(90%);
+
         @media (max-width: 1000px) {
             width: 80vw;
+        }
+        @media (max-height: 700px) {
+            align-self: flex-start;
         }
         @media (max-width: 650px) {
             width: 90vw;
@@ -303,6 +321,14 @@ export default {
     }
 
     .modal::-webkit-scrollbar-thumb {
+        background: transparent;
+    }
+    .modal_wrapper::-webkit-scrollbar {
+        width: 0;  
+        height: 0;
+    }
+
+    .modal_wrapper::-webkit-scrollbar-thumb {
         background: transparent;
     }
 

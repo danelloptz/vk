@@ -16,11 +16,18 @@
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
+            <span>Почта: {{ emailData }}</span>
             <span>Вконтакте: https://vk.com/id{{ userData.vk_id }}</span>
             <span v-if="tgData?.link">Telegram: {{ tgData.link }}</span>
             <span v-if="whtData?.link">WhatsApp: {{ whtData.link }}</span>
         </div>
         
+        <div class="row">
+            <input 
+                v-model="emailLink" 
+                placeholder="Почта">
+            <span @click="addEmail">ДОБАВИТЬ</span>
+        </div>
         <div class="row">
             <input 
                 v-model="telegramLink" 
@@ -225,7 +232,9 @@ export default {
             isSaveModal: false,
             title: "",
             msg: "",
-            notTelegram: false
+            notTelegram: false,
+            emailLink: "",
+            emailData: ""
         };
     },
     computed: {
@@ -335,6 +344,9 @@ export default {
                 this.telegramLink = this.telegramLink.replace("@", "");
                 this.tgData = { "type": "Telegram", "link": `https://t.me/${this.telegramLink}`};
                 this.userData.social_links.push(this.tgData);
+            },
+            addEmail() {
+                this.emailData = this.emailLink;
             },
             addWhatsapp() {
                 this.whtData = { "type": "Whatsapp", "link": `https://wa.me/${this.whatsappLink}` };

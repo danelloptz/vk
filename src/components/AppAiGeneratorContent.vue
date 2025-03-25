@@ -91,41 +91,45 @@
                 <AppGoodButton :text="text2" @click="editSettings" />
                 <AppGoodButton :text="text3" @click="generateThemes" />
             </div>  
-            <table>
-                <thead>
-                    <tr class="head">
-                        <th>
-                            <input type="checkbox" v-model="allCheckboxes">
-                        </th>
-                        <th>День</th>
-                        <th>Тема</th>
-                        <th>Пост</th>
-                        <th>Баннер</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in plan" :key="index">
-                        <td>
-                            <input type="checkbox" v-model="aprovedPostsIndexes[index]" :checked="allCheckboxes">
-                        </td>
-                        <td>
-                            <span>{{ index + 1 }}</span>
-                        </td>
-                        <td class="plan_item">
-                            <span :contenteditable="isEditable">{{ item?.topic_name }}</span>
-                        </td>
-                        <td class="plan_item">
-                            <span :contenteditable="isEditable">{{ item?.post_text[0] }}</span>
-                        </td>
-                        <td class="plan_item">
-                            <img :src="item?.image_links[0]" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table_container">
+                <table>
+                    <thead>
+                        <tr class="head">
+                            <th>
+                                <input type="checkbox" v-model="allCheckboxes">
+                            </th>
+                            <th>День</th>
+                            <th>Тема</th>
+                            <th>Пост</th>
+                            <th>Баннер</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in plan" :key="index">
+                            <td>
+                                <input type="checkbox" v-model="aprovedPostsIndexes[index]" :checked="allCheckboxes">
+                            </td>
+                            <td>
+                                <span>{{ index + 1 }}</span>
+                            </td>
+                            <td class="plan_item">
+                                <span :contenteditable="isEditable">{{ item?.topic_name }}</span>
+                            </td>
+                            <td class="plan_item">
+                                <span :contenteditable="isEditable">{{ item?.post_text[0] }}</span>
+                            </td>
+                            <td class="plan_item">
+                                <img :src="item?.image_links[0]" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <span v-if="isLoading">Подождите, пока закончится генерация.</span>
             <div class="row" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text4" @click="confirmCurrentPosts" />
-                <AppGoodButton :text="text5" />
+                <AppGoodButton :text="text5" @click="regenerateCurrentPosts" />
                 <AppGoodButton :text="text6" @click="editInfo" />
             </div>
         </div>
@@ -175,7 +179,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText } from "@/services/ai";
+    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners } from "@/services/ai";
 
     export default {
         components: { AppGoodButton },
@@ -225,7 +229,9 @@
                 isNewBrief: false,
                 idBrief: "",
                 plan: null,
-                aprovedPostsIndexes: []
+                aprovedPostsIndexes: [],
+                isLoading: false,
+                step: -1,
             }
         },
         async created() {
@@ -251,11 +257,14 @@
                 console.log("БРИФ ЕЩЁ НЕ СОЗДАН!");
             }
 
+            this.isLoading = true;
             const r = await getContentPlan(localStorage.getItem("token"));
             this.plan = r || [];
+            this.isLoading = false;
 
             this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
-            console.log(this.aprovedPostsIndexes);
+            
+            this.step = this.getStep();
         },
         methods: {
             async confirmCurrentPosts() {
@@ -263,8 +272,24 @@
                 this.plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
                 console.log(this.plan);
-                const resp = await generatePostsText(this.plan, localStorage.getItem("token"));
-                console.log(resp);
+                this.isLoading = true;
+
+                if (this.step == 1) {
+                    try {
+                        this.plan = await generatePostsText(this.plan, localStorage.getItem("token"));
+                    } catch(err) {
+                        console.error(err);
+                    }
+                } 
+                if (this.step == 2) {
+                    try {
+                        this.plan = await generateBanners(this.plan, localStorage.getItem("token"));
+                    } catch(err) {
+                        console.error(err);
+                    }
+                } 
+
+                this.isLoading = false;
             },
             setActive(index) {
                 this.activeIndex = index;
@@ -306,11 +331,36 @@
             },
             async generateThemes() {
                 this.saveSettings();
+                this.isLoading = true;
+
                 const topics = await generateTopics(localStorage.getItem("token"));
                 this.plan = topics;
+
+                this.isLoading = false;
             },
             changeEditableContent() {
                 this.isEditableContent = true;
+            },
+            async regenerateCurrentPosts() {
+                this.isLoading = true;
+
+                const topics = await regenerateThemes(this.plan, localStorage.getItem("token"));
+                this.plan = topics;
+
+                this.isLoading = false;
+            },
+            getStep() {
+                console.log(this.plan);
+                const notEmptyThemes = this.plan.filter(item => item.topic_name != "");
+                const notEmptyPosts = this.plan.filter(item => item.post_text.length > 0);
+                const notEmptyImages = this.plan.filter(item => item.image_links.length > 0);
+                console.log("Непустые тема: ", notEmptyThemes);
+                console.log("Непустые посты: ", notEmptyPosts);
+                console.log("Непустые картинки: ", notEmptyImages);
+                if (notEmptyThemes.length == 0) return 0;
+                if (notEmptyPosts.length == 0) return 1;
+                if (notEmptyImages.length == 0) return 2;
+                return 3;
             }
         },
     };
@@ -337,9 +387,9 @@
         width: 100%;
         height: 40px;
         color: white;
-        font-size: 18px;
+        font-size: 14px;
         font-family: 'OpenSans';
-        cursor: pointer;
+        /* cursor: pointer; */
         text-align: center;
         align-content: center;
         transition: .1s ease-in;
@@ -505,6 +555,10 @@
     .dropdown-menu li:hover {
         background: #0c103e;
     }
+    .table_container {
+        max-height: 973px;
+        overflow: auto;
+    }
     table {
         border: none;
         border-collapse: collapse;
@@ -534,6 +588,9 @@
         /* padding: 10px; */
         align-self: center;
         position: relative;
+    }
+    td span {
+        font-size: 14px !important;
     }
     tr:nth-child(2n+1) {
         background: #111433;

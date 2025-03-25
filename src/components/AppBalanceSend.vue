@@ -37,7 +37,7 @@
         <span>Подтвердите перевод. Вы хотите перевести {{ usdt }} USDT пользователю</span>
         <div class="user_tosend">
             <div class="user">
-                <img :src="userToSend.avatar">
+                <img :src="userToSend.avatar_url">
                 <div class="text_wrapper">
                     <h3>{{ `${userToSend.name}` }}</h3>
                     <span>ID: {{ userToSend.vk_id }}</span>

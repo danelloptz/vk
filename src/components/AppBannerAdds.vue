@@ -542,8 +542,14 @@
                 this.timestamp = data.date_view_end;
                 this.posBefore = data.position;
 
+                const curr_date = new Date();
+                if (this.timestamp * 1000 < curr_date.getTime()) {
+                    console.log("ВРЕМЯ РЕКЛАМЫ ПРОШЛО");
+                    this.timestamp = curr_date.getTime();
+                }
+
                 this.isImageUploaded = true;
-                console.log( data.ads_img);
+                console.log(data.ads_img);
             }
         }
     };

@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { getTransactions } from "@/services/cash";
+import { getTransactions, cancelTransaction } from "@/services/cash";
 
 export default {
     data() {
@@ -111,8 +111,9 @@ export default {
             if (item.category == "Перевод") return `Перевод на ${item.to_user}`;
             return item.category;
         },
-        cancelTrans(item) {
-            console.log(item);
+        async cancelTrans(item) {
+            const cancel = await cancelTransaction(item.id);
+            console.log(cancel);
         }
     }
 };

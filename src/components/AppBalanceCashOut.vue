@@ -115,7 +115,7 @@
                     this.cashout = 0;
             },
             async openWaitingModal() {
-                if (this.userInfo.balance >= this.usdt && this.adress != "" && this.usdt != "") {
+                if (this.userInfo.balance >= this.usdt && this.adress != "" && this.usdt != "" && this.usdt >= 10) {
                     const resp = await getMoney(this.userInfo.vk_id, this.cashout, this.adress, this.choices[this.activeIndex]);
                     if (resp.status) {
                         this.isError = false;
@@ -133,6 +133,8 @@
                     this.errMsg = "Заполните поле с адресом!";
                 if (this.usdt == "")
                     this.errMsg = "Введите сумму для вывода!";
+                if (this.usdt < 10)
+                    this.errMsg = "Минимальная сумма вывода 10 USDT!";
             },
             closeModalWaiting() {
                 this.waitingModal = false;

@@ -88,7 +88,7 @@
                 :key="leg.label"
                 @click="changeActiveLeg(index, leg.value)"
                 >
-                <div class="check" :class="{ activeBinar: leg_index == index }"></div>
+                <div class="check" :class="{ activeBinar: (leg_index == index && !userData.auto_current_leg) || (userData.auto_current_leg && leg.value == 'auto') }"></div>
                     <span>{{ leg.label }}</span>
                 </div>
                 <AppGoodButton :text="text4" class="btn" @click="setLeg"/>
@@ -102,7 +102,7 @@
             :current_leg="userData.current_leg" 
             :node="maskedData" 
             :lay="1" 
-            :root_info="{ left: maskedStructInfo.left, right: maskedStructInfo.right }"
+            :root_info="userData"
             @nextUser="next" 
         />
         <AppStructureLinear v-if="activeIndex == 0 && !notFound" 
@@ -178,12 +178,12 @@ export default {
         maskedStructInfo() {
             return {
                 left: {
-                    referals: this.showNums ? this.struct_info.left?.referals : '*'.repeat(this.struct_info.left?.referals.toString().length) || "",
-                    volume: this.showNums ? this.struct_info.left?.volume : '*'.repeat(this.struct_info.left?.volume.toString().length) || ""
+                    referals: this.showNums ? this.maskedData.left?.referals : '*'.repeat(this.maskedData.left?.referals.toString().length) || "",
+                    volume: this.showNums ? this.maskedData.left?.volume : '*'.repeat(this.maskedData.left?.volume.toString().length) || ""
                 },
                 right: {
-                    referals: this.showNums ? this.struct_info.right?.referals : '*'.repeat(this.struct_info.right.referals.toString().length) || "",
-                    volume: this.showNums ? this.struct_info.right?.volume : '*'.repeat(this.struct_info.right.volume.toString().length) || ""
+                    referals: this.showNums ? this.maskedData.right?.referals : '*'.repeat(this.maskedData.right.referals.toString().length) || "",
+                    volume: this.showNums ? this.maskedData.right?.volume : '*'.repeat(this.maskedData.right.volume.toString().length) || ""
                 }
             };
         },

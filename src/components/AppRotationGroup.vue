@@ -5,6 +5,7 @@
         :isWatched="isWatched"
         :link="groupInfo.videos?.[0]?.link || defaultLink"
         :uncloseable="true"
+        :listOfLinks="groupInfo.videos"
         @update:visibility1="isVideoShown = $event"
         @update:isWatched="isWatched = $event"
         @close="closeVideo" 
@@ -119,7 +120,7 @@
                     this.skipCounts = 7;
                     break;
                 default:
-                    this.totalGroups = 10;
+                    this.totalGroups = 1;
                     this.skipCounts = 5;
                     break;
             }
