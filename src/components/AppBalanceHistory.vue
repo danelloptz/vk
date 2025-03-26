@@ -1,4 +1,11 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @update:visibility1="isModal = $event"
+        @close="reload"
+    />
     <section class="history-table">
         <table>
             <thead>
@@ -43,14 +50,19 @@
 
 <script>
 import { getTransactions, cancelTransaction } from "@/services/cash";
+import AppModal from "@/components/AppModal.vue";
 
 export default {
+    components: { AppModal },
     data() {
         return {
             history: [],
             currentPage: 1,
-            perPage: 5,
+            perPage: 20,
             totalTransactions: 0,
+            isModal: false,
+            title: "",
+            msg: ""
         };
     },
     async created() {
@@ -113,7 +125,13 @@ export default {
         },
         async cancelTrans(item) {
             const cancel = await cancelTransaction(item.id);
-            console.log(cancel);
+
+            this.title = cancel.status ? "УСПЕШНО!" : "ОШИБКА!";
+            this.msg = cancel.status ? "Вывод средств отменён." : "При отмене вывода средств произошла ошибка.";
+            this.isModal = true;
+        },
+        reload() {
+            location.reload();
         }
     }
 };

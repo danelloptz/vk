@@ -38,7 +38,7 @@
                 <span>Реферер ID:</span>
                 <span>{{ node.sponsor_vk_id }}</span>
               </div>
-              <div class="row" v-if="lay == 2" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
+              <div class="row" v-if="lay == 2" style="justify-content: center; column-gap: 23px;">
                   <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
                   <a :href="tgData?.link" v-if="tgData?.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
                   <a :href="whtData?.link" v-if="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
@@ -335,8 +335,6 @@
         border-radius: 5px;
         width: max-content;
         word-wrap: break-word;
-        margin-top: 22px;
-        margin-bottom: 10px;
     }
 </style>
   

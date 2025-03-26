@@ -37,7 +37,7 @@
         <span>Подтвердите перевод. Вы хотите перевести {{ usdt }} USDT пользователю</span>
         <div class="user_tosend">
             <div class="user">
-                <img :src="userToSend.avatar_url">
+                <img :src="userToSend.avatar_url" @click="redirect(userToSend.vk_id)">
                 <div class="text_wrapper">
                     <h3>{{ `${userToSend.name}` }}</h3>
                     <span>ID: {{ userToSend.vk_id }}</span>
@@ -45,7 +45,7 @@
             </div>
             <div class="btns">
                 <AppGoodButton :text="text1" class="btn" @click="sendMoney" />
-                <AppBadButton :text="text2"  class="btn"  />
+                <AppBadButton :text="text2"  class="btn" @click="returnBack"  />
             </div>
         </div>
     </section>
@@ -135,6 +135,12 @@
             },
             reload() {
                 window.location.reload();
+            },
+            redirect(id) {
+                window.open(`https://vk.com/id${id}`, "_blank");
+            },
+            returnBack() {
+                this.stepTwo = false;
             }
         }
     };
@@ -222,6 +228,7 @@
         border-radius: 50%;
         outline: 1px solid white;
         outline-offset: 10px;
+        cursor: pointer;
         @media (max-width: 700px) {
             width: 110px;
             height: 110px;

@@ -51,8 +51,10 @@ export default {
     watch: {
         visibility1(newVal) {
             if (newVal) {
-                this.$nextTick(() => {
-                    this.initVKPlayer();
+                this.loadScript().then(() => {
+                    this.$nextTick(() => {
+                        this.initVKPlayer();
+                    });
                 });
             }
         },
@@ -66,16 +68,34 @@ export default {
         document.addEventListener("visibilitychange", this.handleVisibilityChange);
     },
     methods: {
-        skip() {
-            if (this.videoIndex < this.listOfLinks.length - 1) {
-                this.videoIndex++;
-                this.clearTimer();
-                this.currTime = 20;
-                this.isPlaying = false;
-                this.isEnd = false;
-                this.paused = false;
-                if (this.videoIndex == this.listOfLinks.length - 1) this.noskips = true;
-            }
+        loadScript() {
+            return new Promise((resolve, reject) => {
+                // Check if the script is already loaded
+                if (window.VK && window.VK.VideoPlayer) {
+                    resolve();
+                    return;
+                }
+
+                // Create a script element
+                const script = document.createElement('script');
+                script.src = "https://vk.com/js/api/videoplayer.js";
+                script.async = true;
+
+                // Resolve the promise when the script is loaded
+                script.onload = () => {
+                    console.log("VK Video Player script loaded successfully");
+                    resolve();
+                };
+
+                // Reject the promise if there's an error loading the script
+                script.onerror = () => {
+                    console.error("Failed to load VK Video Player script");
+                    reject();
+                };
+
+                // Append the script to the document head
+                document.head.appendChild(script);
+            });
         },
         initVKPlayer() {
             let iframe = this.$refs.videoFrame;
@@ -128,7 +148,6 @@ export default {
         close() {
             this.currTime = 20;
             this.timerMsg = "Пожалуйста, ждите окончания отсчета таймера";
-            // this.intervalId = null;
             this.isPlaying = false;
             this.isEnd = false;
             this.paused = false;

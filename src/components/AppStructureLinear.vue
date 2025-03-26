@@ -35,7 +35,7 @@
                         <span>Реферер ID:</span>
                         <span>{{ currUser.sponsor_vk_id }}</span>
                     </div>
-                    <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
+                    <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px;">
                         <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
                         <a :href="tgData?.link" v-if="tgData?.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
                         <a :href="whtData?.link" v-if="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
@@ -90,7 +90,7 @@
                             <span>Реферер ID:</span>
                             <span>{{ selectedUser.sponsor_vk_id }}</span>
                         </div>
-                        <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px; margin-top: 20px; margin-bottom: 20px;">
+                        <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px;">
                             <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
                             <a :href="tgData?.link" v-if="tgData?.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
                             <a :href="whtData?.link" v-if="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
@@ -112,7 +112,7 @@
                                 <span>{{ item.name }}</span>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row_special">
                             <span>{{ item.vk_id }}</span>
                             <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item.package_name)) ? 'green' : 'red' }"></div>
                             <span>{{ item.package_name }}</span>
@@ -182,7 +182,7 @@
                 visibility: false,
                 selectedUser: null,
                 currentPage: 1,
-                perPage: 5,
+                perPage: 20,
                 openedUsers: [],
                 referersStackData: [],
                 isHide: false,
@@ -466,6 +466,15 @@
         align-self: center;
         justify-self: center;
     }
+    .row_special {
+        display: grid;
+        grid-template-columns: 4fr 1fr 4fr;
+        align-items: center;
+        column-gap: 18px;
+        align-self: center;
+        /* justify-self: center; */
+        justify-items: start;
+    }
     .first {
         justify-self: start !important;
     }
@@ -640,7 +649,5 @@
         border-radius: 5px;
         width: max-content;
         word-wrap: break-word;
-        margin-top: 22px;
-        margin-bottom: 10px;
     }
 </style>

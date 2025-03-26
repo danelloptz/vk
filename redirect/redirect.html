@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @font-face {
+            font-family: 'Tektur';
+            src: url('Tektur.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'OpenSans';
+            src: url('OpenSans.ttf') format('truetype');
+        }
+        body {
+            width: 100%;
+            height: 100vh;
+            background: #070A29;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            /* justify-content: center;/ */
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        h1 {
+            font-size: 48px;
+            font-family: 'Tektur';
+            line-height: normal;
+            color: white;
+            font-weight: normal;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        span {
+            font-size: 128px;
+            font-family: 'Tektur';
+            line-height: normal;
+            color: white;
+            text-transform: uppercase;
+        }
+        p {
+            font-size: 18px;
+            font-family: 'OpenSans';
+            line-height: normal;
+            color: white;
+            margin-top: 30px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 1100px;
+        }
+        .rocket {
+            width: 374px;
+            height: 337px;
+        }
+        .button {
+        width: 270px;
+        height: 51px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(to right, #A139DE, #E14ABB, #E14A7A);
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        line-height: 20.8px;
+        font-family: 'Tektur', sans-serif;
+        cursor: pointer;
+        z-index: 4;
+        margin-top: 50px;
+        @media (max-width: 900px) {
+            width: 170px;
+            font-size: 14px;
+            height: 50px;
+        }
+        @media (max-width: 650px) {
+            height: 40px;
+        }
+        @media (max-width: 420px) {
+            width: 130px;
+            height: 30px;
+            font-size: 12px;
+        }
+    }
+    .button:hover {
+        background: linear-gradient(to right, #E14A7A, #E14ABB, #A139DE);
+    }
+    .line_wrapper {
+        width: 460px;
+        height: 28px;
+        border: 1px solid white;
+        /* padding: 5px; */
+        border-radius: 10px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 0px 4px;
+    }
+    .line {
+        width: 0px;
+        height: 20px;
+        background: #7023EC;
+        transition: .2s ease-in;
+        border-radius: 7px;
+        
+    }
+    </style>
+</head>
+<body>
+    <section class="container">
+        <img src="rocket2.png" class="rocket">
+        <h1>Вы перейдете на сайт через</h1>
+        <span id="timer">3</span>
+        <div class="line_wrapper">
+            <div class="line" id="line"></div>
+        </div>
+        <p><strong>Интересный факт:</strong> По итогам первой половины 2024 года объём российского рынка интернет-рекламы составил 381 млрд рублей. По сравнению с первой половиной 2023 года рынок вырос более чем на 50%. По данным Ассоциации развития интерактивной рекламы (АРИР), рынок видеорекламы в интернете в 2024 году вырос на 20–30%, до 36–39 млрд рублей. </p>
+        <button class="button">ПРОДОЛЖИТЬ</button>
+    </section>
+    <script>
+        let timer = document.getElementById("timer");
+        let line = document.getElementById("line");
+
+        function Timer() {
+            let timeLeft = 3; // Начальное значение таймера (3 секунды)
+            let initialLineWidth = 0; // Начальная ширина полосы загрузки (в пикселях)
+            let maxLineWidth = 460; // Максимальная ширина полосы загрузки (в пикселях)
+            let totalDuration = 3000; // Общее время анимации (3 секунды в миллисекундах)
+            let intervalTime = 100; // Интервал обновления (100 мс)
+
+            let startTime = Date.now(); // Время начала анимации
+
+            function updateProgress() {
+                let elapsedTime = Date.now() - startTime; // Прошедшее время с начала анимации
+                let progress = Math.min(elapsedTime / totalDuration, 1); // Прогресс от 0 до 1
+
+                // Обновляем текст таймера
+                let remainingTime = Math.max(3 - Math.floor(elapsedTime / 1000), 0);
+                timer.textContent = remainingTime;
+
+                // Обновляем ширину полосы загрузки
+                let newLineWidth = initialLineWidth + (maxLineWidth - initialLineWidth) * progress;
+                line.style.width = `${newLineWidth}px`;
+
+                // Если анимация завершена
+                if (progress < 1) {
+                    requestAnimationFrame(updateProgress); // Продолжаем анимацию
+                } else {
+                    timer.textContent = "0"; // Завершаем таймер
+                    line.style.width = `${maxLineWidth}px`; // Устанавливаем максимальную ширину
+                }
+            }
+
+            // Запускаем анимацию
+            requestAnimationFrame(updateProgress);
+        }
+
+        // Запускаем таймер при загрузке страницы
+        window.onload = Timer;
+    </script>
+</body>
+</html>

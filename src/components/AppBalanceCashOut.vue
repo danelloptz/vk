@@ -72,7 +72,7 @@
                 cashout: 0,
                 waitingModal: false,
                 title: "ОЖИДАЙТЕ!",
-                msg: "Запрос на вывод обрабатывается. Вы всегда можете отменить вывод в разделе «История»",
+                msg: "Запрос на вывод обрабатывается. Вы всегда можете отменить вывод в разделе «Финансовая история»",
                 isError: false,
                 errMsg: "",
                 commisionData: null
@@ -115,7 +115,7 @@
                     this.cashout = 0;
             },
             async openWaitingModal() {
-                if (this.userInfo.balance >= this.usdt && this.adress != "" && this.usdt != "" && this.usdt >= 10) {
+                if (this.userInfo.balance >= this.usdt && this.adress != "" && this.usdt != "" && this.usdt >= 10 && Number.isInteger(this.usdt)) {
                     const resp = await getMoney(this.userInfo.vk_id, this.cashout, this.adress, this.choices[this.activeIndex]);
                     if (resp.status) {
                         this.isError = false;
@@ -135,6 +135,9 @@
                     this.errMsg = "Введите сумму для вывода!";
                 if (this.usdt < 10)
                     this.errMsg = "Минимальная сумма вывода 10 USDT!";
+                if (!Number.isInteger(this.usdt))
+                    this.errMsg = "Ошибка, пишите только целые числа!";
+
             },
             closeModalWaiting() {
                 this.waitingModal = false;

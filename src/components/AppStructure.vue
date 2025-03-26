@@ -118,7 +118,7 @@
             @notFound="linearNotFound"
             @cleanCurrSearchUser="cleanCurrSearchUser"
         />
-        <span class="warning" v-if="notFound">Пользователя с таким ID нет вашей структуре!</span>   
+        <span class="warning" v-if="notFound">Пользователя с таким ID нет в вашей структуре!</span>   
     </section>
 </template>
 
