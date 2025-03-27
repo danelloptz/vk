@@ -179,7 +179,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners } from "@/services/ai";
+    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners, regeneratePosts, updateContentPlan } from "@/services/ai";
 
     export default {
         components: { AppGoodButton },
@@ -268,7 +268,7 @@
         },
         methods: {
             async confirmCurrentPosts() {
-                console.log(this.aprovedPostsIndexes);
+                console.log(this.step);
                 this.plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
                 console.log(this.plan);
@@ -276,6 +276,7 @@
 
                 if (this.step == 1) {
                     try {
+                        await updateContentPlan(this.plan, localStorage.getItem("token"));
                         this.plan = await generatePostsText(this.plan, localStorage.getItem("token"));
                     } catch(err) {
                         console.error(err);
@@ -283,6 +284,11 @@
                 } 
                 if (this.step == 2) {
                     try {
+                        this.plan.forEach(item => {
+                            item.chose_post_index = 0;
+                        });
+                        console.log(JSON.stringify(this.plan));
+                        await updateContentPlan(this.plan, localStorage.getItem("token"));
                         this.plan = await generateBanners(this.plan, localStorage.getItem("token"));
                     } catch(err) {
                         console.error(err);
@@ -290,6 +296,7 @@
                 } 
 
                 this.isLoading = false;
+                this.step++;
             },
             setActive(index) {
                 this.activeIndex = index;
@@ -335,6 +342,7 @@
 
                 const topics = await generateTopics(localStorage.getItem("token"));
                 this.plan = topics;
+                this.step++;
 
                 this.isLoading = false;
             },
@@ -344,8 +352,26 @@
             async regenerateCurrentPosts() {
                 this.isLoading = true;
 
-                const topics = await regenerateThemes(this.plan, localStorage.getItem("token"));
-                this.plan = topics;
+                const checked_plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
+                this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+
+                if (this.step == 1) {
+                    try {
+                        const topics = await regenerateThemes(checked_plan, localStorage.getItem("token"));
+                        this.plan = topics;
+                    } catch(err) {
+                        console.error(err);
+                    }
+                } 
+                if (this.step == 2) {
+                    try {
+                        console.log(JSON.stringify(checked_plan));
+                        const topics = await regeneratePosts(checked_plan, localStorage.getItem("token"));
+                        this.plan = topics;
+                    } catch(err) {
+                        console.error(err);
+                    }
+                } 
 
                 this.isLoading = false;
             },

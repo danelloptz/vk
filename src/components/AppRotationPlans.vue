@@ -4,9 +4,10 @@
         :visibility1="isModal"
         :isGoodPayment="isGoodPayment"
         :tarrifs="tariffs"
-        :daysForBusiness="daysForBusiness"
+        :daysForBusiness="selectedPackage == 'Leader' ? daysForBusiness : 0"
         @update:visibility1="isModal = $event"
         @update:isGoodPayment="isGoodPayment = $event"
+        @close="reload"
     />
     <AppModal 
         :title="title1" 

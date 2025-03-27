@@ -54,12 +54,8 @@
 
         <div class="text_row">
             <div class="text_row_item">
-                <h2>Оборот: </h2>
-                <span>{{ maskedStructInfo.left.volume + maskedStructInfo.right.volume }}</span>
-            </div>
-            <div class="text_row_item">
                 <h2>Первая линия / всего: </h2>
-                <span>{{ maskedData?.first_line_referrals }} / {{ maskedData?.total_referrals }}</span>
+                <span>{{ struct_info.first_line_total }} / {{ struct_info.total_referrals }}</span>
             </div>
         </div>
         <div class="search">

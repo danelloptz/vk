@@ -152,6 +152,7 @@ export default {
         close() {
             if (this.visibility1) {
                 this.$emit('update:visibility1', false);
+                this.$emit('close');
             }
             this.error = false;
             // this.$emit('close');
@@ -187,13 +188,14 @@ export default {
         async makePayment() {
             if (this.userData.balance >= this.summary) {
                 let payment;
+                console.log(this.daysForBusiness);
                 if (this.daysForBusiness != 0) {
                     payment = await upgradeToLeader(this.summary, localStorage.getItem("token"));
                 } else {
                     payment = await buyTariff(String(this.currTarif?.id), this.currTime, this.currTarif?.package_name, this.currTarif?.monthly_cost, localStorage.getItem("token"));
                 }
                 
-                if (payment.status) {
+                if (payment == 200) {
                     this.$emit('update:isGoodPayment', true);
                     this.close();
                 }
@@ -222,7 +224,7 @@ export default {
         }
         this.userData = response;
         this.newTarrifs = this.tarrifs.filter(item => item.package_name != "Free");
-        console.log(this.newTarrifs);
+        console.log(this.daysForBusiness);
 
     }
 };

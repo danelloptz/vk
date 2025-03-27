@@ -5,7 +5,6 @@
                 <h2>Партнер</h2>
                 <h2>ID / пакет</h2>
                 <h2>Уровень</h2>
-                <h2>Оборот</h2>
                 <h2>Первая линия</h2>
                 <h2>Команда</h2>
             </div>
@@ -61,7 +60,6 @@
                         <span>{{ currUser.package_name }}</span>
                     </div>
                     <span>{{ currUser?.level }}</span>
-                    <span>{{ currUser?.all_volume }}</span>
                     <div class="row">
                         <img src="@/assets/images/team.png" class="team_icon">
                         <span>{{ currUser?.first_line_referrals }}</span>
@@ -118,7 +116,6 @@
                             <span>{{ item.package_name }}</span>
                         </div>
                         <span>{{ item.level }}</span>
-                        <span>{{ item.all_volume }}</span>
                         <div class="row">
                             <img src="@/assets/images/team.png" class="team_icon">
                             <span>{{ item.first_line_referrals }}</span>
@@ -237,7 +234,7 @@
                     all_volume: this.isHide ? item.all_volume : '*'.repeat(item.all_volume.toString().length),
                     level: this.isHide ? item.level : '*'.repeat(item.level.toString().length),
                     first_line_referrals: this.isHide ? item.first_line_referrals : '*'.repeat(item.first_line_referrals.toString().length),
-                    total_referrals_buf: item.total_referrals,
+                    total_referrals_buf: item.first_line_referrals,
                     total_referrals: this.isHide ? item.total_referrals : '*'.repeat(item.total_referrals.toString().length),
                 }));
             },
