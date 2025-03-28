@@ -47,19 +47,17 @@
 </template>
 
 <script>
-    import { getUserInfo  } from '@/services/user';
     import AppPopup from '@/components/AppPopup.vue';
     import AppModalMini from '@/components/AppModalMini.vue';
     import AppModal from "@/components/AppModal.vue";
-    import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppPopup, AppModalMini, AppModal },
+        props: { userData: Object },
         data() {
             return {
                 popupVisible: false,
                 modalUser: false,
-                userData: null,
                 points: 0,
                 isModal: false,
             }
@@ -100,21 +98,14 @@
             }
         },
         async created() {
-            const response = await getUserInfo(localStorage.getItem("token"));
-            if (!response) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userData = response;
-            
             this.points = this.userData.gift_score;
+            console.log(this.userData.gift_score);
+        },
+        watch: {
+            userData(val) {
+                this.points = val.gift_score;
+                console.log(val);
+            }
         }
     };
 </script>

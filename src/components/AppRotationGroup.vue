@@ -120,7 +120,7 @@
                     this.skipCounts = 7;
                     break;
                 default:
-                    this.totalGroups = 1;
+                    this.totalGroups = 10;
                     this.skipCounts = 5;
                     break;
             }

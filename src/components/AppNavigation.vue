@@ -29,12 +29,10 @@
 </template>
 
 <script>
-    import { getUserInfo } from "@/services/user";
-    import { refreshToken } from "@/services/auth";
-
     export default {
         props: {
-            indexPage: Number
+            indexPage: Number,
+            userData: Object
         },
         data() {
             return {
@@ -53,23 +51,7 @@
                 background: "#1B1E3D",
                 display: "block",
                 zindex: 6,
-                userInfo: null
             };
-        },
-        async created() {
-            const response = await getUserInfo(localStorage.getItem("token"));
-            if (!response) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userInfo = response;
         },
         watch: {
             indexPage(newValue) {
@@ -79,8 +61,8 @@
         computed: {
             updatedMenuItems() {
                 return this.menuItems.map((item, index) => {
-                    if (index === 0 && this.userInfo) {
-                        return { ...item, label: `Баланс: ${this.userInfo.balance} USDT` };
+                    if (index === 0 && this.userData) {
+                        return { ...item, label: `Баланс: ${this.userData.balance} USDT` };
                     }
                     return item;
                 });

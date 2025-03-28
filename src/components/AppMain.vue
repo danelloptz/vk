@@ -49,7 +49,7 @@
             <span>Премиальная ссылка для обладателей пакетов Business, Leader:</span>
             <div class="row2">
                 <strong><span v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">{{ refPremiumLink }}</span></strong>
-                <img src="@/assets/images/copy.png" @click="copyLink(refPremiumLink, 3)">
+                <img v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)" src="@/assets/images/copy.png" @click="copyLink(refPremiumLink, 3)">
                 <span class="green" v-if="isCopy == 3">Скопировано!</span>
             </div>
             <strong><span v-if="!packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">Не доступно</span></strong>
@@ -62,13 +62,13 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
-    import { getUserInfo, getReferer } from "@/services/user";
-    import { refreshToken } from "@/services/auth";
+    import { getReferer } from "@/services/user";
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser },
         props: {
             links: Boolean,  
+            userData: Object
         },
         data() {
             return {
@@ -77,7 +77,6 @@
                 text3: "ПРЕЗЕНТАЦИЯ INTELEKTAZ",
                 text4: "РОТАЦИЯ",
                 referData: [],
-                userData: [],
                 packages: ["Business", "Leader"],
                 isLinks: false,
                 isCopy: 0
@@ -99,33 +98,19 @@
                 this.isLinks = newValue;
                 // this.$emit("update:links", false);
                 console.log("КИНУЛ FALSE"); 
+            },
+            async userData(val) {
+                console.log("ХОБА", val);
+                const refer = await getReferer(val.vk_id);
+                this.referData = refer;
             }
         },
         async created() {
-            const user = await getUserInfo(localStorage.getItem("token"));
-            if (!user) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-
-            this.userData = user;
-
-            const refer = await getReferer(this.userData.vk_id);
-            this.referData = refer;
-
             this.isLinks = this.links;
             if (this.links) {
                 this.openLinks();
                 // this.$emit("update:links", false);
             }
-            console.log(this.links, this.isLinks);
         },
         methods: {
             openTarif() {

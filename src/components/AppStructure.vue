@@ -55,7 +55,7 @@
         <div class="text_row">
             <div class="text_row_item">
                 <h2>Первая линия / всего: </h2>
-                <span>{{ struct_info.first_line_total }} / {{ struct_info.total_referrals }}</span>
+                <span>{{ maskedStructInfo.first_line_total }} / {{ maskedStructInfo.total_referrals }}</span>
             </div>
         </div>
         <div class="search">
@@ -174,13 +174,15 @@ export default {
         maskedStructInfo() {
             return {
                 left: {
-                    referals: this.showNums ? this.maskedData.left?.referals : '*'.repeat(this.maskedData.left?.referals.toString().length) || "",
-                    volume: this.showNums ? this.maskedData.left?.volume : '*'.repeat(this.maskedData.left?.volume.toString().length) || ""
+                    referals: this.showNums ? this.maskedData?.left?.referals : '*'.repeat(this.maskedData?.left?.referals.toString().length) || "",
+                    volume: this.showNums ? this.maskedData?.left?.volume : '*'.repeat(this.maskedData?.left?.volume.toString().length) || ""
                 },
                 right: {
-                    referals: this.showNums ? this.maskedData.right?.referals : '*'.repeat(this.maskedData.right.referals.toString().length) || "",
-                    volume: this.showNums ? this.maskedData.right?.volume : '*'.repeat(this.maskedData.right.volume.toString().length) || ""
-                }
+                    referals: this.showNums ? this.maskedData?.right?.referals : '*'.repeat(this.maskedData?.right.referals.toString().length) || "",
+                    volume: this.showNums ? this.maskedData?.right?.volume : '*'.repeat(this.maskedData?.right.volume.toString().length) || ""
+                },
+                first_line_total: this.showNums ? this.struct_info.first_line_total : '*'.repeat(this.struct_info.first_line_total.toString().length) || "",
+                total_referrals: this.showNums ? this.struct_info.total_referrals : '*'.repeat(this.struct_info.total_referrals.toString().length) || "",
             };
         },
         stats_data() {
@@ -210,6 +212,23 @@ export default {
                         ? maskedNode.total_referrals 
                         : '*'.repeat(maskedNode.total_referrals.toString().length);
                 }
+                if ("left" in maskedNode) {
+                    console.log(maskedNode.left.referals, maskedNode.total_referrals);
+                    maskedNode.left.referals = this.showNums 
+                        ? maskedNode.left.referals 
+                        : '*'.repeat(maskedNode.left.referals.toString().length);
+                    maskedNode.left.volume = this.showNums 
+                        ? maskedNode.left.volume 
+                        : '*'.repeat(maskedNode.left.volume.toString().length);
+                }
+                if ("right" in maskedNode) {
+                    maskedNode.right.referals = this.showNums 
+                        ? maskedNode.right.referals 
+                        : '*'.repeat(maskedNode.right.referals.toString().length);
+                    maskedNode.right.volume = this.showNums 
+                        ? maskedNode.right.volume 
+                        : '*'.repeat(maskedNode.right.volume.toString().length);
+                }
 
                 if ("left_leg" in maskedNode) {
                     maskedNode.left_leg = maskNumbers(maskedNode.left_leg);
@@ -221,7 +240,8 @@ export default {
                 return maskedNode;
             };
 
-            return maskNumbers(this.binarTree);
+            const originalTree = JSON.parse(JSON.stringify(this.binarTree));
+            return maskNumbers(originalTree);
         }
 
     },

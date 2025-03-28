@@ -195,7 +195,7 @@ export default {
                     payment = await buyTariff(String(this.currTarif?.id), this.currTime, this.currTarif?.package_name, this.currTarif?.monthly_cost, localStorage.getItem("token"));
                 }
                 
-                if (payment == 200) {
+                if (payment.status) {
                     this.$emit('update:isGoodPayment', true);
                     this.close();
                 }

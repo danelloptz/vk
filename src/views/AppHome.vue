@@ -1,11 +1,12 @@
 <template>
     <div class="container">
-        <AppHeader @show-help="updateActiveComponent(7)" @isTarif="openTarif" @isReff="openReff"/>
+        <AppHeader :userData="userInfo" @show-help="updateActiveComponent(7)" @isTarif="openTarif" @isReff="openReff"/>
         <AppGroupsAssemble @comeToAssembly="updateActiveComponent(8)" />
         <section class="content">
             <div class="left">
                 <AppNavigation
                     :indexPage="selectedComponent" 
+                    :userData="userInfo"
                     @update:indexPage="selectedComponent = $event" 
                     @update-active-index="updateActiveComponent"
                     @update-repeatClick="updateActiveComponent" 
@@ -50,8 +51,8 @@
                     class="card"
                 />
                 <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" />
-                <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
-                <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" />
+                <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :userData="userInfo" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
+                <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" :userData="userInfo" @openTariff="openTarif" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" />
                 <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
                 <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :businessUser="businessUser" />
