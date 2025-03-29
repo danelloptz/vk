@@ -112,7 +112,8 @@ export default {
             currTarif: null,
             errorMessage: "",
             isYear: false,
-            newTarrifs: []
+            newTarrifs: [],
+            disabled: false
         };
     },
     computed: {
@@ -186,7 +187,8 @@ export default {
             this.hideDropdownTime();
         },
         async makePayment() {
-            if (this.userData.balance >= this.summary) {
+            if (this.userData.balance >= this.summary && !this.disabled) {
+                this.disabled = true;
                 let payment;
                 console.log(this.daysForBusiness);
                 if (this.daysForBusiness != 0) {
@@ -203,6 +205,7 @@ export default {
                     this.error = true;
                     this.errorMessage = payment.message[0].msg;
                 }
+                this.disabled = false;
             } else {
                 this.error = true;
                 this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance} USDT!`;

@@ -116,10 +116,30 @@
                                 <span :contenteditable="isEditable">{{ item?.topic_name }}</span>
                             </td>
                             <td class="plan_item">
-                                <span :contenteditable="isEditable">{{ item?.post_text[0] }}</span>
+                                <span :contenteditable="isEditable">{{ item?.post_text[item.chose_post_index] }}</span>
+                                <div class="plan_item_variants">
+                                    <AppGoodButton 
+                                        v-for="(name, index_var) in variants.slice(0, item.post_text.length)" 
+                                        :key="index_var" 
+                                        :text="name" 
+                                        class="variant_btn" 
+                                        :class="{ not_active: index_var !== plan[index].chose_post_index }"
+                                        @click="setActivePostVar(index_var, index)"
+                                    />
+                                </div>
                             </td>
                             <td class="plan_item">
-                                <img :src="item?.image_links[0]" />
+                                <img :src="item?.image_links[item.chose_image_index]" class="banner" />
+                                <div class="plan_item_variants">
+                                    <AppGoodButton 
+                                        v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
+                                        :key="index_var" 
+                                        :text="name" 
+                                        class="variant_btn"
+                                        :class="{ not_active: index_var !== plan[index].chose_image_index }"
+                                        @click="setActiveImageVar(index_var, index)"
+                                    />
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -179,7 +199,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners, regeneratePosts, updateContentPlan } from "@/services/ai";
+    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners, regeneratePosts, updateContentPlan, regenerateBanners } from "@/services/ai";
 
     export default {
         components: { AppGoodButton },
@@ -232,6 +252,9 @@
                 aprovedPostsIndexes: [],
                 isLoading: false,
                 step: -1,
+                currBanners: [],
+                currTexts: [],
+                variants: ["ВАРИАНТ 1", "ВАРИАНТ 2", "ВАРИАНТ 3"]
             }
         },
         async created() {
@@ -263,8 +286,26 @@
             this.isLoading = false;
 
             this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+            this.currTexts = Array.from({ length: this.plan.length }, () => 0);
+            this.currBanners = Array.from({ length: this.plan.length }, () => 0);
             
             this.step = this.getStep();
+        },
+        computed: { 
+            allCountsOfTexts() {
+                return this.plan.map(item => item.chose_post_index);
+            },
+            allCountsOfBanners() {
+                return this.plan.map(item => item.chose_image_index);
+            },
+            countsOfTexts() {
+                const checked = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
+                return checked.map(item => item.chose_post_index);
+            },
+            countsOfBanners() {
+                const checked = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
+                return checked.map(item => item.chose_image_index);
+            },
         },
         methods: {
             async confirmCurrentPosts() {
@@ -278,6 +319,10 @@
                     try {
                         await updateContentPlan(this.plan, localStorage.getItem("token"));
                         this.plan = await generatePostsText(this.plan, localStorage.getItem("token"));
+                        this.plan.forEach(item => {
+                            item.chose_post_index = 0;
+                        });
+                        await updateContentPlan(this.plan, localStorage.getItem("token"));
                     } catch(err) {
                         console.error(err);
                     }
@@ -285,21 +330,31 @@
                 if (this.step == 2) {
                     try {
                         this.plan.forEach(item => {
-                            item.chose_post_index = 0;
+                            if (!item.chose_post_index) item.chose_post_index = 0;
                         });
-                        console.log(JSON.stringify(this.plan));
                         await updateContentPlan(this.plan, localStorage.getItem("token"));
                         this.plan = await generateBanners(this.plan, localStorage.getItem("token"));
+                        this.plan.forEach(item => {
+                            item.chose_image_index = 0;
+                        });
+                        await updateContentPlan(this.plan, localStorage.getItem("token"));
                     } catch(err) {
                         console.error(err);
                     }
-                } 
+                }
+                if (this.step > 2) await updateContentPlan(this.plan, localStorage.getItem("token"));
 
                 this.isLoading = false;
                 this.step++;
             },
             setActive(index) {
                 this.activeIndex = index;
+            },
+            setActivePostVar(var_index, post_index) {
+                this.plan[post_index].chose_post_index = var_index;
+            },
+            setActiveImageVar(var_index, post_index) {
+                this.plan[post_index].chose_image_index = var_index;
             },
             async saveSettings() {
                 // TODO: отправка на сервер данных брифа
@@ -354,6 +409,9 @@
 
                 const checked_plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+                const max_text = Math.max(...this.countsOfTexts);
+                const max_banners = Math.max(...this.countsOfBanners);
+                console.log(max_text, max_banners);
 
                 if (this.step == 1) {
                     try {
@@ -363,15 +421,30 @@
                         console.error(err);
                     }
                 } 
-                if (this.step == 2) {
+                if (this.step == 2 && max_text < 3) {
                     try {
-                        console.log(JSON.stringify(checked_plan));
+                        checked_plan.forEach(item => {
+                            item.chose_post_index++;
+                        });
                         const topics = await regeneratePosts(checked_plan, localStorage.getItem("token"));
                         this.plan = topics;
+                        this.currText++;
                     } catch(err) {
                         console.error(err);
                     }
                 } 
+                if (this.step == 3 && max_banners < 3) {
+                    try {
+                        checked_plan.forEach(item => {
+                            item.chose_image_index++;
+                        });
+                        const topics = await regenerateBanners(checked_plan, localStorage.getItem("token"));
+                        this.plan = topics;
+                        this.currBanner++;
+                    } catch(err) {
+                        console.error(err);
+                    }
+                }
 
                 this.isLoading = false;
             },
@@ -481,6 +554,7 @@
         background-color: white;
         cursor: pointer;
         padding: 0;
+        margin-top: 8px;
     }
 
     input[type="checkbox"]:checked {
@@ -601,10 +675,13 @@
         font-family: 'OpenSans';
         font-size: 20px;
         text-align: center;
-        align-self: center;
+        /* align-self: center; */
         z-index: 9;
         padding: 10px;
         position: relative;
+    }
+    td {
+        vertical-align: top;
     }
     span {
         color: white;
@@ -612,7 +689,7 @@
         font-size: 20px;
         z-index: 9;
         /* padding: 10px; */
-        align-self: center;
+        /* align-self: center; */
         position: relative;
     }
     td span {
@@ -658,5 +735,30 @@
         width: 270px;
         padding: 15px 20px;
         text-align: start !important;
+    }
+
+    .banner {
+        width: 230px;
+    }
+
+    .variant_btn {
+        width: 70px;
+        height: 20px;
+        font-size: 7px;
+    }
+
+    .not_active {
+        background: none !important;
+        border: 1px solid white;
+    }
+    .not_active:hover {
+        background: rgba(255, 255, 255, 0.329);
+    }
+    .plan_item_variants {
+        display: flex;
+        row-gap: 10px;
+        column-gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
     }
 </style>
