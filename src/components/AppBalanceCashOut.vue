@@ -10,7 +10,7 @@
         <div class="left">
             <div class="row">
                 <img src="@/assets/images/balance.png">
-                <h2 v-if="userInfo">Ваш баланс: {{ userInfo.balance }} USDT</h2>
+                <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
             </div>
             <div class="item">
                 <input 
@@ -53,12 +53,11 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppModal from "@/components/AppModal.vue";
-    import { getUserInfo } from "@/services/user";
     import { getMoney } from "@/services/cash";
-    import { refreshToken } from "@/services/auth";
     import { getConfig } from "@/services/config";
     export default {
         components: { AppGoodButton, AppModal },
+        props: { userData: Object },
         data() {
             return {
                 text1: "ЗАПРОСИТЬ ВЫВОД",
@@ -66,7 +65,6 @@
                 bep_msg: "Обратите внимание, выводы по сети BEP-20 с минимальными комиссиями",
                 activeIndex: 0,
                 commision: 1,
-                userInfo: null,
                 usdt: "",
                 adress: "",
                 cashout: 0,
@@ -84,23 +82,8 @@
             } 
         },
         async created() {
-            const info = await getUserInfo(localStorage.getItem("token"));
-            if (!info) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userInfo = info;
-
             this.commisionData = await getConfig("commissions", localStorage.getItem("token"));
             this.commision = this.commisionData.bep;
-            console.log(this.commisionData);
         },
         methods: {
             setActive(index) {
@@ -115,8 +98,8 @@
                     this.cashout = 0;
             },
             async openWaitingModal() {
-                if (this.userInfo.balance >= this.usdt && this.adress != "" && this.usdt != "" && this.usdt >= 10 && Number.isInteger(this.usdt)) {
-                    const resp = await getMoney(this.userInfo.vk_id, this.cashout, this.adress, this.choices[this.activeIndex]);
+                if (this.userData.balance >= this.usdt && this.adress != "" && this.usdt != "" && this.usdt >= 10 && Number.isInteger(this.usdt)) {
+                    const resp = await getMoney(this.userData.vk_id, this.cashout, this.adress, this.choices[this.activeIndex]);
                     if (resp.status) {
                         this.isError = false;
                         this.waitingModal = true;
@@ -127,7 +110,7 @@
                 } else {
                     this.isError = true;
                 }
-                if (this.userInfo.balance < this.usdt) 
+                if (this.userData.balance < this.usdt) 
                     this.errMsg = "Не хватает средств!";
                 if (this.adress == "")
                     this.errMsg = "Заполните поле с адресом!";

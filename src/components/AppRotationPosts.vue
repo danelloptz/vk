@@ -39,13 +39,11 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
-    // import { getGroupInfo, isSubscribe } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
     import { addInRotation, checkLike, getRotationPosts } from "@/services/groups";
-    import { getUserInfo } from "@/services/user";
-    import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
+        props: { userData: Object },
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
@@ -61,7 +59,6 @@
                 noSubscribe: false,
                 noSkips: false,
                 isPlans: false,
-                userInfo: [],
                 currentGroupIndex: 0,
                 groupPriorities: ["first", "second", "other"],
                 currentPriorityIndex: 0,
@@ -79,20 +76,7 @@
             }
         },
         async created() {
-            const response = await getUserInfo(localStorage.getItem("token"));
-            if (!response) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userInfo = response;
-            this.tariff = this.userInfo.packages[this.userInfo.packages.length - 1].package_name;
+            this.tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
             if (this.isTarif) {
                 this.openPlans();
                 this.$emit("update:isTarif", false);
@@ -112,7 +96,7 @@
                     break;
             }
 
-            const groups = await getRotationPosts(this.userInfo.vk_id, this.tariff);
+            const groups = await getRotationPosts(this.userData.vk_id, this.tariff);
             console.log(groups);
 
             this.groupInfo = groups;
@@ -160,7 +144,7 @@
                 this.isRotation = true;
             },
             async endRotation() {
-                const response = await addInRotation(this.userInfo.vk_id, "post");
+                const response = await addInRotation(this.userData.vk_id, "post");
                 console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
@@ -180,7 +164,7 @@
             async checkSubscription(post_link, group_id) {
                 if (!this.waitingForCheck) return;
                 this.waitingForCheck = false;
-                const response = await checkLike(post_link, group_id, this.userInfo.vk_id);
+                const response = await checkLike(post_link, group_id, this.userData.vk_id);
                 console.log(response);
 
                 if (response.status) {
@@ -229,7 +213,7 @@
                     const group_id = this.groupsQueue[this.currentGroupIndex].group_id;
                     const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
 
-                    this.checkSubscription(post_link, group_id, this.userInfo.vk_id);
+                    this.checkSubscription(post_link, group_id, this.userData.vk_id);
                 }
             },
             handleFocus() {
@@ -239,7 +223,7 @@
                         const group_id = this.groupsQueue[this.currentGroupIndex].group_id;
                         const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
 
-                        this.checkSubscription(post_link, group_id, this.userInfo.vk_id);
+                        this.checkSubscription(post_link, group_id, this.userData.vk_id);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                     }

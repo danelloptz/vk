@@ -76,9 +76,7 @@
 </template>
 
 <script>
-import { getUserInfo } from "@/services/user";
 import AppGoodButton from "@/components/AppGoodButton.vue";
-import { refreshToken } from "@/services/auth";
 import { buyTariff, upgradeToLeader } from "@/services/cash";
 
 export default {
@@ -89,11 +87,11 @@ export default {
         package: String,
         isGoodPayment: Boolean,
         tarrifs: Array,
-        daysForBusiness: String
+        daysForBusiness: String,
+        userData: Object
     },
     data() {
         return {
-            userData: [],
             times: {
                 "1 месяц": 1,
                 "2 месяца": 2,
@@ -213,22 +211,7 @@ export default {
         }
     },
     async created() {
-        const response = await getUserInfo(localStorage.getItem("token"));
-        if (!response) {
-            const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-            if (isAuthorized) {
-                localStorage.setItem("token", isAuthorized.access_token);
-                localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-            } else {
-                localStorage.clear();
-                this.$router.push('/');
-                return;
-            }
-        }
-        this.userData = response;
         this.newTarrifs = this.tarrifs.filter(item => item.package_name != "Free");
-        console.log(this.daysForBusiness);
-
     }
 };
 </script>

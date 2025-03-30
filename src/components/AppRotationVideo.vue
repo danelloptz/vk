@@ -48,13 +48,11 @@
     import AppVideoModal from "@/components/AppVideoModal.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
     import { addInRotation, getRotationVideos } from "@/services/groups";
-    import { getUserInfo } from "@/services/user";
-    import { refreshToken } from "@/services/auth";
     import { addView } from "@/services/groups";
-    // import { getGroupInfo } from "@/services/user"; !!!! РАССКОМЕНТИТЬ !!!!
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppVideoModal, AppRotationPlans },
+        props: { userData: Object },
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
@@ -72,7 +70,6 @@
                 noSubscribe: false,
                 noSkips: false,
                 isPlans: false,
-                userInfo: [],
                 currentVideoIndex: 0,
                 groupPriorities: ["first", "second", "other"],
                 currentPriorityIndex: 0,
@@ -89,20 +86,7 @@
             }
         },
         async created() {
-            const response = await getUserInfo(localStorage.getItem("token"));
-            if (!response) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userInfo = response;
-            this.tariff = this.userInfo.packages[this.userInfo.packages.length - 1].package_name;
+            this.tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
 
             if (this.isTarif) {
                 this.openPlans();
@@ -123,7 +107,7 @@
                     break;
             }
 
-            const videos = await getRotationVideos(this.userInfo.vk_id, this.tariff);
+            const videos = await getRotationVideos(this.userData.vk_id, this.tariff);
             console.log(videos);
 
             this.videosInfo = videos;
@@ -158,7 +142,7 @@
                 }
             },
             async endRotation() {
-                const response = await addInRotation(this.userInfo.vk_id, "video");
+                const response = await addInRotation(this.userData.vk_id, "video");
                 console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
@@ -196,8 +180,8 @@
                 this.isVideoShown = false;
                 if (this.isWatched) {
                     this.isWatched = false;
-                    const resp = await addView(this.userInfo.id, this.videosQueue[this.currentVideoIndex].db_id);
-                    console.log(this.userInfo.id, this.videosQueue[this.currentVideoIndex].db_id, resp);
+                    const resp = await addView(this.userData.id, this.videosQueue[this.currentVideoIndex].db_id);
+                    console.log(this.userData.id, this.videosQueue[this.currentVideoIndex].db_id, resp);
                     this.watchedVideos++;
                     this.videosQueue.splice(this.currentVideoIndex, 1);
                     this.subscribedCount++;

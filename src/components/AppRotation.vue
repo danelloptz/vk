@@ -8,9 +8,9 @@
                 @click="setActive(index)"
             >{{ item }}</span>
         </div>
-            <AppRotationGroup v-if="activeIndex === 0" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
-            <AppRotationVideo v-if="activeIndex === 1"  />
-            <AppRotationPosts v-if="activeIndex === 2" />
+            <AppRotationGroup v-if="activeIndex === 0" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
+            <AppRotationVideo v-if="activeIndex === 1" :userData="userData" />
+            <AppRotationPosts v-if="activeIndex === 2" :userData="userData" />
     </section>
 </template>
 
@@ -21,7 +21,8 @@
     export default {
         components: { AppRotationGroup, AppRotationVideo, AppRotationPosts },
         props: {
-            isTarif: Boolean
+            isTarif: Boolean,
+            userData: Object
         },
         async created() {
             console.log("isTarif в rotation: ", this.isTarif);

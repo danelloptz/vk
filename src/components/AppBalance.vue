@@ -8,10 +8,10 @@
                 @click="setActive(index)"
             >{{ item }}</span>
         </div>
-            <AppBalancePutMoney v-if="activeIndex === 0" />
-            <AppBalanceCashOut v-if="activeIndex === 1" />
-            <AppBalanceSend v-else-if="activeIndex === 2" />
-            <AppBalanceHistory v-else-if="activeIndex === 3" />
+            <AppBalancePutMoney v-if="activeIndex === 0" :userData="userData" />
+            <AppBalanceCashOut v-if="activeIndex === 1" :userData="userData" />
+            <AppBalanceSend v-else-if="activeIndex === 2" :userData="userData" />
+            <AppBalanceHistory v-else-if="activeIndex === 3" :userData="userData" />
     </section>
 </template>
 
@@ -22,6 +22,7 @@
     import AppBalanceSend from '@/components/AppBalanceSend.vue';
     export default {
         components: { AppBalanceCashOut, AppBalancePutMoney, AppBalanceSend, AppBalanceHistory },
+        props: { userData: Object },
         data() {
             return {
                 listSwtich: ["Пополнить баланс", "Вывод средств", "Перевод средств", "Финансовая история"],

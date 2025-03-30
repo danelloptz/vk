@@ -242,14 +242,13 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { getUserInfo } from "@/services/user";
     import { sendOtherAdd, getUserAdds, deleteAdd, editOtherAdd } from "@/services/add";
-    import { refreshToken } from "@/services/auth";
     import { getConfig } from "@/services/config";
     import AppModal from '@/components/AppModal.vue';
 
     export default {
         components: { AppGoodButton, AppModal },
+        props: { userData: Object },
         data() {
             return {
                 countries: [],
@@ -283,7 +282,6 @@
                 selectedCounts: [0, 0, 0, 0, 0, 0],
                 daysSummary: 0,
                 priceSummary: 0,
-                userData: [],
                 userAdds: [],
                 img: "",
                 position: "",
@@ -321,20 +319,6 @@
             }
         },
         async created() {
-            const user_data = await getUserInfo(localStorage.getItem("token"));
-            if (!user_data) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userData = user_data;
-
             this.pricesData = await getConfig("add_price", localStorage.getItem("token"));
             console.log(this.pricesData);
 

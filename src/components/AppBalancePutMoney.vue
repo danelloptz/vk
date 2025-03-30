@@ -15,7 +15,7 @@
         <div class="left" v-if="!stepTwo">
             <div class="row">
                 <img src="@/assets/images/balance.png">
-                <h2 v-if="userInfo">Ваш баланс: {{ userInfo.balance }} USDT</h2>
+                <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
             </div>
             <div class="item">
                 <input 
@@ -42,7 +42,7 @@
         <div class="steptwo" v-if="stepTwo">
             <div class="row">
                 <img src="@/assets/images/balance.png">
-                <h2 v-if="userInfo">Ваш баланс: {{ userInfo.balance }} USDT</h2>
+                <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
             </div>
             <div class="item">
                 <span>Для пополнения отправьте {{ cashout }} USDT (сеть {{ choices[activeIndex] }}) на кошелек: </span>
@@ -70,14 +70,12 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppModalHash from "@/components/AppModalHash.vue";
     import AppModal from "@/components/AppModal.vue";
-
-    import { getUserInfo } from "@/services/user";
     import { putMoney } from "@/services/cash";
-    import { refreshToken } from "@/services/auth";
     import { getConfig } from "@/services/config";
     
     export default {
         components: { AppGoodButton, AppModalHash, AppModal },
+        props: { userData: Object },
         data() {
             return {
                 text1: "ПОПОЛНИТЬ БАЛАНС",
@@ -86,7 +84,6 @@
                 bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
                 activeIndex: 0,
                 commision: 1,
-                userInfo: null,
                 usdt: "",
                 cashout: 0,
                 minCash: 10,
@@ -112,19 +109,6 @@
             }
         },
         async created() {
-            const info = await getUserInfo(localStorage.getItem("token"));
-            if (!info) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userInfo = info;
             this.commisionData = await getConfig("commissions", localStorage.getItem("token"));
             this.commision = this.commisionData.bep;
             this.depositData = await getConfig("deposit_addresses", localStorage.getItem("token"));

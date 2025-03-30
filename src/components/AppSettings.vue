@@ -176,7 +176,7 @@
         <span style="font-size: 14px;"><i>Для продвижения запрещены порнографические материалы, призывы к насилию, оскорбления и другие темы запрещенные законодательством вашей страны и правилами Вконтакте.</i></span>
         <AppGoodButton :text="text1" class="btn" @click="saveSettings" />
    </section>
-   <AppSettingsAuto v-if="isAuto" />
+   <AppSettingsAuto v-if="isAuto" :userData="userData" />
 </template>
 
 <script>
@@ -193,11 +193,10 @@
 export default {
     components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser },
     props: { 
-        businessUser: Object
+        businessUser: Object,
     },
     data() {
         return {
-            userData: null,
             telegramLink: "",
             whatsappLink: "",
             vkGroupLink: "",
@@ -234,7 +233,8 @@ export default {
             msg: "",
             notTelegram: false,
             emailLink: "",
-            emailData: ""
+            emailData: "",
+            userData: []
         };
     },
     computed: {

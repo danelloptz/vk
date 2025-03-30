@@ -119,22 +119,20 @@
 </template>
 
 <script>
-import { getUserInfo } from "@/services/user";
 import { getTree } from "@/services/user";
 import AppGoodButton from "@/components/AppGoodButton.vue";
 import AppBadButton from "@/components/AppBadButton.vue";
 import AppMain from "@/components/AppMain.vue";
 import AppStructureBinar from "@/components/AppStructureBinar.vue";
 import AppStructureLinear from "@/components/AppStructureLinear.vue";
-import { refreshToken } from "@/services/auth";
 import { setLeg, getStructureInfo, findParents } from '@/services/user';
 import AppModal from '@/components/AppModal.vue';
 
 export default {
     components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar, AppStructureLinear, AppModal },
+    props: { userData: Object },
     data() {
         return {
-            userData: [],
             listSwtich: ["Линейная структура", "Бинарная структура"],
             activeIndex: 0,
             showNums: true,
@@ -246,19 +244,6 @@ export default {
 
     },
     async created() {
-        const response = await getUserInfo(localStorage.getItem("token"));
-        if (!response) {
-            const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-            if (isAuthorized) {
-                localStorage.setItem("token", isAuthorized.access_token);
-                localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-            } else {
-                localStorage.clear();
-                this.$router.push('/');
-                return;
-            }
-        }
-        this.userData = response;
         this.root_vk_id = this.userData.vk_id;
 
         if (this.userData.current_leg == "left") this.leg_index = 0;

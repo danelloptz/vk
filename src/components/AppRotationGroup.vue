@@ -48,13 +48,12 @@
     import AppVideoModal from "@/components/AppVideoModal.vue";
 
     import { addInRotation, checkGroupSub, getRotationGroups } from "@/services/groups";
-    import { getUserInfo } from "@/services/user";
-    import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppVideoModal },
         props: {
-            isTarif: Boolean
+            isTarif: Boolean,
+            userData: Object
         },
         data() {
             return {
@@ -71,7 +70,6 @@
                 noSubscribe: false,
                 noSkips: false,
                 isPlans: false,
-                userInfo: [],
                 currentGroupIndex: 0,
                 groupPriorities: ["first", "second", "other"],
                 currentPriorityIndex: 0,
@@ -89,20 +87,7 @@
             }
         },
         async created() {
-            const response = await getUserInfo(localStorage.getItem("token"));
-            if (!response) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userInfo = response;
-            this.tariff = this.userInfo.packages[this.userInfo.packages.length - 1].package_name;
+            this.tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
 
             if (this.isTarif) {
                 console.log('Я СРАБОТАЛ НА ПРОПСЕ!!!!');
@@ -125,7 +110,7 @@
                     break;
             }
 
-            const groups = await getRotationGroups(this.userInfo.vk_id, this.tariff);
+            const groups = await getRotationGroups(this.userData.vk_id, this.tariff);
             console.log(groups);
 
             this.groupInfo = groups;
@@ -173,7 +158,7 @@
                 this.isRotation = true;
             },
             async endRotation() {
-                const response = await addInRotation(this.userInfo.vk_id, "group");
+                const response = await addInRotation(this.userData.vk_id, "group");
                 console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
@@ -193,7 +178,7 @@
                 if (!this.waitingForCheck) return;
                 this.waitingForCheck = false;
                 console.log(groupLink);
-                const response = await checkGroupSub(groupLink, this.userInfo.vk_id, "rotation");
+                const response = await checkGroupSub(groupLink, this.userData.vk_id, "rotation");
                 console.log(response);
 
                 if (response.status) {

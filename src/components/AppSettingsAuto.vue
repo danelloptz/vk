@@ -47,42 +47,27 @@
 </template>
 
 <script>
-import { getUserInfo, sendNewSettings, setAutoposting } from "@/services/user";
+import { sendNewSettings, setAutoposting } from "@/services/user";
 import { getPosts } from "@/services/posts";
-import { refreshToken } from "@/services/auth";
 
 export default {
     data() {
         return {
             socials: [],
             posts: [],
-            userInfo: [],
             isAutoposting: true
         };
     },
     async created() {
-        const response = await getUserInfo(localStorage.getItem("token"));
-        if (!response) {
-            const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-            if (isAuthorized) {
-                localStorage.setItem("token", isAuthorized.access_token);
-                localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-            } else {
-                localStorage.clear();
-                this.$router.push('/');
-                return;
-            }
-        }
-        this.userInfo = response;
-        this.isAutoposting = this.userInfo.autoposting;
+        this.isAutoposting = this.userData.autoposting;
         
         const allSocials = [
             "VK", "Instagram", "Telegram", "TikTok", "Whatsapp", "Facebook"
         ];
 
         this.socials = allSocials.flatMap(type => {
-            // Все соцсети данного типа из userInfo.social_links
-            const existing = this.userInfo.social_links.filter(social => social.type === type);
+            // Все соцсети данного типа из userData.social_links
+            const existing = this.userData.social_links.filter(social => social.type === type);
 
             // Если соцсетей нет, добавляем пустую запись
             if (existing.length === 0) {
@@ -120,16 +105,16 @@ export default {
             const filtered = this.socials.filter(item => item.link != "");
             // Object.values(filtered).forEach(obj => delete obj.isNew);
 
-            this.userInfo.social_links = this.userInfo.social_links.filter(item => {
+            this.userData.social_links = this.userData.social_links.filter(item => {
                 return filtered.some(social => social.type === item.type && social.link === item.link);
             });
 
             filtered.forEach(item => {
                 let flag = true;
-                this.userInfo.social_links.forEach(social => {
+                this.userData.social_links.forEach(social => {
                     if (social.type == item.type && social.link == item.link) flag = false;
                 })
-                if (flag) this.userInfo.social_links.push(item);
+                if (flag) this.userData.social_links.push(item);
             });
 
             const payload = {
@@ -137,7 +122,7 @@ export default {
                 city: null,
                 sex:  null,
                 interests: null,
-                social_links: this.userInfo.social_links,
+                social_links: this.userData.social_links,
                 vip_offer: null,
                 group_link: null,
             };
@@ -147,8 +132,8 @@ export default {
         },
         async switchChange() {
             this.isAutoposting = !this.isAutoposting;
-            if (this.isAutoposting) await setAutoposting(this.userInfo.id, true)
-            else await setAutoposting(this.userInfo.id, false)
+            if (this.isAutoposting) await setAutoposting(this.userData.id, true)
+            else await setAutoposting(this.userData.id, false)
         }
     },
 };

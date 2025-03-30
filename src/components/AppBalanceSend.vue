@@ -9,7 +9,7 @@
     <section class="send" v-if="!stepTwo">
         <div class="row">
             <img src="@/assets/images/balance.png">
-            <h2 v-if="userInfo">Ваш баланс: {{ userInfo.balance }} USDT</h2>
+            <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
         </div>
         <div class="item">
             <input 
@@ -32,7 +32,7 @@
     <section class="send" v-if="stepTwo">
         <div class="row">
             <img src="@/assets/images/balance.png">
-            <h2 v-if="userInfo">Ваш баланс: {{ userInfo.balance }} USDT</h2>
+            <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
         </div>
         <span>Подтвердите перевод. Вы хотите перевести {{ usdt }} USDT пользователю</span>
         <div class="user_tosend">
@@ -55,17 +55,17 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppModal from "@/components/AppModal.vue";
-    import { getUserInfo, getUserInfoById } from "@/services/user";
+    import { getUserInfoById } from "@/services/user";
     import { sendTo } from "@/services/cash";
     import { refreshToken } from "@/services/auth";
 
     export default {
         components: { AppGoodButton, AppBadButton, AppModal },
+        props: { userData: Object },
         data() {
             return {
                 text1: "ПОДТВЕРДИТЬ",
                 text2: "НАЗАД",
-                userInfo: null,
                 usdt: "",
                 cashout: 0,
                 minCash: 1,
@@ -79,24 +79,9 @@
                 endModal: false,
             }
         },
-        async created() {
-            const info = await getUserInfo(localStorage.getItem("token"));
-            if (!info) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }
-            this.userInfo = info;
-        },
         methods: {
             async send() {
-                if (this.userId != "" && Number(this.userInfo.balance) >= Number(this.usdt)) {
+                if (this.userId != "" && Number(this.userData.balance) >= Number(this.usdt)) {
                     const response = await getUserInfoById(this.userId, localStorage.getItem("token"));
                     if (!response) {
                         const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
@@ -123,7 +108,7 @@
                 }
                 if (this.userId == "")
                     this.errorMsg = "Введите id пользователя!";
-                if (Number(this.userInfo.balance) < Number(this.usdt))
+                if (Number(this.userData.balance) < Number(this.usdt))
                     this.errorMsg = "Не хватает средств!";
             },
             async sendMoney() {

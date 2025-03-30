@@ -1,5 +1,6 @@
 <template>
     <AppModalPayment 
+        :userData="userData"
         :package="selectedPackage" 
         :visibility1="isModal"
         :isGoodPayment="isGoodPayment"
@@ -358,13 +359,12 @@ import AppModal from "@/components/AppModal.vue";
 import { getConfig } from "@/services/config";
 
 import { getTariffs, buyBooster } from "@/services/cash";
-import { getUserInfo } from "@/services/user";
  
     export default {
         components: { AppGoodButton, AppModalPayment, AppModal },
+        props: { userData: Object },
         data() {
             return {
-                userData: [],
                 text1: "КУПИТЬ",
                 text2: "ПРОДЛИТЬ",
                 text3: "ПОВЫСИТЬ",
@@ -389,23 +389,14 @@ import { getUserInfo } from "@/services/user";
             this.tariffs = resp;
             console.log(this.tariffs);
 
-            const user = await getUserInfo(localStorage.getItem("token"));
-            this.userData = user;
-
             const booster = await getConfig("booster", localStorage.getItem("token"));
-            console.log(booster);
             this.boosterPrice = booster.price;
-            console.log(this.boosterPrice);
 
             this.tariffs.forEach(tarif => this.plans.push(tarif?.package_name));
             this.currTarrif = this.userData.packages.map(item => item.package_name);
-            console.log(this.currTarrif);
-            this.tariffs.forEach(item => console.log(item?.package_name));
             this.newTarrif = (this.userData.packages.length == 1 && this.userData.packages[0].package_name == "Free") ?  this.userData.packages : this.userData.packages.filter(item => item.package_name != "Free");
-            console.log(this.newTarrif);
 
             if (!(this.userData.packages.filter(item => item.package_name == "Leader").length > 0)) {
-                console.log(this.userData.packages)
                 this.userData.packages.forEach(item => {
                     if (item.package_name == "Business") this.daysForBusiness = this.getDays(item);
                 });

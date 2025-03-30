@@ -17,11 +17,11 @@
                     <strong><span>{{ prices[index] }} USDT</span></strong>
                 </div>
             </div>
-            <div class="group" v-if="userInfo.group">
+            <div class="group" v-if="userData.group">
                 <div class="item">
-                    <img :src="userInfo.group.group_photo">
+                    <img :src="userData.group.group_photo">
                     <div class="text_block">
-                        <span>{{ userInfo.group.group_name }}</span>
+                        <span>{{ userData.group.group_name }}</span>
                     </div>
                 </div>
                 <AppGoodButton :text="text1" class="btn" @click="comeToAss" />
@@ -32,19 +32,17 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { getUserInfo } from "@/services/user";
     import { setAdds } from "@/services/add";
-    import { refreshToken } from "@/services/auth";
     import { getConfig } from "@/services/config";
     import AppModal from '@/components/AppModal.vue';
 
     export default {
         components: { AppGoodButton, AppModal },
+        props: { userData: Object },
         data() {
             return {
                 tarrifs: ["Leader, Business", "VIP", "Start, Standart", "Free"],
                 text1: "ПОПАСТЬ В ЛЕНТУ",
-                userInfo: [],
                 isModal: false,
                 title: "",
                 msg: "",
@@ -55,20 +53,6 @@
             }
         },
         async created() {
-            const user = await getUserInfo(localStorage.getItem("token"));
-            if (!user) {
-                const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
-                if (isAuthorized) {
-                    localStorage.setItem("token", isAuthorized.access_token);
-                    localStorage.setItem("token_refresh", isAuthorized.refresh_token);
-                } else {
-                    localStorage.clear();
-                    this.$router.push('/');
-                    return;
-                }
-            }   
-            this.userInfo = user;
-
             this.priceData = await getConfig("groups_add_price", localStorage.getItem("token"));
         },
         computed: {
@@ -81,12 +65,12 @@
         },  
         methods: {
             async comeToAss() {
-                if (!this.userInfo.group.group_link) {
+                if (!this.userData.group.group_link) {
                     this.isError = true;
                     this.errorMsg = "У вас не привязана группа вк!";
                     return;
                 }
-                const tariff = this.userInfo.packages[this.userInfo.packages.length - 1].package_name;
+                const tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
                 switch (tariff) {
                     case "Leader" || "Business":
                         this.price = 1;
@@ -101,14 +85,14 @@
                         this.price = 3;
                         break;
                 }
-                if (this.userInfo.balance < this.price) {
+                if (this.userData.balance < this.price) {
                     this.isError = true;
                     this.errorMsg = "Не хватает средств на балансе!";
                     return;
                 }
                 this.isError = false;
                 // имена функций я, конечно, придумывать умею ;)
-                const resp = await setAdds(this.userInfo.group.group_link, this.userInfo.vk_id);
+                const resp = await setAdds(this.userData.group.group_link, this.userData.vk_id);
                 this.isModal = true;
                 this.title = resp.status ? "УСПЕШНО!" : "ОШИБКА!";
                 this.msg = resp.status ? "Ваша группа добавлена в рекламную ленту." : "Не удалось добавить группу в рекламную ленту.";
