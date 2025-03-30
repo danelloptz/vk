@@ -300,52 +300,55 @@
             },
             countsOfTexts() {
                 const checked = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
-                return checked.map(item => item.chose_post_index);
+                return checked.map(item => item.post_text.length);
             },
             countsOfBanners() {
                 const checked = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
-                return checked.map(item => item.chose_image_index);
+                return checked.map(item => item.image_links.length);
             },
         },
         methods: {
             async confirmCurrentPosts() {
-                console.log(this.step);
-                this.plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
-                this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
-                console.log(this.plan);
-                this.isLoading = true;
+                const filtered = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
+                if (filtered.length > 0) {
+                    this.plan = filtered;
+                    this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+                    console.log(this.plan);
+                    this.isLoading = true;
 
-                if (this.step == 1) {
-                    try {
-                        await updateContentPlan(this.plan, localStorage.getItem("token"));
-                        this.plan = await generatePostsText(this.plan, localStorage.getItem("token"));
-                        this.plan.forEach(item => {
-                            item.chose_post_index = 0;
-                        });
-                        await updateContentPlan(this.plan, localStorage.getItem("token"));
-                    } catch(err) {
-                        console.error(err);
+                    if (this.step == 1) {
+                        try {
+                            await updateContentPlan(this.plan, localStorage.getItem("token"));
+                            this.plan = await generatePostsText(this.plan, localStorage.getItem("token"));
+                            this.plan.forEach(item => {
+                                item.chose_post_index = 0;
+                            });
+                            await updateContentPlan(this.plan, localStorage.getItem("token"));
+                            this.step++;
+                        } catch(err) {
+                            console.error(err);
+                        }
+                    } 
+                    if (this.step == 2) {
+                        try {
+                            this.plan.forEach(item => {
+                                if (!item.chose_post_index) item.chose_post_index = 0;
+                            });
+                            await updateContentPlan(this.plan, localStorage.getItem("token"));
+                            this.plan = await generateBanners(this.plan, localStorage.getItem("token"));
+                            this.plan.forEach(item => {
+                                item.chose_image_index = 0;
+                            });
+                            await updateContentPlan(this.plan, localStorage.getItem("token"));
+                            this.step++;
+                        } catch(err) {
+                            console.error(err);
+                        }
                     }
-                } 
-                if (this.step == 2) {
-                    try {
-                        this.plan.forEach(item => {
-                            if (!item.chose_post_index) item.chose_post_index = 0;
-                        });
-                        await updateContentPlan(this.plan, localStorage.getItem("token"));
-                        this.plan = await generateBanners(this.plan, localStorage.getItem("token"));
-                        this.plan.forEach(item => {
-                            item.chose_image_index = 0;
-                        });
-                        await updateContentPlan(this.plan, localStorage.getItem("token"));
-                    } catch(err) {
-                        console.error(err);
-                    }
+                    if (this.step > 2) await updateContentPlan(this.plan, localStorage.getItem("token"));
+
+                    this.isLoading = false;
                 }
-                if (this.step > 2) await updateContentPlan(this.plan, localStorage.getItem("token"));
-
-                this.isLoading = false;
-                this.step++;
             },
             setActive(index) {
                 this.activeIndex = index;
@@ -408,10 +411,9 @@
                 this.isLoading = true;
 
                 const checked_plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
-                this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
                 const max_text = Math.max(...this.countsOfTexts);
                 const max_banners = Math.max(...this.countsOfBanners);
-                console.log(max_text, max_banners);
+                this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
 
                 if (this.step == 1) {
                     try {
