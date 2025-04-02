@@ -5,7 +5,7 @@
         :visibility1="isChangeLegModal"
         @update:visibility1="isChangeLegModal = $event"
     />
-    <AppMain :links="isLinks" v-if="isLinks" />
+    <AppMain :links="isLinks" v-if="isLinks" :userData="userData" />
     <section class="struct" v-if="!isLinks">
         <div class="user">
             <img :src="userData.avatar">

@@ -13,6 +13,7 @@
         :title="title" 
         :message="msg" 
         :visibility1="isModal"
+        @close="close"
         @update:visibility1="isModal = $event"
     />
     <section class="header">
@@ -68,6 +69,7 @@
             },
             close() {
                 this.popupVisible = false;
+                window.location.reload();
             },
             showHelp() {
                 this.$emit('show-help');

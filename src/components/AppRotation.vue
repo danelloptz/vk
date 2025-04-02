@@ -25,7 +25,6 @@
             userData: Object
         },
         async created() {
-            console.log("isTarif в rotation: ", this.isTarif);
             this.isPackage = this.isTarif;
             this.$emit("update:isTarif", false);
         },

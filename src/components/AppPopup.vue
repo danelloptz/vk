@@ -32,6 +32,7 @@
                 text1: "ПОЛУЧИТЬ 1 БАЛЛ",
                 title: "",
                 msg: "",
+                disabled: false,
             }
         },  
         methods: {
@@ -42,21 +43,23 @@
                 this.$emit('close'); 
             },
             async getPoint() {
+                if (this.disabled) return;
+                console.log(this.disabled);
+                this.disabled = true;
                 const time = this.time * 1000 || 86400000;
                 const points = localStorage.getItem("points");
                 const dif = new Date().getTime() - time;
                 this.isModal = true;
                 if (dif > 60 * 60 * 1000 && points < 100) {
-                    const resp = await addGiftScore(this.vk_id);
+                    await addGiftScore(this.vk_id);
                     if (!this.autoposting) {
                         const set_autoposting = await setAutoposting(this.id, true);
                         console.log("set_autoposting: ", set_autoposting);
                     }
-                    console.log(resp);
+                    this.disabled = false;
                     localStorage.setItem("points", +points + 1);
                     localStorage.setItem("last_point", new Date().getTime());
                     this.$emit('clicked');
-                    window.location.reload();
                 } else {
                     this.$emit('error');
                 }

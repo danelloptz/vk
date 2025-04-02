@@ -100,7 +100,7 @@
                 v-model="vkGroupLink" 
                 placeholder="ВК группа" >
             <span @click="addVKGroup">ДОБАВИТЬ</span>
-            <h3 v-if="userData">Подписки: {{ userData.group?.count_subs_from_service }}</h3>
+            <h3 v-if="userData">Подписки: {{ userData.group?.count_subs_from_service || 0}}</h3>
         </div>
         <div class="row2">
             <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
@@ -234,7 +234,8 @@ export default {
             notTelegram: false,
             emailLink: "",
             emailData: "",
-            userData: []
+            userData: [],
+            disabled: false,
         };
     },
     computed: {
@@ -401,6 +402,8 @@ export default {
                 // }
             },
             async saveSettings() {
+                if (this.disabled) return;
+                this.disabled = true;
                 const payload = {
                     country: this.searchQuery != this.userData.country ? this.searchQuery : null,
                     city: this.selectedCity != this.userData.city ? this.selectedCity : null,
@@ -416,6 +419,7 @@ export default {
                 this.isSaveModal = true;
                 this.title = response == 200 ? "УСПЕШНО!" : "ОШИБКА!";
                 this.msg = response == 200 ? "Настройки сохранены." : "При сохранении настроек возникла ошибка!";
+                this.disabled = false;
             }
     }
 };

@@ -294,7 +294,8 @@
                 ad_id: null,
                 timestamp: null,
                 daysBefore: 0,
-                posBefore: ""
+                posBefore: "",
+                disabled: false,
             }
         },
         computed: {
@@ -442,7 +443,9 @@
                 this.daysSummary = this.selectedCounts.reduce((sum, num, index) => sum + (num * this.daysNum[index]), 0);
             },
             async makePayment() {
+                if (this.disabled) return;
                 if (this.userData.balance >= this.priceSummary && (this.priceSummary > 0 || this.isEdit) && (this.img != "" || this.uploadedImage != "")) {
+                    this.disabled = true;
                     const formData = new FormData();
 
                     if (this.img != "") formData.append("ads_img", this.img.get("file"))
@@ -494,6 +497,7 @@
                     this.title = payment.status ? "УСПЕШНО!" : "ОШИБКА!";
                     this.msg = payment.status ? "Покупка завершена. Ваша реклама добавлена." : "Не удалось оплатить покупку рекламного банера.";
                     this.isEdit = false;
+                    this.disabled = false;
                 } else {
                     this.isModal = true;
                     this.title = "ОШИБКА!"

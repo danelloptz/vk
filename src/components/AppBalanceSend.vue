@@ -77,11 +77,14 @@
                 title: "УСПЕШНО",
                 msg: "Средства были переведены пользователю",
                 endModal: false,
+                disabled: false
             }
         },
         methods: {
             async send() {
+                if (this.disabled) return;
                 if (this.userId != "" && Number(this.userData.balance) >= Number(this.usdt)) {
+                    this.disabled = true;
                     const response = await getUserInfoById(this.userId, localStorage.getItem("token"));
                     if (!response) {
                         const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
@@ -103,6 +106,7 @@
                         this.isError = true;
                         this.errorMsg = "Нет пользователя с таким ID!"
                     }
+                    this.disabled = false;
                 } else {
                     this.isError = true;
                 }
@@ -112,11 +116,14 @@
                     this.errorMsg = "Не хватает средств!";
             },
             async sendMoney() {
+                if (this.disabled) return;
+                this.disabled = true;
                 const response = await sendTo(this.userToSend.vk_id, this.usdt, localStorage.getItem("token"));
                 if (response) {
                     this.endModal = true;
                     this.stepTwo = false;
                 } 
+                this.disabled = true;
             },
             reload() {
                 window.location.reload();

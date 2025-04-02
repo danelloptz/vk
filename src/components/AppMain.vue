@@ -84,13 +84,13 @@
         },
         computed: {
             refLink() {
-                return `https://intelektaz.com/?ref=${this.userData.vk_id}`;
+                return `https://intelektaz.com/?ref=${this.userData?.vk_id}`;
             },
             refVkLink() {
-                return `https://intelektaz.com/?ref=${this.userData.vk_id}`;
+                return `https://intelektaz.com/?ref=${this.userData?.vk_id}`;
             },
             refPremiumLink() {
-                return `https://intelektaz.com/?ref=${this.userData.vk_id}`;
+                return `https://intelektaz.com/?ref=${this.userData?.vk_id}`;
             }
         },
         watch: {
@@ -99,10 +99,13 @@
                 // this.$emit("update:links", false);
                 console.log("КИНУЛ FALSE"); 
             },
-            async userData(val) {
-                console.log("ХОБА", val);
-                const refer = await getReferer(val.vk_id);
-                this.referData = refer;
+            userData: {
+                handler: async function(val) {
+                    console.log("ХОБА", val);
+                    const refer = await getReferer(val.vk_id);
+                    this.referData = refer;
+                },
+                deep: true
             }
         },
         async created() {
@@ -124,10 +127,8 @@
             },
             async copyLink(link, index) {
                 this.isCopy = index;
-                console.log(this.isCopy);
                 await navigator.clipboard.writeText(link);
                 setTimeout(() => { this.isCopy = 0; console.log(this.isCopy);}, 2000);
-                console.log(this.isCopy);
             },
             openPres() {
                 window.open("/Intelektaz.pdf", "_blank");

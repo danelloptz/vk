@@ -133,6 +133,7 @@
             });
 
             window.addEventListener("focus", () => {
+                console.log('focus', this.wasBlurred);
                 if (this.wasBlurred) {
                     const elapsed = Date.now() - this.blurTime; // Сколько времени вкладка была неактивной
                     if (elapsed > 500) {
@@ -176,12 +177,12 @@
             },
             async checkSubscription(groupLink) {
                 if (!this.waitingForCheck) return;
-                this.waitingForCheck = false;
                 console.log(groupLink);
                 const response = await checkGroupSub(groupLink, this.userData.vk_id, "rotation");
                 console.log(response);
 
                 if (response.status) {
+                    this.waitingForCheck = false;
                     this.addGroups++;
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
@@ -228,12 +229,16 @@
                 }
             },
             handleFocus() {
+                console.log('nadleFocus');
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
                     if (elapsed > 5000) { // Например, если прошло более 5 секунд
+                        this.noSubscribe = false;
+                        console.log('nandler');
                         this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
+                        this.noSubscribe = true;
                     }
                 }
             },

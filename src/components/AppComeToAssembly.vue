@@ -49,7 +49,8 @@
                 errorMsg: "",
                 isError: false,
                 price: 3,
-                priceData: null
+                priceData: null,
+                disabled: false
             }
         },
         async created() {
@@ -65,6 +66,8 @@
         },  
         methods: {
             async comeToAss() {
+                if (this.disabled) return;
+                this.disabled = true;
                 if (!this.userData.group.group_link) {
                     this.isError = true;
                     this.errorMsg = "У вас не привязана группа вк!";
@@ -88,6 +91,7 @@
                 if (this.userData.balance < this.price) {
                     this.isError = true;
                     this.errorMsg = "Не хватает средств на балансе!";
+                    this.disabled = false;
                     return;
                 }
                 this.isError = false;
@@ -96,6 +100,7 @@
                 this.isModal = true;
                 this.title = resp.status ? "УСПЕШНО!" : "ОШИБКА!";
                 this.msg = resp.status ? "Ваша группа добавлена в рекламную ленту." : "Не удалось добавить группу в рекламную ленту.";
+                this.disabled = false;
             },
             reload() {
                 window.location.reload();

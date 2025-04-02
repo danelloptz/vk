@@ -97,7 +97,8 @@
                 errorMessage: "",
                 commisionData: null,
                 depositData: null,
-                isCopy: false
+                isCopy: false,
+                disabled: false
             }
         },
         computed: {
@@ -134,10 +135,12 @@
                 this.isOpen = false;
             },
             async check() {
+                if (this.disabled) return;
                 if (this.txid != "") {
                     const contract = this.activeIndex == 0 ? this.depositData.bsc_contract_address : this.depositData.trc_contract_address;
                     const wallet =  this.activeIndex == 0 ? this.depositData.bsc : this.depositData.trc;
                     try {
+                        this.disabled = true;
                         const response = await putMoney(this.cashout, this.txid, contract, wallet, ["BSC20", "TRC20"][this.activeIndex], localStorage.getItem("token"));
                         console.log(response);
                         if (!response.isError) {
@@ -149,6 +152,7 @@
                             if (response.message.indexOf("been used")) this.errorMessage = "Этот хэш уже был использован!"
                             else this.errorMessage = response.message;
                         }
+                        this.disabled = false;
                     } catch(e) {
                         this.isError = true;
                         this.errorMessage = "Неправильный хэш!";

@@ -73,7 +73,8 @@
                 msg: "Запрос на вывод обрабатывается. Вы всегда можете отменить вывод в разделе «Финансовая история»",
                 isError: false,
                 errMsg: "",
-                commisionData: null
+                commisionData: null,
+                disabled: false,
             }
         },
         computed: {
@@ -98,15 +99,21 @@
                     this.cashout = 0;
             },
             async openWaitingModal() {
+                if (this.disabled) return;
                 if (this.userData.balance >= this.usdt && this.adress != "" && this.usdt != "" && this.usdt >= 10 && Number.isInteger(this.usdt)) {
+                    this.disabled = true;
                     const resp = await getMoney(this.userData.vk_id, this.cashout, this.adress, this.choices[this.activeIndex]);
+                    console.log(resp);
                     if (resp.status) {
                         this.isError = false;
                         this.waitingModal = true;
                     }
                     else {
                         this.isError = true;
+                        if (resp.code == 422) 
+                            this.errMsg = "Неправильно введённые данные!";
                     }
+                    this.disabled = false;
                 } else {
                     this.isError = true;
                 }

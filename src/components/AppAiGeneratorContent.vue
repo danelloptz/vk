@@ -313,10 +313,11 @@
                 if (filtered.length > 0) {
                     this.plan = filtered;
                     this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
-                    console.log(this.plan);
                     this.isLoading = true;
 
+                    console.log(this.step);
                     if (this.step == 1) {
+                        console.log("STEP 1", this.step);
                         try {
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
                             this.plan = await generatePostsText(this.plan, localStorage.getItem("token"));
@@ -324,12 +325,14 @@
                                 item.chose_post_index = 0;
                             });
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
-                            this.step++;
                         } catch(err) {
                             console.error(err);
                         }
-                    } 
+                    }
+
+                    console.log(this.step);
                     if (this.step == 2) {
+                        console.log("STEP 2", this.step);
                         try {
                             this.plan.forEach(item => {
                                 if (!item.chose_post_index) item.chose_post_index = 0;
@@ -340,12 +343,12 @@
                                 item.chose_image_index = 0;
                             });
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
-                            this.step++;
                         } catch(err) {
                             console.error(err);
                         }
                     }
-                    if (this.step > 2) await updateContentPlan(this.plan, localStorage.getItem("token"));
+                    if (this.step > 2) await updateContentPlan(this.plan, localStorage.getItem("token"))
+                    else this.step++;
 
                     this.isLoading = false;
                 }
@@ -395,6 +398,7 @@
 
             },
             async generateThemes() {
+                this.step = 0;
                 this.saveSettings();
                 this.isLoading = true;
 

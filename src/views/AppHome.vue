@@ -135,6 +135,7 @@
         },
         async created() {
             let userInfo = await getUserInfo(localStorage.getItem("token"));
+            localStorage.setItem("points", userInfo.gift_score);
             console.log(userInfo);
             if (userInfo && !userInfo.activation) {
                 this.$router.push('/signup_1');

@@ -112,7 +112,7 @@ export async function getMoney(vk_id, sum_money, wallet, chain) {
         return response.data;
     } catch (error) {
         console.error("Ошибка при выводе средств", error);
-        return false; 
+        return {"code": error.status}
     }
 }
 

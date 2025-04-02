@@ -111,17 +111,18 @@ export default {
             errorMessage: "",
             isYear: false,
             newTarrifs: [],
-            disabled: false
+            disabled: false,
         };
     },
     computed: {
         summary() {
             if (this.selectedPackage == "Leader") {
+                console.log(this.newTarrifs);
                 const leader_pack = this.newTarrifs.find(item => item.package_name == "Leader");
                 const business_pack = this.newTarrifs.find(item => item.package_name == "Business");
                 console.log(leader_pack, business_pack, this.daysForBusiness);
                 if (this.daysForBusiness != 0) {
-                    return (leader_pack.monthly_cost * 12 - 4)  - Math.floor(+this.daysForBusiness / 30) * business_pack.monthly_cost;
+                    return Math.abs((leader_pack.monthly_cost * 12 - 4)  - Math.floor(+this.daysForBusiness / 30)) * business_pack.monthly_cost;
                 } else return 500;
             } 
             if (this.selectedPackage == "Business") return 300;
@@ -144,6 +145,11 @@ export default {
                     this.currTime = 1;
                     this.selectedTime = "1 месяц";
                 }
+            }
+        },
+        tarrifs: {
+            handler(val) {
+                this.newTarrifs = val.filter(item => item.package_name != "Free");
             }
         }
     },
@@ -205,14 +211,13 @@ export default {
                 }
                 this.disabled = false;
             } else {
-                this.error = true;
-                this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance} USDT!`;
+                if (!this.disabled) {
+                    this.error = true;
+                    this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance} USDT!`;
+                }
             }
         }
     },
-    async created() {
-        this.newTarrifs = this.tarrifs.filter(item => item.package_name != "Free");
-    }
 };
 </script>
 
