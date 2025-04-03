@@ -102,7 +102,7 @@
                 if (this.disabled) return;
                 if (this.userData.balance >= this.usdt && this.adress != "" && this.usdt != "" && this.usdt >= 10 && Number.isInteger(this.usdt)) {
                     this.disabled = true;
-                    const resp = await getMoney(this.userData.vk_id, this.cashout, this.adress, this.choices[this.activeIndex]);
+                    const resp = await getMoney(this.userData.vk_id, this.cashout, this.adress, this.choices[this.activeIndex], this.commision);
                     console.log(resp);
                     if (resp.status) {
                         this.isError = false;
@@ -116,6 +116,7 @@
                     this.disabled = false;
                 } else {
                     this.isError = true;
+                    this.disabled = false;
                 }
                 if (this.userData.balance < this.usdt) 
                     this.errMsg = "Не хватает средств!";

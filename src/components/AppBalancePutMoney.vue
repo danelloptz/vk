@@ -136,7 +136,8 @@
             },
             async check() {
                 if (this.disabled) return;
-                if (this.txid != "") {
+                this.isError = false;
+                if (this.txid != "" && this.txid != this.choices[this.activeIndex]) {
                     const contract = this.activeIndex == 0 ? this.depositData.bsc_contract_address : this.depositData.trc_contract_address;
                     const wallet =  this.activeIndex == 0 ? this.depositData.bsc : this.depositData.trc;
                     try {
@@ -156,8 +157,19 @@
                     } catch(e) {
                         this.isError = true;
                         this.errorMessage = "Неправильный хэш!";
+                        this.disabled = false;
                     }
                     
+                }
+                if (this.txid == this.choices[this.activeIndex]) {
+                    this.isError = true;
+                    this.errorMessage = "Неправильный хэш!";
+                    this.disabled = false;
+                }
+                if (this.txid == "") {
+                    this.isError = true;
+                    this.errorMessage = "Заполните поле с хэшем!";
+                    this.disabled = false;
                 }
             },
             closeModalMoneyPut() {

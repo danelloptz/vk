@@ -101,13 +101,14 @@ export async function getTariffs(token) {
     }
 }
 
-export async function getMoney(vk_id, sum_money, wallet, chain) {
+export async function getMoney(vk_id, sum_money, wallet, chain, commission) {
     try {
         const response = await axios.post('https://web.intelektaz.com/api/v2/users/withdrawal_money', {
             "vk_id": vk_id,
             "sum_money": sum_money,
             "wallet": wallet,
             "chain": chain,
+            "commission": commission
         });
         return response.data;
     } catch (error) {
