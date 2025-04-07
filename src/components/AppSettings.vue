@@ -250,7 +250,7 @@ export default {
         },
         newUserData() {
             return {
-                "avatar": this.userData?.avatar,
+                "avatar": this.userData?.avatar_url,
                 "name": this.userData?.name,
                 "package_name": this.userData?.packages.at(-1)?.package_name,
                 "vip_offer_text": this.sentence,

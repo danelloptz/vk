@@ -8,7 +8,7 @@
     <AppMain :links="isLinks" v-if="isLinks" :userData="userData" />
     <section class="struct" v-if="!isLinks">
         <div class="user">
-            <img :src="userData.avatar">
+            <img :src="userData.avatar_url">
             <div class="user_col">
                 <div class="user_row">
                     <h2>{{ `${userData.name}` }}</h2>

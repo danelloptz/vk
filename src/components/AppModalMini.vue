@@ -4,7 +4,7 @@
             <img src="@/assets/images/close.png" class="close" @click="close">
             <div class="row">
                 <div class="col">
-                    <img :src="userData.avatar">
+                    <img :src="userData.avatar_url">
                     <span class="pckg_name">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</span>
                 </div>
                 <div class="col">

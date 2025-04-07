@@ -8,9 +8,9 @@
         <hr>
         <div class="info_block">
             <div class="user_info">
-                <img v-if="userData" :src="userData.avatar" class="avatar">
+                <img v-if="userData" :src="userData.avatar_url" class="avatar">
                 <div class="user_info_text">
-                    <h2 v-if="userData">{{ `${userData.first_name} ${userData.last_name}` }}</h2>
+                    <h2 v-if="userData">{{ userData.name }}</h2>
                     <span v-if="userData">ID: {{ userData.vk_id }}</span>
                 </div>
             </div>

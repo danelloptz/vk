@@ -131,7 +131,7 @@
                 setTimeout(() => { this.isCopy = 0; console.log(this.isCopy);}, 2000);
             },
             openPres() {
-                window.open("/Intelektaz.pdf", "_blank");
+                window.open("https://api.intelektaz.com/assets/9762b603-68ed-4f4b-b8f0-516bb60f0605", "_blank");
             }
         }
     };

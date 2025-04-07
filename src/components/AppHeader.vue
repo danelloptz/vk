@@ -22,7 +22,6 @@
             :userData="userData"
             @update:visibility1="modalUser = $event"
             @isClicked="sendClick"
-            @close="close" 
             @isReffs="openReff"
         />
         <div class="header_title">
@@ -41,7 +40,7 @@
             <div class="header_info" @click="openModalUser">
                 <div class="header_info_circle" :class="userData && (userData?.packages[userData?.packages.length - 1]?.package_name !== 'Free' && userData?.packages[userData?.packages.length - 1]?.package_name !== 'Not active' ? 'green' : 'red')"></div>
                 <div v-if="userData" class="header_info_status">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</div>
-                <img v-if="userData" :src="userData.avatar" >
+                <img v-if="userData" :src="userData.avatar_url" >
             </div>
         </div>
     </section>

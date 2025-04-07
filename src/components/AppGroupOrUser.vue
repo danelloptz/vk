@@ -1,6 +1,6 @@
 <template>
     <div class="footer_data" v-if="Object.keys(userData).length !== 0">
-        <img v-if="objectData" :src="isSettings ? objectData.group.group_photo : objectData.avatar" class="avatar" style="margin-top: 15px;">
+        <img v-if="objectData" :src="isSettings ? objectData.group.group_photo : (objectData.avatar_url ?? objectData.avatar)" class="avatar" style="margin-top: 15px;">
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
                 <h2 v-if="objectData && userData.name">{{ isSettings ? objectData.group.group_name : userData.name }} <span v-if="objectData && 

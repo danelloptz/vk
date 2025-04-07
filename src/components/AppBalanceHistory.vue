@@ -20,7 +20,7 @@
                 <tr v-for="(item, index) in history" :key="index">
                     <td>{{ new Date(item.date_created).toLocaleDateString("ru-RU") }}</td>
                     <td>{{ item.sum }}</td>
-                    <td>{{ formatedMessage(item) }}</td>
+                    <td v-html="formatedMessage(item)"></td>
                     <td style="display: flex; flex-direction: column; row-gap: 5px;">
                         {{ item.status }} 
                         <span 
@@ -120,7 +120,12 @@ export default {
             }
         },
         formatedMessage(item) {
-            if (item.category == "Перевод") return `Перевод на ${item.to_user}`;
+            if (item.category === "Перевод") {
+                return `Перевод на ${item.to_user}`;
+            }
+            if (item.category.startsWith("https")) {
+                return `<a href="${item.category}" target="_blank" style="text-decoration: underline; color: white;">Вывод</a>`;
+            }
             return item.category;
         },
         async cancelTrans(item) {
@@ -199,5 +204,9 @@ tr:nth-child(2n) {
 .switchs span.active {
     background-color: #111433;
     color: white;
+}
+a {
+    color: white;
+    font-family: 'OpenSans';
 }
 </style>

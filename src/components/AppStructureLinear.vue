@@ -415,7 +415,7 @@
     }
     .header {
         display: grid;
-        grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+        grid-template-columns: 2fr 2fr 1fr 1fr 1fr;
         padding: 10px;
     }
     .header h2 {
