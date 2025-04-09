@@ -34,9 +34,9 @@
                 
             </div>
             <span class="id" v-if="objectData && objectData.vk_id && !objectData?.group_link && !objectData?.post_link && !objectData?.video_link">ID: {{ objectData.vk_id }}</span>
-            <span style="margin-top: 20px;" v-if="shouldDisplayText" >{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span>
+            <span class="sentence" style="word-break: break-word;" v-if="shouldDisplayText" >{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span>
             <a v-if="objectData && (isSettings || (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
-            <div class="footer_data_links" style="margin-top: 20px;">
+            <div v-if="windowWidth > 650" class="footer_data_links" style="margin-top: 20px;">
                 <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
                 <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
@@ -45,6 +45,11 @@
                 <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
             </div>
+        </div>
+        <div v-if="windowWidth <= 650" class="footer_data_links" style="margin-top: 20px;">
+            <a v-if="objectData" :href="vkData"  target="_blank"><img src="@/assets/images/vk.png"></a>
+            <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
+            <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
         </div>
         <span v-if="isBusiness || isSettings" class="business">Business-предложение</span>
         
@@ -156,8 +161,15 @@ export default {
             justify-content: center;
             align-items: center;
         }
-        @media (max-width: 600px) {
-            align-items: start;
+        @media (max-width: 650px) {
+            align-items: flex-start;
+            row-gap: 10px;
+            overflow: hidden;
+            justify-content: start;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            column-gap: 0px;
+            /* flex-wrap: wrap; */
         }
     }
     .footer_data > img {
@@ -174,11 +186,18 @@ export default {
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+        @media (max-width: 650px) {
+            float: left;
+            width: 90px;
+        }
     }
     .footer_data_wrapper {
         display: flex;
         flex-direction: column;
         row-gap: 10px;
+        @media (max-width: 650px) {
+            overflow: hidden;
+        }
     }
     .footer_data_row {
         display: flex;
@@ -283,5 +302,14 @@ export default {
         bottom: 20px;
         right: 20px;
         cursor: pointer;
+        @media (max-width: 650px) {
+            font-size: 12px;
+        }
+    }
+    .sentence {
+        margin-top: 20px; 
+        @media (max-width: 650px) {
+            margin-top: 0px;
+        }
     }
 </style>

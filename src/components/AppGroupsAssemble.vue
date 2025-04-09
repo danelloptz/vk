@@ -96,13 +96,9 @@
         display: flex;
         align-items: end;
         cursor: pointer;
-        @media (max-width: 600px) {
-            width: 100px;
-            height: 100px;
-        }
-        @media (max-width: 360px) {
-            width: 120px;
-            height: 120px;
+        @media (max-width: 650px) {
+            width: 95.88px;
+            height: 95.88px;
         }
     }
     .item img {
@@ -127,7 +123,7 @@
         padding: 6px;
         border-radius: 10px;
         z-index: 6;
-        @media (max-width: 600px) {
+        @media (max-width: 650px) {
             display: none;
         }
     }
@@ -144,9 +140,10 @@
         right: -20px;
         cursor: pointer;
         transition: .3s;
-        @media (max-width: 600px) {
-            width: 40px;
-            height: 40px;
+        @media (max-width: 650px) {
+            width: 27.33px;
+            height: 27.33px;
+            right: -14px;
         }
     }
     .add_group:hover {

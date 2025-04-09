@@ -206,19 +206,26 @@
             }
         },
         async created() {
-            const responseUser = await getUserInfo(localStorage.getItem("token"));
-            if (!responseUser) {
+            let response = await getUserInfo(localStorage.getItem("token"));
+            if (!response) {
                 const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                console.log(isAuthorized);
                 if (isAuthorized) {
                     localStorage.setItem("token", isAuthorized.access_token);
                     localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                    response = await getUserInfo(localStorage.getItem("token"));
+                    if (!response) {
+                        localStorage.clear();
+                        this.$router.push('/');
+                        return;
+                    }
                 } else {
                     localStorage.clear();
                     this.$router.push('/');
                     return;
                 }
             }
-            this.userData = responseUser;
+            this.userData = response;
 
             const refer = await getReferer(this.userData.vk_id);
             this.referData = refer;

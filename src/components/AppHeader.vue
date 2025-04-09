@@ -127,28 +127,34 @@
         justify-content: space-between;
         position: relative;
         z-index: 15;
+        padding-top: 10px;
     }
     .header_title {
         display: flex;
         align-items: center;
         column-gap: 13px;
+        @media (max-width: 650px) {
+            column-gap: 6px;
+        }
     }
     .header_title img {
         width: 72px;
         height: 72px;
         object-fit: cover;
         object-position: center;
-        @media (max-width: 350px) {
-            width: 50px;
-            height: 50px;
+        @media (max-width: 650px) {
+            width: 36px;
+            height: auto;
         }
     }
     .header_title div {
         width: 174px;
         height: 19px;
         background: url("@/assets/images/main_title.png");
-        @media (max-width: 1000px) {
-            display: none;
+        @media (max-width: 650px) {
+            width: 87.24px;
+            height: 9.5px;
+            background-size: 87.24px 9.5px;
         }
     }
     .header_links {
@@ -183,14 +189,18 @@
         column-gap: 14px;
         align-items: center;
         cursor: pointer;
+        @media (max-width: 650px) {
+            column-gap: 5px;
+        }
     }
     .header_gift img {
         width: 31px;
         height: 31px;
         object-fit: cover;
         object-position: center;
-        @media (max-width: 300px) {
-            display: none;
+        @media (max-width: 650px) {
+            width: 20px;
+            height: 20px;
         }
     }
     .header_gift span {
@@ -198,7 +208,7 @@
         font-family: 'OpenSans';
         color: white;
         @media (max-width: 650px) {
-            display: none;
+            font-size: 16px;
         }
     }
     .header_info {
@@ -210,11 +220,18 @@
         border-radius: 50px;
         border: 1px solid white;
         cursor: pointer;
+        @media (max-width: 650px) {
+            column-gap: 0px;
+        }
     }
     .header_info_circle {
         width: 10px;
         height: 10px;
         border-radius: 5px;
+        @media (max-width: 650px) {
+            width: 6px;
+            height: 6px;
+        }
     }
     .green {
         background: #1ABE38;
@@ -227,14 +244,20 @@
         font-size: 16px;
         font-family: 'OpenSans';
         color: white;
+        @media (max-width: 650px) {
+            font-size: 9.23px;
+            margin-left: 3px;
+            margin-right: 6px;
+        }
     }
     .header_info img {
         width: 40px;
         height: 40px;
         border-radius: 20px;
-        @media (max-width: 350px) {
-            width: 30px;
-            height: 30px;
+        @media (max-width: 650px) {
+            width: 23.08px;
+            height: 23.08px;
+            border-radius: 50%;
         }
     }
 </style>

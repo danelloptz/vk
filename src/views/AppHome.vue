@@ -41,11 +41,18 @@
                     v-if="addDataVertical"
                     :isClicked="isClicked"
                     @update:isClicked="isClicked = $event" 
-                    :orientation="orientation" 
+                    :orientation="windowWidth <= 650 ? orientationV : orientation" 
                     :data="addDataVertical" />
+                <AppGroupOrUser 
+                    v-if="windowWidth <= 650"
+                    :objectData="businessUser"
+                    :isBusiness="true"
+                    class="card"
+                />
             </div>
             <div class="right">
                 <AppGroupOrUser 
+                    v-if="windowWidth > 650"
                     :objectData="businessUser"
                     :isBusiness="true"
                     class="card"
@@ -119,9 +126,15 @@
                 isReff: false,
                 tgData: [],
                 vkData: [],
-                whtData: []
+                whtData: [],
+                windowWidth: 0,
             }
         },  
+        mounted() {
+            this.windowWidth = window.innerWidth;
+
+            window.addEventListener('resize', this.handleResize);
+        },
         computed: {
             currentOrientation() { 
                 // это нужно для расположения реклам, которые слева
@@ -194,6 +207,9 @@
             window.removeEventListener("resize", this.checkWindowWidth);
         },
         methods: {
+            handleResize() {
+                this.windowWidth = window.innerWidth;
+            },
             checkWindowWidth() {
                 // аналогично для блока рекламы надо
                 this.orientation = window.innerWidth <= 1000 ? this.orientationH : this.orientationV;
@@ -298,8 +314,9 @@
         @media (max-width: 800px) {
             grid-template-columns: 2fr 3fr;
         }
-        @media (max-width: 600px) {
-            grid-template-columns: 1fr;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column-reverse;
         }
     }
     .right {
@@ -390,8 +407,11 @@
         @media (max-width: 700px) {
             height: auto;
         }
-        @media (max-width: 500px) {
-            padding: 50px;
+        @media (max-width: 650px) {
+            padding: 10px;
+            padding-left: 20px;
+            padding-bottom: 20px;
+            padding-top: 15px;
         }
     }
 </style>
