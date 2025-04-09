@@ -84,7 +84,7 @@ export default {
         z-index: 2;
         overflow-y: auto;
         scrollbar-width: none;
-        row-gap: 20px;
+        /* row-gap: 20px; */
         box-sizing: border-box;
         margin-top: -50px;
         align-self: center;
@@ -172,13 +172,16 @@ export default {
         left: 37px;
         width: 60px;
         height: 60px;
-        transform: rotate(157deg);
+        transform: rotate(-140deg);
         @media (max-width: 900px) {
             width: 70px;
             height: 70px;
         }
         @media (max-width: 650px) {
-            display: none;
+            width: 81px;
+            height: 81px;
+            top: 23px;
+            left: 5px;
         }
     }
     .right_image {
@@ -187,13 +190,17 @@ export default {
         right: 89px;
         width: 112px;
         height: 112px;
-        transform: rotate(-9deg);
+        transform: rotate(16deg);
         @media (max-width: 900px) {
             width: 70px;
             height: 70px;
         }
         @media (max-width: 650px) {
-            display: none;
+            width: 50px;
+            height: 50px;
+            right: 15px;
+            bottom: 57px;
+            top: auto;
         }
     }
 </style>

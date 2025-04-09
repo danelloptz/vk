@@ -31,6 +31,9 @@ export default {
     padding: 25px 0;
     overflow-y: scroll;
     scrollbar-width: none;
+    @media (max-width: 500px) {
+      padding: 7px 0px;
+    }
   }
   #app::-webkit-scrollbar {
         width: 0;  

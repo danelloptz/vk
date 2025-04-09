@@ -35,13 +35,14 @@
             height: 50px;
         }
         @media (max-width: 650px) {
-            height: 40px;
+            width: 170px;
+            height: 51px;
         }
-        @media (max-width: 420px) {
+        /* @media (max-width: 420px) {
             width: 130px;
             height: 30px;
             font-size: 12px;
-        }
+        } */
     }
     .button:hover {
         background: linear-gradient(to right, #E14A7A, #E14ABB, #A139DE);

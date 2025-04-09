@@ -168,24 +168,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in themes" :key="index">
-                        <td>
+                    <tr v-for="(item, index) in plan" :key="index">
+                        <td v-if="item.date_publication">
                             <input type="checkbox" :checked="allCheckboxesContent">
                         </td>
-                        <td>
+                        <td v-if="item.date_publication">
                             <span class="content_text">{{ index + 1 }}</span>
                         </td>
-                        <td>
-                            <span class="content_text">{{ themes?.[index] }}</span>
+                        <td v-if="item.date_publication">
+                            <span class="content_text">{{ item?.topic_name }}</span>
                         </td>
-                        <td>
-                            <span  class="content_text">{{ posts?.[index] }}</span>
+                        <td v-if="item.date_publication">
+                            <span class="content_text">{{ item.post_text[item.chose_post_index] }}</span>
                         </td>
-                        <td>
-                            <img :src="banners?.[index]" />
+                        <td v-if="item.date_publication">
+                            <img class="accepted_banner" :src="item.image_links[item.chose_image_index]" />
                         </td>
-                        <td class="col">
-                            <span  class="content_text" :contenteditable="isEditableContent">12.11.2024 12:00</span>
+                        <td class="col" v-if="item.date_publication">
+                            <span class="content_text" :contenteditable="isEditableContent">{{ formatedDate(item.date_publication * 1000) }}</span>
                             <span class="change_text" @click="changeEditableContent">Изменить</span>
                         </td>
                     </tr>
@@ -199,7 +199,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners, regeneratePosts, updateContentPlan, regenerateBanners } from "@/services/ai";
+    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners, regeneratePosts, updateContentPlan, regenerateBanners, acceptPlan } from "@/services/ai";
 
     export default {
         components: { AppGoodButton },
@@ -254,7 +254,8 @@
                 step: -1,
                 currBanners: [],
                 currTexts: [],
-                variants: ["ВАРИАНТ 1", "ВАРИАНТ 2", "ВАРИАНТ 3"]
+                variants: ["ВАРИАНТ 1", "ВАРИАНТ 2", "ВАРИАНТ 3"],
+                result: []
             }
         },
         async created() {
@@ -309,10 +310,11 @@
         },
         methods: {
             async confirmCurrentPosts() {
-                const filtered = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
+                const filtered = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 if (filtered.length > 0) {
                     this.plan = filtered;
                     this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+                    this.allCheckboxes = false;
                     this.isLoading = true;
 
                     console.log(this.step);
@@ -320,7 +322,9 @@
                         console.log("STEP 1", this.step);
                         try {
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
-                            this.plan = await generatePostsText(this.plan, localStorage.getItem("token"));
+                            let resp = await generatePostsText(this.plan, localStorage.getItem("token"));
+                            if (!resp) resp = await generatePostsText(this.plan, localStorage.getItem("token"));
+                            this.plan = resp;
                             this.plan.forEach(item => {
                                 item.chose_post_index = 0;
                             });
@@ -338,7 +342,9 @@
                                 if (!item.chose_post_index) item.chose_post_index = 0;
                             });
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
-                            this.plan = await generateBanners(this.plan, localStorage.getItem("token"));
+                            let resp = await generateBanners(this.plan, localStorage.getItem("token"));
+                            if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
+                            this.plan = resp;
                             this.plan.forEach(item => {
                                 item.chose_image_index = 0;
                             });
@@ -347,7 +353,17 @@
                             console.error(err);
                         }
                     }
-                    if (this.step > 2) await updateContentPlan(this.plan, localStorage.getItem("token"))
+                    if (this.step > 2) {
+                        try {
+                            let resp = await acceptPlan(this.plan, localStorage.getItem("token"));
+                            if (!resp) resp = await acceptPlan(this.plan, localStorage.getItem("token"));
+                            this.plan = resp;
+                            this.activeIndex = 1;
+                        } catch(err) {
+                            console.error(err);
+                        }
+                        
+                    }
                     else this.step++;
 
                     this.isLoading = false;
@@ -414,10 +430,11 @@
             async regenerateCurrentPosts() {
                 this.isLoading = true;
 
-                const checked_plan = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
+                const checked_plan = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 const max_text = Math.max(...this.countsOfTexts);
                 const max_banners = Math.max(...this.countsOfBanners);
                 this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
+                this.allCheckboxes = false;
 
                 if (this.step == 1) {
                     try {
@@ -466,6 +483,18 @@
                 if (notEmptyPosts.length == 0) return 1;
                 if (notEmptyImages.length == 0) return 2;
                 return 3;
+            },
+            formatedDate(time) {
+                console.log(time);
+                const date = new Date(time);
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours() - 3).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${day}.${month}.${year} ${hours}:${minutes}`;
             }
         },
     };
@@ -766,5 +795,8 @@
         column-gap: 10px;
         flex-wrap: wrap;
         margin-top: 20px;
+    }
+    .accepted_banner {
+        width: 180px;
     }
 </style>

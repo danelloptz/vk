@@ -129,6 +129,7 @@
                     <!-- Вложенная таблица -->
                     <div v-if="openedUsers[currentPage - 1][index]" class="nested">
                         <AppStructureLinear 
+                            :rootUser="rootUser"
                             :isRoot="false" 
                             :referer="item.vk_id" 
                             :vk_id="item.vk_id" 
@@ -196,7 +197,7 @@
         async created() {
             if (this.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
             else this.isFirstLine = false;
-            const referals = await getReferals(this.vk_id);
+            const referals = await getReferals(this.rootUser.vk_id, this.vk_id);
             this.node = referals.referrals;
             console.log(this.node);
 
@@ -284,7 +285,7 @@
                     if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                     else this.isFirstLine = false;
                     if (newValue?.vk_id) {
-                        const referals = await getReferals(newValue.vk_id);
+                        const referals = await getReferals(this.rootUser.vk_id, newValue.vk_id);
                         this.node = referals.referrals;
                     }
                 },
@@ -380,7 +381,7 @@
                 if (vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                 else this.isFirstLine = false;
                 
-                const referals = await getReferals(vk_id);
+                const referals = await getReferals(this.rootUser.vk_id, vk_id);
                 this.node = referals.referrals;
             },
             resetOpenedUsers() {
@@ -441,7 +442,7 @@
     .item {
         width: 100%;
         display: grid;
-        grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+        grid-template-columns: 2fr 2fr 1fr 1fr 1fr;
         align-items: center;
         padding: 10px;
         border-left: 1px solid white;

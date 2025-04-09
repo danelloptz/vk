@@ -7,8 +7,8 @@
         </div>
         <hr>
         <div class="btn_wrapper">
-            <AppGoodButton :text="text" :disabled="isDisabled" @click="tap"/>
-            <AppBadButton :text="text2" />
+            <AppGoodButton class="btn" :text="text" :disabled="isDisabled" @click="tap"/>
+            <AppBadButton class="btn" :text="text2" />
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
         <img src="@/assets/images/auth_image.png" class="right_image">
@@ -99,7 +99,7 @@
                     const state = this.state;
                     const code_challenge = this.code_challenge;
                     const code_challenge_method = this.code_challenge_method;
-                    const scopes = "groups,photos,wall,video";
+                    const scopes = "groups,photos,wall,video,stats";
                     localStorage.setItem('zopa', code_challenge);   
 
                     const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=${scopes}`;
@@ -227,11 +227,19 @@
         margin-top: -50px;
         @media (max-width: 900px) {
             width: 80vw;
-            height: 60vh;
+            min-height: 300px;
         }
         @media (max-width: 650px) {
-            padding: 25px 20px;
-            height: 300px;
+            /* padding: 25px 20px; */
+            min-height: 300px;
+        }
+        @media (max-width: 500px) {
+            padding-top: 61px;
+            padding-bottom: 51px;
+            padding-left: 20px;
+            padding-right: 20px;
+            height: 390px;
+            min-width: 331px;
         }
     }
 
@@ -266,10 +274,14 @@
         border-radius: 10px;
         @media (max-width: 900px) {
             width: 80vw;
-            height: 60vh;
+            min-height: 300px;
         }
         @media (max-width: 650px) {
-            height: 300px;
+            min-height: 300px;
+        }
+        @media (max-width: 500px) {
+            min-height: 390px;
+            min-width: 331px;
         }
     }
 
@@ -290,7 +302,7 @@
             font-size: 35px;
         }
         @media (max-width: 500px) {
-            font-size: 30px;
+            font-size: 32px;
         }
     }
     span {
@@ -301,6 +313,9 @@
         color: white;
         text-wrap: wrap;
         text-align: center;
+        @media (max-width: 400px) {
+            font-size: 16px;
+        }
         @media (max-width: 900px) {
             font-size: 20px;
         }
@@ -321,6 +336,11 @@
         @media (max-width: 900px) {
             width: 80%;
         }
+        @media (max-width: 500px) {
+            width: 100%;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
     }
 
     .btn_wrapper {
@@ -329,6 +349,14 @@
         row-gap: 20px;
         @media (max-width: 420px) {
             row-gap: 10px;
+        }
+    }
+
+    .btn {
+        @media (max-width: 500px) {
+            width: 170px !important;
+            height: 51px !important;
+            font-size: 14px;
         }
     }
 
@@ -343,8 +371,11 @@
             width: 70px;
             height: 70px;
         }
-        @media (max-width: 650px) {
-            display: none;
+        @media (max-width: 550px) {
+            width: 58px;
+            height: 58px;
+            bottom: 73px;
+            left: 5px;
         }
     }
     .right_image {
@@ -358,8 +389,11 @@
             width: 70px;
             height: 70px;
         }
-        @media (max-width: 650px) {
-            display: none;
+        @media (max-width: 550px) {
+            width: 50px;
+            height: 50px;
+            bottom: 33px;
+            right: 5px;
         }
     }
 </style>

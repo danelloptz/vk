@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="inputs">
-                <h3>Региональные данные</h3>
+                <h3>Региональные данные:</h3>
                 <div class="dropdown">
                     <input
                         type="text"
@@ -40,7 +40,7 @@
                 <input
                     v-model="selectedCity" 
                     placeholder="Город" >
-                <div class="dropdown" style="margin-top: 70px;">
+                <div class="dropdown" style="margin-top: 40px;">
                     <input
                         v-model="searchQueryGender"
                         type="text"
@@ -65,7 +65,7 @@
                     </ul>
                 </div>
                 <span v-if="isNotSelectGender" class="error_message">Не выбран пол!</span>
-                <h3 style="margin-top: 50px;">Интересы*</h3>
+                <h3 style="margin-top: 50px;">Интересы:</h3>
 
                 <div v-if="selectedInterests.length > 0" class="selected-countries">
                     <span v-for="(interest, index) in selectedInterests" :key="index" class="selected-interest">
@@ -97,7 +97,7 @@
             
                 <div class="agreement">
                     <input type="checkbox" v-model="isCheckboxChecked">
-                    <span>Мне исполнилось 18 лет и я принимаю <a href="https://docs.google.com/viewer?url=https://api.intelektaz.com/assets/610b8919-c766-4311-9f0d-e893dfd4541a"  target="_blank" >пользовательское соглашение</a>.</span>
+                    <span>Мне исполнилось 18 лет и я принимаю <a style="color: white;" href="https://docs.google.com/viewer?url=https://api.intelektaz.com/assets/610b8919-c766-4311-9f0d-e893dfd4541a"  target="_blank" >пользовательское соглашение</a>.</span>
                 </div>
                 <span v-if="isNotCheckboxChecked" class="error_message">Нет соглашения!</span>
 
@@ -267,7 +267,6 @@
         width: 360px;
         @media (max-width: 500px) {
             width: 100%;
-            align-items: center;
         }
     }
     .dropdown {
@@ -275,6 +274,9 @@
         width: 360px;
         @media (max-width: 500px) {
             width:70vw;
+        }
+        @media (max-width:  500px) {
+            width: 100%;
         }
     }
 
@@ -292,6 +294,10 @@
         position: relative;
         @media (max-width: 500px) {
             width: 70vw;
+        }
+        @media (max-width:  500px) {
+            width: 100%;
+            height: 50px;
         }
     }
 
@@ -363,7 +369,8 @@
         }
         @media (max-width: 650px) {
             width: 90vw;
-            padding: 30px 15px;
+            padding: 61px 15px;
+            row-gap: 30px;
         }
     }
 
@@ -416,7 +423,7 @@
     }
 
     h1 {
-        font-size: 48px;
+        font-size: 36px;
         color: white;
         font-family: 'Tektur';
         line-height: 62.4px;
@@ -427,9 +434,12 @@
         @media (max-width: 500px) {
             font-size: 30px;
         }
+        @media (max-width: 400px) {
+            font-size: 24px;
+        }
     }
     span {
-        font-size: 24px;
+        font-size: 18px;
         font-family: 'OpenSans';
         font-weight: 400;
         line-height: 32.68px;
@@ -437,9 +447,6 @@
         text-wrap: wrap;
         text-align: left;
         font-family: 'OpenSans';
-        @media (max-width: 900px) {
-            font-size: 20px;
-        }
         @media (max-width: 650px) {
             font-size: 17px;
         }
@@ -447,7 +454,7 @@
             font-size: 15px;
         }
         @media (max-width: 450px) {
-            font-size: 13px;
+            font-size: 16px;
         }
     }
     hr {
@@ -469,6 +476,10 @@
             align-items: center;
             row-gap: 30px;
         }
+        @media (max-width:  500px) {
+            align-items: start;
+            padding: 10px 0px;
+        }
         
     }
     .user_info {
@@ -482,9 +493,11 @@
         border-radius: 50%;
         object-position: center;
         object-fit: cover;
+        outline: 1px solid white;
+        outline-offset: 4px;
         @media (max-width: 560px) {
-            width: 100px;
-            height: 100px;
+            width: 71px;
+            height: 71px;
         }
     }
 
@@ -495,12 +508,15 @@
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+        @media (max-width: 500px) {
+            font-size: 16px;
+        }
     }
-
-    span {
-        color: white;
-        font-size: 18px;
-        font-family: 'OpenSans';
+    .user_info_text span {
+        font-size: 18px !important;
+        @media (max-width: 500px) {
+            font-size: 16px !important;
+        }
     }
 
     .selected-countries {
@@ -581,6 +597,9 @@
         @media (max-width: 1100px) {
             font-size: 36px;
         }
+        @media (max-width: 650px) {
+            font-size: 20px;
+        }
     }
     .footer_text span {
         font-family: 'OpenSans';
@@ -593,7 +612,6 @@
             font-size: 16px;
         }
         @media (max-width: 830px) {
-            font-size: 15px;
             text-align: center;
         }
     }

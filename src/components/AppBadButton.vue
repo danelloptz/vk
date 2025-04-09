@@ -36,13 +36,14 @@
             height: 50px;
         }
         @media (max-width: 650px) {
-            height: 40px;
+            width: 170px;
+            height: 51px;
         }
-        @media (max-width: 420px) {
+        /* @media (max-width: 420px) {
             width: 130px;
             height: 30px;
-            font-size: 12px;
-        }
+            font-size: 1    2px;
+        } */
     }
     .button:hover {
         background: rgba(255, 255, 255, 0.167);

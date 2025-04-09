@@ -176,14 +176,12 @@
         scrollbar-width: none;
         row-gap: 30px;
         box-sizing: border-box;
-        margin-top: -50px;
-        align-self: center;
         @media (max-width: 1400px) {
             width: 80vw;
         }
         @media (max-width: 650px) {
             width: 90vw;
-            padding: 30px 15px;
+            padding: 60px 15px;
         }
     }
 
@@ -242,7 +240,8 @@
             font-size: 35px;
         }
         @media (max-width: 500px) {
-            font-size: 30px;
+            font-size: 24px;
+            line-height: normal;
         }
     }
     span {
@@ -258,7 +257,7 @@
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 17px;
+            font-size: 14px;
         }
     }
     hr {
@@ -295,9 +294,9 @@
         border-radius: 50%;
         object-position: center;
         object-fit: cover;
-        @media (max-width: 560px) {
-            width: 100px;
-            height: 100px;
+        @media (max-width: 650px) {
+            width: 71px;
+            height: 71px;
         }
     }
     input {
@@ -312,18 +311,24 @@
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
-            width: 70vw;
-        }
     }
     .wrapper_btn {
         display: flex;
         column-gap: 20px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 20px;
+            align-self: center;
+        }
     }
     h2 {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        font-weight: normal;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .user_info_text h2 {
         font-family: 'OpenSans';
@@ -332,5 +337,13 @@
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
+    }
+    .user_info_text span {
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
 </style>

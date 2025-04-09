@@ -171,3 +171,18 @@ export async function regenerateBanners(posts, token) {
         return false; 
     }
 }
+
+export async function acceptPlan(plan, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/accept_content_plan', plan, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при одобрении контент плана", error);
+        return false; 
+    }
+}

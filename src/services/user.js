@@ -129,10 +129,11 @@ export async function setLeg(user_id, leg) {
     }
 }
 
-export async function getReferals(vk_id) {
+export async function getReferals(owner_vk_id, second_vk_id) {
     try {
         const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_referals`, { 
-            "vk_id": vk_id
+            "owner_vk_id": owner_vk_id,
+            "second_vk_id": second_vk_id
          });
         return response.data;
     } catch (error) {

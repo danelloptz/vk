@@ -59,12 +59,19 @@
             };
         },
         async created() {
-            const response = await getUserInfo(localStorage.getItem("token"));
+            let response = await getUserInfo(localStorage.getItem("token"));
             if (!response) {
                 const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
+                console.log(isAuthorized);
                 if (isAuthorized) {
                     localStorage.setItem("token", isAuthorized.access_token);
                     localStorage.setItem("token_refresh", isAuthorized.refresh_token);
+                    response = await getUserInfo(localStorage.getItem("token"));
+                    if (!response) {
+                        localStorage.clear();
+                        this.$router.push('/');
+                        return;
+                    }
                 } else {
                     localStorage.clear();
                     this.$router.push('/');
@@ -220,7 +227,7 @@
         }
         @media (max-width: 650px) {
             width: 90vw;
-            padding: 30px 15px;
+            padding: 60px 15px;
         }
     }
 
@@ -277,9 +284,10 @@
         font-weight: 400;
         @media (max-width: 900px) {
             font-size: 35px;
+            line-height: normal;
         }
         @media (max-width: 500px) {
-            font-size: 30px;
+            font-size: 24px;
         }
     }
     span {
@@ -295,7 +303,7 @@
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 17px;
+            font-size: 16px;
         }
     }
     .add_block {
@@ -309,7 +317,10 @@
         padding: 0px 20px;
         border-radius: 5px 5px 0px 0px;
         line-height: 2;
+        @media (max-width: 500px) {
+            font-size: 14px;
         }
+    }
     hr {
         width: 100%;
         height: 1px;
@@ -321,7 +332,7 @@
     .groups_block {
         display: flex;
         justify-content: space-between;
-        align-items: end;
+        align-items: center;
         column-gap: 20px;
         @media (max-width: 1100px) {
             flex-direction: column;
@@ -337,6 +348,9 @@
         @media (max-width: 900px) {
             justify-content: center;
             flex-direction: row;
+        }
+        @media (max-width: 650px) {
+            flex-direction: column;
         }
     }
     .error_message {
