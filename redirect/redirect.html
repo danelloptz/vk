@@ -119,7 +119,7 @@
             <div class="line" id="line"></div>
         </div>
         <p><strong>Интересный факт:</strong> По итогам первой половины 2024 года объём российского рынка интернет-рекламы составил 381 млрд рублей. По сравнению с первой половиной 2023 года рынок вырос более чем на 50%. По данным Ассоциации развития интерактивной рекламы (АРИР), рынок видеорекламы в интернете в 2024 году вырос на 20–30%, до 36–39 млрд рублей. </p>
-        <button class="button">ПРОДОЛЖИТЬ</button>
+        <button class="button" onclick="redirect">ПРОДОЛЖИТЬ</button>
     </section>
     <script>
         let timer = document.getElementById("timer");
@@ -152,6 +152,7 @@
                 } else {
                     timer.textContent = "0"; // Завершаем таймер
                     line.style.width = `${maxLineWidth}px`; // Устанавливаем максимальную ширину
+                    window.location.href = referer ? `https://lk.intelektaz.com/?ref=${referer}` : `https://lk.intelektaz.com`;
                 }
             }
 
@@ -159,7 +160,13 @@
             requestAnimationFrame(updateProgress);
         }
 
+        function redirect() {
+            window.location.href = referer ? `https://lk.intelektaz.com/?ref=${referer}` : `https://lk.intelektaz.com`;
+        }
+
         // Запускаем таймер при загрузке страницы
+        const urlParams = new URLSearchParams(window.location.search); 
+        const referer = urlParams.get('ref');
         window.onload = Timer;
     </script>
 </body>

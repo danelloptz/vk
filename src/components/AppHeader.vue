@@ -29,7 +29,7 @@
             <div class="main_title"></div>
         </div>
         <div class="header_links">
-            <a href="">Новости</a>
+            <a href="" @click.prevent="showNews">Новости</a>
             <a href="" @click.prevent="showHelp">Помощь</a>
         </div>
         <div class="header_user">
@@ -72,6 +72,9 @@
             },
             showHelp() {
                 this.$emit('show-help');
+            },
+            showNews() {
+                this.$emit('show-news');
             },
             openModalUser() {
                 this.modalUser = true;

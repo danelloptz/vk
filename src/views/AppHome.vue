@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <AppHeader :userData="userInfo" @show-help="updateActiveComponent(7)" @isTarif="openTarif" @isReff="openReff"/>
+        <AppHeader :userData="userInfo" @show-news="updateActiveComponent(11)" @show-help="updateActiveComponent(7)" @isTarif="openTarif" @isReff="openReff"/>
         <AppGroupsAssemble @comeToAssembly="updateActiveComponent(8)" />
         <section class="content">
             <div class="left">
@@ -75,6 +75,7 @@
                     :orientation="orientationH" 
                     :data="addDataHorizontal"    
                 />
+                <AppNews v-if="selectedComponent === 11 && !isReff" />
             </div>
         </section>
     </div>
@@ -98,12 +99,13 @@
     import AppComeToAssembly from '@/components/AppComeToAssembly.vue';
     import AppRotationPlans from '@/components/AppRotationPlans.vue';
     import AppVipUser from '@/components/AppVipUser.vue';
+    import AppNews from '@/components/AppNews.vue';
     import { getUserInfo, getVipUser } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans, AppVipUser },
+        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans, AppVipUser, AppNews },
         data() {
             return {
                 verticalAddCount: 2,

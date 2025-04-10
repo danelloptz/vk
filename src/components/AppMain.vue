@@ -63,6 +63,7 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import { getReferer } from "@/services/user";
+    import { getConfig } from "@/services/config";
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser },
@@ -79,18 +80,19 @@
                 referData: [],
                 packages: ["Business", "Leader"],
                 isLinks: false,
-                isCopy: 0
+                isCopy: 0,
+                refLinks: []
             }
         },
         computed: {
             refLink() {
-                return `https://intelektaz.com/?ref=${this.userData?.vk_id}`;
+                return `https://${this.refLinks.default}/?ref=${this.userData?.vk_id}`;
             },
             refVkLink() {
-                return `https://intelektaz.com/?ref=${this.userData?.vk_id}`;
+                return `https://${this.refLinks.vk}/?ref=${this.userData?.vk_id}`;
             },
             refPremiumLink() {
-                return `https://intelektaz.com/?ref=${this.userData?.vk_id}`;
+                return `https://${this.refLinks.premium}/?ref=${this.userData?.vk_id}`;
             }
         },
         watch: {
@@ -109,6 +111,8 @@
             }
         },
         async created() {
+            const resp = await getConfig('referal_domains', localStorage.getItem("token"));
+            this.refLinks = resp;
             this.isLinks = this.links;
             if (this.links) {
                 this.openLinks();
