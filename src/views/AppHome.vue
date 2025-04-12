@@ -5,6 +5,7 @@
         <section class="content">
             <div class="left">
                 <AppNavigation
+                    v-if="windowWidth > 1000"
                     :indexPage="selectedComponent" 
                     :userData="userInfo"
                     @update:indexPage="selectedComponent = $event" 
@@ -12,30 +13,12 @@
                     @update-repeatClick="updateActiveComponent" 
                     @update-isClicked="updateIsClicked"
                 />
-                <!-- <div class="vip" v-if="vipUser">
-                    <div class="vip_user">
-                        <img :src="vipUser.avatar">
-                        <div class="text_wrapper">
-                            <h2>{{ vipUser.name }}</h2>
-                            <span>{{ vipUser.package_name }}</span>
-                        </div>
-                    </div>
-                    <span>{{ vipUser.vip_offer_text }}</span>
-                    <a :href="vipUser.group_link" target="_blank">Ссылка</a>
-                    <div class="vip_footer">
-                        <div class="vip_links">
-                            <a :href="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
-                            <a :href="tgData.link" target="_blank"><img src="@/assets/images/telegram.png"></a>
-                            <a :href="whtData.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
-                        </div>
-                        <span>VIP-предложение</span>
-                    </div>
-                </div> -->
                 <AppVipUser 
                     :vipUser="vipUser"
                     :vkData="vkData"
                     :tgData="tgData"
                     :whtData="whtData"
+                    :windowWidth="windowWidth"
                     v-if="vipUser" />
                 <AppAdd 
                     v-if="addDataVertical"
@@ -57,7 +40,7 @@
                     :isBusiness="true"
                     class="card"
                 />
-                <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" :userData="userInfo" />
+                <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
                 <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :userData="userInfo" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
                 <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" :userData="userInfo" @openTariff="openTarif" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" :userData="userInfo" />
@@ -76,6 +59,27 @@
                     :data="addDataHorizontal"    
                 />
                 <AppNews v-if="selectedComponent === 11 && !isReff" />
+            </div>
+        </section>
+        <section class="wrapper_nav_mobile" v-if="windowWidth <= 1000">
+            <div class="nav_mobile" v-if="isBurger">
+                <div 
+                    class="item" 
+                    v-for="(menu, index) in updatedMenuItems" 
+                    :key="index" 
+                    :class="{ active: selectedComponent === index }" 
+                    @click="updateActiveComponent(index)"
+                >
+                    <img :src="menu.img" />
+                    <span>{{ menu.label }}</span>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="burger" v-if="!isBurger" @click="openBurger">
+                    <img src="@/assets/images/burger.png">
+                    <span>Меню</span>
+                </div>
+                <img src="@/assets/images/close.png" class="burger_close" @click="closeBurger" v-if="isBurger" >
             </div>
         </section>
     </div>
@@ -130,6 +134,17 @@
                 vkData: [],
                 whtData: [],
                 windowWidth: 0,
+                menuItems: [
+                    { img: require('@/assets/images/balance.png'), label: 'Баланс: ' },
+                    { img: require('@/assets/images/home.png'), label: 'Главная' },
+                    { img: require('@/assets/images/Ai.png'), label: 'ИИ генератор' },
+                    { img: require('@/assets/images/structure.png'), label: 'Структура' },
+                    { img: require('@/assets/images/rotation.png'), label: 'Ротация' },
+                    { img: require('@/assets/images/settings.png'), label: 'Настройки' },
+                    { img: require('@/assets/images/instructions.png'), label: 'Инструкции' },
+                ],
+                isBurger: false,
+                helpFlag: false
             }
         },  
         mounted() {
@@ -142,6 +157,14 @@
                 // это нужно для расположения реклам, которые слева
                 return window.innerWidth <= 600 ? 'vertical' : 'horizontal';
             },
+            updatedMenuItems() {
+                return this.menuItems.map((item, index) => {
+                    if (index === 0 && this.userData) {
+                        return { ...item, label: `Баланс: ${this.userInfo.balance} USDT` };
+                    }
+                    return item;
+                });
+            }
         },
         watch: {
             isClicked(newValue) {
@@ -209,6 +232,24 @@
             window.removeEventListener("resize", this.checkWindowWidth);
         },
         methods: {
+            openBurger() {
+                document.addEventListener("click", this.handleClickOutside);
+                this.isBurger = true;
+            },
+            closeBurger() {
+                this.isBurger = false;
+                document.removeEventListener("click", this.handleClickOutside);
+            },
+            handleClickOutside(event) {
+                const path = event.composedPath();
+                const wrapperNavMobile = this.$el.querySelector(".wrapper_nav_mobile");
+                console.log(!path.includes(wrapperNavMobile), this.helpFlag);
+                if (!path.includes(wrapperNavMobile) && this.helpFlag) {
+                    this.closeBurger();
+                    this.helpFlag = false;
+                }
+                this.helpFlag = true;
+            },
             handleResize() {
                 this.windowWidth = window.innerWidth;
             },
@@ -218,6 +259,7 @@
                 console.log(this.orientation);
             },
             async updateActiveComponent(index) {
+                this.isBurger = false;
                 localStorage.setItem("page", index);
                 this.selectedComponent = index;
                 const vip = await getVipUser(this.userInfo.vk_id); // вип юзер слева
@@ -415,5 +457,79 @@
             padding-bottom: 20px;
             padding-top: 15px;
         }
+    }
+    .wrapper_nav_mobile {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 999;
+    }
+    .footer {
+        display: flex;
+        justify-content: center;
+        padding: 5px;
+        background: #070A29;
+    }
+    .burger {
+        display: flex;
+        column-gap: 10px;
+        padding: 8px;
+        border-radius: 15px;
+        border: 1px solid white;
+        cursor: pointer;
+        width: 100px;
+        height: 30px;
+        justify-content: center;
+        align-items: center;
+    }
+    .burger img {
+        width: 20px;
+        height: 12.85px;
+        pointer-events: none;
+    }
+    .burger span {
+        font-size: 16px;
+        font-family: 'OpenSans';
+        font-weight: 600;
+        line-height: 1.3;
+        pointer-events: none;
+    }
+    .burger_close {
+        width: 30px;
+        height: 30px;
+    }
+    .nav_mobile {
+        width: 100%;
+        background: #1B1E3D;
+        padding: 10px;
+        border-radius: 10px;
+        z-index: 5;
+    }
+    .item {
+        width: 100%;
+        border-top: 1px solid rgba(255, 255, 255, 0.10);
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        column-gap: 10px;
+        cursor: pointer;
+    }
+    img {
+        width: 20px;
+        height: 20px;
+        object-fit: cover;
+        object-position: center;
+        z-index: 5;
+    }
+    span {
+        color: white;
+        font-size: 16px;
+        font-family: 'OpenSans';
+        z-index: 5;
+    }
+    .active {
+        background: #7023EC;
     }
 </style>

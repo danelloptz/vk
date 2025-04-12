@@ -13,7 +13,7 @@
     />
     <section class="cashout">
         <div class="left" v-if="!stepTwo">
-            <div class="row">
+            <div class="row" v-if="windowWidth > 650">
                 <img src="@/assets/images/balance.png">
                 <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
             </div>
@@ -25,9 +25,13 @@
                 >
                 <span>Минимальная сумма пополнения 1 USDT</span>
             </div>
-            <AppGoodButton :text="text1" @click="checkCash" />
+            <AppGoodButton class="btn" :text="text1" @click="checkCash" />
         </div>
         <div class="right" v-if="!stepTwo">
+            <div class="row" v-if="windowWidth <= 650">
+                <img src="@/assets/images/balance.png">
+                <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
+            </div>
             <h2>Выберите сеть для пополнения:</h2>
             <div class="right_row">
                 <span
@@ -54,12 +58,13 @@
             </div>
             <span>Убедитесь, что адрес правильный и относится к той же сети! Транзакции невозможно отменить. После завершения транзакции отправьте ниже хэш (TxID) вашей транзакции. Зачисление средств происходит автоматически только после подтверждения хэша (TxID). </span>
             <a @click="openModal">Инструкция, где взять хэш (TxID)</a>
-            <span v-if="isError" class="error" >{{ errorMessage }}</span>
+            <span v-if="isError&& windowWidth > 650" class="error" >{{ errorMessage }}</span>
             <div class="input">
                 <input 
                     v-model="txid"
                     placeholder="TxID транзакция"
                 >
+                <span v-if="isError && windowWidth <= 650" class="error" ><img src="@/assets/images/cross2.png"> {{ errorMessage }}</span>
                 <AppGoodButton :text="text2" class="txid" @click="check" />
             </div>
         </div>
@@ -75,7 +80,10 @@
     
     export default {
         components: { AppGoodButton, AppModalHash, AppModal },
-        props: { userData: Object },
+        props: { 
+            userData: Object,
+            windowWidth: Number
+        },
         data() {
             return {
                 text1: "ПОПОЛНИТЬ БАЛАНС",
@@ -208,6 +216,9 @@
         display: flex;
         column-gap: 10px;
         align-items: center;
+        @media (max-width: 650px) {
+            margin-bottom: 30px;
+        }
     }
     .row img {
         width: 25px;
@@ -220,6 +231,9 @@
         color: white;
         font-weight: bold;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .item {
         display: flex;
@@ -238,14 +252,24 @@
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            height: 50px;
+            font-size: 14px;
         }
     }
     span {
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
+    }
+    .right {
+        width: 300px;
+        @media (max-width: 700px) {
+            width: auto;
+        }
     }
     .right {
         width: 300px;
@@ -256,6 +280,9 @@
     .right_row {
         display: flex;
         column-gap: 20px;
+        @media (max-width: 650px) {
+            column-gap: 10px;
+        }
     }
     .right_row span {
         width: 140px;
@@ -269,9 +296,10 @@
         border: 1px solid white;
         transition: .1s ease-in;
         cursor: pointer;
-        @media (max-width: 450px) {
+        text-decoration: up;
+        @media (max-width: 650px) {
             font-size: 20px;
-            width: 100px;
+            min-width: 150px;
         }
     }
     .active {
@@ -307,21 +335,40 @@
         column-gap: 30px;
         align-items: center;
         height: 60px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            height: auto;
+            row-gap: 20px;
+        }
     }
     .steptwo input {
         width: 360px;
         height: 100%;
+        @media (max-width: 650px) {
+            width: 100%;
+            height: 50px;
+        }
     }
     .txid {
         height: 100%;
         width: 170px;
+        @media (max-width: 650px) {
+            height: 50px;
+        }
     }
     a {
         text-decoration: underline;
         cursor: pointer;
     }
     .error {
-        color: red !important;
+        color: #FF6666 !important;
+        display: flex;
+        align-items: center;
+    }
+    .error img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
     }
     .green {
         color: green !important;
@@ -337,6 +384,9 @@
         display: flex;
         align-items: center;
         column-gap: 10px;
+        @media (max-width: 650px) {
+            flex-wrap: wrap;
+        }
     }
     .hash img {
         width: 20px;
@@ -345,5 +395,18 @@
     }
     .hash span {
         line-height: 2;
+        @media (max-width: 650px) {
+            line-height: 1.3;
+            word-break: break-all;
+        }
+    }
+    .btn {
+        width: 190px !important;
+        align-self: center;
+    }
+    .right {
+        @media (max-width: 650px) {
+            row-gap: 10px;
+        }
     }
 </style>

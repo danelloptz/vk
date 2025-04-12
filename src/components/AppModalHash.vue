@@ -76,6 +76,9 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+        @media (max-width: 650px) {
+            height: auto;
+        }
     }
 
     .modal {
@@ -101,6 +104,8 @@ export default {
         @media (max-width: 650px) {
             width: 90vw;
             padding: 30px 15px;
+            padding-top: 61px;
+            margin-top: 0px;
         }
     }
 
@@ -153,8 +158,9 @@ export default {
         @media (max-width: 900px) {
             font-size: 35px;
         }
-        @media (max-width: 500px) {
-            font-size: 30px;
+        @media (max-width: 650px) {
+            line-height: normal;
+            font-size: 24px;
         }
     }
     h2 {
@@ -163,6 +169,11 @@ export default {
         font-weight: 400;
         line-height: 32.68px;
         color: white;
+        @media (max-width: 650px) {
+            line-height: normal;
+            font-size: 16px;
+            font-weight: normal;
+        }
     }
     ol li, ul li {
         font-size: 16px;

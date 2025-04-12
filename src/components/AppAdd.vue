@@ -2,15 +2,16 @@
     <section 
         class="add_container"
         :style="{ 
-            flexDirection: orientation === 'vertical' ? 'column' : 'row',
-            gridTemplateColumns: orientation === 'vertical' ? '1fr' : '9fr 1fr',
-            display: orientation === 'vertical' ? 'flex' : 'grid',
+            flexDirection: orientation === 'vertical' || (orientation === 'horizontal' && windowWidth <= 650) ? 'column' : 'row',
+            gridTemplateColumns: orientation === 'vertical' || (orientation === 'horizontal' && windowWidth <= 650) ? '1fr' : '9fr 1fr',
+            display: orientation === 'vertical' || (orientation === 'horizontal' && windowWidth <= 650) ? 'flex' : 'grid',
+            marginBottom: orientation === 'horizontal' ? '50px' : '0px'
          }"
     >
         <div 
             class="img_wrapper"
             :style="{
-                gridTemplateColumns: orientation === 'vertical' ? '1fr' : `repeat(${filteredData.length}, 1fr)`,
+                gridTemplateColumns: orientation === 'vertical' && windowWidth > 650 ? '1fr' : orientation === 'vertical' ? '1fr 1fr' : `repeat(${filteredData.length}, 1fr)`,
             }"
         >
             <img 
@@ -19,7 +20,7 @@
                 :src="item.ads_img"
                 :style="{
                     // aspectRatio: orientation === 'vertical' ? '1/1' : 'auto',
-                    height: orientation === 'vertical' ? 'auto' : '140px',
+                    height: orientation === 'vertical' || (orientation === 'horizontal' && windowWidth <= 650) ? 'auto' : '140px',
                     maxWidth: orientation === 'vertical' ? 'auto' : '740px'
                 }"
                 @click="openLink(item.ads_url)"
@@ -28,7 +29,7 @@
         <div 
             class="text_wrapper"
             :style="{
-                flexDirection: orientation === 'vertical' ? 'row' : 'column'
+                flexDirection: orientation === 'vertical' || (orientation === 'horizontal' && windowWidth <= 650) ? 'row' : 'column'
             }"
         >
             <div class="add">
@@ -115,9 +116,9 @@
         display: grid;
         column-gap: 10px;
         row-gap: 10px;
-        @media (max-width: 650px) {
+        /* @media (max-width: 650px) {
             grid-template-columns: 1fr 1fr !important;
-        }
+        } */
     }
     .img_wrapper img {
         width: 100%;

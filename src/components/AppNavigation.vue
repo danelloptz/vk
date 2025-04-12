@@ -32,7 +32,7 @@
     export default {
         props: {
             indexPage: Number,
-            userData: Object
+            userData: Object,
         },
         data() {
             return {

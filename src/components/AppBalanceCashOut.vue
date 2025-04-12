@@ -8,7 +8,7 @@
     />
     <section class="cashout">
         <div class="left">
-            <div class="row">
+            <div class="row" v-if="windowWidth > 650">
                 <img src="@/assets/images/balance.png">
                 <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
             </div>
@@ -30,11 +30,15 @@
             </div>
             
             <span>Вывод обрабатывается в течение рабочего дня</span>
-            <span>Вы получите {{ cashout }} USDT за вычетом комиссии.</span>
+            <span :style="{ marginTop: windowWidth <= 650 ? '-20px' : '0px' }">Вы получите <strong>{{ cashout }}</strong> USDT за вычетом комиссии.</span>
             <span v-if="isError" class="error">{{ errMsg }}</span>
-            <AppGoodButton :text="text1" @click="openWaitingModal"/>
+            <AppGoodButton :text="text1" class="btn" @click="openWaitingModal"/>
         </div>
         <div class="right">
+            <div class="row" v-if="windowWidth <= 650">
+                <img src="@/assets/images/balance.png">
+                <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
+            </div>
             <h2>Выберите сеть для вывода:</h2>
             <div class="right_row">
                 <span
@@ -57,7 +61,10 @@
     import { getConfig } from "@/services/config";
     export default {
         components: { AppGoodButton, AppModal },
-        props: { userData: Object },
+        props: { 
+            userData: Object,
+            windowWidth: Number
+        },
         data() {
             return {
                 text1: "ЗАПРОСИТЬ ВЫВОД",
@@ -158,10 +165,18 @@
         flex-direction: column;
         row-gap: 30px;
     }
+    .right {
+        @media (max-width: 650px) {
+            row-gap: 10px;
+        }
+    }
     .row {
         display: flex;
         column-gap: 10px;
         align-items: center;
+        @media (max-width: 650px) {
+            margin-bottom: 30px;
+        }
     }
     .row img {
         width: 25px;
@@ -174,6 +189,9 @@
         color: white;
         font-weight: bold;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .item {
         display: flex;
@@ -192,14 +210,18 @@
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            height: 50px;
+            font-size: 14px;
         }
     }
     span {
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .right {
         width: 300px;
@@ -210,6 +232,9 @@
     .right_row {
         display: flex;
         column-gap: 20px;
+        @media (max-width: 650px) {
+            column-gap: 10px;
+        }
     }
     .right_row span {
         width: 140px;
@@ -224,9 +249,9 @@
         transition: .1s ease-in;
         cursor: pointer;
         text-decoration: up;
-        @media (max-width: 450px) {
+        @media (max-width: 650px) {
             font-size: 20px;
-            width: 100px;
+            min-width: 150px;
         }
     }
     .active {
@@ -241,5 +266,10 @@
 
     input[type="number"] {
         -moz-appearance: textfield;
+    }
+
+    .btn {
+        width: 190px !important;
+        align-self: center;
     }
 </style>

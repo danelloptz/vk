@@ -7,7 +7,7 @@
             <span>Розыгрыш проходит 1го числа каждого месяца. После розыгрыша все балы обнуляются. Условия участия в розыгрыше VIP тарифа:</span>
             <span>1. Собери 100 балов. 1 клик = 1 балл. Доступно 1 раз в час. <br>
                     2. Должно быть включено автопродвижение. Если оно выключено, то при нажатии на «Получить 1 балл», автопродвижение включается автоматически.</span>
-            <AppGoodButton :text="text1" @click="getPoint" />
+            <AppGoodButton :text="text1" class="btn" @click="getPoint" />
             <img src="@/assets/images/auth_image.png" class="left_image">
             <img src="@/assets/images/auth_image.png" class="right_image">
             <img src="@/assets/images/gift_box.png" class="gift_image">
@@ -99,13 +99,16 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        @media (max-width: 650px) {
+            height: auto;
+        }
     }
 
     .modal {
         width: 1160px;
         height: 450px;
         border-radius: 10px;
-        position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
+        position: relative;
         display: flex;
         flex-direction: column;
         /* align-items: center; */
@@ -125,6 +128,9 @@
         @media (max-width: 650px) {
             width: 90vw;
             height: auto;
+            margin-top: 0px;
+            padding: 30px 10px;
+            padding-top: 61px;
         }
     }
 
@@ -177,8 +183,9 @@
         @media (max-width: 900px) {
             font-size: 35px;
         }
-        @media (max-width: 500px) {
-            font-size: 30px;
+        @media (max-width: 650px) {
+            font-size: 24px;
+            line-height: normal;
         }
     }
     span {
@@ -198,7 +205,7 @@
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 17px;
+            font-size: 16px;
         }
     }
     .left_image {
@@ -232,6 +239,13 @@
         transform: rotate(-20deg);
         @media (max-width: 1000px) {
             display: none;
+        }
+    }
+    .btn {
+        width: 200px;
+        align-self: center;
+        @media (max-width: 650px) {
+            margin-bottom: 50px;
         }
     }
 </style>

@@ -7,7 +7,7 @@
         @close="reload"
     />
     <section class="history-table">
-        <table>
+        <table v-if="windowWidth > 650">
             <thead>
                 <tr>
                     <th>Дата</th>
@@ -33,6 +33,22 @@
             </tbody>
         </table>
 
+        <div class="history_mob" v-if="windowWidth <= 650">
+            <div class="history_mob_item" v-for="(item, index) in history" :key="index">
+                <span><strong>Дата: </strong>{{  new Date(item.date_created).toLocaleDateString("ru-RU") }}</span>
+                <span><strong>Сумма, USDT: </strong>{{ item.sum }}</span>
+                <span><strong>Описание: </strong><span v-html="formatedMessage(item)"></span></span>
+                <span>
+                    <strong>Статус: </strong>{{ item.status }} 
+                    <span 
+                        v-if="item.category == 'Вывод' && item.status == 'В процессе'" 
+                        @click="cancelTrans(item)"
+                        style="text-decoration: underline; cursor: pointer;"
+                    >Отменить</span>
+                </span>
+            </div>
+        </div>
+
         <div class="switchs" v-if="totalPages > 1">
             <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
 
@@ -54,11 +70,14 @@ import AppModal from "@/components/AppModal.vue";
 
 export default {
     components: { AppModal },
+    props: {
+        windowWidth: Number
+    },
     data() {
         return {
             history: [],
             currentPage: 1,
-            perPage: 20,
+            perPage: 3,
             totalTransactions: 0,
             isModal: false,
             title: "",
@@ -206,6 +225,26 @@ tr:nth-child(2n) {
     color: white;
 }
 a {
+    color: white;
+    font-family: 'OpenSans';
+}
+.history_mob {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    row-gap: 10px;
+}
+.history_mob_item {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 10px 0px;
+}
+.history_mob_item span {
+    display: flex;
+    column-gap: 10px;
+    font-size: 14px;
     color: white;
     font-family: 'OpenSans';
 }

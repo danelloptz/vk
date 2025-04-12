@@ -199,7 +199,7 @@ export default {
             width: 50px;
             height: 50px;
             right: 15px;
-            bottom: 57px;
+            bottom: 45px;
             top: auto;
         }
     }

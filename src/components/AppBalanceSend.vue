@@ -26,7 +26,7 @@
             >
             <span v-if="isError" class="error">{{ errorMsg }}</span>
         </div>
-        <AppGoodButton :text="text1" @click="send" />
+        <AppGoodButton class="btn" :text="text1" @click="send" />
         
     </section>
     <section class="send" v-if="stepTwo">
@@ -44,8 +44,8 @@
                 </div>
             </div>
             <div class="btns">
-                <AppGoodButton :text="text1" class="btn" @click="sendMoney" />
-                <AppBadButton :text="text2"  class="btn" @click="returnBack"  />
+                <AppGoodButton :text="text1" class="btn1" @click="sendMoney" />
+                <AppBadButton :text="text2"  class="btn1" @click="returnBack"  />
             </div>
         </div>
     </section>
@@ -156,8 +156,9 @@
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            width: 100%;
+            height: 50px;
         }
     }
     input[type="number"]::-webkit-inner-spin-button,
@@ -173,6 +174,9 @@
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .row {
         display: flex;
@@ -190,6 +194,9 @@
         color: white;
         font-weight: bold;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .item {
         display: flex;
@@ -221,9 +228,9 @@
         outline: 1px solid white;
         outline-offset: 10px;
         cursor: pointer;
-        @media (max-width: 700px) {
-            width: 110px;
-            height: 110px;
+        @media (max-width: 650px) {
+            width: 90px;
+            height: 90px;
         }
     }
     .text_wrapper {
@@ -236,19 +243,29 @@
         color: white;
         font-weight: bold;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .btns {
         display: flex;
         flex-direction: column;
         row-gap: 30px;
         @media (max-width: 700px) {
-            flex-direction: row;
-            column-gap: 30px;
+            row-gap: 20px;
+            align-self: center;
         }
     }
     .btn {
-        @media (max-width: 480px) {
-            width: 35vw;
+        @media (max-width: 650px) {
+            width: 190px;
+            align-self: center;
+        }
+    }
+    .btn1 {
+        @media (max-width: 650px) {
+            width: 210px;
+            align-self: center;
         }
     }
     .error {
