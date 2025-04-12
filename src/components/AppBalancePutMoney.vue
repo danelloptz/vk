@@ -271,12 +271,6 @@
             width: auto;
         }
     }
-    .right {
-        width: 300px;
-        @media (max-width: 700px) {
-            width: auto;
-        }
-    }
     .right_row {
         display: flex;
         column-gap: 20px;
