@@ -618,6 +618,8 @@ export default {
         top: 23px;
         right: 23px;
         transition: transform 0.3s ease;
+        width: 13px;
+        height: 13px;
     }
 
     .arrow_down.rotated {

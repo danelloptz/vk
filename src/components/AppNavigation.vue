@@ -84,6 +84,9 @@
                 this.isShown = !(this.isShown);
             }
         },
+        async created() {
+            console.log(this.userData);
+        }
     };
 </script>
 

@@ -16,7 +16,7 @@
         <AppAiGeneratorContent v-if="activeIndex == 0" />
         <AppAiAnalytics v-if="activeIndex == 1" />
         <AppAiScene v-if="activeIndex == 2" />
-        <AppAiChat v-if="activeIndex == 3" />
+        <AppAiChat v-if="activeIndex == 3" :userData="userData" />
     </section>
 </template>
 

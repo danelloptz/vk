@@ -16,19 +16,19 @@
         <span>Ротация - это взаимовыгодная функция. Вам необходимо подписаться на 20 предложенных ВК групп, посмотреть одно ВК видео 20 секунд, и в ответ получаете 10 подписок на свою ВК группу.</span>
         <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных подписок до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
         <div class="rotation_preview_btns">
-            <AppBadButton :text="text1" @click="makeRotation"/>
-            <AppGoodButton :text="text2" @click="openPlans" />
+            <AppBadButton :text="text1" class="btn" @click="makeRotation"/>
+            <AppGoodButton :text="text2" class="btn" @click="openPlans" />
         </div>
     </section>
     <section class="rotation" v-if="isRotation && !isPlans && !isTarif">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
-            <AppGroupOrUser style="min-width: 550px;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
+            <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" :isRotation="true" />
+            <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png"> Не осталось пропусков!</span>
+            <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не подписались на ВК группу, нажмите «Пропустить» или подпишитесь на ВК группу</span>
             <div class="groups_block_btns">
-                <AppGoodButton :text="text3" @click="subscribeGroup" />
-                <AppBadButton :text="`${text4} (${skipCounts})`" @click="skipGroup" />
-                <span class="error" v-if="noSkips">Не осталось пропусков!</span>
-                <span class="error" v-if="noSubscribe">Не подписались!</span>
+                <AppGoodButton class="btn" :text="text3" @click="subscribeGroup" />
+                <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
             </div>
         </div>
     </section>
@@ -53,7 +53,8 @@
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppVideoModal },
         props: {
             isTarif: Boolean,
-            userData: Object
+            userData: Object,
+            windowWidth: Number
         },
         data() {
             return {
@@ -90,10 +91,7 @@
             this.tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
 
             if (this.isTarif) {
-                console.log('Я СРАБОТАЛ НА ПРОПСЕ!!!!');
                 this.openPlans();
-                // this.$emit("update:isTarif", false);
-                console.log('сделал false');
             }
             switch (this.tariff) {
                 case "Free": 
@@ -114,16 +112,6 @@
             console.log(groups);
 
             this.groupInfo = groups;
-
-            // this.groupInfo.first.forEach(item => {
-            //     item["package_name"] = "Leader";
-            // });
-            // this.groupInfo.second.forEach(item => {
-            //     item["package_name"] = "VIP";
-            // });
-            // this.groupInfo.other.forEach(item => {
-            //     item["package_name"] = "Free";
-            // });
 
             this.updateGroupQueue();
 
@@ -205,6 +193,8 @@
                 if (this.skipCounts == 0) 
                     this.noSkips = true
                 else {
+                    this.noSkips = false;
+                    this.noSubscribe = false;
                     this.skipCounts--;
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     if (this.groupsQueue.length === 0) {
@@ -286,10 +276,24 @@
     .rotation_preview span {
         color: white;
         font-size: 18px;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .rotation_preview_btns {
         display: flex;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: center;
+            row-gap: 21px;
+            margin-top: 10px;
+        }
+    }
+    .btn {
+        @media (max-width: 650px) {
+            width: 210px;
+        }
     }
     .rotation, .rotation_end {
         display: flex;
@@ -305,6 +309,10 @@
         background: #2F3251;
         width: fit-content;
         border-radius: 10px;
+        @media (max-width: 650px) {
+            font-size: 14px;
+            padding: 8px 21px;
+        }
     }
     .group {
         display: flex;
@@ -315,6 +323,11 @@
         display: flex;
         align-items: center;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: center;
+            row-gap: 21px;
+        }
     }
     span {
         font-size: 18px;
@@ -322,6 +335,14 @@
         font-family: 'OpenSans';
     }
     .error {
-        color: red;
+        color: #FF6666;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+    }
+    .error img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
     }
 </style>

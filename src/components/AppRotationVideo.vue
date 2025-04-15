@@ -14,22 +14,19 @@
         <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных ВК видео по 20 секунд, и в ответ получаете 10 просмотров своего ВК видео.</span>
         <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
         <div class="rotation_preview_btns">
-            <AppBadButton :text="text1" @click="makeRotation"/>
-            <AppGoodButton :text="text2" @click="openPlans" />
+            <AppBadButton class="btn" :text="text1" @click="makeRotation"/>
+            <AppGoodButton class="btn" :text="text2" @click="openPlans" />
         </div>
     </section>
     <section class="rotation" v-if="isRotation && !isPlans">
         <span class="counter">Просмотры {{ watchedVideos }} из {{ totalVideos }}</span>
         <div class="group">
-            <AppGroupOrUser style="min-width: 550px;" :v-if="videosInfo" :objectData="videosQueue[currentVideoIndex]" />
+            <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="videosInfo" :objectData="videosQueue[currentVideoIndex]" />
+            <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png"> Не осталось пропусков!</span>
+            <span class="error" v-if="notWatched"><img src="@/assets/images/cross2.png">Вы не посмотрели видео 20 секунд, нажмите «Пропустить» или запустите видео повторно</span>
             <div class="groups_block_btns">
-                <AppGoodButton :text="text3" @click="watchVideo" />
-                <AppBadButton :text="`${text4} (${skipCounts})`" @click="skipGroup" />
-            </div>
-            <span class="error" v-if="noSkips">Не осталось пропусков!</span>
-            <div class="row">
-                <img src="@/assets/images/cross.png" v-if="notWatched">
-                <span class="error" v-if="notWatched">Вы не посмотрели видео 20 секунд, нажмите «Пропустить» или запустите видео повторно</span>
+                <AppGoodButton :text="text3" class="btn" @click="watchVideo" />
+                <AppBadButton :text="`${text4} (${skipCounts})`" class="btn" @click="skipGroup" />
             </div>
         </div>
     </section>
@@ -153,6 +150,8 @@
                 if (this.skipCounts == 0) 
                     this.noSkips = true
                 else {
+                    this.noSkips = false;
+                    this.notWatched = false;
                     this.skipCounts--;
                     this.videosQueue.splice(this.currentVideoIndex, 1);
                     if (this.videosQueue.length === 0) {
@@ -217,10 +216,24 @@
     .rotation_preview span {
         color: white;
         font-size: 18px;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .rotation_preview_btns {
         display: flex;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: center;
+            row-gap: 21px;
+            margin-top: 10px;
+        }
+    }
+    .btn {
+        @media (max-width: 650px) {
+            width: 210px;
+        }
     }
     .rotation, .rotation_end {
         display: flex;
@@ -236,16 +249,28 @@
         background: #2F3251;
         width: fit-content;
         border-radius: 10px;
+        @media (max-width: 650px) {
+            font-size: 14px;
+            padding: 8px 21px;
+        }
     }
     .group {
         display: flex;
         flex-direction: column;
         row-gap: 50px;
+        @media (max-width: 650px) {
+            align-items: center;
+        }
     }
     .groups_block_btns {
         display: flex;
         align-items: center;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: center;
+            row-gap: 21px;
+        }
     }
     span {
         font-size: 18px;
@@ -253,7 +278,15 @@
         font-family: 'OpenSans';
     }
     .error {
-        color: red;
+        color: #FF6666;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+    }
+    .error img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
     }
     .row {
         display: flex;

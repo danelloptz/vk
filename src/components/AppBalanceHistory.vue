@@ -43,7 +43,7 @@
                     <span 
                         v-if="item.category == 'Вывод' && item.status == 'В процессе'" 
                         @click="cancelTrans(item)"
-                        style="text-decoration: underline; cursor: pointer;"
+                        class="descr"
                     >Отменить</span>
                 </span>
             </div>
@@ -77,7 +77,7 @@ export default {
         return {
             history: [],
             currentPage: 1,
-            perPage: 3,
+            perPage: 20,
             totalTransactions: 0,
             isModal: false,
             title: "",
@@ -242,10 +242,12 @@ a {
     padding: 10px 0px;
 }
 .history_mob_item span {
-    display: flex;
-    column-gap: 10px;
     font-size: 14px;
     color: white;
     font-family: 'OpenSans';
+}
+.descr {
+    text-decoration: underline;
+    cursor: pointer;
 }
 </style>

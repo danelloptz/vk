@@ -1,5 +1,51 @@
 <template>
     <div class="footer_data" v-if="Object.keys(userData).length !== 0">
+        <!-- <div class="zopa">
+            <div class="left_col">
+                <img v-if="objectData" :src="isSettings ? objectData.group.group_photo : (objectData.avatar_url ?? objectData.avatar)" class="avatar" style="margin-top: 15px;">
+                <span class="label" v-if="windowWidth <= 650 && (objectData &&
+                        (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Business' ||
+                        objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Leader' || 
+                        objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'VIP' || 
+                        (objectData.status && (objectData.status == 'Business' ||
+                            objectData.status == 'Leader' || objectData.status == 'VIP')
+                        )) ||
+                        (objectData?.package_name == 'Business' ||
+                        objectData?.package_name == 'Leader' ||
+                        objectData?.package_name == 'VIP'))
+                        " style="margin-left: 10px;">
+                        {{ objectData?.packages?.[objectData?.packages?.length - 1]?.package_name ?? objectData.status ?? objectData?.package_name}}
+                </span>
+            </div>
+            <div class="footer_data_wrapper">
+                <div class="footer_data_row">
+                    <h2 v-if="objectData && userData.name">{{ isSettings ? objectData.group.group_name : userData.name }} <span v-if="windowWidth > 650 && (objectData &&
+                        (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Business' ||
+                        objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Leader' || 
+                        objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'VIP' || 
+                        (objectData.status && (objectData.status == 'Business' ||
+                            objectData.status == 'Leader' || objectData.status == 'VIP')
+                        )) ||
+                        (objectData?.package_name == 'Business' ||
+                        objectData?.package_name == 'Leader' ||
+                        objectData?.package_name == 'VIP'))
+                        " style="margin-left: 10px;">
+                        {{ objectData?.packages?.[objectData?.packages?.length - 1]?.package_name ?? objectData.status ?? objectData?.package_name}}
+                    </span></h2><br>
+                    
+                </div>
+                <span class="id" v-if="objectData && objectData.vk_id && !objectData?.group_link && !objectData?.post_link && !objectData?.video_link">ID: {{ objectData.vk_id }}</span><br>
+                <span class="sentence" style="word-break: break-word;" v-if="shouldDisplayText" >{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span><br>
+                <a v-if="objectData && (isSettings || (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData?.group_link && (objectData?.group_link == '' || objectData?.group_link.length == 0) ? `https://vk.com/id${objectData?.vk_id}` : objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a><br>
+                <div v-if="windowWidth > 650 || isRotation" class="footer_data_links" style="margin-top: 20px;">
+                    <a v-if="objectData" :href="vkData"  target="_blank"><img src="@/assets/images/vk.png"></a>
+                    <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
+                    <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
+                </div>
+            </div>
+        </div> -->
+
+
         <div class="left_col">
             <img v-if="objectData" :src="isSettings ? objectData.group.group_photo : (objectData.avatar_url ?? objectData.avatar)" class="avatar" style="margin-top: 15px;">
             <span class="label" v-if="windowWidth <= 650 && (objectData &&
@@ -34,19 +80,15 @@
                 
             </div>
             <span class="id" v-if="objectData && objectData.vk_id && !objectData?.group_link && !objectData?.post_link && !objectData?.video_link">ID: {{ objectData.vk_id }}</span>
-            <span class="sentence" style="word-break: break-word;" v-if="shouldDisplayText" >{{ objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text }}</span>
+            <span class="sentence" style="word-break: break-word;" v-if="shouldDisplayText" >{{ ' ' + (objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text) + ' ' }}</span>
             <a v-if="objectData && (isSettings || (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData?.group_link && (objectData?.group_link == '' || objectData?.group_link.length == 0) ? `https://vk.com/id${objectData?.vk_id}` : objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
-            <div v-if="windowWidth > 650" class="footer_data_links" style="margin-top: 20px;">
-                <!-- !!!!!! РАССКОМЕНИТРОВАТЬ !!!!!! -->
-                <!-- <a v-if="objectData" :href="objectData.links.vk"><img src="@/assets/images/vk.png"></a>
-                <a v-if="objectData" :href="objectData.links.telegram"><img src="@/assets/images/telegram.png"></a>
-                <a v-if="objectData" :href="objectData.links.whatsapp"><img src="@/assets/images/whatsapp.png"></a> -->
+            <div v-if="windowWidth > 650 || isRotation" class="footer_data_links" style="margin-top: 20px;">
                 <a v-if="objectData" :href="vkData"  target="_blank"><img src="@/assets/images/vk.png"></a>
                 <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
-        <div v-if="windowWidth <= 650" class="footer_data_links" style="margin-top: 20px;">
+        <div v-if="windowWidth <= 650 && !isRotation" class="footer_data_links" style="margin-top: 20px;margin-bottom: 20px;">
             <a v-if="objectData" :href="vkData"  target="_blank"><img src="@/assets/images/vk.png"></a>
             <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
             <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
@@ -65,7 +107,8 @@ export default {
             default: () => ({}), // Указываем пустой объект, чтобы избежать ошибок
         },
         isBusiness: Boolean,
-        isSettings: Boolean
+        isSettings: Boolean,
+        isRotation: Boolean,
     },
     data() {
         return {
@@ -154,22 +197,19 @@ export default {
     .footer_data {
         display: flex;
         column-gap: 30px;
-        width: fit-content; 
+        width: fit-content;
         max-width: 100%;
         position: relative;
+
         @media (max-width: 1100px) {
             justify-content: center;
             align-items: center;
         }
+
         @media (max-width: 650px) {
-            align-items: flex-start;
-            row-gap: 10px;
-            overflow: hidden;
-            justify-content: start;
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            column-gap: 0px;
-            /* flex-wrap: wrap; */
+            display: block; /* Отключаем Flexbox */
+            overflow: hidden; /* Обеспечиваем корректное обтекание */
+            padding: 15px;
         }
     }
     .footer_data > img {
@@ -182,22 +222,31 @@ export default {
             height: 90px;
         }
     }
+    
     .left_col {
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+
         @media (max-width: 650px) {
-            float: left;
-            width: 90px;
+            float: left; /* Обтекание слева только на маленьких экранах */
+            width: 120px; /* Ширина автоматическая */
+            margin-right: 15px; /* Отступ справа для обтекания */
         }
     }
+
     .footer_data_wrapper {
         display: flex;
         flex-direction: column;
         row-gap: 10px;
+
         @media (max-width: 650px) {
-            overflow: hidden;
+            display: block;
+            clear: right;
         }
+    }
+    .footer_data_wrapper > * {
+        display: block;
     }
     .footer_data_row {
         display: flex;
@@ -312,7 +361,16 @@ export default {
     .sentence {
         margin-top: 20px; 
         @media (max-width: 650px) {
-            margin-top: 0px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
+    }
+
+
+
+
+    .zopa_col {
+        float: left;
+        width: 120px;
     }
 </style>

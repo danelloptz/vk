@@ -21,7 +21,7 @@
                 <span>{{ item.label }}</span>
                 <div class="card_item">
                     <h2>{{ item.stat }}</h2>
-                    <span>{{ item.difference != "" ? item.difference : "_" }}</span>
+                    <!-- <span>{{ item.difference != "" ? item.difference : "_" }}</span> -->
                 </div>
             </div>
         </div>
@@ -31,6 +31,7 @@
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import { getUserInfo } from '@/services/user';
+    import { getAnalytics } from '@/services/ai';
 
     export default {
         components: { AppGoodButton },
@@ -43,25 +44,36 @@
                     name: "НАЗВАНИЕ ГРУППЫ 2",
                     subscribes: 700
                 },
+                // stats: [
+                //     { label: "Охват", stat: "0", difference: "-46%" },
+                //     { label: "Просмотры", stat: "60", difference: "-28%" },
+                //     { label: "Подписчики", stat: "0", difference: "" },
+                //     { label: "Лайки", stat: "7", difference: "" },
+                // ],
                 stats: [
-                    { label: "Охват", stat: "40", difference: "-46%" },
-                    { label: "Просмотры", stat: "60", difference: "-28%" },
-                    { label: "Подписчики", stat: "0", difference: "" },
-                    { label: "Лайки", stat: "7", difference: "" },
-                    { label: "Комментарии", stat: "0", difference: "" },
-                    { label: "Поделились", stat: "0", difference: "" },
+                    { label: "Охват", stat: "." },
+                    { label: "Просмотры", stat: "." },
+                    { label: "Подписчики", stat: "." },
+                    { label: "Лайки", stat: "." },
                 ],
-                userInfo: []
+                userInfo: [],
+                gpt_comment: ""
             }
         },
         async created() {
             this.userInfo = await getUserInfo(localStorage.getItem("token"));
-
+            const resp = await getAnalytics(this.userInfo.vk_id);
+            this.stats[0].stat = resp.data.reach_total;
+            this.stats[1].stat = resp.data.views;
+            this.stats[2].stat = resp.data.subscribed;
+            this.stats[3].stat = resp.data.likes;
+            this.gpt_comment = resp.data.gpt_comment;
         },
         methods: {
             getStats() {
                 this.nextStep = true;
             }
+            
         }
     };
 </script>
@@ -117,7 +129,7 @@
 
     .cards {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         column-gap: 26px;
         row-gap: 30px;
     }
@@ -145,6 +157,7 @@
         color: white;
         font-family: 'OpenSans';
         line-height: 1;
+        font-weight: normal;
     }
     .card_item span {
         font-size: 16px;

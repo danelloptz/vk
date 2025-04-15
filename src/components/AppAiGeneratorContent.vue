@@ -8,15 +8,17 @@
                 @click="setActive(index)"
             >{{ item }}</span>
         </div> 
-        <h1>Для создания качественного контент плана вам необходимо заполнить подробный бриф:</h1> 
         <div class="brief" v-if="activeIndex == 0">
+        <h1>Для создания качественного контент плана вам необходимо заполнить подробный бриф:</h1> 
             <div class="container">
                 <div class="item">
+                    <span class="counter">{{ allSymbols }}/{{ maxSymbols }}</span>
                     <h2>Название компании:</h2>
                     <input 
                         type="text"
                         v-model="label"
                         placeholder="Название"
+                        @input="validateInput('label', $event)"
                         :class="{ saved: isSaved }"
                     >
                     <h2>Год основания компании:</h2>
@@ -24,28 +26,29 @@
                         type="text"
                         v-model="year"
                         placeholder="Год"
+                        @input="validateInput('year', $event)"
                         :class="{ saved: isSaved }"
                     >
                 </div>
                 <div class="item">
                     <h2>Описание компании:</h2>
-                    <textarea :class="{ saved: isSaved }" placeholder="Какие продукты или услуги предлагает компания?" v-model="description_company"></textarea>
+                    <textarea :class="{ saved: isSaved }" placeholder="Какие продукты или услуги предлагает компания?" v-model="description_company" @input="validateInput('description_company', $event)"></textarea>
                 </div>
                 <div class="item">
                     <h2>Конкурентные преимущества:</h2>
-                    <textarea :class="{ saved: isSaved }" placeholder="Что выделяет компанию среди конкурентов?" v-model="pros"></textarea>
+                    <textarea :class="{ saved: isSaved }" placeholder="Что выделяет компанию среди конкурентов?" v-model="pros" @input="validateInput('pros', $event)"></textarea>
                 </div>
                 <div class="item">
                     <h2>Описание продукта / услуги:</h2>
-                    <textarea :class="{ saved: isSaved }" placeholder="Подробное описание продуктов или услуг, которые необходимо продвигать" v-model="description_product"></textarea>
+                    <textarea :class="{ saved: isSaved }" placeholder="Подробное описание продуктов или услуг, которые необходимо продвигать" v-model="description_product" @input="validateInput('description_product', $event)"></textarea>
                 </div>
                 <div class="item">
                     <h2>Какие боли или проблемы решает ваш продукт?</h2>
-                    <textarea :class="{ saved: isSaved }" placeholder="Чем ваш продукт может помочь клиентам?" v-model="whats_solve"></textarea>
+                    <textarea :class="{ saved: isSaved }" placeholder="Чем ваш продукт может помочь клиентам?" v-model="whats_solve" @input="validateInput('whats_solve', $event)"></textarea>
                 </div>
                 <div class="item">
                     <h2>Уникальные характеристики продукта:</h2>
-                    <textarea :class="{ saved: isSaved }" placeholder="Что отличает ваш продукт от других на рынке?" v-model="characteristics"></textarea>
+                    <textarea :class="{ saved: isSaved }" placeholder="Что отличает ваш продукт от других на рынке?" v-model="characteristics"  @input="validateInput('characteristics', $event)"></textarea>
                 </div>
                 <div class="item">
                     <h2>Цена и ценовая политика:</h2>
@@ -53,19 +56,35 @@
                         type="text"
                         v-model="price"
                         placeholder="Цена"
+                        @input="validateInput('price', $event)"
                         :class="{ saved: isSaved }"
                     >
                     <h2>Какой тип партнерской программы в компании?</h2>
-                    <input 
-                        type="text"
-                        v-model="type"
-                        placeholder="Типа"
-                        :class="{ saved: isSaved }"
-                    >
+                    <div class="dropdown">
+                        <input
+                            v-model="type"
+                            type="text"
+                            placeholder="Тип программы"
+                            :class="{ saved: isSaved }"
+                            @focus="isDropdownVisible = true"
+                            @blur="hideDropdown"
+                            readonly 
+                        />
+                        <img :class="{'rotated': isDropdownVisible}" src="@/assets/images/arrow_down.png" class="arrow_down">
+                        <ul v-if="isDropdownVisible" class="dropdown-menu">
+                            <li
+                                v-for="(item, index) in types"
+                                :key="index"
+                                @mousedown.prevent="selectType(item)"
+                            >
+                                {{ item }}
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="item">
                     <h2>Кто ваша основная целевая аудитория?</h2>
-                    <textarea :class="{ saved: isSaved }" placeholder="Возраст, пол, профессия, уровень дохода" v-model="audience"></textarea>
+                    <textarea :class="{ saved: isSaved }" placeholder="Возраст, пол, профессия, уровень дохода" v-model="audience" @input="validateInput('audience', $event)"></textarea>
                 </div>
                 <div class="item">
                     <h2>Ссылка:</h2>
@@ -73,6 +92,7 @@
                         type="text"
                         v-model="link"
                         placeholder="Ссылка"
+                        @input="validateInput('link', $event)"
                         :class="{ saved: isSaved }"
                     >
                 </div>
@@ -82,6 +102,7 @@
                         type="text"
                         v-model="reaction"
                         placeholder="Покупки, регистрация в системе"
+                        @input="validateInput('reaction', $event)"
                         :class="{ saved: isSaved }"
                     >
                 </div>
@@ -116,7 +137,7 @@
                                 <span :contenteditable="isEditable">{{ item?.topic_name }}</span>
                             </td>
                             <td class="plan_item">
-                                <span :contenteditable="isEditable">{{ item?.post_text[item.chose_post_index] }}</span>
+                                <span :contenteditable="isEditable" v-html="formatedPost(item?.post_text[item.chose_post_index])"></span>
                                 <div class="plan_item_variants">
                                     <AppGoodButton 
                                         v-for="(name, index_var) in variants.slice(0, item.post_text.length)" 
@@ -179,14 +200,20 @@
                             <span class="content_text">{{ item?.topic_name }}</span>
                         </td>
                         <td v-if="item.date_publication">
-                            <span class="content_text">{{ item.post_text[item.chose_post_index] }}</span>
+                            <span class="content_text" v-html="formatedPost(item.post_text[item.chose_post_index])"></span>
                         </td>
                         <td v-if="item.date_publication">
                             <img class="accepted_banner" :src="item.image_links[item.chose_image_index]" />
                         </td>
                         <td class="col" v-if="item.date_publication">
-                            <span class="content_text" :contenteditable="isEditableContent">{{ formatedDate(item.date_publication * 1000) }}</span>
-                            <span class="change_text" @click="changeEditableContent">Изменить</span>
+                            <span
+                                class="content_text"
+                                :contenteditable="isEditableContent"
+                                :ref="'editableDate_' + index"
+                            >{{ formatedDate(item.date_publication * 1000) }}</span>
+                            <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
+                            <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
+                            <span class="error" v-if="badDate">Неправильный формат даты. Введите дату в формате: 01.01.2000 12:00</span>
                         </td>
                     </tr>
                 </tbody>
@@ -214,6 +241,7 @@
                 text5: "ЗАМЕНИТЬ",
                 text6: "РЕДАКТИРОВАТЬ",
                 text7: "УДАЛИТЬ",
+                text8: "СОХРАНИТЬ",
                 themes: [
                     "Обзор сервиса Best Followers. Видео-инструктаж о том, как сервис может помочь в развитии вашего Telegram-канала и увеличении доходов",
                     "Обзор сервиса Noise Pollution. Видео-инструктаж о том, как сервис может помочь в развитии вашего Telegram-канала и увеличении доходов",
@@ -255,7 +283,18 @@
                 currBanners: [],
                 currTexts: [],
                 variants: ["ВАРИАНТ 1", "ВАРИАНТ 2", "ВАРИАНТ 3"],
-                result: []
+                result: [],
+                badDate: false,
+                maxSymbols: 3500,
+                isDropdownVisible: false,
+                types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"]
+            }
+        },
+        watch: {
+            isSaved(status) {
+                if (status) {
+                    setTimeout(() => this.isSaved = false, 1100);
+                }
             }
         },
         async created() {
@@ -307,8 +346,30 @@
                 const checked = this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 return checked.map(item => item.image_links.length);
             },
+            allSymbols() {
+                return this.year.length + this.label.length + this.description_company.length + this.pros.length + this.description_product.length + this.whats_solve.length + this.characteristics.length + this.price.length + this.audience.length + this.link.length + this.reaction.length;
+            }
         },
         methods: {
+            hideDropdown() {
+                this.isDropdownVisible = false;
+            },
+            selectType(item) {
+                this.type = item;
+                this.hideDropdown();
+            },
+            validateInput(field) {
+                const currentLength = this.allSymbols;
+
+                // Если текущая длина + новая длина превышает лимит, обрезаем ввод
+                if (currentLength > this.maxSymbols) {
+                    this[field] = this[field].slice(0, this[field].length - (currentLength - this.maxSymbols));
+                }
+            },
+            formatedPost(post) {
+                if (!post) return "";
+                return post.replace(/\n/g, "<br>");
+            },
             async confirmCurrentPosts() {
                 const filtered = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 if (filtered.length > 0) {
@@ -355,6 +416,7 @@
                     }
                     if (this.step > 2) {
                         try {
+                            this.plan.forEach(item => item.is_accept_pairs = true);
                             let resp = await acceptPlan(this.plan, localStorage.getItem("token"));
                             if (!resp) resp = await acceptPlan(this.plan, localStorage.getItem("token"));
                             this.plan = resp;
@@ -377,6 +439,32 @@
             },
             setActiveImageVar(var_index, post_index) {
                 this.plan[post_index].chose_image_index = var_index;
+            },
+            async savePlan(index) {
+                const editableElement = this.$refs['editableDate_' + index];
+
+                if (!editableElement) {
+                    console.error("Редактируемый элемент не найден");
+                    return;
+                }
+
+                const editedDate = editableElement[0].innerText.trim();
+                const newTimestamp = this.convertToTimestamp(editedDate);
+
+                if (newTimestamp) {
+                    this.badDate = false;
+                    this.plan[index].date_publication = newTimestamp;
+                    console.log("Обновленный план:", this.plan);
+                } else {
+                    console.error("Неверный формат даты");
+                    this.badDate = true;
+                    return;
+                }
+
+                const resp = await updateContentPlan(this.plan, localStorage.getItem("token"));
+                if (resp == 200) {
+                    this.isEditableContent = false;
+                }
             },
             async saveSettings() {
                 // TODO: отправка на сервер данных брифа
@@ -425,7 +513,7 @@
                 this.isLoading = false;
             },
             changeEditableContent() {
-                this.isEditableContent = true;
+                this.isEditableContent = !this.isEditableContent;
             },
             async regenerateCurrentPosts() {
                 this.isLoading = true;
@@ -491,10 +579,27 @@
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
-                const hours = String(date.getHours() - 3).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
                 const minutes = String(date.getMinutes()).padStart(2, '0');
 
                 return `${day}.${month}.${year} ${hours}:${minutes}`;
+            },
+            convertToTimestamp(dateString) {
+                try {
+                    // Разбиваем строку на компоненты даты и времени
+                    const [datePart, timePart] = dateString.split(' ');
+                    const [day, month, year] = datePart.split('.').map(Number);
+                    const [hours, minutes] = timePart.split(':').map(Number);
+
+                    const date = new Date(year, month - 1, day, hours, minutes);
+
+                    const timestamp = Math.floor(date.getTime() / 1000);
+
+                    return timestamp;
+                } catch(err) {
+                    return false;
+                }
+                
             }
         },
     };
@@ -551,6 +656,11 @@
         color: white;
         font-family: 'OpenSans';
         text-align: center;
+        margin-bottom: 50px;
+        justify-self: center;
+        @media (min-width: 1300px) {
+            max-width: 60%;
+        }
     }
     h2 {
         font-size: 18px;
@@ -571,13 +681,11 @@
         display: flex;
         flex-direction: column;
         row-gap: 20px;
+        position: relative;
     }
     .dropdown {
         position: relative;
-        width: 360px;
-        @media (max-width: 500px) {
-            width:70vw;
-        }
+        width: 100%
     }
 
     input[type="checkbox"] {
@@ -645,6 +753,8 @@
         position: absolute;
         top: 23px;
         right: 23px;
+        width: 13px;
+        height: 13px;
         transition: transform 0.3s ease;
     }
 
@@ -741,7 +851,12 @@
         justify-content: space-between;
     }
     .saved {
-        border-color: #4caf4f8e; 
+        animation: ChangeColor 1s ease-in-out;
+    }
+    @keyframes ChangeColor {
+        0% { border-color: white; }
+        50% { border-color: #4caf4f8e;  }
+        100% { border-color: white; }
     }
 
     .content {
@@ -762,6 +877,7 @@
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
+        cursor: pointer;
     }
     .content_text {
         font-size: 14px;
@@ -798,5 +914,24 @@
     }
     .accepted_banner {
         width: 180px;
+    }
+    .sm_btn {
+        width: 110px;
+        font-size: 12px;
+    }
+    .error {
+        color: red;
+    }
+    .counter {
+        position: absolute;
+        right: 0;
+        top: 0;
+        font-size: 14px;
+        color: white;
+        opacity: .5;
+        font-family: 'OpenSans';
+        width: min-content;
+        line-height: 2;
+        height: min-content;
     }
 </style>

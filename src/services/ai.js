@@ -186,3 +186,42 @@ export async function acceptPlan(plan, token) {
         return false; 
     }
 }
+
+export async function getAnalytics(vk_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/get_stats', {
+            "vk_id": vk_id
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении статистики о группе", error);
+        return false; 
+    }
+}
+
+export async function getChat(user_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/get_helper_messages', {
+            "user_id": user_id
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении диалога с ИИ", error);
+        return false; 
+    }
+}
+
+export async function sendChatMessage(message, history, thread_id, dialog_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/helper_chat', {
+            "message": message,
+            "history": history,
+            "thread_id": thread_id,
+            "dialog_id": dialog_id
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при отправлении сообщения в чат ИИ", error);
+        return false; 
+    }
+}

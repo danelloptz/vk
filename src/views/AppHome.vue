@@ -44,7 +44,7 @@
                 <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :userData="userInfo" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
                 <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" :userData="userInfo" @openTariff="openTarif" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" :userData="userInfo" />
-                <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :userData="userInfo" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
+                <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
                 <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :businessUser="businessUser" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
                 <AppBannerAdds v-if="selectedComponent == 10 && !isReff" :userData="userInfo" />
@@ -159,7 +159,7 @@
             },
             updatedMenuItems() {
                 return this.menuItems.map((item, index) => {
-                    if (index === 0 && this.userData) {
+                    if (index === 0 && this.userInfo) {
                         return { ...item, label: `Баланс: ${this.userInfo.balance} USDT` };
                     }
                     return item;

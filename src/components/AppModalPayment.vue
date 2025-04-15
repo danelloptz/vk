@@ -121,7 +121,7 @@ export default {
                 const business_pack = this.newTarrifs.find(item => item.package_name == "Business");
                 console.log("Я в ЛИДЕРЕ", leader_pack, business_pack, this.daysForBusiness);
                 if (this.daysForBusiness != 0) {
-                    return Math.abs((leader_pack.monthly_cost * 12 - 4)  - Math.floor(+this.daysForBusiness / 30) * business_pack.monthly_cost);
+                    return Math.abs((leader_pack.monthly_cost * 12 - 4)  - Math.floor(+this.daysForBusiness / 31) * business_pack.monthly_cost);
                 } else return 500;
             } 
             if (this.selectedPackage == "Business") return 300;
@@ -438,6 +438,8 @@ export default {
         position: absolute;
         top: 23px;
         right: 23px;
+        width: 13px;
+        height: 13px;
         transition: transform 0.3s ease;
     }
 

@@ -196,12 +196,20 @@ export default {
         width: 50vw;
         aspect-ratio: 16 / 9;
         z-index: 20;
+        @media (max-width: 900px) {
+            width: 100%;
+        }
     }
     .header {
         display: flex;
         justify-content: space-between;
         height: 93px;
         width: 100%;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 30px;
+            height: auto;
+        }
     }
     .timer_wrapper {
         width: 100%;
@@ -211,6 +219,10 @@ export default {
         padding: 0px 30px;
         align-items: center;
         background: #1B1E3D;
+        @media (max-width: 650px) {
+            padding: 21px 10px;
+            border-radius: 10px;
+        }
     }
     .timer {
         font-size: 40px;
@@ -224,6 +236,13 @@ export default {
         font-size: 32px;
         font-family: 'OpenSans';
         color: white;
+        @media (max-width: 1200px) {
+            font-size: 20px;
+        }
+        @media (max-width: 900px) {
+            font-size: 16px;
+            text-align: start !important;
+        }
     }
     .quit, .skip {
         font-size: 20px;
@@ -235,6 +254,12 @@ export default {
         cursor: pointer;
         padding: 0 36px;
         align-content: center;
+        @media (max-width: 650px) {
+            width: 100%;
+            padding: 20px;
+            font-size: 16px;
+            border-radius: 10px;
+        }
     }
 
     h3 {
@@ -258,6 +283,10 @@ export default {
         justify-content: center;
         align-items: start;
         padding: 50px;
+        @media (max-width: 650px) {
+            align-items: center;
+            padding: 0px;
+        }
     }
 
     .modal {
@@ -279,8 +308,9 @@ export default {
             width: 80vw;
         }
         @media (max-width: 650px) {
-            width: 90vw;
-            padding: 30px 15px;
+            width: 95vw;
+            padding: 0;
+            row-gap: 30px;
         }
     }
 

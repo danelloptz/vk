@@ -1,71 +1,33 @@
 <template>
-    <section class="balance">
-        <div class="switch" v-if="windowWidth > 650">
+    <div class="switch_mob">
+        <span class="active" @click="openDrowdown">
+            {{ listSwtich[activeIndex].name }}
+            <img src="@/assets/images/arrow_down.png" 
+                class="arrow_down"
+                :class="{ rotated: isDropdown }"
+            >
+        </span>
+        <div class="dropdown" v-if="isDropdown">
             <span
-                v-for="(item, index) in listSwtich"
+                v-for="(item, index) in filteredListSwtich"
                 :key="index"
-                :class="{ active: activeIndex === item.index }" 
+                class="item_mob"
                 @click="setActive(item.index)"
             >{{ item.name }}</span>
         </div>
-        <div class="switch_mob" v-if="windowWidth <= 650">
-            <span class="active" @click="openDrowdown">
-                {{ listSwtich[activeIndex].name }}
-                <img src="@/assets/images/arrow_down.png" 
-                    class="arrow_down"
-                    :class="{ rotated: isDropdown }"
-                >
-            </span>
-            <div class="dropdown" v-if="isDropdown">
-                <span
-                    v-for="(item, index) in filteredListSwtich"
-                    :key="index"
-                    class="item_mob"
-                    @click="setActive(item.index)"
-                >{{ item.name }}</span>
-            </div>
-        </div>
-            <AppBalancePutMoney v-if="activeIndex === 0" :userData="userData" :windowWidth="windowWidth" />
-            <AppBalanceCashOut v-if="activeIndex === 1" :userData="userData" :windowWidth="windowWidth" />
-            <AppBalanceSend v-else-if="activeIndex === 2" :userData="userData" :windowWidth="windowWidth" />
-            <AppBalanceHistory v-else-if="activeIndex === 3" :userData="userData" :windowWidth="windowWidth" />
-    </section>
+    </div>
 </template>
 
 <script>
-    import AppBalanceCashOut from '@/components/AppBalanceCashOut.vue';
-    import AppBalancePutMoney from '@/components/AppBalancePutMoney.vue';
-    import AppBalanceHistory from '@/components/AppBalanceHistory.vue';
-    import AppBalanceSend from '@/components/AppBalanceSend.vue';
     export default {
-        components: { AppBalanceCashOut, AppBalancePutMoney, AppBalanceSend, AppBalanceHistory },
-        props: { 
-            userData: Object,
-            windowWidth: Number
+        props: {
+            listSwtich: Object,
         },
         data() {
             return {
-                listSwtich: [
-                    {
-                        index: 0,
-                        name: "Пополнить баланс"
-                    },
-                    {
-                        index: 1,
-                        name: "Вывод средств"
-                    },
-                    {
-                        index: 2,
-                        name: "Перевод средств"
-                    },
-                    {
-                        index: 3,
-                        name: "Финансовая история"
-                    },
-                ],
-                activeIndex: 0,
                 isDropdown: false,
-                helpFlag: false
+                helpFlag: false,
+                activeIndex: 0
             }
         },
         computed: {
@@ -74,10 +36,6 @@
             }
         },
         methods: {
-            setActive(index) {
-                this.activeIndex = index;
-                this.isDropdown = false;
-            },
             openDrowdown() {
                 this.isDropdown = !this.isDropdown;
                 if (this.isDropdown) document.addEventListener("click", this.handleClickOutside)
@@ -85,14 +43,30 @@
             },
             handleClickOutside(event) {
                 const path = event.composedPath();
-                const wrapperNavMobile = this.$el.querySelector(".switch_mob");
-                console.log(!path.includes(wrapperNavMobile), this.helpFlag);
-                if (!path.includes(wrapperNavMobile) && this.helpFlag) {
+                const wrapperNavMobile = path.find(el => el.classList?.contains("switch_mob"));
+                if (!wrapperNavMobile && this.helpFlag) {
                     this.isDropdown = false;
                     this.helpFlag = false;
                 }
                 this.helpFlag = true;
             },
+            // handleClickOutside(event) {
+            //     const path = event.composedPath();
+            //     const wrapperNavMobile = this.$el.querySelector(".switch_mob");
+            //     console.log(path, wrapperNavMobile);
+            //     console.log(!path.includes(wrapperNavMobile), this.helpFlag);
+            //     if (!path.includes(wrapperNavMobile) && this.helpFlag) {
+            //         this.isDropdown = false;
+            //         this.helpFlag = false;
+            //     }
+            //     this.helpFlag = true;
+            // },
+            setActive(index) {
+                this.activeIndex = index;
+                this.isDropdown = false;
+                this.helpFlag = false;
+                this.$emit("update-index", index);
+            }
         }
     };
 </script>
@@ -119,18 +93,6 @@
     .rotated {
         transform: rotate(180deg);
         transition: .2s ease-in;
-    }
-    .balance {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        row-gap: 50px;
-        /* z-index: 4; */
-    }
-    .switch {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
     }
     .switch_mob {
         width: 100%;

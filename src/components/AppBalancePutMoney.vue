@@ -281,8 +281,9 @@
     .right_row span {
         width: 140px;
         height: 60px;
-        text-align: center;
-        align-content: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';

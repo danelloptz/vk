@@ -1,5 +1,5 @@
 <template>
-    <section class="assistant">
+    <section class="ass">
         <h2>ИИ помощник</h2>
         <h2>Вы можете задать любой вопрос ИИ помощнику, или создать индивидуальный, нестандартный контент, просто описав подробный промпт.</h2>
         
@@ -11,11 +11,10 @@
 
             <!-- Блок сообщений -->
             <div class="messages">
-                <div v-for="(message, index) in messages" :key="index" :class="message.type">
-                    {{ message.text }}
-                </div>
+                <div v-for="(message, index) in messages" :key="index" :class="message.creator" v-html="formatedMessage(message.text)"></div>
             </div>
 
+            <div class="loader" v-if="isWaiting"></div>
             <!-- Поле ввода -->
             <div class="input_field">
                 <span class="counter">{{ msg.length }}/2000</span>
@@ -33,44 +32,70 @@
 
 <script>
 import AppGoodButton from '@/components/AppGoodButton.vue';
+import { getChat, sendChatMessage } from '@/services/ai';
 
 export default {
     components: { AppGoodButton },
+    props: {
+        userData: Object
+    },
     data() {
         return {
             msg: "",
             text1: "ОТПРАВИТЬ",
-            messages: [] // Список всех сообщений
+            messages: [], // Список всех сообщений,
+            data: [],
+            isWaiting: false
         };
     },
-    mounted() {
-        // При загрузке страницы добавляем приветственное сообщение от ИИ
-        this.addMessage("ai_msg", "Здравствуйте! Чем могу помочь?");
-    },
     methods: {
-        sendMessage() {
-            if (!this.msg.trim()) return; // Игнорируем пустые сообщения
+        async sendMessage() {
+            if (!this.msg.trim()) return;
 
-            // Добавляем сообщение пользователя
-            this.addMessage("user_msg", this.msg);
-
-            // Очищаем поле ввода
+            this.addMessage(this.msg);
+            const message = this.msg;
             this.msg = "";
 
-            // Заглушка для ответа ИИ
-            setTimeout(() => {
-                this.addMessage("ai_msg", "Это заглушка для ответа ИИ.");
-            }, 1000);
+            this.isWaiting = true;
+            const resp = await sendChatMessage(message, this.messages, this.data.thread_id, this.data.dialog_id);
+            this.data = resp;
+            this.messages = resp.messages;
+            this.isWaiting = false;
         },
-        addMessage(type, text) {
-            this.messages.push({ type, text });
+        addMessage(text) {
+            const date = new Date();
+            this.messages.push({
+                "creator": "user",
+                "text": text,
+                "date_created": String(Math.floor(date / 1000))
+            });
+        },
+        formatedMessage(message) {
+            // Парсим строку из JSON-формата, если она экранирована
+            let parsedMessage = message;
+            try {
+                parsedMessage = JSON.parse(message); // Преобразуем строку в нормальный формат
+            } catch (error) {
+                console.warn("Строка не является JSON, оставляем как есть:", error);
+            }
+
+            // Убираем кавычки и заменяем \n на <br>
+            const new_msg = parsedMessage.replace(/"/g, "").replace(/\n/g, "<br>");
+
+            console.log(new_msg);
+            return new_msg;
         }
+    },
+    async created() {
+        const resp = await getChat(this.userData.id);
+        this.data = resp;
+        this.messages = resp.messages;
     }
 };
 </script>
 
 <style scoped>
-    .asistant {
+    .ass {
         display: flex;
         flex-direction: column;
         row-gap: 30px;
@@ -125,19 +150,19 @@ export default {
     .messages::-webkit-scrollbar-thumb {
         background: transparent;
     }
-    .ai_msg, .user_msg {
+    .assistant, .user {
         width: 60%;
         padding: 20px;
         color: white;
         font-size: 16px;
         font-family: 'OpenSans';
     }
-    .ai_msg {
+    .assistant {
         align-self: flex-start;
         background: #282847;
         border-radius: 0px 10px 10px 0px;
     }
-    .user_msg {
+    .user {
         align-self: flex-end;
         background: #50506F;
         border-radius: 10px 0px 0px 10px;
@@ -177,5 +202,25 @@ export default {
         align-self: flex-end;
         width: 100px;
         font-size: 12px;
+    }
+    /* HTML: <div class="loader"></div> */
+    .loader {
+    width: 60px;
+    aspect-ratio: 2;
+    --_g: no-repeat radial-gradient(circle closest-side,white 90%,rgba(255, 255, 255, 0));
+    background: 
+        var(--_g) 0%   50%,
+        var(--_g) 50%  50%,
+        var(--_g) 100% 50%;
+    background-size: calc(100%/3) 50%;
+    animation: l3 1s infinite linear;
+    margin-left: 30px;
+    margin-bottom: 30px;
+    }
+    @keyframes l3 {
+        20%{background-position:0%   0%, 50%  50%,100%  50%}
+        40%{background-position:0% 100%, 50%   0%,100%  50%}
+        60%{background-position:0%  50%, 50% 100%,100%   0%}
+        80%{background-position:0%  50%, 50%  50%,100% 100%}
     }
 </style>

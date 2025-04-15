@@ -6,23 +6,20 @@
             и в ответ получаете 10 просмотров вашего последнего поста. </span>
         <span>Если у Вас активен премиальный тариф, то Вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
         <div class="rotation_preview_btns">
-            <AppBadButton :text="text1" @click="makeRotation"/>
-            <AppGoodButton :text="text2" @click="openPlans" />
+            <AppBadButton class="btn" :text="text1" @click="makeRotation"/>
+            <AppGoodButton class="btn" :text="text2" @click="openPlans" />
         </div>
     </section>
     <section class="rotation" v-if="isRotation && !isPlans">
         <span class="counter">Просмотры {{ addGroups }} из {{ totalGroups }}</span>
         <div class="group">
-            <AppGroupOrUser style="min-width: 550px;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
+            <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <span>Необходимо просмотреть и поставить лайк на последний пост в группе, если есть закрепленное сообщение, пропустите его</span>
+            <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png">Не осталось пропусков!</span>
+            <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не поставили лайк на последний пост в группе, нажмите «Пропустить» или поставьте лайк.</span>
             <div class="groups_block_btns">
-                <AppGoodButton :text="text3" @click="subscribeGroup" />
-                <AppBadButton :text="`${text4} (${skipCounts})`" @click="skipGroup" />
-            </div>
-            <span class="error" v-if="noSkips">Не осталось пропусков!</span>
-            <div class="row" v-if="noSubscribe">
-                <img src="@/assets/images/cross.png" >
-                <span class="error">Вы не поставили лайк на последний пост в группе, нажмите «Пропустить» или поставьте лайк</span>
+                <AppGoodButton :text="text3" class="btn" @click="subscribeGroup" />
+                <AppBadButton :text="`${text4} (${skipCounts})`" class="btn" @click="skipGroup" />
             </div>
         </div>
     </section>
@@ -190,6 +187,8 @@
                 if (this.skipCounts == 0) 
                     this.noSkips = true
                 else {
+                    this.noSkips = false;
+                    this.noSubscribe = false;
                     this.skipCounts--;
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     if (this.groupsQueue.length === 0) {
@@ -265,10 +264,24 @@
     .rotation_preview span {
         color: white;
         font-size: 18px;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .rotation_preview_btns {
         display: flex;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: center;
+            row-gap: 21px;
+            margin-top: 10px;
+        }
+    }
+    .btn {
+        @media (max-width: 650px) {
+            width: 210px;
+        }
     }
     .rotation, .rotation_end {
         display: flex;
@@ -284,16 +297,28 @@
         background: #2F3251;
         width: fit-content;
         border-radius: 10px;
+        @media (max-width: 650px) {
+            font-size: 14px;
+            padding: 8px 21px;
+        }
     }
     .group {
         display: flex;
         flex-direction: column;
         row-gap: 50px;
+        @media (max-width: 650px) {
+            row-gap: 30px;
+        }
     }
     .groups_block_btns {
         display: flex;
         align-items: center;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: center;
+            row-gap: 21px;
+        }
     }
     span {
         font-size: 18px;
@@ -301,7 +326,15 @@
         font-family: 'OpenSans';
     }
     .error {
-        color: red;
+        color: #FF6666;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+    }
+    .error img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
     }
     .row {
         display: flex;

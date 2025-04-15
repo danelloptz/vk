@@ -64,7 +64,7 @@
             return {
                 selectedTime: "",
                 isDropdownVisibleTime: false,
-                times: ["30 секунд", "1 минута", "3 минуты", "5 минуты", "10 минут", "20 минут", "30 минут"],
+                times: ["30 секунд", "1 минута", "3 минуты"],
                 text1: "СГЕНЕРИРОВАТЬ",
                 text2: "ОТПРАВИТЬ",
                 nameCharacters: "",
@@ -149,6 +149,8 @@
         position: absolute;
         top: 23px;
         right: 23px;
+        width: 13px;
+        height: 13px;
         transition: transform 0.3s ease;
     }
 

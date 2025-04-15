@@ -1,13 +1,14 @@
 <template>
     <section class="balance">
-        <div class="switch" v-if="!isPackage" :key="isPackage">
+        <div class="switch" v-if="!isPackage && windowWidth > 650" :key="isPackage">
             <span
                 v-for="(item, index) in listSwtich"
                 :key="index"
-                :class="{ active: activeIndex === index }" 
-                @click="setActive(index)"
-            >{{ item }}</span>
+                :class="{ active: activeIndex === item.index }" 
+                @click="setActive(item.index)"
+            >{{ item.name }}</span>
         </div>
+        <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
             <AppRotationGroup v-if="activeIndex === 0" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
             <AppRotationVideo v-if="activeIndex === 1" :userData="userData" />
             <AppRotationPosts v-if="activeIndex === 2" :userData="userData" />
@@ -18,11 +19,13 @@
     import AppRotationGroup from '@/components/AppRotationGroup.vue';
     import AppRotationVideo from '@/components/AppRotationVideo.vue';
     import AppRotationPosts from '@/components/AppRotationPosts.vue';
+    import AppDropdown from '@/components/AppDropdown.vue';
     export default {
-        components: { AppRotationGroup, AppRotationVideo, AppRotationPosts },
+        components: { AppRotationGroup, AppRotationVideo, AppRotationPosts, AppDropdown },
         props: {
             isTarif: Boolean,
-            userData: Object
+            userData: Object,
+            windowWidth: Number
         },
         async created() {
             this.isPackage = this.isTarif;
@@ -30,7 +33,20 @@
         },
         data() {
             return {
-                listSwtich: ["Ротация групп", "Ротация видео", "Ротация постов"],
+                listSwtich: [
+                    {
+                        index: 0,
+                        name: "Ротация групп"
+                    },
+                    {
+                        index: 1,
+                        name: "Ротация видео"
+                    },
+                    {
+                        index: 2,
+                        name: "Ротация постов"
+                    }
+                ],
                 activeIndex: 0,
                 isPackage: false
             }
