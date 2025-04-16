@@ -94,6 +94,9 @@
         right: 0px;
         width: 438px;
         z-index: 999;
+        @media (max-width: 650px) {
+            width: 90vw;
+        }
     }
     .modal {
         width: 100%;
@@ -109,11 +112,23 @@
         display: flex;
         justify-content: space-between;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: center;
+        }
     }
     .col {
         display: flex;
         flex-direction: column;
         row-gap: 10px;
+        @media (max-width: 650px) {
+            align-items: center;
+        }
+    }
+    .col span {
+        @media (max-width: 650px) {
+            text-align: center;
+        }
     }
     .col img {
         width: 90px;
@@ -153,6 +168,11 @@
     .btn {
         width: 110px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            width: 190px;
+            margin-bottom: 20px;
+        }
+
     }
 
     .close {

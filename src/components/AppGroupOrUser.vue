@@ -132,9 +132,11 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
-                    this.tgData = this.objectData?.social_links.filter(link => link.type === "Telegram").at(-1) || [];
-                    this.whtData = this.objectData?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
-                    this.vkData = `https://vk.com/id${this.objectData.vk_id}`;
+                    if (this.userData?.social_links) {
+                        this.tgData = this.userData?.social_links.filter(link => link.type === "Telegram").at(-1) || [];
+                        this.whtData = this.userData?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
+                        this.vkData = `https://vk.com/id${this.userData.vk_id}`;
+                    }
                 }
             }
         }

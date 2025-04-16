@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div class="row">
+        <div class="zopaaaaa">
             <h2>Автопродвижение вашего бизнеса Intelektaz</h2>
             <div class="switch" 
                 @click="switchChange"
@@ -37,7 +37,7 @@
 
             <div v-for="(post, index) in posts" :key="index" class="row2">
                 <span  >{{ index + 1 }}</span>
-                <span  >{{ post.text }}</span>
+                <span  >Пост: <br>{{ post.text }}</span>
                 <img   :src="post.image" >
                 <a   href="#" @click.prevent="downloadImage(post.image)">Скачать</a>
             </div> 
@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { sendNewSettings, setAutoposting } from "@/services/user";
+import { getUserInfo, sendNewSettings, setAutoposting } from "@/services/user";
 import { getPosts } from "@/services/posts";
 
 export default {
@@ -55,19 +55,27 @@ export default {
         return {
             socials: [],
             posts: [],
+            userInfo: [],
             isAutoposting: true
         };
     },
     async created() {
-        this.isAutoposting = this.userData.autoposting;
+        const response = await getUserInfo(localStorage.getItem("token"));
+        if (!response) {
+            localStorage.clear();
+            this.$router.push('/');
+            return;
+        }
+        this.userInfo = response;
+        this.isAutoposting = this.userInfo.autoposting;
         
         const allSocials = [
             "VK", "Instagram", "Telegram", "TikTok", "Whatsapp", "Facebook"
         ];
 
         this.socials = allSocials.flatMap(type => {
-            // Все соцсети данного типа из userData.social_links
-            const existing = this.userData.social_links.filter(social => social.type === type);
+            // Все соцсети данного типа из userInfo.social_links
+            const existing = this.userInfo.social_links.filter(social => social.type === type);
 
             // Если соцсетей нет, добавляем пустую запись
             if (existing.length === 0) {
@@ -105,16 +113,16 @@ export default {
             const filtered = this.socials.filter(item => item.link != "");
             // Object.values(filtered).forEach(obj => delete obj.isNew);
 
-            this.userData.social_links = this.userData.social_links.filter(item => {
+            this.userInfo.social_links = this.userInfo.social_links.filter(item => {
                 return filtered.some(social => social.type === item.type && social.link === item.link);
             });
 
             filtered.forEach(item => {
                 let flag = true;
-                this.userData.social_links.forEach(social => {
+                this.userInfo.social_links.forEach(social => {
                     if (social.type == item.type && social.link == item.link) flag = false;
                 })
-                if (flag) this.userData.social_links.push(item);
+                if (flag) this.userInfo.social_links.push(item);
             });
 
             const payload = {
@@ -122,7 +130,7 @@ export default {
                 city: null,
                 sex:  null,
                 interests: null,
-                social_links: this.userData.social_links,
+                social_links: this.userInfo.social_links,
                 vip_offer: null,
                 group_link: null,
             };
@@ -132,8 +140,8 @@ export default {
         },
         async switchChange() {
             this.isAutoposting = !this.isAutoposting;
-            if (this.isAutoposting) await setAutoposting(this.userData.id, true)
-            else await setAutoposting(this.userData.id, false)
+            if (this.isAutoposting) await setAutoposting(this.userInfo.id, true)
+            else await setAutoposting(this.userInfo.id, false)
         }
     },
 };
@@ -150,11 +158,18 @@ export default {
         color: white;
         font-family: 'OpenSans';
         font-weight: bold;
+        @media (max-width: 650px) {
+            font-size: 16px;
+            width: fit-content;
+        }
     }
     span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     input {
         width: 360px;
@@ -168,24 +183,34 @@ export default {
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 600px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            width: 100%;
+            height: 50px;
         }
     }
     .row {
         display: flex;
         column-gap: 20px;
         align-items: center;
-        @media (max-width: 600px) {
-            flex-direction: column;
-            align-items: start;
-            row-gap: 15px;
+        @media (max-width: 650px) {
+            flex-direction: column !important;
+            align-items: start !important;
+            row-gap: 15px !important;
         }
+    }
+    .zopaaaaa {
+        display: flex;
+        column-gap: 15px;
+        align-items: center;
+        position: relative;
     }
     .sub_row {
         display: flex;
         align-items: center;
         column-gap: 20px;
+        @media (max-width: 650px) {
+            column-gap: 15px;
+        }
     }
     img {
         width: 60px;
@@ -193,6 +218,10 @@ export default {
         object-fit: cover;
         object-position: center;
         cursor: pointer;
+        @media (max-width: 650px) {
+            width: 39px;
+            height: auto;
+        }
     }
     .add {
         font-size: 16px;
@@ -208,6 +237,10 @@ export default {
         height: 60px;
         transition: .2s ease-in;
         cursor: pointer;
+        @media (max-width: 650px) {
+            padding: 12px 28px;
+            height: 41px;
+        }
     }
     .add:hover {
         background: rgba(255, 255, 255, 0.167);
@@ -238,22 +271,19 @@ export default {
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
-        @media (max-width: 600px) {
-            font-size: 12px;
-        }
     }
     .row2 span {
-        @media (max-width: 500px) {
+        @media (max-width: 6500px) {
             align-self: start;
-            font-size: 15px;
+            font-size: 14px;
         }
     }
-    .row2 span:first-of-type {
+    /* .row2 span:first-of-type {
         @media (max-width: 500px) {
             align-self: start;
             font-size: 20px;
         }
-    }
+    } */
     a {
         text-decoration: underline;
         cursor: pointer;

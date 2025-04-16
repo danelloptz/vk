@@ -19,6 +19,7 @@
     <section class="header">
         <AppModalMini 
             :visibility1="modalUser"
+            :windowWidth="windowWidth"
             :userData="userData"
             @update:visibility1="modalUser = $event"
             @isClicked="sendClick"
@@ -53,7 +54,10 @@
 
     export default {
         components: { AppPopup, AppModalMini, AppModal },
-        props: { userData: Object },
+        props: { 
+            userData: Object,
+            windowWidth: Number
+        },
         data() {
             return {
                 popupVisible: false,

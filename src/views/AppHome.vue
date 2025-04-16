@@ -45,7 +45,7 @@
                 <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" :userData="userInfo" @openTariff="openTarif" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" :userData="userInfo" />
                 <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
-                <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :businessUser="businessUser" />
+                <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :windowWidth="windowWidth" :businessUser="businessUser" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
                 <AppBannerAdds v-if="selectedComponent == 10 && !isReff" :userData="userInfo" />
                 <AppHelp v-if="selectedComponent === 7 && !isReff" @update-isInstructions="updateActiveComponent(6)" :userData="userInfo" />

@@ -64,10 +64,7 @@
                     />
                 </div>
             </div>
-            <div class="row" v-if="error">
-                <img src="@/assets/images/cross.png" />
-                <span class="error">{{ errorMessage }}</span>
-            </div>
+            <span class="error" v-if="error"> <img src="@/assets/images/cross.png" />{{ errorMessage }}</span>
             <img src="@/assets/images/auth_image.png" class="left_image">
             <img src="@/assets/images/auth_image.png" class="right_image">
             <AppGoodButton :text="text1" @click="makePayment" class="btn" />
@@ -252,6 +249,9 @@ export default {
         font-size: 18px;
         color: white;
         font-weight: bold;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .item {
         display: flex;
@@ -301,12 +301,13 @@ export default {
         @media (max-width: 1000px) {
             width: 80vw;
         }
-        @media (max-height: 700px) {
-            align-self: flex-start;
-        }
         @media (max-width: 650px) {
             width: 90vw;
             padding: 30px 15px;
+            padding-top: 40px;
+            display: flex;
+            flex-direction: column;
+            row-gap: 0px;
         }
     }
 
@@ -367,8 +368,8 @@ export default {
         @media (max-width: 900px) {
             font-size: 35px;
         }
-        @media (max-width: 500px) {
-            font-size: 30px;
+        @media (max-width: 650px) {
+            font-size: 32px;
         }
     }
     span {
@@ -384,7 +385,7 @@ export default {
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 17px;
+            font-size: 14px;
         }
     }
     .left_image {
@@ -399,7 +400,11 @@ export default {
             height: 70px;
         }
         @media (max-width: 650px) {
-            display: none;
+            width: 53px;
+            height: 53px;
+            top: 14px;
+            left: 28px;
+            transform: rotate(-140.31deg);
         }
     }
     .right_image {
@@ -429,14 +434,13 @@ export default {
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            height: 50px;
         }
     }
 
     .arrow_down {
         position: absolute;
-        top: 23px;
         right: 23px;
         width: 13px;
         height: 13px;
@@ -488,12 +492,22 @@ export default {
     .dropdown {
         position: relative;
         width: 360px;
-        @media (max-width: 500px) {
-            width:70vw;
+        display: flex;
+        align-items: center;
+        @media (max-width: 650px) {
+            width: 100%;
         }
     }
     .error {
-        color: red;
+        color: #FF6666;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+    }
+    .error img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
     }
     .row {
         margin-top: 20px;
@@ -513,5 +527,9 @@ export default {
     .btn {
         margin-top: 20px;
         position: relative;
+        @media (max-width: 650px) {
+            width: 190px;
+            align-self: center;
+        }
     }
 </style>

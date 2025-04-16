@@ -38,313 +38,321 @@
                 <span v-else style="font-size: 40px;"><strong>{{ "∞" }}</strong></span>
             </div>
         </div>
-        <table>
-            <div class="bg"></div>
-            <div class="gradient-column"></div>
-            <div class="gradient-column2"></div>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th v-for="(tarif, index) in tariffs" :key="index" :class="{ strong: tarif.package_name == 'Business' || tarif.package_name == 'Leader' }" >{{ tarif.package_name }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>ИИ генерация постов</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Автопостинг</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>ИИ менеджер продаж</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>SEO оптимизация и поисковый трафик</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>ИИ анализ группы</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>ИИ сценарии для видео</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>ИИ помощник</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>VIP предложение</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Business предложение</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Автоподписка</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Рефподписка</td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Баннерная реклама</td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Рекламная лента, USDT</td>
-                    <td><span>3</span></td>
-                    <td><span>2</span></td>
-                    <td><span>2</span></td>
-                    <td><span>1.5</span></td>
-                    <td><span>1</span></td>
-                    <td style="border-right: none;"><span>1</span></td>
-                </tr>
-                <tr>
-                    <td>Ежемесячный розыгрыш VIP тарифа</td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Ротация групп</td>
-                    <td><span>20/10</span></td>
-                    <td><span>15/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td style="border-right: none;"><span>10/10</span></td>
-                </tr>
-                <tr>
-                    <td>Ротация видео</td>
-                    <td><span>20/10</span></td>
-                    <td><span>15/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td style="border-right: none;"><span>10/10</span></td>
-                </tr>
-                <tr>
-                    <td>Ротация постов</td>
-                    <td><span>20/10</span></td>
-                    <td><span>15/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td><span>10/10</span></td>
-                    <td style="border-right: none;"><span>10/10</span></td>
-                </tr>
-                <tr>
-                    <td>Booster (30 USDT) </td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><span>Доступен, вкл. 0 шт.</span></td>
-                    <td><span>Включено 12 шт. (360 USDT)</span></td>
-                    <td style="border-right: none;"><span>Включено 12 шт. (360 USDT)</span></td>
-                </tr>
-                <tr>
-                    <td>Клиентский маркетинг, ур.</td>
-                    <td><span>1</span></td>
-                    <td><span>3</span></td>
-                    <td><span>5</span></td>
-                    <td><span>7</span></td>
-                    <td><span>8</span></td>
-                    <td style="border-right: none;"><span>10-15</span></td>
-                </tr>
-                <tr>
-                    <td>Бинар, %</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><span>8%</span></td>
-                    <td style="border-right: none;"><span>10-12%</span></td>
-                </tr>
-                <tr>
-                    <td>Быстрый старт</td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Matching bonus, ур.</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td style="border-right: none;"><span>5-10</span></td>
-                </tr>
-                <tr>
-                    <td>Ранг бонус</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Бонус Глобальный 1</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Бонус Глобальный 2</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Бонус Глобальный 3</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Авто-продвижение сервиса</td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok_green.png"></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td>Новые функции</td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><div class="minus"></div></td>
-                    <td><img src="@/assets/images/ok.png"></td>
-                    <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
-                </tr>
-                <tr>
-                    <td style="border-bottom: none;" class="start_col"></td>
-                    <td class="column" style="border-bottom: none;">
-                        <span><span class="big_letters">{{ tariffs[0]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                    </td>
-                    <td class="column"  style="border-bottom: none;">
-                        <div class="col2">
-                            <span><span class="big_letters">{{ tariffs[1]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                            <AppGoodButton :text="currTarrif.includes(plans[1]) ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
-                        </div>
-                    </td>
-                    <td class="column" style="border-bottom: none;">
-                        <div class="col2">
-                            <span><span class="big_letters">{{ tariffs[2]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                            <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
-                        </div>
-                    </td>
-                    <td class="column vip_col" style="border-bottom: none;">
-                        <div class="col2">
-                            <span><span class="big_letters">{{ tariffs[3]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                            <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
-                        </div>
-                    </td>
-                    <td class="column top_col" style="border-bottom: none;">
-                        <div class="col2">
-                            <span><span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                            <AppGoodButton :text="currTarrif.includes('Business') ? text2 : text1" class="btn_big" @click="selectPackage(plans[4])"/>
-                        </div>
-                    </td>
-                    <td class="column top_col" style="border-right: none; border-bottom: none;">
-                        <div class="col2">
-                            <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
-                            <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader') && +daysForBusiness >= 30) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn_big" @click="selectPackage(plans[5])"/>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <span style="text-align: start;">*Пакеты Business и Leader активируются сроком только на 1 год с максимальной скидкой и полным функционалом сервиса с дальнейшими доработками. Это несоизмеримо выгоднее, чем любой другой тариф.</span>
+        <div class="mob_help" v-if="windowWidth <= 650">            
+            <span>Листай вправо</span>
+            <img src="@/assets/images/arrow.png">
+        </div>
+        <div class="wrapper">
+            <div class="table">
+            <table>
+                <div class="bg"></div>
+                <div class="gradient-column"></div>
+                <div class="gradient-column2"></div>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th v-for="(tarif, index) in tariffs" :key="index" :class="{ strong: tarif.package_name == 'Business' || tarif.package_name == 'Leader' }" >{{ tarif.package_name }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ИИ генерация постов</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Автопостинг</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>ИИ менеджер продаж</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>SEO оптимизация и поисковый трафик</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>ИИ анализ группы</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>ИИ сценарии для видео</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>ИИ помощник</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>VIP предложение</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Business предложение</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Автоподписка</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Рефподписка</td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Баннерная реклама</td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Рекламная лента, USDT</td>
+                        <td><span>3</span></td>
+                        <td><span>2</span></td>
+                        <td><span>2</span></td>
+                        <td><span>1.5</span></td>
+                        <td><span>1</span></td>
+                        <td style="border-right: none;"><span>1</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ежемесячный розыгрыш VIP тарифа</td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Ротация групп</td>
+                        <td><span>20/10</span></td>
+                        <td><span>15/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td style="border-right: none;"><span>10/10</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ротация видео</td>
+                        <td><span>20/10</span></td>
+                        <td><span>15/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td style="border-right: none;"><span>10/10</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ротация постов</td>
+                        <td><span>20/10</span></td>
+                        <td><span>15/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td><span>10/10</span></td>
+                        <td style="border-right: none;"><span>10/10</span></td>
+                    </tr>
+                    <tr>
+                        <td>Booster (30 USDT) </td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><span>Доступен, вкл. 0 шт.</span></td>
+                        <td><span>Включено 12 шт. (360 USDT)</span></td>
+                        <td style="border-right: none;"><span>Включено 12 шт. (360 USDT)</span></td>
+                    </tr>
+                    <tr>
+                        <td>Клиентский маркетинг, ур.</td>
+                        <td><span>1</span></td>
+                        <td><span>3</span></td>
+                        <td><span>5</span></td>
+                        <td><span>7</span></td>
+                        <td><span>8</span></td>
+                        <td style="border-right: none;"><span>10-15</span></td>
+                    </tr>
+                    <tr>
+                        <td>Бинар, %</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><span>8%</span></td>
+                        <td style="border-right: none;"><span>10-12%</span></td>
+                    </tr>
+                    <tr>
+                        <td>Быстрый старт</td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Matching bonus, ур.</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td style="border-right: none;"><span>5-10</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ранг бонус</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Бонус Глобальный 1</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Бонус Глобальный 2</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Бонус Глобальный 3</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Авто-продвижение сервиса</td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok_green.png"></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td>Новые функции</td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><div class="minus"></div></td>
+                        <td><img src="@/assets/images/ok.png"></td>
+                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                    </tr>
+                    <tr>
+                        <td style="border-bottom: none;" class="start_col"></td>
+                        <td class="column" style="border-bottom: none;">
+                            <span><span class="big_letters">{{ tariffs[0]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                        </td>
+                        <td class="column"  style="border-bottom: none;">
+                            <div class="col2">
+                                <span><span class="big_letters">{{ tariffs[1]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                                <AppGoodButton :text="currTarrif.includes(plans[1]) ? text2 : text1" class="btn" @click="selectPackage(plans[1])"/>
+                            </div>
+                        </td>
+                        <td class="column" style="border-bottom: none;">
+                            <div class="col2">
+                                <span><span class="big_letters">{{ tariffs[2]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                                <AppGoodButton :text="currTarrif.includes(plans[2]) ? text2 : text1" class="btn" @click="selectPackage(plans[2])"/>
+                            </div>
+                        </td>
+                        <td class="column vip_col" style="border-bottom: none;">
+                            <div class="col2">
+                                <span><span class="big_letters">{{ tariffs[3]?.monthly_cost }}</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                                <AppGoodButton :text="currTarrif.includes(plans[3]) ? text2 : text1" class="btn" @click="selectPackage(plans[3])"/>
+                            </div>
+                        </td>
+                        <td class="column top_col" style="border-bottom: none;">
+                            <div class="col2">
+                                <span><span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                                <AppGoodButton :text="currTarrif.includes('Business') ? text2 : text1" class="btn_big" @click="selectPackage(plans[4])"/>
+                            </div>
+                        </td>
+                        <td class="column top_col" style="border-right: none; border-bottom: none;">
+                            <div class="col2">
+                                <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                                <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader') && +daysForBusiness >= 30) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn_big" @click="selectPackage(plans[5])"/>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+        <span style="text-align: start;" class="descr">*Пакеты Business и Leader активируются сроком только на 1 год с максимальной скидкой и полным функционалом сервиса с дальнейшими доработками. Это несоизмеримо выгоднее, чем любой другой тариф.</span>
         <div class="booster">
             <div class="booster-img"></div>
             <div class="col">
                 <span><strong>Booster</strong> - инструмент, который дает мощный всплеск подписчиков, просмотров видео, постов, за счет обнуления показателей внутренней статистики тарифа/пакета. Доступен на тарифе VIP, пакетах Business, Leader.</span>
-                <strong><span>Цена 30 USDT</span></strong>
+                <strong><span class="booster_cost">Цена 30 USDT</span></strong>
                 <AppGoodButton :text="text1" class="booster_btn" @click="buy"/>
             </div>
             
@@ -381,7 +389,8 @@ import { getTariffs, buyBooster } from "@/services/cash";
                 msg1: "Тариф был приобретён.",
                 isBooster: false,
                 boosterPrice: 100, // просто так,
-                daysForBusiness: 0
+                daysForBusiness: 0,
+                windowWidth: 0
             }
         },
         async created() {
@@ -401,6 +410,9 @@ import { getTariffs, buyBooster } from "@/services/cash";
                     if (item.package_name == "Business") this.daysForBusiness = this.getDays(item);
                 });
             }
+
+            this.windowWidth = window.innerWidth;
+            window.addEventListener('resize', this.handleResize);
            
         },
         watch: {
@@ -442,7 +454,10 @@ import { getTariffs, buyBooster } from "@/services/cash";
             },
             reload() {
                 window.location.reload();
-            }
+            },
+            handleResize() {
+                this.windowWidth = window.innerWidth;
+            },
         }
     };
 </script>
@@ -457,6 +472,9 @@ import { getTariffs, buyBooster } from "@/services/cash";
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .row {
         display: flex;
@@ -473,11 +491,37 @@ import { getTariffs, buyBooster } from "@/services/cash";
         align-items: center;
         column-gap: 7px;
     }
+    .wrapper {
+        width: 100%;
+        overflow: hidden;
+    }
+    .table {
+        width: 100%;
+        overflow-x: scroll;
+        padding-bottom: 19px;
+    }
     table {
         width: 100%;
         border-radius: 10px;
         position: relative;
         z-index: 9;
+    }
+    /* Для WebKit-браузеров (Chrome, Safari, Edge) */
+    .table::-webkit-scrollbar {
+        height: 27px; /* Высота горизонтального скроллбара */
+    }
+
+    .table::-webkit-scrollbar-track {
+        background: #2F3251; /* Убираем фон полосы прокрутки */
+        border-radius: 14px;
+    }
+
+    .table::-webkit-scrollbar-thumb {
+        width: 64px;
+        background: linear-gradient(to right, #7023EC, #A585DA); /* Цвет ползунка */
+        border-radius: 13.5px; /* Закругляем углы ползунка */
+        border: 4px solid #2F3251; /* "Отступ" через границу того же цвета, что и фон */
+        background-clip: content-box;
     }
     td {
         border-bottom: 1px solid rgba(255, 255, 255, 0.5);
@@ -587,11 +631,19 @@ import { getTariffs, buyBooster } from "@/services/cash";
         align-items: center;
         border-radius: 10px;
         padding: 30px 40px;
+        @media (max-width: 650px) {
+            padding: 18px 15px;
+            column-gap: 15px;
+            align-items: start;
+        }
     }
     .col {
         display: flex;
         flex-direction: column;
         row-gap: 15px;
+        @media (max-width: 650px) {
+            row-gap: 10px;
+        }
     }
     .col2 {
         display: flex;
@@ -606,6 +658,10 @@ import { getTariffs, buyBooster } from "@/services/cash";
         background-blend-mode: lighten;
         -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
         mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 100%);
+        @media (max-width: 650px) {
+            min-width: 80px;
+            height: 180px;
+        }
     }
 
     .booster span {
@@ -615,9 +671,20 @@ import { getTariffs, buyBooster } from "@/services/cash";
         text-align: start;
         align-self: auto;
         width: 100%;
+        @media (max-width: 650px) {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    }
+    .booster_cost {
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .booster_btn {
         width: 130px;
+        height: 41px;
+        font-size: 14px;
     }
     .large_letters {
         font-size: 32px !important;
@@ -638,5 +705,25 @@ import { getTariffs, buyBooster } from "@/services/cash";
     .vip_col {
         min-width: 120px;
         max-width: 120px;
+    }
+    .mob_help {
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+        align-self: end;
+        margin-bottom: -10px;
+    }
+    .mob_help span {
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .mob_help img {
+        width: 43px;
+    }
+    .desrc {
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
 </style>

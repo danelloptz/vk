@@ -1,21 +1,22 @@
 <template>
-    <section class="assembly" v-if="assemblyGroups">
-        <div 
-            class="item"
-            v-for="(group, index) in assemblyGroups"
-            v-show="index < itemsToShow"
-            :key="group.group_name"
-            @click="redirectToGroup(group.group_link)"
-        >
-            <img
-                :src="group.group_photo">
-            <!-- <span v-else>Изображение не найдено</span> -->
-            <div class="text_block">
-                <span>{{ group.group_name }}</span>
+    <div class="wrapper">
+        <section class="assembly" v-if="assemblyGroups">
+            <div 
+                class="item"
+                v-for="(group) in assemblyGroups"
+                :key="group.group_name"
+                @click="redirectToGroup(group.group_link)"
+            >
+                <img
+                    :src="group.group_photo">
+                <!-- <span v-else>Изображение не найдено</span> -->
+                <div class="text_block">
+                    <span>{{ group.group_name }}</span>
+                </div>
             </div>
-        </div>
-        <img src="@/assets/images/plus.png" class="add_group" @click="addGroup">
-    </section>
+        </section>
+    <img src="@/assets/images/plus.png" class="add_group" @click="addGroup">
+    </div>
 </template>
 
 <script>
@@ -77,6 +78,12 @@
 </script>
 
 <style scoped>
+    .wrapper {
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
     .assembly {
         width: 100%;
         display: flex;
@@ -86,9 +93,25 @@
         background-color: #2f3251a8;
         border-radius: 10px;
         position: relative;
+        overflow-x: auto;
+        scrollbar-color: #2f3251 transparent;
+        scrollbar-width: thin;
+    }
+   /* Для WebKit-браузеров (Chrome, Safari, Edge) */
+    .assembly::-webkit-scrollbar {
+        height: 8px; /* Высота горизонтального скроллбара */
+    }
+
+    .assembly::-webkit-scrollbar-track {
+        background: transparent; /* Убираем фон полосы прокрутки */
+    }
+
+    .assembly::-webkit-scrollbar-thumb {
+        background: #2f3251; /* Цвет ползунка */
+        border-radius: 4px; /* Закругляем углы ползунка */
     }
     .item {
-        width: 150px;
+        min-width: 150px;
         height: 150px;
         border-radius: 10px;
         position: relative;
@@ -97,7 +120,7 @@
         align-items: end;
         cursor: pointer;
         @media (max-width: 650px) {
-            width: 95.88px;
+            min-width: 95.88px;
             height: 95.88px;
         }
     }
@@ -137,7 +160,7 @@
         height: 60px;
         z-index: 11;
         position: absolute;
-        right: -20px;
+        right: -30px;
         cursor: pointer;
         transition: .3s;
         @media (max-width: 650px) {

@@ -16,10 +16,26 @@
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
-            <span>Почта: {{ emailData }}</span>
-            <span>Вконтакте: https://vk.com/id{{ userData.vk_id }}</span>
-            <span v-if="tgData?.link">Telegram: {{ tgData.link }}</span>
-            <span v-if="whtData?.link">WhatsApp: {{ whtData.link }}</span>
+            <span v-if="windowWidth > 650">Вконтакте: https://vk.com/id{{ userData.vk_id }}</span>
+            <span v-if="tgData?.link && windowWidth > 650">Telegram: {{ tgData.link }}</span>
+            <span v-if="whtData?.link && windowWidth > 650">WhatsApp: {{ whtData.link }}</span>
+            <span v-if="windowWidth > 650 && emailData">Почта: {{ emailData }}</span>
+            <div class="mobile_links_row" v-if="windowWidth <= 650">
+                <span>Вконтакте: </span>
+                <span>https://vk.com/id{{ userData.vk_id }}</span>
+            </div>
+            <div class="mobile_links_row" v-if="tgData?.link && windowWidth <= 650">
+                <span>Telegram: </span>
+                <span>{{ tgData.link }}</span>
+            </div>
+            <div class="mobile_links_row" v-if="whtData?.link && windowWidth <= 650">
+                <span>WhatsApp: </span>
+                <span>{{ whtData.link }}</span>
+            </div>
+            <div class="mobile_links_row" v-if="emailData && windowWidth <= 650">
+                <span>Почта: </span>
+                <span>{{ emailData }}</span>
+            </div>
         </div>
         
         <div class="row">
@@ -68,7 +84,7 @@
                 placeholder="Город" >
         </div>
         
-        <div class="dropdown" style="margin-top: 70px;">
+        <div class="dropdown" :style="{ marginTop: windowWidth > 650 ? '70px' : '30px' }">
             <input
                 v-model="searchQueryGender"
                 type="text"
@@ -157,16 +173,25 @@
                 maxlength="200"
             ></textarea>
             <AppVipUser 
-                style="height: 100%;"
+                v-if="windowWidth > 650"
                 :vipUser="newUserData" 
                 :vkData="vkData"
                 :tgData="tgData"
                 :whtData="whtData"
+                :windowWidth="windowWidth"
             />
         </div>
         <input  
             v-model="siteLink" 
             placeholder="Сайт" >
+        <AppVipUser 
+            v-if="windowWidth <= 650"
+            :vipUser="newUserData" 
+            :vkData="vkData"
+            :tgData="tgData"
+            :whtData="whtData"
+            :windowWidth="windowWidth"
+        />
         <AppGroupOrUser 
             :objectData="newUserData"
             :isSettings="true"
@@ -194,6 +219,7 @@ export default {
     components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser },
     props: { 
         businessUser: Object,
+        windowWidth: Number
     },
     data() {
         return {
@@ -249,17 +275,20 @@ export default {
             return this.sentence.slice(0, 90);
         },
         newUserData() {
-            return {
-                "avatar": this.userData?.avatar_url,
-                "name": this.userData?.name,
-                "package_name": this.userData?.packages.at(-1)?.package_name,
-                "vip_offer_text": this.sentence,
-                "group_link": this.siteLink,
-                "group": this.userData?.group,
-                "packages": this.userData?.packages,
-                "vk_id": this.userData?.vk_id,
-                "social_links": this.userData?.social_links
-            }
+            if (this.userData?.packages) {
+                return {
+                    "avatar": this.userData?.avatar_url,
+                    "name": this.userData?.name,
+                    "package_name": this.userData?.packages.at(-1)?.package_name,
+                    "vip_offer_text": this.sentence,
+                    "group_link": this.siteLink,
+                    "group": this.userData?.group,
+                    "packages": this.userData?.packages,
+                    "vk_id": this.userData?.vk_id,
+                    "social_links": this.userData?.social_links
+                }
+            } else return {};
+            
         },
         vkData() {
             return `https://vk.com/id${this.userData.vk_id}`;
@@ -388,23 +417,24 @@ export default {
                     this.vkGroupLink = this.userData.group.group_link;
                 if (this.userData.video?.video_link)
                     this.vkVideoLink = this.userData.video?.video_link;
+                if (this.userData.email)
+                    this.emailData = this.userData.email == '""' ? "" : this.userData.email;
                 if (this.userData.country)
-                    this.searchQuery = this.userData.country;
+                    this.searchQuery = this.userData.country == '""' ? "" : this.userData.country;
                 if (this.userData.city)
-                    this.selectedCity = this.userData.city;
+                    this.selectedCity = this.userData.city == '""' ? "" : this.userData.city;
                 if (this.userData.sex)
                     this.searchQueryGender = this.userData.sex_db;
                 if (this.userData.interests) 
                     this.selectedInterests = [...this.userData.interests];
-                // if (this.userData.group?.vip_offer) {
-                    this.sentence = this.userData?.vip_offer_text;
-                    this.siteLink = this.userData?.vip_offer_link;
-                // }
+                    this.sentence = this.userData?.vip_offer_text == '""' ? "" : this.userData?.vip_offer_text;
+                    this.siteLink = this.userData?.vip_offer_link == '""' ? "" : this.userData?.vip_offer_link;
             },
             async saveSettings() {
                 if (this.disabled) return;
                 this.disabled = true;
                 const payload = {
+                    email: this.emailData != this.userData.email ? this.emailData : null,
                     country: this.searchQuery != this.userData.country ? this.searchQuery : null,
                     city: this.selectedCity != this.userData.city ? this.selectedCity : null,
                     sex: this.searchQueryGender != this.userData.sex_db ? this.searchQueryGender : null,
@@ -446,9 +476,10 @@ export default {
         @media (max-width: 900px) {
             width: 250px;
         }
-        @media (max-width: 500px) {
-            height: 50px;
-            width: 200px;
+        @media (max-width: 650px) {
+            height: 51px;
+            width: 210px;
+            align-self: center;
         }
     }
     .card {
@@ -462,8 +493,8 @@ export default {
         @media (max-width: 700px) {
             height: auto;
         }
-        @media (max-width: 500px) {
-            padding: 50px;
+        @media (max-width: 650px) {
+            padding: 15px;
         }
     }
 
@@ -481,11 +512,17 @@ export default {
         padding: 30px;
         background: #2F3251;
         border-radius: 10px;
+        @media (max-width: 650px) {
+            padding: 20px 10px;
+        }
     }
     .auto span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .settings {
         display: flex;
@@ -498,22 +535,37 @@ export default {
         flex-direction: column;
         row-gap: 10px;
     }
+    .mobile_links_row {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        column-gap: 20px;
+    }
+    .mobile_links_row span {
+        word-break: break-all;
+    }
     .row {
         display: flex;
         align-items: center;
         column-gap: 20px;
         flex-wrap: wrap;
         row-gap: 10px;
+        @media (max-width: 650px) {
+            row-gap: 20px;
+        }
     }
     .row2 {
         display: flex;
         align-items: center;
         column-gap: 10px;
+        width: fit-content;
     }
     .row2 span {
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .row span {
         font-size: 16px;
@@ -529,6 +581,13 @@ export default {
         height: 60px;
         transition: .2s ease-in;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        @media (max-width: 650px) {
+            font-size: 14px !important;
+            height: 41px;
+            padding: 12px 28px;
+        }
     }
     .row span:hover {
         background: rgba(255, 255, 255, 0.167);
@@ -539,6 +598,9 @@ export default {
         color: white;
         font-family: 'OpenSans';
         font-weight: bold;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     h1, h2, span, img {
         z-index: 5;
@@ -546,8 +608,11 @@ export default {
     .dropdown {
         position: relative;
         width: 360px;
-        @media (max-width: 500px) {
-            width:70vw;
+        display: flex;
+        align-items: center;
+        @media (max-width: 650px) {
+            width: 100%;
+            height: 50px;
         }
     }
 
@@ -563,8 +628,9 @@ export default {
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            width: 100% !important;
+            height: 50px;
         }
     }
     textarea {
@@ -582,8 +648,8 @@ export default {
         color: rgba(255, 255, 255, 0.5);
         word-wrap: break-word;
         resize: none;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            width: 100%;
         }
     }
     .highlighted-text {
@@ -615,7 +681,6 @@ export default {
 
     .arrow_down {
         position: absolute;
-        top: 23px;
         right: 23px;
         transition: transform 0.3s ease;
         width: 13px;
@@ -628,9 +693,10 @@ export default {
 
     .dropdown-menu {
         position: absolute;
+        top: 100%;
         width: 100%;
         border: 1px solid white;
-        border-radius: 10px;
+        border-radius: 0px 0px 10px 10px;
         max-height: 200px;
         overflow-y: scroll;
         list-style: none;
@@ -679,7 +745,7 @@ export default {
         }
     }
     span {
-        font-size: 24px;
+        font-size: 18px;
         font-family: 'OpenSans';
         font-weight: 400;
         line-height: 32.68px;
@@ -691,13 +757,7 @@ export default {
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 17px;
-        }
-        @media (max-width: 550px) {
-            font-size: 15px;
-        }
-        @media (max-width: 450px) {
-            font-size: 13px;
+            font-size: 14px;
         }
     }
     hr {
@@ -712,12 +772,9 @@ export default {
         font-family: 'OpenSans';
         font-size: 40px;
         color: white;
-    }
-
-    span {
-        color: white;
-        font-size: 18px;
-        font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 20px;
+        }
     }
 
     .selected-countries {
@@ -756,10 +813,14 @@ export default {
     }
 
     .checkbox {
-        width: 30px;
+        width: 30px !important;
         height: 30px;
         background: none;
         border: 1px solid white;
         border-radius: 3px;
+        @media (max-width: 650px) {
+            width: 20px !important;
+            height: 20px;
+        }
     }
 </style>

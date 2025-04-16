@@ -134,11 +134,17 @@
                                 <span>{{ index + 1 }}</span>
                             </td>
                             <td class="plan_item">
-                                <span :contenteditable="isEditable">{{ item?.topic_name }}</span>
+                                <div class="line_wrapper" v-if="(isLoading && step == 0 && !isRegenerate) || (isRegenerate && step == 1)">
+                                    <div class="line"></div>
+                                </div>
+                                <span v-if="!(isLoading && step == 0)" :contenteditable="isEditable">{{ item?.topic_name }}</span>
                             </td>
                             <td class="plan_item">
-                                <span :contenteditable="isEditable" v-html="formatedPost(item?.post_text[item.chose_post_index])"></span>
-                                <div class="plan_item_variants">
+                                <div class="line_wrapper" v-if="(isLoading && step == 1 && !isRegenerate) || (isRegenerate && step == 2)">
+                                    <div class="line"></div>
+                                </div>
+                                <span v-if="!(isLoading && step == 0)" :contenteditable="isEditable" v-html="formatedPost(item?.post_text[item.chose_post_index])"></span>
+                                <div class="plan_item_variants" v-if="!(isLoading && step == 0)">
                                     <AppGoodButton 
                                         v-for="(name, index_var) in variants.slice(0, item.post_text.length)" 
                                         :key="index_var" 
@@ -150,8 +156,11 @@
                                 </div>
                             </td>
                             <td class="plan_item">
-                                <img :src="item?.image_links[item.chose_image_index]" class="banner" />
-                                <div class="plan_item_variants">
+                                <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
+                                    <div class="line"></div>
+                                </div>
+                                <img v-if="!(isLoading && step == 0)" :src="item?.image_links[item.chose_image_index]" class="banner" />
+                                <div class="plan_item_variants" v-if="!(isLoading && step == 0)">
                                     <AppGoodButton 
                                         v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
                                         :key="index_var" 
@@ -279,6 +288,7 @@
                 plan: null,
                 aprovedPostsIndexes: [],
                 isLoading: false,
+                isRegenerate: false,
                 step: -1,
                 currBanners: [],
                 currTexts: [],
@@ -371,16 +381,18 @@
                 return post.replace(/\n/g, "<br>");
             },
             async confirmCurrentPosts() {
+                this.step = this.getStep();
                 const filtered = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 if (filtered.length > 0) {
                     this.plan = filtered;
                     this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
                     this.allCheckboxes = false;
                     this.isLoading = true;
+                    const param = this.step == 0 || this.step == 1 ? 20000 : 0;
+                    this.Timer(this.plan.length, param);
 
                     console.log(this.step);
                     if (this.step == 1) {
-                        console.log("STEP 1", this.step);
                         try {
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
                             let resp = await generatePostsText(this.plan, localStorage.getItem("token"));
@@ -397,7 +409,6 @@
 
                     console.log(this.step);
                     if (this.step == 2) {
-                        console.log("STEP 2", this.step);
                         try {
                             this.plan.forEach(item => {
                                 if (!item.chose_post_index) item.chose_post_index = 0;
@@ -426,7 +437,6 @@
                         }
                         
                     }
-                    else this.step++;
 
                     this.isLoading = false;
                 }
@@ -505,10 +515,11 @@
                 this.step = 0;
                 this.saveSettings();
                 this.isLoading = true;
+                this.Timer(this.plan.length, 20000);
 
                 const topics = await generateTopics(localStorage.getItem("token"));
                 this.plan = topics;
-                this.step++;
+                // this.step++;
 
                 this.isLoading = false;
             },
@@ -516,14 +527,19 @@
                 this.isEditableContent = !this.isEditableContent;
             },
             async regenerateCurrentPosts() {
+                this.step = this.getStep();
                 this.isLoading = true;
+                this.isRegenerate = true;
+
+                const param = this.step == 0 || this.step == 1 || this.step == 2 ? 20000 : 0;
+                this.Timer(this.plan.length, param);
 
                 const checked_plan = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 const max_text = Math.max(...this.countsOfTexts);
                 const max_banners = Math.max(...this.countsOfBanners);
                 this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
                 this.allCheckboxes = false;
-
+                console.log(this.step);
                 if (this.step == 1) {
                     try {
                         const topics = await regenerateThemes(checked_plan, localStorage.getItem("token"));
@@ -558,6 +574,7 @@
                 }
 
                 this.isLoading = false;
+                this.isRegenerate = false;
             },
             getStep() {
                 console.log(this.plan);
@@ -600,7 +617,29 @@
                     return false;
                 }
                 
-            }
+            },
+            Timer(countOfPosts, time) {
+                let initialLineWidth = 0; // Начальная ширина полосы загрузки (в пикселях)
+                let maxLineWidth = 233; // Максимальная ширина полосы загрузки (в пикселях)
+                let totalDuration = time ? time : (Math.ceil(countOfPosts / 7)) * 60 * 1000; // Общее время анимации (3 секунды в миллисекундах)
+
+                let startTime = Date.now(); // Время начала анимации
+
+                function updateProgress() {
+                    let lines = document.querySelectorAll('.line');
+                    let elapsedTime = Date.now() - startTime;
+                    let progress = Math.min(elapsedTime / totalDuration, 1);
+
+                    let newLineWidth = initialLineWidth + (maxLineWidth - initialLineWidth) * progress;
+                    lines.forEach(line => line.style.width = `${newLineWidth}px`);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateProgress);
+                    }
+                }
+            // Запускаем анимацию
+            requestAnimationFrame(updateProgress);
+        }
         },
     };
 </script>
@@ -933,5 +972,23 @@
         width: min-content;
         line-height: 2;
         height: min-content;
+    }
+    .line_wrapper {
+        width: 233px;
+        height: 15px;
+        border: 1px solid white;
+        /* padding: 5px; */
+        border-radius: 7.5px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 2.68px;
+    }
+    .line {
+        width: 0px;
+        height: 9.64px;
+        background: #7023EC;
+        transition: .2s ease-in;
+        border-radius: 4.8px;   
     }
 </style>
