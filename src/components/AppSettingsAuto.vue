@@ -35,12 +35,25 @@
                 </div>
             </div>
 
-            <div v-for="(post, index) in posts" :key="index" class="row2">
-                <span  >{{ index + 1 }}</span>
-                <span  >Пост: <br>{{ post.text }}</span>
-                <img   :src="post.image" >
-                <a   href="#" @click.prevent="downloadImage(post.image)">Скачать</a>
+            <div v-for="(post, index) in paginatedPosts" :key="index" class="row2">
+                <span  >{{ (index + 1) + (currentPage - 1)*pageSize }}</span>
+                <span  >Пост: <br>{{ post.text || post.post_text[post.chose_post_index] }}</span>
+                <img   :src="post.image || post.image_links[post.chose_image_index]" >
+                <a   href="#" @click.prevent="downloadImage(post.image || post.image_links[post.chose_image_index])">Скачать</a>
             </div> 
+        </div>
+
+        <div class="switchs" v-if="totalPages > 1">
+            <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
+
+            <span v-for="page in visiblePages" :key="page" @click="goToPage(page)" 
+                  :class="{ active: page === currentPage }">
+                {{ page }}
+            </span>
+
+            <span v-if="currentPage + 2 < totalPages">...</span>
+
+            <img src="@/assets/images/arrow.svg" @click="nextPage" v-if="currentPage < totalPages" />
         </div>
         
     </div>
@@ -49,6 +62,7 @@
 <script>
 import { getUserInfo, sendNewSettings, setAutoposting } from "@/services/user";
 import { getPosts } from "@/services/posts";
+import { getContentPlan } from "@/services/ai";
 
 export default {
     data() {
@@ -56,8 +70,31 @@ export default {
             socials: [],
             posts: [],
             userInfo: [],
-            isAutoposting: true
+            isAutoposting: true,
+            currentPage: 1, // Текущая страница
+            pageSize: 5, // Количество постов на странице
         };
+    },
+    computed: {
+        totalPages() {
+            return Math.ceil(this.posts.length / this.pageSize);
+        },
+        visiblePages() {
+            const pages = [];
+            for (
+                let i = Math.max(1, this.currentPage - 2);
+                i <= Math.min(this.totalPages, this.currentPage + 2);
+                i++
+            ) {
+                pages.push(i);
+            }
+            return pages;
+        },
+        paginatedPosts() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            const end = start + this.pageSize;
+            return this.posts.slice(start, end);
+        },
     },
     async created() {
         const response = await getUserInfo(localStorage.getItem("token"));
@@ -90,8 +127,14 @@ export default {
             }));
         });
 
-        const posts = await getPosts();
-        this.posts = posts;
+        const plan = await getContentPlan(localStorage.getItem("token"));
+        const isPlan = plan.filter((item) => item.date_publication).length > 0;
+        console.log(isPlan);
+
+        this.posts = isPlan ? plan : await getPosts();
+
+        // const posts = await getPosts();
+        // this.posts = posts;
 
     },
     methods: {
@@ -142,7 +185,22 @@ export default {
             this.isAutoposting = !this.isAutoposting;
             if (this.isAutoposting) await setAutoposting(this.userInfo.id, true)
             else await setAutoposting(this.userInfo.id, false)
-        }
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
+        },
+        goToPage(page) {
+            if (page >= 1 && page <= this.totalPages) {
+                this.currentPage = page;
+            }
+        },
     },
 };
 </script>
@@ -332,4 +390,33 @@ export default {
         flex-direction: column;
         row-gap: 30px;
     }
+    .switchs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+.switchs img {
+    cursor: pointer;
+    width: 15px;
+    filter: invert(100%);
+    width: 15px;
+    height: 15px;
+}
+.switchs span {
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+}
+.switchs span.active {
+    background-color: #111433;
+    color: white;
+}
+a {
+    color: white;
+    font-family: 'OpenSans';
+}
 </style>

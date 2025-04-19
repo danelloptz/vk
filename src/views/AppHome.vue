@@ -5,7 +5,7 @@
         <section class="content">
             <div class="left">
                 <AppNavigation
-                    v-if="windowWidth > 1000"
+                    v-if="windowWidth > 1200"
                     :indexPage="selectedComponent" 
                     :userData="userInfo"
                     @update:indexPage="selectedComponent = $event" 
@@ -43,7 +43,7 @@
                 <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
                 <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :userData="userInfo" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
                 <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" :userData="userInfo" @openTariff="openTarif" />
-                <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" :userData="userInfo" />
+                <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
                 <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
                 <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :windowWidth="windowWidth" :businessUser="businessUser" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
@@ -61,7 +61,7 @@
                 <AppNews v-if="selectedComponent === 11 && !isReff" />
             </div>
         </section>
-        <section class="wrapper_nav_mobile" v-if="windowWidth <= 1000">
+        <section class="wrapper_nav_mobile" v-if="windowWidth <= 1200">
             <div class="nav_mobile" v-if="isBurger">
                 <div 
                     class="item" 
@@ -255,7 +255,7 @@
             },
             checkWindowWidth() {
                 // аналогично для блока рекламы надо
-                this.orientation = window.innerWidth <= 1000 ? this.orientationH : this.orientationV;
+                this.orientation = window.innerWidth <= 1200 ? this.orientationH : this.orientationV;
                 console.log(this.orientation);
             },
             async updateActiveComponent(index) {
@@ -340,7 +340,7 @@
         display: flex;
         column-gap: 38px;
         row-gap: 30px;
-        @media (max-width: 1000px) {
+        @media (max-width: 1200px) {
             flex-direction: column;
         }
     }
@@ -349,7 +349,7 @@
         display: flex;
         flex-direction: column;
         row-gap: 30px;
-        @media (max-width: 1000px) {
+        @media (max-width: 1200px) {
             display: grid;
             grid-template-columns: 1fr 2fr;
             width: 100%;

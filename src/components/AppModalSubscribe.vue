@@ -6,8 +6,8 @@
             <span>При отключении функции подписки отключается полностью весь входящий поток подписчиков на вашу группу с сервиса Intelektaz.</span>
             <span>Вы подтверждаете отключение функции подписки?</span>
             <div class="row">
-                <AppBadButton :text="text1" @click="confirm" />
-                <AppBadButton :text="text2" @click="cancel" />
+                <AppBadButton class="btn" :text="text1" @click="confirm" />
+                <AppBadButton class="btn" :text="text2" @click="cancel" />
             </div>
         </section>
     </div>
@@ -166,7 +166,7 @@ export default {
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 17px;
+            font-size: 16px;
         }
     }
     .left_image {
@@ -202,5 +202,8 @@ export default {
     .row {
         display: flex;
         column-gap: 30px;
+    }
+    .btn {
+        width: 140px;
     }
 </style>

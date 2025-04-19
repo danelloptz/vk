@@ -28,6 +28,8 @@
             return {
                 assemblyGroups: null,
                 itemsToShow: 10,
+                scrollInterval: null,
+                windowWidth: 0
             }
         },
         async created() {
@@ -46,6 +48,7 @@
 
             this.updateItemsToShow();
             window.addEventListener("resize", this.updateItemsToShow);
+            if (this.windowWidth <= 1000) this.startAutoScroll();
         },
         beforeUnmount() {
             window.removeEventListener("resize", this.updateItemsToShow);
@@ -53,6 +56,7 @@
         methods: {
             updateItemsToShow() {
                 const width = window.innerWidth;
+                this.windowWidth = width;
                 if (width >= 1920) this.itemsToShow = 10;
                 else if (width >= 1700) this.itemsToShow = 9;
                 else if (width >= 1440) this.itemsToShow = 8;
@@ -72,6 +76,36 @@
             },
             addGroup() {
                 this.$emit("comeToAssembly");
+            },
+            startAutoScroll() {
+                let scrollPosition = 0; // Текущая позиция прокрутки
+                const scrollStep = this.windowWidth > 650 ? 150 : 105.88; // Шаг прокрутки (ширина одного элемента + отступ)
+
+                this.scrollInterval = setInterval(() => {
+                    const container = document.querySelector('.assembly');
+                    if (!container) return;
+
+                    const maxScroll = container.scrollWidth - container.clientWidth;
+
+                    // Если достигли конца, возвращаемся в начало
+                    console.log(scrollPosition, maxScroll);
+                    if (scrollPosition == maxScroll) {
+                        scrollPosition = 0;
+                        console.log("Im here");
+                    }
+                    else {
+                        scrollPosition += scrollStep * 3;
+                        if (scrollPosition > maxScroll) {
+                            scrollPosition = maxScroll;
+                            console.log(scrollPosition, maxScroll);
+                        } 
+                    } 
+
+                    container.scrollTo({
+                        left: scrollPosition,
+                        behavior: 'smooth' // Плавная прокрутка
+                    });
+                }, 10000); // Каждые 3 секунды
             }
         }
     };

@@ -17,20 +17,23 @@
                 <span>ID: {{ userData.vk_id }}</span>
             </div>
         </div>
-        <div class="switch_wrapper">
+        <div class="switch_wrapper" v-if="windowWidth > 650">
             <div class="switch">
                 <span
                     v-for="(item, index) in listSwtich"
                     :key="index"
-                    :class="{ active: activeIndex === index }"
-                    @click="setActive(index)"
-                >{{ item }}</span>
+                    :class="{ active: activeIndex === item.index }"
+                    @click="setActive(item.index)"
+                >{{ item.name }}</span>
             </div>
             <img src="@/assets/images/eye.png" class="eye" v-if="showNums" @click="switchShowNums">
             <img src="@/assets/images/close_eye.png" class="eye" v-if="!showNums" @click="switchShowNums">
         </div>
+        <AppDropdown :listSwtich="listSwtich" v-if="windowWidth <= 650" @update-index="setActive"/>
+        <img src="@/assets/images/eye.png" class="eye" v-if="showNums && windowWidth <= 650" @click="switchShowNums">
+        <img src="@/assets/images/close_eye.png" class="eye" v-if="!showNums && windowWidth <= 650" @click="switchShowNums">
         
-        <div class="stats">
+        <div class="stats" v-if="windowWidth > 900">
             <div class="stats_row first">
                 <div class="stats_item" v-for="(item, index) in maskedStats.slice(0, 3)" :key="index">
                     <img :src="require(`@/assets/images/${item.img}`)">
@@ -50,7 +53,43 @@
                 </div>
             </div>
         </div>
-        <AppGoodButton :text="text1" @click="openLinks" />
+        <div class="stats" v-if="windowWidth <= 900">
+            <div class="row_mob">
+                <div class="stats_item" v-for="(item, index) in maskedStats.slice(0, 2)" :key="index">
+                    <img :src="require(`@/assets/images/${item.img}`)">
+                    <div class="item_col">
+                        <h3>{{ item.num }}</h3>
+                        <span>{{ item.text }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stats_item" v-for="(item, index) in maskedStats.slice(2, 3)" :key="index">
+                <img :src="require(`@/assets/images/${item.img}`)">
+                <div class="item_col">
+                    <h3>{{ item.num }}</h3>
+                    <span>{{ item.text }}</span>
+                </div>
+            </div>
+            <div class="row_mob">
+                <div class="stats_item" v-for="(item, index) in maskedStats.slice(3, 5)" :key="index">
+                    <img :src="require(`@/assets/images/${item.img}`)">
+                    <div class="item_col">
+                        <h3>{{ item.num }}</h3>
+                        <span>{{ item.text }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row_mob">
+                <div class="stats_item" v-for="(item, index) in maskedStats.slice(5, 7)" :key="index">
+                    <img :src="require(`@/assets/images/${item.img}`)">
+                    <div class="item_col">
+                        <h3>{{ item.num }}</h3>
+                        <span>{{ item.text }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <AppGoodButton :text="text1" class="btn" @click="openLinks" />
 
         <div class="text_row">
             <div class="text_row_item">
@@ -127,13 +166,26 @@ import AppStructureBinar from "@/components/AppStructureBinar.vue";
 import AppStructureLinear from "@/components/AppStructureLinear.vue";
 import { setLeg, getStructureInfo, findParents } from '@/services/user';
 import AppModal from '@/components/AppModal.vue';
+import AppDropdown from "@/components/AppDropdown.vue";
 
 export default {
-    components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar, AppStructureLinear, AppModal },
-    props: { userData: Object },
+    components: { AppGoodButton, AppBadButton, AppMain, AppStructureBinar, AppStructureLinear, AppModal, AppDropdown },
+    props: { 
+        userData: Object,
+        windowWidth: Number
+    },
     data() {
         return {
-            listSwtich: ["Линейная структура", "Бинарная структура"],
+            listSwtich: [
+                    {
+                        index: 0,
+                        name: "Линейная структура"
+                    },
+                    {
+                        index: 1,
+                        name: "Бинарная структура"
+                    },
+                ],
             activeIndex: 0,
             showNums: true,
             text1: "РЕФЕРАЛЬНЫЕ ССЫЛКИ",
@@ -610,5 +662,18 @@ export default {
   }
   .btn {
     width: 150px;
+  }
+  .row_mob {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 10px;
+  }
+  .row_mob .stats_item {
+    width: 100;
+  }
+  .btn {
+    width: 230px;
+    height: 40px;
+    align-self: center;
   }
 </style>

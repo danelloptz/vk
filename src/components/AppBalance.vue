@@ -169,7 +169,9 @@
         cursor: pointer;
         display: flex;
         align-items: center;
+        justify-content: center;
         transition: .1s ease-in;
+        text-align: center;
         @media (max-width: 1300px) {
             font-size: 16px;
         }
@@ -180,6 +182,9 @@
         }
         @media (max-width: 700px) {
             height: 50px;
+        }
+        @media (max-width: 650px) {
+            text-align: start;
         }
     }
     .item_mob {
