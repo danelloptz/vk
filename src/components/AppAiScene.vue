@@ -40,8 +40,10 @@
                 placeholder="Подробно опишите детали сюжета"
                 maxlength="2000"
             ></textarea>
-            <AppGoodButton :text="text1" />
+            <AppGoodButton :text="text1" @click="generate" />
         </div>
+        <span class="scenario" v-if="scenario.scenario != ''" v-html="scenario.scenario">
+        </span>
         <div class="item">
             <h2>Если вам нужно внести корректировки в сценарий, то пропишите их здесь: </h2>
             <textarea 
@@ -50,16 +52,20 @@
                 placeholder="Ваше сообщение"
                 maxlength="2000"
             ></textarea>
-            <AppGoodButton :text="text2" />
+            <AppGoodButton :text="text2" @click="regenerate" />
         </div>
     </section>
 </template>
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import { getScenario, generateScenario, editScenario } from '@/services/ai';
 
     export default {
         components: { AppGoodButton },
+        props: {
+            userData: Object
+        },
         data() {
             return {
                 selectedTime: "",
@@ -69,7 +75,8 @@
                 text2: "ОТПРАВИТЬ",
                 nameCharacters: "",
                 story: "",
-                edits: ""
+                edits: "",
+                scenario: null
             }
         },
         methods: {
@@ -79,7 +86,50 @@
             selectTime(item) {
                 this.selectedTime = item;
                 this.hideDropdownTime();
+            },
+            async generate() {
+                const payload = {
+                    "scenario": {
+                        "duration": this.selectedTime == "30 секунд" ? "30" : this.selectedTime == "1 минута" ? "60" : "180",
+                        "person_names": this.nameCharacters,
+                        "details": this.story,
+                        "scenario": this.scenario.scenario,
+                        "scenario_id": this.scenario.scenario_id,
+                        "edit_message": this.edits
+                    },
+                    "user_id": this.userData.id
+                };
+                const resp = await generateScenario(payload);
+                this.scenario = resp;
+                this.setScenario();
+            },
+            setScenario() {
+                this.selectedTime = this.scenario.duration == "" ? "" : this.scenario.duration == "30" ? "30 секунд" : this.scenario.duration == "60" ? "1 минута" : "3 минуты";
+                this.nameCharacters = this.scenario.person_names;
+                this.story = this.scenario.details;
+            },
+            async regenerate() {
+                const payload = {
+                    "scenario": {
+                        "duration": this.selectedTime == "30 секунд" ? "30" : this.selectedTime == "1 минута" ? "60" : "180",
+                        "person_names": this.nameCharacters,
+                        "details": this.story,
+                        "scenario": this.scenario.scenario,
+                        "scenario_id": this.scenario.scenario_id,
+                        "edit_message": this.edits
+                    },
+                    "user_id": this.userData.id
+                };
+                const resp = await editScenario(payload);
+                this.scenario = resp;
+                this.setScenario();
             }
+        },
+
+        async created() {
+            const resp = await getScenario(this.userData.id);
+            this.scenario = resp;
+            if (this.scenario) this.setScenario();
         }
     };
 </script>
@@ -202,5 +252,10 @@
         @media (max-width: 500px) {
             width:70vw;
         }
+    }
+    .scenario {
+        color: white;
+        font-size: 18px;
+        font-family: 'OpenSans';
     }
 </style>

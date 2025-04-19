@@ -191,3 +191,18 @@ export async function findParents(vk_id, search_id) {
         return false; 
     }
 }
+
+export async function sendPosting(token) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v1/content_plan/schedule_posts`, {},{
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при отправке на постинг", error);
+        return false; 
+    }
+}

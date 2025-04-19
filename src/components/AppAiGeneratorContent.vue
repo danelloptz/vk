@@ -227,7 +227,9 @@
                     </tr>
                 </tbody>
             </table>
-            <AppGoodButton :text="text7" />
+            <span v-if="isLoading">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
+            <span v-if="isPostPubl">Посты были успешно отправлены.</span>
+            <AppGoodButton :text="text7" @click="publicate" />
         </div>
     </section>
     
@@ -236,6 +238,7 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners, regeneratePosts, updateContentPlan, regenerateBanners, acceptPlan } from "@/services/ai";
+    import { sendPosting } from "@/services/user";
 
     export default {
         components: { AppGoodButton },
@@ -249,7 +252,8 @@
                 text4: "ОДОБРИТЬ",
                 text5: "ЗАМЕНИТЬ",
                 text6: "РЕДАКТИРОВАТЬ",
-                text7: "УДАЛИТЬ",
+                text7: "ОПУБЛИКОВАТЬ",
+                text9: "УДАЛИТЬ",
                 text8: "СОХРАНИТЬ",
                 themes: [
                     "Обзор сервиса Best Followers. Видео-инструктаж о том, как сервис может помочь в развитии вашего Telegram-канала и увеличении доходов",
@@ -297,7 +301,8 @@
                 badDate: false,
                 maxSymbols: 3500,
                 isDropdownVisible: false,
-                types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"]
+                types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"],
+                isPostPubl: false
             }
         },
         watch: {
@@ -639,6 +644,12 @@
                 }
             // Запускаем анимацию
             requestAnimationFrame(updateProgress);
+        },
+        async publicate() {
+            this.isLoading = true;
+            const resp = await sendPosting(localStorage.getItem("token"));
+            this.isLoading = false;
+            if (resp) this.isPostPubl = true;
         }
         },
     };
