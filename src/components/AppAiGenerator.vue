@@ -17,6 +17,7 @@
         <AppAiAnalytics v-if="activeIndex == 1" />
         <AppAiScene v-if="activeIndex == 2" />
         <AppAiChat v-if="activeIndex == 3" :userData="userData" />
+        <AppAiManager v-if="activeIndex == 4" />
     </section>
 </template>
 
@@ -26,12 +27,13 @@
     import AppAiScene from '@/components/AppAiScene.vue';
     import AppAiChat from '@/components/AppAiChat.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppAiManager from '@/components/AppAiManager.vue';
     
     export default {
         props: { 
             userData: Object
          },
-        components: { AppAiGeneratorContent, AppAiAnalytics, AppAiScene, AppAiChat, AppGoodButton },
+        components: { AppAiGeneratorContent, AppAiAnalytics, AppAiScene, AppAiChat, AppGoodButton, AppAiManager },
         data() {
             return {
                 activeIndex: 0,

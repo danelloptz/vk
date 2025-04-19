@@ -323,7 +323,7 @@
     a { text-decoration: underline; }
     .container {
         width: 100%;
-        padding: 0px 50px;
+        padding: 0px 40px;
         display: flex;
         flex-direction: column;
         row-gap: 46px;

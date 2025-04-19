@@ -184,6 +184,25 @@
   .tree-container {
     display: flex;
     justify-content: center;
+    width: 100%;
+    overflow-x: auto;
+  }
+  /* Для WebKit-браузеров (Chrome, Safari, Edge) */
+  .tree-container::-webkit-scrollbar {
+      height: 27px; /* Высота горизонтального скроллбара */
+  }
+
+  .tree-container::-webkit-scrollbar-track {
+      background: #2F3251; /* Убираем фон полосы прокрутки */
+      border-radius: 14px;
+  }
+
+  .tree-container::-webkit-scrollbar-thumb {
+      width: 64px;
+      background: linear-gradient(to right, #7023EC, #A585DA); /* Цвет ползунка */
+      border-radius: 13.5px; /* Закругляем углы ползунка */
+      border: 4px solid #2F3251; /* "Отступ" через границу того же цвета, что и фон */
+      background-clip: content-box;
   }
   
   .tree-user {
@@ -208,6 +227,9 @@
     color: white;
     font-size: 14px;  
     font-family: 'OpenSans';
+    @media (max-width: 650px) {
+      font-size: 12px;  
+    }
   }
   
   .avatar {

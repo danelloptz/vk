@@ -225,3 +225,35 @@ export async function sendChatMessage(message, history, thread_id, dialog_id) {
         return false; 
     }
 }
+
+export async function getScenario(user_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/get_scenario', {
+            "user_id": user_id
+        });
+        return response.data.scenario;
+    } catch(error) {
+        console.error("Ошибка при получении сценария", error);
+        return false; 
+    }
+}
+
+export async function generateScenario(payload) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/generate_scenario', payload);
+        return response.data.scenario;
+    } catch(error) {
+        console.error("Ошибка при генерации сценария", error);
+        return false; 
+    }
+}
+
+export async function editScenario(payload) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/edit_scenario', payload);
+        return response.data.scenario;
+    } catch(error) {
+        console.error("Ошибка при редактировании сценария", error);
+        return false; 
+    }
+}

@@ -1,19 +1,16 @@
 <template>
-    <AppModalMessage
-        :visibility1="isMessageModal"
-        @update:visibility1="isMessageModal = $event"
-    />
     <section class="help" v-if="!isQu">
         <span class="big">Для начала посмотрите раздел «Инструкции», здесь есть ответы  на большинство вопросов: </span>
-        <AppGoodButton :text="text1" @click="gotoInstructions" />
+        <AppGoodButton class="btn" :text="text1" @click="gotoInstructions" />
         <span>Также рекомендуем обратиться к вашему рефереру:</span>
-        <AppGroupOrUser :objectData="refererData" />
+        <AppGroupOrUser :objectData="refererData" class="card" />
         <div class="row">
             <span style="width: 70%;">Если вы не смогли найти ответ на ваш вопрос, то напишите в службу поддержки Intelektaz, и мы обязательно ответим вам:</span>
             <AppGoodButton :text="text2" @click="openQu" class="btn" />
         </div>
     </section>
     <section class="qu" v-if="isQu">
+        <h2>Выберите тему вашего вопроса:</h2>
         <div class="item" 
             v-for="(item, index) in textData" 
             :key="index"
@@ -22,11 +19,13 @@
             <div class="row">
                 <h2 :class="{ active: activeIndex === index }">{{ item.title }}</h2>
             </div>
-            <div v-show="activeIndex === index" class="text" v-html="item.text">
+            <div v-show="activeIndex === index" class="text" v-for="(qu, index_2) in item.qu" :key="index_2">
+                <h3>{{ qu }}</h3>
+                <span v-html="item.answ[index_2]"></span>
             </div>
         </div>
         <span>Если вы не нашли ответ на свой вопрос, напишите оператору, указав в первом сообщении ваш ID, если необходимо, группу и всю детальную информацию по вашему вопросу текстом.</span>
-        <AppGoodButton :text="text3" @click="openModalMessage" class="btn2"/>
+        <AppGoodButton :text="text3" @click="redirectBot" class="btn2"/>
     </section>
     
 </template>
@@ -34,11 +33,11 @@
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
-    import AppModalMessage from "@/components/AppModalMessage.vue";
     import { getReferer } from "@/services/user";
+    import { getConfig } from "@/services/config";
 
     export default {
-        components: { AppGoodButton, AppGroupOrUser, AppModalMessage },
+        components: { AppGoodButton, AppGroupOrUser },
         props: { userData: Object },
         data() {
             return {
@@ -49,37 +48,14 @@
                 text3: "НАПИСАТЬ ОПЕРАТОРУ",
                 refererData: [],
                 isMessageModal: false,
-                textData: [
-                    { 
-                        title: "ВВОД / ВЫВОД",
-                        text: "<h2 class='text_h2'>Если у вас возникли трудности с пополнением баланса через USDT TRC-20.</h2><span class='text_span'>Обратитесь к своему рефереру и попросите его помочь вам с оплатой через внутренний перевод. Вы отправляется ему средства удобным для вас способом по курсу, а он вам перевод внутри бота. Контакт своего реферера вы можете найти в разделе «Структура».</span><h2 class='text_h2'>Если вы перевели средства на баланс, но на балансе этих средств нет, то скорее всего вы не отправили хэш данной транзакции боту, или отправили не в соответствующий раздел.</h2><span class='text_span'>Необходимо отправить хэш транзакции для подтверждения своего перевода. Все переводы осуществляются автоматически. Хэш необходимо взять с того источника (кошелька или биржи), откуда вы отправили средства. Для этого зайдите в своем кошельке в детали перевода или «Открыть обозреватель». Далее, если вы перешли в другой раздел бота, необходимо повторно перейти в раздел пополнения баланса, вписать и отправить сумму пополнения и отправить хэш для пополнения счета.</span>"
-                    },
-                    {
-                        title: "ПРИВЯЗКА ГРУППЫ",
-                        text: "Нет, вашу группу за использование сервиса не заблокируют. Но если вы будете публиковать контент, нарушающий правила «ВКонтакте», то на вашу группу могут быть наложены ограничения."
-                    },
-                    {
-                        title: "ПАРТНЁРСКАЯ ПРОГРАММА",
-                        text: "Нет, вашу группу за использование сервиса не заблокируют. Но если вы будете публиковать контент, нарушающий правила «ВКонтакте», то на вашу группу могут быть наложены ограничения."
-                    },
-                    {
-                        title: "ИИ ГЕНЕРАТОР",
-                        text: "Нет, вашу группу за использование сервиса не заблокируют. Но если вы будете публиковать контент, нарушающий правила «ВКонтакте», то на вашу группу могут быть наложены ограничения."
-                    },
-                    {
-                        title: "РОТАЦИЯ",
-                        text: "Нет, вашу группу за использование сервиса не заблокируют. Но если вы будете публиковать контент, нарушающий правила «ВКонтакте», то на вашу группу могут быть наложены ограничения."
-                    },
-                    {
-                        title: "ДРУГОЙ",
-                        text: "Нет, вашу группу за использование сервиса не заблокируют. Но если вы будете публиковать контент, нарушающий правила «ВКонтакте», то на вашу группу могут быть наложены ограничения."
-                    }
-                ]
+                textData: null
             }
         },
         async created() {
             const refer = await getReferer(this.userData.vk_id);
             this.refererData = refer;
+            const resp = await getConfig("help", localStorage.getItem("token"));
+            this.textData = resp.data;
         },
         methods: {
             gotoInstructions() {
@@ -93,6 +69,9 @@
             },
             openModalMessage() {
                 this.isMessageModal = true;
+            },
+            redirectBot() {
+                window.open('https://t.me/IntelektazBot', '_blank');
             }
         }
     };
@@ -109,11 +88,17 @@
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;;
+        }
     }
     .item {
         display: flex;
@@ -129,12 +114,20 @@
         align-items: center;
         column-gap: 20px;
         justify-content: space-between;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: start;
+            row-gap: 20px;
+        }
     }
     h2 {
         font-size: 20px;
         font-family: 'OpenSans';
         color: white;
         transition: .2s ease-in;
+        @media (max-width: 650px) {
+            font-size: 18px;
+        }
     }
     .row img {
         width: 28px;
@@ -161,11 +154,14 @@
         color: white;
         font-family: 'OpenSans';
     }
-    .text_h2, .text_span {
+    .text h3, .text span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
         transition: max-height 0.3s ease, opacity 0.3s ease;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .qu {
         display: flex;
@@ -175,9 +171,24 @@
     .btn {
         width: 200px;
         font-size: 16px;
+        @media (max-width: 650px) {
+            width: 180px;
+            height: 40px;
+            font-size: 14px;
+        }
     }
     .btn2 {
         width: 230px;
         font-size: 16px;
+        @media (max-width: 650px) {
+            width: 200px;
+            height: 40px;
+            font-size: 14px;
+        }
+    }
+    .card {
+        @media (max-width: 650px) {
+            width: 100%;
+        }
     }
 </style>

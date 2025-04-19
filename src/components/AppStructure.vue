@@ -89,7 +89,7 @@
                 </div>
             </div>
         </div>
-        <AppGoodButton :text="text1" class="btn" @click="openLinks" />
+        <AppGoodButton :text="text1" class="links_btns" @click="openLinks" />
 
         <div class="text_row">
             <div class="text_row_item">
@@ -98,15 +98,20 @@
             </div>
         </div>
         <div class="search">
-            <img src="@/assets/images/search.png">
-            <input
-                class="search_input"
-                v-model="search"
-                placeholder="Введите ID"
-                type="text"
-            />
-            <AppGoodButton :text="text2" class="btn" @click="searchId" />
-            <AppBadButton :text="text3" class="btn" @click="backup"  />
+            <div class="btn_wrapper">
+                <img src="@/assets/images/search.png">
+                <input
+                    class="search_input"
+                    v-model="search"
+                    placeholder="Введите ID"
+                    type="text"
+                />
+            </div>
+            <div class="btn_wrapper">
+                <AppGoodButton :text="text2" class="btn" @click="searchId" />
+                <AppBadButton :text="text3" class="btn" @click="backup"  />
+            </div>
+            
         </div>
         <div class="legs" v-if="activeIndex == 1">
             <div class="left">
@@ -126,8 +131,9 @@
                 <div class="check" :class="{ activeBinar: (leg_index == index && !userData.auto_current_leg) || (userData.auto_current_leg && leg.value == 'auto') }"></div>
                     <span>{{ leg.label }}</span>
                 </div>
-                <AppGoodButton :text="text4" class="btn" @click="setLeg"/>
+                <AppGoodButton v-if="windowWidth > 650" :text="text4" class="set_leg_btn" @click="setLeg"/>
             </div>
+            <AppGoodButton v-if="windowWidth <= 650" :text="text4" class="set_leg_btn" @click="setLeg"/>
         </div>
         <AppStructureBinar 
             v-if="binarTree && !notFound && activeIndex == 1" 
@@ -528,6 +534,10 @@ export default {
         width: 75px;
         height: 75px;
         object-fit: cover;
+        @media (max-width: 650px) {
+            width: 65px;
+            height: 65px;
+        }
     }
 
     .item_col {
@@ -567,6 +577,9 @@ export default {
         font-size: 20px;
         font-family: 'OpenSans';
         color: white;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .text_row_item span {
         font-size: 20px;
@@ -579,12 +592,21 @@ export default {
         width: 100%;
         align-items: center;
         column-gap: 18px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 11px;
+            align-items: start;
+       }
     }
     .search img {
         width: 35px;
         height: 35px;
         object-fit: cover;
         object-position: center;
+        @media (max-width: 650px) {
+            width: 25px;;
+            height: 25px;
+        }
     }
     .search input {
         width: 430px;
@@ -595,6 +617,10 @@ export default {
         color: white;
         padding: 10px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+            width: 100%;
+        }
     }
     .search input:focus {
         outline: none;
@@ -610,11 +636,16 @@ export default {
 
 
     .legs {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-  }
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: start;
+            row-gap: 20px;
+        }
+    }
   .left, .right {
     display: flex;
     align-items: center;
@@ -625,6 +656,10 @@ export default {
     height: 30px;
     border-radius: 50%;
     background: #DA2D2D;
+    @media (max-width: 650px) {
+        width: 20px;
+        height: 20px;
+    }
   }
   .binar_active {
     background: #1ABE38 !important;
@@ -638,11 +673,14 @@ export default {
     font-size: 20px;
     color: white;
     font-family: 'OpenSans';
+    @media (max-width: 650px) {
+        font-size: 16px;
+    }
   }
   .legs_item {
     display: flex;
     align-items: center;
-    column-gap: 10px;
+    column-gap: 14px;
   }
   .check {
     width: 18px;
@@ -659,9 +697,17 @@ export default {
     font-size: 18px;
     color: white;
     font-family: 'OpenSans';
+    @media (max-width: 650px) {
+        font-size: 16px;
+    }
   }
   .btn {
     width: 150px;
+    @media (max-width: 650px) {
+        width: 80px;
+        height: 30px;
+        font-size: 12px;
+    }
   }
   .row_mob {
     display: grid;
@@ -671,9 +717,22 @@ export default {
   .row_mob .stats_item {
     width: 100;
   }
-  .btn {
-    width: 230px;
+  .links_btns {
+    @media (max-width: 650px) {
+        width: 230px;
+        height: 40px;
+        align-self: center;
+    }
+  }
+  .btn_wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    column-gap: 18px;
+  }
+  .set_leg_btn {
+    width: 130px;
     height: 40px;
-    align-self: center;
+    font-size: 14px;
   }
 </style>
