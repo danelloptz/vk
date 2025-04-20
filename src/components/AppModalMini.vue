@@ -11,11 +11,13 @@
                     <h2>{{ `${userData.name}` }}</h2>
                     <span class="id">ID: {{ userData.vk_id }}</span>
                     <a style="cursor: pointer;" @click="openRef">Реферальные ссылки</a>
-                    <span>Партнерская программа активна до {{ endDate }}</span>
+                    <span class="program">Партнерская программа активна до {{ endDate }}</span>
                 </div>
             </div>
             <div class="row">
                 <AppGoodButton :text="text1" class="btn" @click="openTarif"/>
+                <a href="" v-if="windowWidth <= 600" @click.prevent="showNews">Новости</a>
+                <a href="" v-if="windowWidth <= 600" @click.prevent="showHelp">Помощь</a>
                 <AppBadButton :text="text2" class="btn" @click="exit" />
             </div>
         </div>
@@ -31,6 +33,7 @@
         props: {
             userData: Object,
             visibility1: Boolean,
+            windowWidth: Number
         },
         data() {
             return {
@@ -71,7 +74,15 @@
                 console.log('modal mini');
                 this.$emit("isReffs");
                 this.close();
-            }
+            },
+            showHelp() {
+                this.$emit('isHelp');
+                this.close();
+            },
+            showNews() {
+                this.$emit('isNews');
+                this.close();
+            },
         }
     };
 </script>
@@ -94,8 +105,9 @@
         right: 0px;
         width: 438px;
         z-index: 999;
-        @media (max-width: 650px) {
-            width: 90vw;
+        @media (max-width: 600px) {
+            width: 100vw;
+            left: 0;
         }
     }
     .modal {
@@ -107,28 +119,22 @@
         padding: 40px;
         background: #111433;
         border-radius: 10px;
+        @media (max-width: 600px) {
+            padding: 20px;
+        }
     }
     .row {
         display: flex;
         justify-content: space-between;
         column-gap: 30px;
-        @media (max-width: 650px) {
-            flex-direction: column;
-            align-items: center;
+        @media (max-width: 600px) {
+            column-gap: 20px;
         }
     }
     .col {
         display: flex;
         flex-direction: column;
         row-gap: 10px;
-        @media (max-width: 650px) {
-            align-items: center;
-        }
-    }
-    .col span {
-        @media (max-width: 650px) {
-            text-align: center;
-        }
     }
     .col img {
         width: 90px;
@@ -138,16 +144,29 @@
         object-fit: cover;
         outline: 1px solid white;
         outline-offset: 10px;
+        @media (max-width: 600px) {
+            width: 64px;
+            height: 64px;
+            outline-offset: 4px;
+        }
     }
     h2 {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 600px) {
+            font-size: 16px;
+        }
     }
     span {
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+    }
+    .program {
+        @media (max-width: 600px) {
+            font-size: 14px;
+        }
     }
     .pckg_name {
         text-align: center;
@@ -164,13 +183,17 @@
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+        @media (max-width: 600px) {
+            font-size: 14px;
+        }
     }
     .btn {
         width: 110px;
         font-family: 'OpenSans';
-        @media (max-width: 650px) {
-            width: 190px;
-            margin-bottom: 20px;
+        @media (max-width: 600px) {
+            width: 70px;
+            height: 31px;
+            font-size: 10px;
         }
 
     }
@@ -182,5 +205,14 @@
         width: 15px;
         height: 15px;
         cursor: pointer;
+    }
+    a {
+        font-size: 16px;
+        font-family: 'OpenSans';
+        color: white;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
     }
 </style>

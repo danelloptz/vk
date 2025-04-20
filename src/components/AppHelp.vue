@@ -5,7 +5,7 @@
         <span>Также рекомендуем обратиться к вашему рефереру:</span>
         <AppGroupOrUser :objectData="refererData" class="card" />
         <div class="row">
-            <span style="width: 70%;">Если вы не смогли найти ответ на ваш вопрос, то напишите в службу поддержки Intelektaz, и мы обязательно ответим вам:</span>
+            <span>Если вы не смогли найти ответ на ваш вопрос, то напишите в службу поддержки Intelektaz, и мы обязательно ответим вам:</span>
             <AppGoodButton :text="text2" @click="openQu" class="btn" />
         </div>
     </section>
@@ -169,7 +169,7 @@
         row-gap: 38px;
     }
     .btn {
-        width: 200px;
+        min-width: 200px;
         font-size: 16px;
         @media (max-width: 650px) {
             width: 180px;

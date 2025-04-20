@@ -24,6 +24,8 @@
             @update:visibility1="modalUser = $event"
             @isClicked="sendClick"
             @isReffs="openReff"
+            @isNews="showNews"
+            @isHelp="showHelp"
         />
         <div class="header_title">
             <img src="@/assets/images/main_logo.png" >
@@ -106,8 +108,7 @@
             }
         },
         async created() {
-            this.points = this.userData.gift_score;
-            console.log(this.userData.gift_score);
+            console.log(this.windowWidth);
         },
         watch: {
             userData(val) {
@@ -135,6 +136,9 @@
         position: relative;
         z-index: 15;
         padding-top: 10px;
+        @media (max-width: 600px) {
+            position: static;
+        }
     }
     .header_title {
         display: flex;

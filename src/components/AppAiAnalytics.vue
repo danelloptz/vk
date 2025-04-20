@@ -25,6 +25,7 @@
                 </div>
             </div>
         </div>
+        <span v-html="gpt_comment" class="gpt_comment"></span>
     </section>
 </template>
 
@@ -164,5 +165,10 @@
         color: white;
         font-family: 'OpenSans';
         opacity: .5;
+    }
+    .gpt_comment {
+        font-size: 18px;
+        font-family: 'OpenSans';
+        color: white;
     }
 </style>

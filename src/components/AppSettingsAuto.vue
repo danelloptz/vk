@@ -62,7 +62,6 @@
 <script>
 import { getUserInfo, sendNewSettings, setAutoposting } from "@/services/user";
 import { getPosts } from "@/services/posts";
-import { getContentPlan } from "@/services/ai";
 
 export default {
     data() {
@@ -127,15 +126,7 @@ export default {
             }));
         });
 
-        const plan = await getContentPlan(localStorage.getItem("token"));
-        const isPlan = plan.filter((item) => item.date_publication).length > 0;
-        console.log(isPlan);
-
-        this.posts = isPlan ? plan : await getPosts();
-
-        // const posts = await getPosts();
-        // this.posts = posts;
-
+        this.posts = await getPosts();
     },
     methods: {
         addSocial(social, index) {

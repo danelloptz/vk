@@ -18,7 +18,7 @@
             </thead>
             <tbody v-if="history.length">
                 <tr v-for="(item, index) in history" :key="index">
-                    <td>{{ new Date(item.date_created).toLocaleDateString("ru-RU") }}</td>
+                    <td>{{ formatedDate(item.date_created) }}</td>
                     <td>{{ item.sum }}</td>
                     <td v-html="formatedMessage(item)"></td>
                     <td style="display: flex; flex-direction: column; row-gap: 5px;">
@@ -35,7 +35,7 @@
 
         <div class="history_mob" v-if="windowWidth <= 650">
             <div class="history_mob_item" v-for="(item, index) in history" :key="index">
-                <span><strong>Дата: </strong>{{  new Date(item.date_created).toLocaleDateString("ru-RU") }}</span>
+                <span><strong>Дата: </strong>{{ formatedDate(item.date_created) }}</span>
                 <span><strong>Сумма, USDT: </strong>{{ item.sum }}</span>
                 <span><strong>Описание: </strong><span v-html="formatedMessage(item)"></span></span>
                 <span>
@@ -146,6 +146,17 @@ export default {
                 return `<a href="${item.category}" target="_blank" style="text-decoration: underline; color: white;">Вывод</a>`;
             }
             return item.category;
+        },
+        formatedDate(time) {
+            const date = new Date(time);
+
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${day}.${month}.${year} ${hours}:${minutes}`;
         },
         async cancelTrans(item) {
             const cancel = await cancelTransaction(item.id);

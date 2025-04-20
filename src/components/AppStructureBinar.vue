@@ -1,5 +1,5 @@
 <template>
-    <div class="tree-container">
+    <div class="tree-container" :style="{ minHeight: visibility ? '400px' : 'auto' }">
       <div class="tree-user" :style="{ width: lay != 1 ? (400 / (Math.pow(2, lay-1))) + 'px' : '400px', alignItems: lay == 4 ? 'center' : 'normal' }">
         <div v-if="node" class="avatar-container" :style="{ justifyContent: lay == 1 ? 'space-between' : 'center' }">
           <div class="text_header" v-if="lay == 1">

@@ -107,12 +107,67 @@
                     >
                 </div>
             </div>
-            <div class="row" style="margin-top: 50px; margin-bottom: 44px;">
+            <div class="row" v-if="windowWidth > 650" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text1" @click="saveSettings"/>
                 <AppGoodButton :text="text2" @click="editSettings" />
                 <AppGoodButton :text="text3" @click="generateThemes" />
             </div>  
-            <div class="table_container">
+            <div class="mob_btns" v-if="windowWidth <= 650">
+                <div class="mob_btns_row">
+                    <AppGoodButton class="mob_btn" :text="text1" @click="saveSettings"/>
+                    <AppGoodButton class="mob_btn" :text="text2" @click="editSettings" />
+                </div>
+                <AppGoodButton class="mob_btn" :text="text3" @click="generateThemes" />
+            </div>
+            <input type="checkbox" v-if="windowWidth <= 650" v-model="allCheckboxes" style="margin-bottom: 20px;">
+            <div class="table_container_mob" v-if="windowWidth <= 650">
+                <div class="table_mob">
+                    <div class="table_item_mob" v-for="(item, index) in plan" :key="index">
+                        <input type="checkbox" v-model="aprovedPostsIndexes[index]" :checked="allCheckboxes" style="margin-bottom: 20px;">
+                        <div class="table_item_mob_content">
+                            <span>День: {{ index + 1 }}</span>
+                            <span v-if="step >= 0">Тема: </span>
+                            <div class="line_wrapper" v-if="(isLoading && step == 0 && !isRegenerate) || (isRegenerate && step == 1)">
+                                <div class="line"></div>
+                            </div>
+                            <span v-if="!(isLoading && step == 0)" :contenteditable="isEditable">{{ item?.topic_name }}</span>
+
+                            <span v-if="step >= 2">Пост: </span>
+                            <div class="line_wrapper" v-if="(isLoading && step == 1 && !isRegenerate) || (isRegenerate && step == 2)">
+                                <div class="line"></div>
+                            </div>
+                            <span v-if="!(isLoading && step == 0)" :contenteditable="isEditable" v-html="formatedPost(item?.post_text[item.chose_post_index])"></span>
+                            <div class="plan_item_variants" v-if="!(isLoading && step == 0) && step >= 2">
+                                <AppGoodButton 
+                                    v-for="(name, index_var) in variants.slice(0, item.post_text.length)" 
+                                    :key="index_var" 
+                                    :text="name" 
+                                    class="variant_btn" 
+                                    :class="{ not_active: index_var !== plan[index].chose_post_index }"
+                                    @click="setActivePostVar(index_var, index)"
+                                />
+                            </div>
+
+                            <span v-if="step >= 3">Баннер: </span>
+                            <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
+                                <div class="line"></div>
+                            </div>
+                            <img v-if="!(isLoading && step == 0)" :src="item?.image_links[item.chose_image_index]" class="banner" />
+                            <div class="plan_item_variants" v-if="!(isLoading && step == 0) && step >= 3">
+                                <AppGoodButton 
+                                    v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
+                                    :key="index_var" 
+                                    :text="name" 
+                                    class="variant_btn"
+                                    :class="{ not_active: index_var !== plan[index].chose_image_index }"
+                                    @click="setActiveImageVar(index_var, index)"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table_container" v-if="windowWidth > 650">
                 <table>
                     <thead>
                         <tr class="head">
@@ -177,13 +232,57 @@
             </div>
             
             <span v-if="isLoading">Подождите, пока закончится генерация.</span>
-            <div class="row" style="margin-top: 50px; margin-bottom: 44px;">
+            <div class="row" v-if="windowWidth > 650" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text4" @click="confirmCurrentPosts" />
                 <AppGoodButton :text="text5" @click="regenerateCurrentPosts" />
                 <AppGoodButton :text="text6" @click="editInfo" />
             </div>
+            <div class="mob_btns" v-if="windowWidth <= 650">
+                <div class="mob_btns_row">
+                    <AppGoodButton class="mob_btn" :text="text4" @click="confirmCurrentPosts" />
+                    <AppGoodButton class="mob_btn" :text="text5" @click="regenerateCurrentPosts" />
+                </div>
+                <AppGoodButton class="mob_btn" :text="text6" @click="editInfo" />
+            </div>
         </div>
-        <div class="content" v-if="activeIndex == 1">
+
+        <div class="table_container_mob" v-if="activeIndex == 1 && windowWidth <= 650">
+            <div class="table_mob">
+                <div class="table_item_mob" v-for="(item, index) in plan" :key="index">
+                    <input 
+                        v-if="item.date_publication" 
+                        type="checkbox" 
+                        v-model="aprovedPostsIndexes[index]" 
+                        :checked="allCheckboxes" 
+                        style="margin-bottom: 20px;"
+                    />
+                    <div class="table_item_mob_content" v-if="item.date_publication">
+                        <span>День: {{ index + 1 }}</span>
+                        <span>Тема: </span>
+                        <span>{{ item?.topic_name }}</span>
+
+                        <span>Пост: </span>
+                        <span v-html="formatedPost(item?.post_text[item.chose_post_index])"></span>
+
+                        <span>Баннер: </span>
+                        <img :src="item?.image_links[item.chose_image_index]" class="banner" />
+
+                        <span>Дата / время публикации: </span>
+                        <span
+                            class="content_text"
+                            :contenteditable="isEditableContent"
+                            :ref="'editableDate_' + index"
+                            @input="updateSelectedDate"
+                        >{{ formatedDate(item.date_publication * 1000) }}</span>
+                        <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
+                        <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
+                        <span class="error" v-if="badDate">Неправильный формат даты. Введите дату в формате: 01.01.2000 12:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" v-if="activeIndex == 1 && windowWidth > 650">
             <table>
                 <thead>
                     <tr class="head">
@@ -200,7 +299,12 @@
                 <tbody>
                     <tr v-for="(item, index) in plan" :key="index">
                         <td v-if="item.date_publication">
-                            <input type="checkbox" :checked="allCheckboxesContent">
+                            <input 
+                                v-if="item.date_publication" 
+                                type="checkbox" 
+                                v-model="aprovedPostsIndexes[index]" 
+                                :checked="allCheckboxesContent" 
+                            />
                         </td>
                         <td v-if="item.date_publication">
                             <span class="content_text">{{ index + 1 }}</span>
@@ -219,6 +323,7 @@
                                 class="content_text"
                                 :contenteditable="isEditableContent"
                                 :ref="'editableDate_' + index"
+                                @input="updateSelectedDate"
                             >{{ formatedDate(item.date_publication * 1000) }}</span>
                             <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
                             <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
@@ -242,6 +347,9 @@
 
     export default {
         components: { AppGoodButton },
+        props: {
+            windowWidth: Number
+        },
         data() {
             return {
                 activeIndex: 0,
@@ -302,7 +410,8 @@
                 maxSymbols: 3500,
                 isDropdownVisible: false,
                 types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"],
-                isPostPubl: false
+                isPostPubl: false,
+                selectedDate: null, // Общая дата для всех выделенных элементов
             }
         },
         watch: {
@@ -310,7 +419,12 @@
                 if (status) {
                     setTimeout(() => this.isSaved = false, 1100);
                 }
-            }
+            },
+            allCheckboxesContent(newVal) {
+                // Если отмечен "Выбрать все", обновляем массив чекбоксов
+                this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => newVal);
+                console.log(this.aprovedPostsIndexes, newVal);
+            },
         },
         async created() {
             const resp = await getBrief(localStorage.getItem("token"));
@@ -475,10 +589,12 @@
                     this.badDate = true;
                     return;
                 }
+                this.saveSelectedDates();
 
                 const resp = await updateContentPlan(this.plan, localStorage.getItem("token"));
                 if (resp == 200) {
                     this.isEditableContent = false;
+                    this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
                 }
             },
             async saveSettings() {
@@ -530,6 +646,42 @@
             },
             changeEditableContent() {
                 this.isEditableContent = !this.isEditableContent;
+                // if (!this.isEditableContent) {
+                //     console.log("SAVED!!!!!");
+                //     // При выходе из режима редактирования сохраняем значение
+                //     this.saveSelectedDates();
+                // }
+            },
+            saveSelectedDates() {
+                // Применяем выбранную дату ко всем выделенным элементам
+                const selectedIndexes = this.aprovedPostsIndexes.reduce((acc, isChecked, index) => {
+                    if (isChecked) acc.push(index);
+                    return acc;
+                }, []);
+                console.log("selectedIndexes: ", selectedIndexes, this.aprovedPostsIndexes);
+                selectedIndexes.forEach(index => {
+                    const dateElement = this.$refs[`editableDate_${index}`]?.[0];
+                    if (dateElement && this.selectedDate) {
+                        dateElement.textContent = this.selectedDate;
+                        this.plan[index].date_publication = this.convertToTimestamp(this.selectedDate); // Обновляем данные в массиве
+                    }
+                });
+
+                console.log(this.plan);
+                this.badDate = false; // Сбрасываем флаг ошибки
+            },
+            parseDate(dateString) {
+                const date = new Date(dateString);
+                console.log(date, date.getTime());
+                if (isNaN(date.getTime())) {
+                    this.badDate = true;
+                    return null;
+                }
+                return Math.floor(date.getTime() / 1000); // Возвращаем в секундах
+            },
+            updateSelectedDate(event) {
+                // Обновляем общую дату при изменении одного из полей
+                this.selectedDate = event.target.textContent.trim();
             },
             async regenerateCurrentPosts() {
                 this.step = this.getStep();
@@ -595,7 +747,6 @@
                 return 3;
             },
             formatedDate(time) {
-                console.log(time);
                 const date = new Date(time);
 
                 const day = String(date.getDate()).padStart(2, '0');
@@ -659,6 +810,7 @@
     .active {
         background: #7023EC;
         font-weight: bold;
+        border: none !important;
     }
     .ai {
         width: 100%;
@@ -671,6 +823,16 @@
         width: 100%;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
+        @media (max-width: 650px) {
+            grid-template-columns: 1fr;
+            row-gap: 10px;
+        }
+    }
+    .switch span {
+        @media (max-width: 650px) {
+            font-size: 16px !important;
+            border: 1px solid white;
+        }
     }
     span {
         width: 100%;
@@ -711,6 +873,10 @@
         @media (min-width: 1300px) {
             max-width: 60%;
         }
+        @media (max-width: 650px) {
+            font-size: 16px;
+            text-align: start;
+        }
     }
     h2 {
         font-size: 18px;
@@ -726,6 +892,9 @@
         grid-template-columns: repeat(2, 1fr);
         column-gap: 50px;
         row-gap: 30px;
+        @media (max-width: 650px) {
+            grid-template-columns: 1fr;
+        }
     }
     .item {
         display: flex;
@@ -748,6 +917,9 @@
         cursor: pointer;
         padding: 0;
         margin-top: 8px;
+        @media (max-width: 650px) {
+            margin-top: 0px;
+        }
     }
 
     input[type="checkbox"]:checked {
@@ -777,8 +949,8 @@
         font-family: 'OpenSans';
         position: relative;
         transition: .2s ease-in;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            height: 50px;
         }
     }
     textarea {
@@ -794,8 +966,9 @@
         font-family: 'OpenSans';
         position: relative;
         transition: .2s ease-in;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            height: 160px;
+            padding: 10px;
         }
     }
 
@@ -829,6 +1002,9 @@
         letter-spacing: 1px;
         scrollbar-width: none;
         z-index: 15;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .dropdown::-webkit-scrollbar {
         width: 0;  
@@ -852,6 +1028,10 @@
     }
     .table_container {
         max-height: 973px;
+        overflow: auto;
+    }
+    .table_container_mob {
+        max-height: 1200px;
         overflow: auto;
     }
     table {
@@ -946,6 +1126,7 @@
         width: 70px;
         height: 20px;
         font-size: 7px;
+        border-radius: 5px;
     }
 
     .not_active {
@@ -968,6 +1149,12 @@
     .sm_btn {
         width: 110px;
         font-size: 12px;
+        @media (max-width: 650px) {
+            width: 70px;
+            height: 20px;
+            font-size: 7px;
+            border-radius: 5px;
+        }
     }
     .error {
         color: red;
@@ -1001,5 +1188,58 @@
         background: #7023EC;
         transition: .2s ease-in;
         border-radius: 4.8px;   
+    }
+    .mob_btns {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        width: 100%;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    .mob_btns_row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 10px;
+    }
+    .mob_btn {
+        width: 100%;
+        height: 40px;
+        font-size: 14px;
+    }
+    .table_mob {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        row-gap: 20px;
+    }
+    .table_item_mob {
+        width: 100%;
+        display: flex;
+        column-gap: 10px;
+        padding: 10px;
+    }
+    .table_item_mob:nth-child(2n+1) {
+        background: #111433;
+    }
+    .table_item_mob_content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+    }
+    .table_item_mob_row {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
+    .table_item_mob span {
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+        width: fit-content !important;
+        height: auto !important;
+        text-align: start !important;
+        padding: 0 !important;
     }
 </style>

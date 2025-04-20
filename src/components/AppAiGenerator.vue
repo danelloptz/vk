@@ -5,15 +5,16 @@
         <AppGoodButton :text="text1" style="width: 200px; margin-top: 40px;" @click="openTatiff" />
     </section>
     <section class="ai" v-if="userData.packages.at(-1).package_name == 'Leader' || userData.packages.at(-1).package_name == 'Business'">
-        <div class="switch">
+        <div class="switch" v-if="windowWidth > 650">
             <span
                 v-for="(item, index) in listSwtich"
                 :key="index"
-                :class="{ active: activeIndex === index }" 
-                @click="setActive(index)"
-            >{{ item }}</span>
+                :class="{ active: activeIndex === item.index }" 
+                @click="setActive(item.index)"
+            >{{ item.name }}</span>
         </div>  
-        <AppAiGeneratorContent v-if="activeIndex == 0" />
+        <AppDropdown :listSwtich="listSwtich" @update-index="setActive" />
+        <AppAiGeneratorContent v-if="activeIndex == 0" :windowWidth="windowWidth" />
         <AppAiAnalytics v-if="activeIndex == 1" />
         <AppAiScene v-if="activeIndex == 2" :userData="userData" />
         <AppAiChat v-if="activeIndex == 3" :userData="userData" />
@@ -28,16 +29,39 @@
     import AppAiChat from '@/components/AppAiChat.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppAiManager from '@/components/AppAiManager.vue';
+    import AppDropdown from '@/components/AppDropdown.vue';
     
     export default {
         props: { 
-            userData: Object
-         },
-        components: { AppAiGeneratorContent, AppAiAnalytics, AppAiScene, AppAiChat, AppGoodButton, AppAiManager },
+            userData: Object,
+            windowWidth: Number
+        },
+        components: { AppAiGeneratorContent, AppAiAnalytics, AppAiScene, AppAiChat, AppGoodButton, AppAiManager, AppDropdown },
         data() {
             return {
                 activeIndex: 0,
-                listSwtich: ["ИИ контент", "ИИ анализ", "ИИ сценарий", "ИИ помощник", "ИИ менеджер"],
+                listSwtich: [
+                    {
+                        index: 0,
+                        name: "ИИ контент"
+                    },
+                    {
+                        index: 1,
+                        name: "ИИ анализ"
+                    }, 
+                    {
+                        index: 2,
+                        name: "ИИ сценарий"
+                    }, 
+                    {
+                        index: 3,
+                        name: "ИИ помощник"
+                    }, 
+                    {
+                        index: 4,
+                        name: "ИИ менеджер"
+                    },
+                ],
                 text1: "ВЫБРАТЬ ПАКЕТ"
             }
         },
