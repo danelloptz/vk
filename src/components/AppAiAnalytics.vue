@@ -3,12 +3,20 @@
         <h2>ИИ анализ ВК: динамика подписчиков, лучшие посты, вовлеченность, лайки, комментарии, репосты.</h2>
         <span>К вашему аккаунту привязана ВК группа: </span>
 
-        <div class="group_card">
+        <div class="group_card" v-if="windowWidth > 650">
             <div class="group_card_item">
                 <img :src="userInfo.group.group_photo" >
                 <h2>{{ userInfo.group.group_name }}</h2>
             </div>
             <div class="group_card_item">
+                <span>{{ userInfo.group?.count_subs_vk }} подписчиков</span>
+            </div>
+        </div>
+
+        <div class="group_card_mob" v-if="windowWidth <= 650">
+            <img :src="userInfo.group.group_photo" >
+            <div class="group_card_mob_col">
+                <h2>{{ userInfo.group.group_name }}</h2>
                 <span>{{ userInfo.group?.count_subs_vk }} подписчиков</span>
             </div>
         </div>
@@ -36,6 +44,9 @@
 
     export default {
         components: { AppGoodButton },
+        props: {
+            windowWidth: Number
+        },
         data() {
             return {
                 text1: "АНАЛИЗ ГРУППЫ",
@@ -90,11 +101,17 @@
         font-size: 24px;
         font-family: 'OpenSans';
         color: white;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .analytics span {
         font-size: 18px;
         font-family: 'OpenSans';
         color: white;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .group_card {
         width: 100%;
@@ -116,6 +133,10 @@
         border-radius: 50%;
         outline: 1px solid white;
         outline-offset: 5px;
+        @media (max-width: 650px) {
+            width: 81px;
+            height: 81px;
+        }
     }
     .group_card_item h2, .group_card_item span {
         color: white;
@@ -126,6 +147,10 @@
         width: 220px;
         height: 51px;
         align-self: center;
+        @media (max-width: 650px) {
+            width: 180px;
+            height: 40px;
+        }
     }
 
     .cards {
@@ -133,6 +158,10 @@
         grid-template-columns: repeat(2, 1fr);
         column-gap: 26px;
         row-gap: 30px;
+        @media (max-width: 650px) {
+            column-gap: 10px;
+            row-gap: 10px;
+        }
     }
     .card {
         display: flex;
@@ -142,6 +171,9 @@
         row-gap: 13px;
         width: 100%;
         padding: 17px 44px;
+        @media (max-width: 650px) {
+            padding: 20px;
+        }
     }
     .card span {
         color: white;
@@ -170,5 +202,40 @@
         font-size: 18px;
         font-family: 'OpenSans';
         color: white;
+    }
+    .group_card_mob {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        background: #2F3251;
+        border-radius: 10px;
+        column-gap: 20px;
+    }
+    .group_card_mob_col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 11px;
+    }
+    .group_card_mob img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        outline: 1px solid white;
+        outline-offset: 5px;
+        @media (max-width: 650px) {
+            width: 81px;
+            height: 81px;
+        }
+    }
+    .group_card_mob h2, .group_card_mob span {
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .group_card_mob h2 {
+        font-size: 16px;
+    }
+    .group_card_mob span {
+        font-size: 14px;
     }
 </style>

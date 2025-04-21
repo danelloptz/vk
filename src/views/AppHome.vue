@@ -47,7 +47,7 @@
                 <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
                 <AppSettings v-if="selectedComponent === 5 && !isClicked && !isReff" :windowWidth="windowWidth" :businessUser="businessUser" />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
-                <AppBannerAdds v-if="selectedComponent == 10 && !isReff" :userData="userInfo" />
+                <AppBannerAdds v-if="selectedComponent == 10 && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
                 <AppHelp v-if="selectedComponent === 7 && !isReff" @update-isInstructions="updateActiveComponent(6)" :userData="userInfo" />
                 <AppComeToAssembly v-if="selectedComponent === 8 && !isReff" :userData="userInfo" />
                 <AppRotationPlans v-if="selectedComponent === 9 && !isReff" :userData="userInfo" /> 

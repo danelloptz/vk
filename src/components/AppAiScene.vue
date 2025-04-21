@@ -23,7 +23,7 @@
         </div>
         <div class="item">
             <span class="counter">{{ nameCharacters.length }}/200</span>
-            <h2>Имена персонажей</h2>
+            <h3>Имена персонажей</h3>
             <input 
                 v-model="nameCharacters"
                 type="text"
@@ -33,19 +33,19 @@
         </div>
         <div class="item">
             <span class="counter">{{ story.length }}/2000</span>
-            <h2>Детали сюжета: </h2>
+            <h3>Детали сюжета: </h3>
             <textarea 
                 v-model="story"
                 type="text"
                 placeholder="Подробно опишите детали сюжета"
                 maxlength="2000"
             ></textarea>
-            <AppGoodButton :text="text1" @click="generate" />
+            <AppGoodButton class="btn" :text="text1" @click="generate" />
         </div>
         <span class="scenario" v-if="scenario.scenario != ''" v-html="scenario.scenario">
         </span>
         <div class="item">
-            <h2>Если вам нужно внести корректировки в сценарий, то пропишите их здесь: </h2>
+            <h3>Если вам нужно внести корректировки в сценарий, то пропишите их здесь: </h3>
             <textarea 
                 v-model="edits"
                 type="text"
@@ -71,7 +71,7 @@
                 selectedTime: "",
                 isDropdownVisibleTime: false,
                 times: ["30 секунд", "1 минута", "3 минуты"],
-                text1: "СГЕНЕРИРОВАТЬ",
+                text1: "СГЕНЕРИРОВАТЬ СЦЕНАРИЙ",
                 text2: "ОТПРАВИТЬ",
                 nameCharacters: "",
                 story: "",
@@ -140,11 +140,25 @@
         display: flex;
         flex-direction: column;
         row-gap: 50px;
+        @media (max-width: 650px) {
+            row-gap: 20px;
+        }
     }
     h2 {
         font-size: 20px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
+    }
+    h3 {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
 
     .item {
@@ -176,8 +190,8 @@
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        @media (max-width: 500px) {
-            width: 70vw;
+        @media (max-width: 650px) {
+            font-size: 16px;
         }
     }
 
@@ -250,12 +264,21 @@
         position: relative;
         width: 360px;
         @media (max-width: 500px) {
-            width:70vw;
+            width: 100%;
         }
     }
     .scenario {
         color: white;
         font-size: 18px;
         font-family: 'OpenSans';
+    }
+    .btn {
+        width: 260px;
+        height: 51px;
+        @media (max-width: 650px) {
+            width: 240px;
+            height: 40px;
+            align-self: center;
+        }
     }
 </style>

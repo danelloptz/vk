@@ -148,7 +148,7 @@
         </div>
         <span style="text-align: left;">Загрузите баннер 200х250 для бокового блока или 740х140 для нижнего блока. Вес файла не более 2 мб.</span>
         <span v-if="isError" class="error">Не подходящий размер изображения!</span>
-        <AppGoodButton :text="text1" @click="triggerFileUpload" />
+        <AppGoodButton class="uploadImage" :text="text1" @click="triggerFileUpload" />
         <input 
             type="file" 
             ref="fileInput" 
@@ -162,7 +162,7 @@
             <input type="text" v-model="link" placeholder="Ссылка">
         </div>
         <div class="uploadedImage" v-if="isImageUploaded">
-            <img :src="uploadedImage" alt="Предпросмотр" />
+            <img :src="uploadedImage" class="image" alt="Предпросмотр" />
         </div>
 
         <div class="prices">
@@ -197,7 +197,7 @@
         </div>
 
         <h1 style="margin-top: 50px;">Мои объявления</h1>
-        <table v-if="userAdds">
+        <table v-if="userAdds && windowWidth > 650">
             <thead>
                 <tr class="head">
                     <th>Номер</th>
@@ -208,7 +208,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in userAdds" :key="index">
+                <tr v-for="(item, index) in paginatedUserAdds" :key="index">
                     <td>
                         <span>{{ index + 1 }}</span>
                     </td>
@@ -237,6 +237,42 @@
                 </tr>
             </tbody>
         </table>
+        <div class="mob_adds" v-if="windowWidth <= 650">
+            <div class="mob_adds_item" v-for="(item, index) in paginatedUserAdds" :key="index">
+                <span><strong>Номер: </strong>{{ index + 1 + (currentPage - 1) * pageSize }}</span>
+                <span><strong>Объявление:</strong></span>
+                <img :src="item.add_img" class="image" >
+                <div class="mob_adds_item_row">
+                    <span><strong>Статус: </strong>{{ item.status ? "активно" : "неактивно" }}</span>
+                    <span><strong>Осталось дней: </strong>{{ item.time_left + 1 }}</span>
+                </div>
+                <div class="mob_adds_item_row2">
+                    <span><strong>Управление: </strong></span>
+                    <div class="mob_adds_item_col">
+                        <div class="mob_adds_item_col_row" @click="edit(item)">
+                            <img src="@/assets/images/edit.png" class="mob_icon" style="cursor: pointer;">
+                            <a>редактировать</a>
+                        </div>
+                        <div class="mob_adds_item_col_row" @click="deleteAdd(item, index)">
+                            <img src="@/assets/images/delete.png" class="mob_icon">
+                            <a>удалить</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="switchs" v-if="totalPages > 1">
+            <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
+
+            <span v-for="page in visiblePages" :key="page" @click="goToPage(page)" 
+                :class="{ active: page === currentPage }">
+                {{ page }}
+            </span>
+
+            <span v-if="currentPage + 2 < totalPages">...</span>
+
+            <img src="@/assets/images/arrow.svg" @click="nextPage" v-if="currentPage < totalPages" />
+        </div>
     </section>
 </template>
 
@@ -248,7 +284,10 @@
 
     export default {
         components: { AppGoodButton, AppModal },
-        props: { userData: Object },
+        props: { 
+            userData: Object,
+            windowWidth: Number
+        },
         data() {
             return {
                 countries: [],
@@ -296,6 +335,8 @@
                 daysBefore: 0,
                 posBefore: "",
                 disabled: false,
+                currentPage: 1, 
+                pageSize: 5,
             }
         },
         computed: {
@@ -317,7 +358,29 @@
                     values.push(value.toLocaleString("ru-RU"));
                 }
                 return values;
-            }
+            },
+            totalPages() {
+                // Вычисляем общее количество страниц
+                return Math.ceil(this.userAdds.length / this.pageSize);
+            },
+            visiblePages() {
+                // Определяем видимые страницы (текущая ±2)
+                const pages = [];
+                for (
+                    let i = Math.max(1, this.currentPage - 2);
+                    i <= Math.min(this.totalPages, this.currentPage + 2);
+                    i++
+                ) {
+                    pages.push(i);
+                }
+                return pages;
+            },
+            paginatedUserAdds() {
+                // Возвращаем объявления только для текущей страницы
+                const start = (this.currentPage - 1) * this.pageSize;
+                const end = start + this.pageSize;
+                return this.userAdds.slice(start, end);
+            },
         },
         async created() {
             this.pricesData = await getConfig("add_price", localStorage.getItem("token"));
@@ -340,6 +403,21 @@
             }
         },
         methods: {
+            prevPage() {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                }
+            },
+            nextPage() {
+                if (this.currentPage < this.totalPages) {
+                    this.currentPage++;
+                }
+            },
+            goToPage(page) {
+                if (page >= 1 && page <= this.totalPages) {
+                    this.currentPage = page;
+                }
+            },
             selectCountry(country) {
                 if (country.trim() !== "" && !this.selectedCountries.includes(country)) {
                     this.selectedCountries.push(country);
@@ -553,17 +631,26 @@
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     span {
         font-size: 18px;
         font-family: 'OpenSans';
         color: white;
+        @media (max-width: 650px) {
+            font-size: 14px !important;
+        }
     }
     .container {
         display: grid;
         grid-template-columns: 1fr 1fr;
         column-gap: 50px;
         row-gap: 30px;
+        @media (max-width: 650px) {
+            grid-template-columns: 1fr;
+        }
     }
     .item {
         display: flex;
@@ -573,8 +660,8 @@
     .dropdown {
         position: relative;
         width: 360px;
-        @media (max-width: 500px) {
-            width:70vw;
+        @media (max-width: 650px) {
+            width: 100%;
         }
     }
 
@@ -591,13 +678,15 @@
         font-family: 'OpenSans';
         position: relative;
         @media (max-width: 1300px) {
-            width: 100%ж
+            width: 100%;
         }
     }
     .arrow_down {
         position: absolute;
         top: 23px;
         right: 23px;
+        width: 15px;
+        height: 15px;
         transition: transform 0.3s ease;
     }
 
@@ -645,6 +734,9 @@
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .selected-countries {
         display: flex;
@@ -677,6 +769,10 @@
         column-gap: 26px;
         width: 100%;
         cursor: pointer;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
     .row input {
         width: 100%;
@@ -701,6 +797,9 @@
         justify-content: space-between;
         align-items: center;
         padding: 10px 20px;
+        @media (max-width: 650px) {
+            padding: 10px 15px;
+        }
     }
     .price:nth-child(2n+1) {
         background: #111433;
@@ -715,6 +814,9 @@
         color: white;
         font-family: 'OpenSans';
         padding: 0;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .price_item img {
         cursor: pointer;
@@ -731,6 +833,10 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: start;
+        }
     }
 
     .summary_text {
@@ -743,8 +849,19 @@
         align-items: center;
         column-gap: 5px;
     }
+    .summary_text_row span {
+        @media (max-width: 650px) {
+            padding: 0;
+        }
+    }
     .btn {
         width: 189px;
+        @media (max-width: 650px) {
+            margin-top: 20px;
+            width: 180px;
+            height: 40px;
+            align-self: center;
+        }
     }
     th {
         line-height: 3;
@@ -786,6 +903,82 @@
     }
     .image {
         max-width: 200px;
-        max-height: 150px;
+        max-height: 250px;
+    }
+    .uploadImage {
+        @media (max-width: 650px) {
+            width: 180px;
+            height: 40px;
+            align-self: center;
+        }
+    }
+    .mob_adds {
+        display: flex;
+        flex-direction: column;
+    }
+    .mob_adds_item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 15px 10px;
+        row-gap: 10px;
+    }
+    .mob_adds_item:nth-child(2n+1) {
+        background: #111433;
+    }
+    .mob_adds_item span, .mob_adds_item a{
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+        padding: 0 !important;
+        text-align: start !important;
+        align-self: self-start !important;
+    }
+    .mob_adds_item_row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .mob_adds_item_row2 {
+        display: flex;
+        column-gap: 30px;
+    }
+    .mob_adds_item_col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
+    }
+    .mob_adds_item_col_row {
+        display: flex;
+        align-items: center;
+        column-gap: 5px;
+        cursor: pointer;
+    }
+    .mob_icon {
+        width: 15px;
+        height: 15px;
+    }
+    .switchs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+    .switchs img {
+        cursor: pointer;
+        width: 15px;
+        filter: invert(100%);
+    }
+    .switchs span {
+        cursor: pointer;
+        font-size: 16px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+    }
+    .switchs span.active {
+        background-color: #111433;
+        color: white;
     }
 </style>

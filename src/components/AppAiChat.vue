@@ -61,6 +61,7 @@ export default {
             this.data = resp;
             this.messages = resp.messages;
             this.isWaiting = false;
+            this.scrollToBottom();
         },
         addMessage(text) {
             const date = new Date();
@@ -84,12 +85,21 @@ export default {
 
             console.log(new_msg);
             return new_msg;
-        }
+        },
+        scrollToBottom() {
+            this.$nextTick(() => {
+                const messagesContainer = this.$el.querySelector('.messages');
+                if (messagesContainer) {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            });
+        },
     },
     async created() {
         const resp = await getChat(this.userData.id);
         this.data = resp;
         this.messages = resp.messages;
+        this.scrollToBottom();
     }
 };
 </script>
@@ -99,12 +109,18 @@ export default {
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+        @media (max-width: 650px) {
+            row-gap: 10px;
+        }
     }
     h2 {
         font-size: 20px;
         color: white;
         font-family: 'OpenSans';
         line-height: 2;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .chat {
         display: flex;
@@ -122,23 +138,32 @@ export default {
         background: #141433;
         border-radius: 10px 10px 0px 0px;
         border-bottom: 1px solid white;
+        @media (max-width: 650px) {
+            padding: 10px;
+        }
     }
     .header h3 {
         font-family: 'OpenSans';
         color: white;
         font-size: 24px;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .header span {
         font-family: 'OpenSans';
         color: white;
         font-size: 18px;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .messages {
        display: flex;
        flex-direction: column;
        row-gap: 30px;
        height: 500px;
-       padding: 50px 0px;
+       padding: 50px 6px;
        overflow: hidden;
        overflow-y: scroll;
     }
@@ -156,6 +181,11 @@ export default {
         color: white;
         font-size: 16px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            max-width: 200px;
+            padding: 10px;
+            font-size: 14px;
+        }
     }
     .assistant {
         align-self: flex-start;
@@ -174,6 +204,10 @@ export default {
         flex-direction: column;
         row-gap: 15px;
         align-self: center;
+        @media (max-width: 650px) {
+            width: 100%;
+            padding: 0px 6px;
+        }
     }
     .counter {
         position: absolute;
@@ -183,6 +217,9 @@ export default {
         font-size: 14px;
         opacity: .5;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 12px;
+        }
     }
     textarea {
         width: 100%;
@@ -196,12 +233,19 @@ export default {
         border-radius: 10px;
         font-family: 'OpenSans';
         position: relative;
-        
+        @media (max-width: 650px) {
+            height: 160px;
+        }
     }
     .btn {
         align-self: flex-end;
         width: 100px;
         font-size: 12px;
+        @media (max-width: 650px) {
+            font-size: 10px;
+            width: 90px;
+            height: 29px;
+        }
     }
     /* HTML: <div class="loader"></div> */
     .loader {
@@ -216,6 +260,11 @@ export default {
     animation: l3 1s infinite linear;
     margin-left: 30px;
     margin-bottom: 30px;
+    @media (max-width: 650px) {
+        width: 30px;
+        margin-left: 10px;
+        margin-bottom: 10px;
+    }
     }
     @keyframes l3 {
         20%{background-position:0%   0%, 50%  50%,100%  50%}

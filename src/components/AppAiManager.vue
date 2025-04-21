@@ -20,10 +20,16 @@
     }
     .unworked img {
         width: 540px;
+        @media (max-width: 650px) {
+            max-width: 330px;
+        }
     }
     .unworked h1 {
         font-size: 40px;
         color: #FF6666;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
 </style>

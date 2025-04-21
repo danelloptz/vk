@@ -24,7 +24,7 @@
                 <h1>Возникли вопросы?</h1>
                 <span>Обратитесь за помощью к Вашему личному консультанту (рефереру):</span>
             </div>
-            <AppGroupOrUser :objectData="referData" />
+            <AppGroupOrUser :objectData="referData" style="width: auto;" />
         </div>
     </section>
     <section class="links" v-if="isLinks">
@@ -36,6 +36,7 @@
                 <img src="@/assets/images/copy.png" @click="copyLink(refLink, 1)">
                 <span class="green" v-if="isCopy == 1">Скопировано!</span>
             </div>
+            <span class="green_mob" v-if="isCopy == 1">Скопировано!</span>
         </div>
         <div class="item2">
             <span>Реферальная ссылка для ВК:</span>
@@ -44,6 +45,7 @@
                 <img src="@/assets/images/copy.png" @click="copyLink(refVkLink, 2)">
                 <span class="green" v-if="isCopy == 2">Скопировано!</span>
             </div>
+            <span class="green_mob" v-if="isCopy == 2">Скопировано!</span>
         </div>
         <div class="item2">
             <span>Премиальная ссылка для обладателей пакетов Business, Leader:</span>
@@ -52,6 +54,7 @@
                 <img v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)" src="@/assets/images/copy.png" @click="copyLink(refPremiumLink, 3)">
                 <span class="green" v-if="isCopy == 3">Скопировано!</span>
             </div>
+            <span class="green_mob" v-if="isCopy == 3">Скопировано!</span>
             <strong><span v-if="!packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">Не доступно</span></strong>
         </div>
         <span>Для максимального охвата аудитории используйте все доступные вам информационные источники. Чем больше пользователей перейдет по вашей реферальной ссылке, тем успешнее будет ваш бизнес - больше подписчиков, больше клиентов, больше доход по партнерской программе.</span>
@@ -146,28 +149,49 @@
         display: flex;
         flex-direction: column;
         row-gap: 50px;
+        @media (max-width: 650px) {
+            row-gap: 30px;
+        }
     }
     h1 {
         font-size: 32px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 20px;
+        }
     }
     span, h2 {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .tarif_btn, .ref_btn, .rot_btn {
         height: 51px;
     }
     .tarif_btn {
         width: 189px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 45px;
+        }
     }
     .ref_btn {
         width: 250px;
+        @media (max-width: 650px) {
+            width: 230px;
+            height: 45px;
+        }
     }
     .rot_btn {
         width: 133px;
+         @media (max-width: 650px) {
+            width: 115px;
+            height: 45px;
+        }
     }
     .item {
         display: flex;
@@ -177,11 +201,18 @@
     .row {
         display: flex;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 20px;
+        }
     }
     .row2 {
         display: flex;
         align-items: center;
         column-gap: 10px;
+        @media (max-width: 650px) {
+            align-items: start;
+        }
     }
     .row2 img {
         width: 20px;
@@ -190,11 +221,20 @@
     }
     .row2 span {
         line-height: 2;
+        @media (max-width: 650px) {
+            line-height: 1.5;
+            word-break: break-all;
+        }
     }
     .footer {
         width: 100%;
         display: flex;
         justify-content: space-between;
+        column-gap: 50px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 20px;
+        }
     }
     .col {
         display: flex;
@@ -205,6 +245,9 @@
         display: flex;
         flex-direction: column;
         row-gap: 50px;
+        @media (max-width: 650px) {
+            row-gap: 30px;
+        }
     }
     .item2 {
         display: flex;
@@ -215,6 +258,19 @@
         color: green;
         animation: ShowEasy 2s ease-in;
         opacity: 0;
+        @media (max-width: 650px) {
+            display: none;
+        }
+    }
+    .green_mob {
+        color: green;
+        animation: ShowEasy 2s ease-in;
+        opacity: 0;
+        display: none;
+        font-size: 10px;
+        @media (max-width: 650px) {
+            display: block;
+        }
     }
     @keyframes ShowEasy {
         0% { opacity: 0; }
