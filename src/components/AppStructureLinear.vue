@@ -1,7 +1,7 @@
 <template>
     <section class="linear">
         <div class="table">
-            <div class="header" v-if="isRoot">
+            <div class="header" v-if="isRoot && windowWidth > 650">
                 <h2>Партнер</h2>
                 <h2>ID / пакет</h2>
                 <h2>Уровень</h2>
@@ -69,6 +69,34 @@
                         <span>{{ currUser?.total_referrals }}</span>
                     </div>
                 </div>
+
+                <div class="item_mob" @click="open(currUser)" v-if="currUser && windowWidth <= 650" :key="currUser" >
+                        <div class="plus" @click.stop="toggleExpand(index, item)">
+                            {{ currUser?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
+                        </div>
+                        <div class="item_mob_content">
+                            <div class="user_small">
+                                <img :src="currUser.avatar_url">
+                                <span>{{ currUser.name }}</span>
+                            </div>
+                            <div class="item_mob_content_row">
+                                <span>ID / тариф: {{ currUser.vk_id }}</span>
+                                <div class="item_mob_tarif">
+                                    <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(currUser.package_name)) ? 'green' : 'red' }"></div>
+                                    <span>{{ currUser.package_name }}</span>
+                                </div>
+                            </div>
+                            <div class="item_mob_content_row">
+                                <span>Первая линия / Команда: </span>
+                                <img src="@/assets/images/team.png" class="team_icon">
+                                <span>{{ currUser.first_line_referrals }}</span>
+                                <span>/</span>
+                                <span>{{ currUser.total_referrals }}</span>
+                            </div>
+                            <span>Уровень: {{ currUser.level }}</span>
+                        </div>
+                    </div>
+
                 <div v-for="(item, index) in paginatedHistory" :key="index" :style="{ marginLeft: currUser ? '40px' : '0px' }">
                     <div class="modal_wrapper" v-if="visibility">
                         <div class="modal">
@@ -100,7 +128,7 @@
                         </div>
                     </div>
                     
-                    <div class="item" @click="open(item)" >
+                    <div class="item" @click="open(item)" v-if="windowWidth > 650">
                         <div class="row first">
                             <div class="plus" @click.stop="toggleExpand(index, item)">
                                 {{ item?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
@@ -126,6 +154,33 @@
                         </div>
                     </div>
 
+                    <div class="item_mob" @click="open(item)" v-if="windowWidth <= 650">
+                        <div class="plus" @click.stop="toggleExpand(index, item)">
+                            {{ item?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
+                        </div>
+                        <div class="item_mob_content">
+                            <div class="user_small">
+                                <img :src="item.avatar_url">
+                                <span>{{ item.name }}</span>
+                            </div>
+                            <div class="item_mob_content_row">
+                                <span>ID / тариф: {{ item.vk_id }}</span>
+                                <div class="item_mob_tarif">
+                                    <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item.package_name)) ? 'green' : 'red' }"></div>
+                                    <span>{{ item.package_name }}</span>
+                                </div>
+                            </div>
+                            <div class="item_mob_content_row">
+                                <span>Первая линия / Команда: </span>
+                                <img src="@/assets/images/team.png" class="team_icon">
+                                <span>{{ item.first_line_referrals }}</span>
+                                <span>/</span>
+                                <span>{{ item.total_referrals }}</span>
+                            </div>
+                            <span>Уровень: {{ item.level }}</span>
+                        </div>
+                    </div>
+
                     <!-- Вложенная таблица -->
                     <div v-if="openedUsers[currentPage - 1][index]" class="nested">
                         <AppStructureLinear 
@@ -137,6 +192,7 @@
                             :showNums="isHide" 
                             :referersStack="referersStackData" 
                             :searchUsers="[]"
+                            :windowWidth="windowWidth"
                             @updateUser="updateUser" 
                         />
                     </div>
@@ -172,7 +228,8 @@
             showNums: { type: Boolean, default: true },
             searchUsers: Array,
             currUser: Object,
-            rootUser: Object
+            rootUser: Object,
+            windowWidth: Number
         },
         data() {
             return {
@@ -312,10 +369,14 @@
                         this.$set(this.openedUsers[this.currentPage - 1], index, false);
                     }
                     
-                    if (this.lay % 2 == 0) {
+                    if (this.lay % 2 == 0 || this.windowWidth <= 650) {
+                        console.log(item.vk_id);
                         this.isZopa = true;
-                        this.$emit("updateUser", item.vk_id);
                         this.referersStackData.push({name: item.name, vk_id: item.vk_id});
+                        
+                        if (this.windowWidth <= 650) this.updateUser(item.vk_id)
+                        else this.$emit("updateUser", item.vk_id);
+
                         this.isNewLay = true; 
                         this.totalOpened = 0;
                     } else {
@@ -370,6 +431,7 @@
                 }
             },
             async updateUser(vk_id, index = false) {
+                console.log("updateUser");
                 this.totalOpened = 0;
                 if (!this.isNewLay) this.$emit("cleanCurrSearchUser", this.referersStackData, index);
                 this.isNewLay = false;
@@ -502,6 +564,9 @@
         display: flex;
         align-items: center;
         column-gap: 5px;
+        @media (max-width: 650px) {
+            column-gap: 10px;
+        }
     }
     .user_small img {
         width: 17px;
@@ -509,6 +574,10 @@
         border-radius: 50%;
         object-fit: cover;
         object-position: center;
+        @media (max-width: 650px) {
+            width: 20px;
+            height: 20px;
+        }
     }
     .circle {
         width: 10px;
@@ -532,6 +601,9 @@
         background: #2F3251;
         border-radius: 10px;
         z-index: 989;
+        @media (max-width: 650px) {
+            right: 10%;
+        }
     }
     .modal {
         padding: 20px;
@@ -647,5 +719,36 @@
         border-radius: 5px;
         width: max-content;
         word-wrap: break-word;
+    }
+    .item_mob {
+        width: 100%;
+        display: flex;
+        column-gap: 10px;
+        align-items: start;
+        padding: 20px 5px;
+    }
+    .item_mob:nth-child(2n+1) {
+        background: #111433;
+    }
+    .item_mob_content {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+    }
+    .item_mob_content_row {
+        display: flex;
+        align-items: center;
+        column-gap: 6px;
+    }
+    .item_mob span {
+        font-size: 14px !important;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .item_mob_tarif {
+        display: flex;
+        align-items: center;
+        column-gap: 5px;
+        margin-left: 9px;
     }
 </style>

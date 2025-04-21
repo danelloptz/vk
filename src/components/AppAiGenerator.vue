@@ -13,7 +13,7 @@
                 @click="setActive(item.index)"
             >{{ item.name }}</span>
         </div>  
-        <AppDropdown :listSwtich="listSwtich" @update-index="setActive" />
+        <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
         <AppAiGeneratorContent v-if="activeIndex == 0" :windowWidth="windowWidth" />
         <AppAiAnalytics v-if="activeIndex == 1" />
         <AppAiScene v-if="activeIndex == 2" :userData="userData" />

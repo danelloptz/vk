@@ -156,6 +156,7 @@
             :currUser="currUser"
             :showNums="showNums"
             :rootUser="userData"
+            :windowWidth="windowWidth"
             @notFound="linearNotFound"
             @cleanCurrSearchUser="cleanCurrSearchUser"
         />
@@ -391,7 +392,7 @@ export default {
             if (!flag && flag !== 0) {
                 this.searchUsers = stackData;
             } 
-        }
+        },
     }
 };
 </script>

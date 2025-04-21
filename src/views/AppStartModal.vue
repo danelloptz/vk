@@ -45,8 +45,7 @@
         async created() {
             // тут делаем редирект в ЛК, если живой пользователь решит перейти в lk.intelektaz.com (а не в /home)
             if (localStorage.length == 0) window.location.reload();
-            localStorage.removeItem("isDisabled");
-            this.isDisabled = false;
+            this.isDisabled = localStorage.getItem("isDisabled") || false;
             const token = localStorage.getItem("token_refresh");
             if (token) {
                 const resp = await refreshToken(token); // проверяем, что токен валидный
