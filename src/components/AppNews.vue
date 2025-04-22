@@ -72,11 +72,17 @@
         color: white;
         font-weight: bold;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 20px;
+        }
     }
     .header span {
         color: white;
         font-size: 18px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     hr {
         width: 100%;
@@ -97,22 +103,36 @@
         color: white;
         font-weight: bold;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 18px;
+        }
     }
     .item img {
         max-height: 300px;
         object-position: left;
         object-fit: contain;
+        margin-bottom: 10px;
     }
     .item span {
         color: white;
         font-size: 18px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .text {
         color: white;
         font-family: 'OpenSans';
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
     }
     .date {
         color: rgba(255, 255, 255, 0.5) !important;
+    }
+    .btn{
+        width: 170px;
+        height: 51px;
     }
 </style>

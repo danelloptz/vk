@@ -22,7 +22,7 @@
                     v-model="msg"
                     placeholder="Ваше сообщение"
                     maxlength="2000"
-                    @keydown.enter.prevent="sendMessage"
+                    @keydown="handleKeyDown"
                 ></textarea>
                 <AppGoodButton :text="text1" class="btn" @click="sendMessage" />
             </div>
@@ -50,7 +50,7 @@ export default {
     },
     methods: {
         async sendMessage() {
-            if (!this.msg.trim()) return;
+            if (!this.msg.trim() || this.isWaiting) return;
 
             this.addMessage(this.msg);
             const message = this.msg;
@@ -72,17 +72,14 @@ export default {
             });
         },
         formatedMessage(message) {
-            // Парсим строку из JSON-формата, если она экранирована
             let parsedMessage = message;
             try {
-                parsedMessage = JSON.parse(message); // Преобразуем строку в нормальный формат
+                parsedMessage = JSON.parse(message);
             } catch (error) {
                 console.warn("Строка не является JSON, оставляем как есть:", error);
             }
 
-            // Убираем кавычки и заменяем \n на <br>
             const new_msg = parsedMessage.replace(/"/g, "").replace(/\n/g, "<br>");
-
             console.log(new_msg);
             return new_msg;
         },
@@ -93,6 +90,19 @@ export default {
                     messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 }
             });
+        },
+        handleKeyDown(event) {
+            // Если нажат Enter и не зажат Ctrl
+            if (event.key === "Enter" && !event.ctrlKey) {
+                event.preventDefault(); // Отменяем стандартное поведение (перенос строки)
+                this.sendMessage(); // Отправляем сообщение
+            }
+
+            // Если нажат Enter и зажат Ctrl
+            if (event.key === "Enter" && event.ctrlKey) {
+                event.preventDefault(); // Отменяем стандартное поведение
+                this.msg += "\n"; // Добавляем перенос строки
+            }
         },
     },
     async created() {

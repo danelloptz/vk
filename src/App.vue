@@ -31,7 +31,7 @@ export default {
     padding: 25px 0;
     overflow-y: scroll;
     scrollbar-width: none;
-    @media (max-width: 500px) {
+    @media (max-width: 650px) {
       padding: 7px 0px;
     }
   }

@@ -1,7 +1,12 @@
 <template>
-    <div class="tree-container" :style="{ minHeight: visibility ? '400px' : 'auto' }">
+    <div class="tree-container" :style="{ 
+        minHeight: visibility ? '400px' : 'auto' , 
+        width: (lay == 1 && windowWidth <= 650 && users.length > 1) ? `${widthChild}px` : 'auto'
+      }">
       <div class="tree-user" :style="{ width: lay != 1 ? (400 / (Math.pow(2, lay-1))) + 'px' : '400px', alignItems: lay == 4 ? 'center' : 'normal' }">
-        <div v-if="node" class="avatar-container" :style="{ justifyContent: lay == 1 ? 'space-between' : 'center' }">
+        <div v-if="node" class="avatar-container" :style="{ 
+            columnGap: lay == 1 ? '42px' : '0px',
+            }">
           <div class="text_header" v-if="lay == 1">
             <span><strong>Лево</strong></span>
             <span>Рефералы: {{ node.left.referals }}</span>
@@ -52,10 +57,10 @@
 
         <div v-if="(node.left_leg || node.right_leg) && lay < 4" class="children">
           <div v-if="node.left_leg" class="child left">
-            <AppStructureBinar :node="node.left_leg" :lay="lay+1" :root_info="root_info" :referer="node.vk_id" :style="{ marginLeft: (node.left_leg && !node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
+            <AppStructureBinar :windowWidth="windowWidth" :node="node.left_leg" :lay="lay+1" :root_info="root_info" :referer="node.vk_id" :style="{ marginLeft: (node.left_leg && !node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
           </div>
           <div v-if="node.right_leg" class="child right">
-            <AppStructureBinar :node="node.right_leg" :lay="lay+1" :root_info="root_info" :referer="node.vk_id" :style="{ marginRight: (!node.left_leg && node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
+            <AppStructureBinar :windowWidth="windowWidth" :node="node.right_leg" :lay="lay+1" :root_info="root_info" :referer="node.vk_id" :style="{ marginRight: (!node.left_leg && node.right_leg) ? -(400 / (Math.pow(2, lay-1))) + 'px' : -(400 / (Math.pow(2, lay))) + 'px'}" />
           </div>
         </div>
         <div class="plus" v-if="lay == 4" @click="nextUser(node)">
@@ -81,7 +86,10 @@
       activation: Boolean,
       current_leg: String,
       isRoot: Boolean,
-      root_info: Object
+      root_info: Object,
+      windowWidth: Number,
+      users: Array,
+      widthChild: Number
     },
     data() {
       return {
@@ -119,8 +127,8 @@
           const year = date.getUTCFullYear(); // Год
 
           return `${day}.${month}.${year}`;
-      }
-    }
+      },
+    },
   };
   </script>
   
@@ -184,8 +192,9 @@
   .tree-container {
     display: flex;
     justify-content: center;
-    width: 100%;
-    overflow-x: auto;
+    /* width: 100%; */
+    /* overflow-x: auto; */
+    overflow: visible;
   }
   /* Для WebKit-браузеров (Chrome, Safari, Edge) */
   .tree-container::-webkit-scrollbar {
@@ -210,11 +219,13 @@
     flex-direction: column;
     position: relative;
     width: 200px;
+    overflow: visible;
   }
   
   .avatar-container {
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 
   .text_header {
@@ -358,5 +369,6 @@
         width: max-content;
         word-wrap: break-word;
     }
+    
 </style>
   

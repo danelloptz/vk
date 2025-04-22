@@ -68,6 +68,9 @@ export default {
         document.addEventListener("visibilitychange", this.handleVisibilityChange);
     },
     methods: {
+        skip() {
+            if (this.listOfLinks.length > this.videoIndex + 1) this.videoIndex++; 
+        },
         loadScript() {
             return new Promise((resolve, reject) => {
                 // Check if the script is already loaded
@@ -382,5 +385,8 @@ export default {
         @media (max-width: 650px) {
             font-size: 17px;
         }
+    }
+    .video {
+        min-height: 500px;
     }
 </style>

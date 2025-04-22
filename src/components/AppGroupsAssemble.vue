@@ -34,7 +34,6 @@
         },
         async created() {
             const adds = await getAdds();
-            console.log(adds.groups);
             this.assemblyGroups = adds.groups;
             // const response = await getAssemblyGroups(); !!!!! РАССКОМЕНИТРОВАТЬ !!!!!
             // this.assemblyGroups = response;
@@ -88,16 +87,13 @@
                     const maxScroll = container.scrollWidth - container.clientWidth;
 
                     // Если достигли конца, возвращаемся в начало
-                    console.log(scrollPosition, maxScroll);
                     if (scrollPosition == maxScroll) {
                         scrollPosition = 0;
-                        console.log("Im here");
                     }
                     else {
                         scrollPosition += scrollStep * 3;
                         if (scrollPosition > maxScroll) {
                             scrollPosition = maxScroll;
-                            console.log(scrollPosition, maxScroll);
                         } 
                     } 
 
@@ -145,7 +141,7 @@
         border-radius: 4px; /* Закругляем углы ползунка */
     }
     .item {
-        min-width: 150px;
+        width: 150px;
         height: 150px;
         border-radius: 10px;
         position: relative;
@@ -153,6 +149,9 @@
         display: flex;
         align-items: end;
         cursor: pointer;
+        @media (max-width: 1000px) {
+            min-width: 150px;
+        }
         @media (max-width: 650px) {
             min-width: 95.88px;
             height: 95.88px;

@@ -49,16 +49,17 @@
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
                 <AppBannerAdds v-if="selectedComponent == 10 && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
                 <AppHelp v-if="selectedComponent === 7 && !isReff" @update-isInstructions="updateActiveComponent(6)" :userData="userInfo" />
-                <AppComeToAssembly v-if="selectedComponent === 8 && !isReff" :userData="userInfo" />
+                <AppComeToAssembly v-if="selectedComponent === 8 && !isReff" :userData="userInfo" @open-balance="updateActiveComponent(0)" />
                 <AppRotationPlans v-if="selectedComponent === 9 && !isReff" :userData="userInfo" /> 
+                <AppNews v-if="selectedComponent === 11 && !isReff" />
                 <AppAdd
                     :isClicked="isClicked" 
                     @update:isClicked="isClicked = $event" 
                     v-if="addDataHorizontal"
                     :orientation="orientationH" 
                     :data="addDataHorizontal"    
+                    :style="{ marginBottom: windowWidth <= 650 ? '200px' : '60px' }"
                 />
-                <AppNews v-if="selectedComponent === 11 && !isReff" />
             </div>
         </section>
         <section class="wrapper_nav_mobile" v-if="windowWidth <= 1200">

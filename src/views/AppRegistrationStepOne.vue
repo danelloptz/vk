@@ -111,7 +111,7 @@
                 <h1>ВОЗНИКЛИ ВОПРОСЫ?</h1>
                 <span>Обратитесь за помощью к Вашему личному консультанту (рефереру):</span>
             </div>
-            <AppGroupOrUser :objectData="referData" />
+            <AppGroupOrUser style="width: 100%;" :objectData="referData" />
         </div>
 </section>
 </template>

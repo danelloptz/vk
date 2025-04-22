@@ -16,23 +16,23 @@
                 </span>
             </div>
             <div class="items">
-                <div class="modal_wrapper" v-if="visibility && currUser" :key="currUser">
+                <div class="modal_wrapper" v-if="visibility && maskedCurrUser" :key="maskedCurrUser">
                     <div class="modal">
                     <img src="@/assets/images/close.png" class="close" @click="close">
-                    <img :src="currUser.avatar_url" class="avatar">
-                    <h2>{{ currUser.name }}</h2>
-                    <span class="package_name">{{ currUser.package_name }}</span>
+                    <img :src="maskedCurrUser.avatar_url" class="avatar">
+                    <h2>{{ maskedCurrUser.name }}</h2>
+                    <span class="package_name">{{ maskedCurrUser.package_name }}</span>
                     <div class="row_modal">
                         <span>Первая линия / всего: </span>
-                        <span>{{ currUser?.first_line_referrals }}/{{ currUser?.total_referrals }}</span>
+                        <span>{{ maskedCurrUser?.first_line_referrals }}/{{ maskedCurrUser?.total_referrals }}</span>
                     </div>
                     <div class="row_modal">
                         <span>ID:</span>
-                        <span>{{ currUser.vk_id }}</span>
+                        <span>{{ maskedCurrUser.vk_id }}</span>
                     </div>
                     <div class="row_modal">
                         <span>Реферер ID:</span>
-                        <span>{{ currUser.sponsor_vk_id }}</span>
+                        <span>{{ maskedCurrUser.sponsor_vk_id }}</span>
                     </div>
                     <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px;">
                         <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
@@ -41,64 +41,64 @@
                     </div>
                     <div class="row_col_modal">
                         <span>Дата регистрации: </span>
-                        <span>{{ formatedDate(currUser?.date_created) }}</span>
+                        <span>{{ formatedDate(maskedCurrUser?.date_created) }}</span>
                     </div>
                     </div>
                 </div>
                 
-                <div class="item" @click="open(currUser)" v-if="currUser" :key="currUser" >
+                <div class="item" @click="open(maskedCurrUser)" v-if="maskedCurrUser && windowWidth > 650" :key="maskedCurrUser" >
                     <div class="row first">
-                        <div class="plus" @click.stop="toggleExpand(index, item)">{{ currUser?.first_line_referrals > 0 ? '-' : '' }}</div>
+                        <div class="plus" @click.stop="toggleExpand(index, maskedCurrUser)">{{ maskedCurrUser?.first_line_referrals > 0 ? '-' : '' }}</div>
                         <div class="user_small">
-                            <img :src="currUser.avatar_url">
-                            <span>{{ currUser.name }}</span>
+                            <img :src="maskedCurrUser.avatar_url">
+                            <span>{{ maskedCurrUser.name }}</span>
                         </div>
                     </div>
                     <div class="row">
-                        <span>{{ currUser.vk_id }}</span>
-                        <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(currUser.package_name)) ? 'green' : 'red' }"></div>
-                        <span>{{ currUser.package_name }}</span>
+                        <span>{{ maskedCurrUser.vk_id }}</span>
+                        <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(maskedCurrUser.package_name)) ? 'green' : 'red' }"></div>
+                        <span>{{ maskedCurrUser.package_name }}</span>
                     </div>
-                    <span>{{ currUser?.level }}</span>
+                    <span>{{ maskedCurrUser?.level }}</span>
                     <div class="row">
                         <img src="@/assets/images/team.png" class="team_icon">
-                        <span>{{ currUser?.first_line_referrals }}</span>
+                        <span>{{ maskedCurrUser?.first_line_referrals }}</span>
                     </div>
                     <div class="row">
                         <img src="@/assets/images/team.png" class="team_icon">
-                        <span>{{ currUser?.total_referrals }}</span>
+                        <span>{{ maskedCurrUser?.total_referrals }}</span>
                     </div>
                 </div>
 
-                <div class="item_mob" @click="open(currUser)" v-if="currUser && windowWidth <= 650" :key="currUser" >
-                        <div class="plus" @click.stop="toggleExpand(index, item)">
-                            {{ currUser?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
+                <div class="item_mob" @click="open(maskedCurrUser)" v-if="maskedCurrUser && windowWidth <= 650" :key="maskedCurrUser" >
+                        <div class="plus" @click.stop="toggleExpand(index, maskedCurrUser)">
+                            {{ maskedCurrUser?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
                         </div>
                         <div class="item_mob_content">
                             <div class="user_small">
-                                <img :src="currUser.avatar_url">
-                                <span>{{ currUser.name }}</span>
+                                <img :src="maskedCurrUser.avatar_url">
+                                <span>{{ maskedCurrUser.name }}</span>
                             </div>
                             <div class="item_mob_content_row">
-                                <span>ID / тариф: {{ currUser.vk_id }}</span>
+                                <span>ID / тариф: {{ maskedCurrUser.vk_id }}</span>
                                 <div class="item_mob_tarif">
-                                    <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(currUser.package_name)) ? 'green' : 'red' }"></div>
-                                    <span>{{ currUser.package_name }}</span>
+                                    <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(maskedCurrUser.package_name)) ? 'green' : 'red' }"></div>
+                                    <span>{{ maskedCurrUser.package_name }}</span>
                                 </div>
                             </div>
                             <div class="item_mob_content_row">
                                 <span>Первая линия / Команда: </span>
                                 <img src="@/assets/images/team.png" class="team_icon">
-                                <span>{{ currUser.first_line_referrals }}</span>
+                                <span>{{ maskedCurrUser.first_line_referrals }}</span>
                                 <span>/</span>
-                                <span>{{ currUser.total_referrals }}</span>
+                                <span>{{ maskedCurrUser.total_referrals }}</span>
                             </div>
-                            <span>Уровень: {{ currUser.level }}</span>
+                            <span>Уровень: {{ maskedCurrUser.level }}</span>
                         </div>
                     </div>
 
                 <div v-for="(item, index) in paginatedHistory" :key="index" :style="{ marginLeft: currUser ? '40px' : '0px' }">
-                    <div class="modal_wrapper" v-if="visibility">
+                    <div class="modal_wrapper" v-if="visibility && !currUser">
                         <div class="modal">
                         <img src="@/assets/images/close.png" class="close" @click="close">
                         <img :src="selectedUser.avatar_url" class="avatar">
@@ -154,7 +154,7 @@
                         </div>
                     </div>
 
-                    <div class="item_mob" @click="open(item)" v-if="windowWidth <= 650">
+                    <div class="item_mob" @click="open(item)" v-if="windowWidth <= 650 && !currUser">
                         <div class="plus" @click.stop="toggleExpand(index, item)">
                             {{ item?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
                         </div>
@@ -296,6 +296,18 @@
                     total_referrals: this.isHide ? item.total_referrals : '*'.repeat(item.total_referrals.toString().length),
                 }));
             },
+            maskedCurrUser() {
+                if (!this.currUser) return null; // Проверяем, что объект существует
+
+                return {
+                    ...this.currUser, // Копируем все свойства объекта
+                    all_volume: this.isHide ? this.currUser.all_volume : '*'.repeat(this.currUser.all_volume.toString().length),
+                    level: this.isHide ? this.currUser.level : '*'.repeat(this.currUser.level.toString().length),
+                    first_line_referrals: this.isHide ? this.currUser.first_line_referrals : '*'.repeat(this.currUser.first_line_referrals.toString().length),
+                    total_referrals_buf:  this.currUser.first_line_referrals,
+                    total_referrals: this.isHide ? this.currUser.total_referrals : '*'.repeat(this.currUser.total_referrals.toString().length),
+                };
+            },
             pagination() {
                 return [...this.referersStackData];
             }
@@ -339,12 +351,14 @@
             },
             currUser: {
                 async handler(newValue) {
+                    console.log('ДООООО', newValue);
                     if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                     else this.isFirstLine = false;
                     if (newValue?.vk_id) {
                         const referals = await getReferals(this.rootUser.vk_id, newValue.vk_id);
                         this.node = referals.referrals;
                     }
+                    console.log('ПОООООСЛЕ', newValue);
                 },
                 deep: true,
                 immediate: true
@@ -359,20 +373,21 @@
         },
         methods: {
             toggleExpand(index, item) {
+                console.log(item);
                 if (item.total_referrals_buf > 0) {
 
                     if (!this.openedUsers[this.currentPage - 1]) {
                         this.updateOpenedUsers();
                     }
 
-                    if (this.openedUsers[this.currentPage - 1][index] === undefined) {
-                        this.$set(this.openedUsers[this.currentPage - 1], index, false);
-                    }
+                    // if (this.openedUsers[this.currentPage - 1][index] === undefined) {
+                    //     this.$set(this.openedUsers[this.currentPage - 1], index, false);
+                    // }
                     
                     if (this.lay % 2 == 0 || this.windowWidth <= 650) {
                         console.log(item.vk_id);
                         this.isZopa = true;
-                        this.referersStackData.push({name: item.name, vk_id: item.vk_id});
+                        if (!this.maskedCurrUser) this.referersStackData.push({name: item.name, vk_id: item.vk_id});
                         
                         if (this.windowWidth <= 650) this.updateUser(item.vk_id)
                         else this.$emit("updateUser", item.vk_id);

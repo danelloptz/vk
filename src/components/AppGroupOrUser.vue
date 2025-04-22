@@ -79,7 +79,6 @@
                 </span></h2>
                 
             </div>
-            <span class="id" v-if="objectData && objectData.vk_id && !objectData?.group_link && !objectData?.post_link && !objectData?.video_link">ID: {{ objectData.vk_id }}</span>
             <span class="sentence" style="word-break: break-word;" v-if="shouldDisplayText" >{{ ' ' + (objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text) + ' ' }}</span>
             <a v-if="objectData && (isSettings || (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData?.group_link && (objectData?.group_link == '' || objectData?.group_link.length == 0) ? `https://vk.com/id${objectData?.vk_id}` : objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
             <div v-if="windowWidth > 650 || isRotation" class="footer_data_links" style="margin-top: 20px;">

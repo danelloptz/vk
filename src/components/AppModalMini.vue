@@ -59,6 +59,7 @@
                 if (this.visibility1) {
                     this.$emit('update:visibility1', false);
                 }
+                console.log('mini close');
                 this.$emit('close'); 
             },
             openTarif() {
@@ -156,12 +157,16 @@
         font-family: 'OpenSans';
         @media (max-width: 600px) {
             font-size: 16px;
+            width: fit-content;
         }
     }
     span {
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 600px) {
+            width: fit-content;
+        }
     }
     .program {
         @media (max-width: 600px) {

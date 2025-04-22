@@ -135,17 +135,30 @@
             </div>
             <AppGoodButton v-if="windowWidth <= 650" :text="text4" class="set_leg_btn" @click="setLeg"/>
         </div>
-        <AppStructureBinar 
-            v-if="binarTree && !notFound && activeIndex == 1" 
-            :isRoot="true" 
-            :user="userData" 
-            :activation="struct_info.qualification" 
-            :current_leg="userData.current_leg" 
-            :node="maskedData" 
-            :lay="1" 
-            :root_info="userData"
-            @nextUser="next" 
-        />
+        <div class="mob_help" v-if="windowWidth <= 650 && users.length > 1 && activeIndex == 1">            
+            <span>Листай вправо</span>
+            <img src="@/assets/images/arrow.png">
+        </div>
+        <div class="binar" ref="binar" :style="{overflowX: users.length > 1 ? 'auto' : 'visible'}">
+            <AppStructureBinar 
+                v-if="binarTree && !notFound && activeIndex == 1" 
+                :isRoot="true" 
+                :user="userData" 
+                :activation="struct_info.qualification" 
+                :current_leg="userData.current_leg" 
+                :node="maskedData" 
+                :lay="1" 
+                :root_info="userData"
+                :windowWidth="windowWidth"
+                :users="users"
+                :widthChild="widthChild"
+                @nextUser="next"
+            />
+            <div class="back_arrow" v-if="binarStack.length > 1" @click="backNode">
+                <img src="@/assets/images/arrow.png" />
+            </div>
+        </div>
+            
         <AppStructureLinear v-if="activeIndex == 0 && !notFound" 
             :vk_id="root_vk_id" 
             :key="root_vk_id"
@@ -219,6 +232,8 @@ export default {
             currUser: null,
             isUser: true,
             lay: 1,
+            widthChild: null,
+            binarStack: []
         };
     },
     computed: {
@@ -312,8 +327,25 @@ export default {
         await this.next(this.userData.vk_id);
 
         this.struct_info = await getStructureInfo(this.userData.vk_id);
+        this.setInitialScrollPosition();
     },
     methods: {
+        setInitialScrollPosition() {
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    const container = this.$refs.binar;
+                    if (!container) {
+                        console.warn("Элемент .binar не найден.");
+                        return;
+                    }
+
+                        container.scrollTo({
+                            left: 1000,
+                            behavior: "auto"
+                        });
+                }, 50); // Небольшая задержка для гарантии
+            });
+        },
         setActive(index) {
             this.activeIndex = index;
         },
@@ -327,6 +359,9 @@ export default {
             const tree = await getTree(vk_id);
             this.binarTree = tree;
             this.getAllId(this.binarTree);
+            if (this.binarTree.left_leg) this.widthChild = 1000;
+            if (this.binarTree.right_leg && !this.binarTree.left_leg) this.widthChild += 500;
+            this.binarStack.push(this.maskedData);
         },
         getAllId(node) {
             if (!node.vk_id) return
@@ -340,21 +375,29 @@ export default {
             if (this.activeIndex == 1) {
                 if (this.users.includes(+this.search)) {
                     this.binarTree = await getTree(+this.search);
+                    this.binarStack.push(this.binarTree);
                 } else {
                     this.notFound = true;
                 }
             } else {    
+                if (!(/^\d+$/.test(this.search))) {
+                    this.notFound = true;
+                    return;
+                }
                 const resp = await findParents(this.userData.vk_id, +this.search);
                 this.searchUsers = resp.referrers;
-                this.currUser = resp.searched_user;
-
-                this.searchUsers.reverse();
-                this.searchUsers.push({ "vk_id": this.currUser.vk_id, "name": this.currUser.name });
                 if (this.searchUsers.length > 0) {
                     this.notFound = false;
                     this.root_vk_id = +this.search;
                 }
-                else this.notFound = true;
+                else {
+                    this.notFound = true;
+                    return;
+                }
+                this.currUser = resp.searched_user;
+
+                this.searchUsers.reverse();
+                this.searchUsers.push({ "vk_id": this.currUser.vk_id, "name": this.currUser.name })
             }
             
         },
@@ -363,6 +406,7 @@ export default {
             this.notFound = false;
             this.binarTree = await getTree(this.userData.vk_id);
             this.searchUsers = [];
+            this.binarStack.push(this.binarTree);
             this.root_vk_id = this.userData.vk_id;
         },
         changeActiveLeg(index, name) {
@@ -388,11 +432,18 @@ export default {
         },
         cleanCurrSearchUser(stackData, flag) {
             this.currUser = null;
+            this.binarStack = [];
             this.isUser = false;
             if (!flag && flag !== 0) {
                 this.searchUsers = stackData;
             } 
         },
+        backNode() {
+            if (this.binarStack.length > 1) {
+                this.binarStack.pop();
+                this.binarTree = this.binarStack.at(-1);
+            }
+        }
     }
 };
 </script>
@@ -736,4 +787,56 @@ export default {
     height: 40px;
     font-size: 14px;
   }
+  .binar {
+    overflow-x: auto;
+    position: relative;
+  }
+  .binar::-webkit-scrollbar {
+      height: 27px; /* Высота горизонтального скроллбара */
+  }
+
+  .binar::-webkit-scrollbar-track {
+      background: #2F3251; /* Убираем фон полосы прокрутки */
+      border-radius: 14px;
+  }
+
+  .binar::-webkit-scrollbar-thumb {
+      width: 64px;
+      background: linear-gradient(to right, #7023EC, #A585DA); /* Цвет ползунка */
+      border-radius: 13.5px; /* Закругляем углы ползунка */
+      border: 4px solid #2F3251; /* "Отступ" через границу того же цвета, что и фон */
+      background-clip: content-box;
+  }
+  .mob_help {
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+        align-self: end;
+        margin-bottom: -10px;
+    }
+    .mob_help span {
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .mob_help img {
+        width: 43px;
+    }
+    .back_arrow {
+        width: 40px;
+        height: 40px;
+        border: 1px solid white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        position: sticky;
+        left: 0;
+        bottom: 34px;
+    }
+    .back_arrow img {
+        width: 26px;
+        transform: rotate(180deg);
+    }
 </style>

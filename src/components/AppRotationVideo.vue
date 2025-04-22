@@ -4,7 +4,7 @@
         v-if="videosInfo"
         :visibility1="isVideoShown"
         :isWatched="isWatched"
-        :listOfLinks="[{link: videosQueue[currentVideoIndex].video_link}]"
+        :listOfLinks="[{link: videosQueue[currentVideoIndex]?.video_link}]"
         @update:visibility1="isVideoShown = $event"
         @update:isWatched="isWatched = $event"
         @close="closeVideo" 

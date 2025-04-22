@@ -21,6 +21,7 @@
                 <AppBadButton :text="`${text2} (${skipCounts})`" @click="skipGroup" />
                 <span class="error_message" v-if="noSkips">Не осталось пропусков!</span>
                 <span class="error_message" v-if="noSubscribe">Не подписались!</span>
+                <span class="error_message" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             </div>
         </div>
     </section>
@@ -48,6 +49,7 @@
                 text2: "ПРОПУСТИТЬ",
                 noSkips: false,
                 noSubscribe: false,
+                tooFast: false,
                 currentGroupIndex: 0,
                 groupPriorities: ["first", "second", "third_and_fourth", "fifth", "other"],
                 currentPriorityIndex: 0,
@@ -130,6 +132,7 @@
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;
+                    this.tooFast = false;
 
                     if (this.addGroups === this.totalGroups) {
                         console.log("сработал changestatus", this.addGroups, this.totalGroups);
@@ -178,10 +181,12 @@
             handleFocus() {
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
-                    if (elapsed > 3000) { // Например, если прошло более 5 секунд
+                    if (elapsed > 1000) { // Например, если прошло более 5 секунд
+                        this.tooFast = false;
                         this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
+                        this.tooFast = true;
                     }
                 }
             },

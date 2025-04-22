@@ -26,6 +26,7 @@
             <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" :isRotation="true" />
             <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png"> Не осталось пропусков!</span>
             <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не подписались на ВК группу, нажмите «Пропустить» или подпишитесь на ВК группу</span>
+            <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
                 <AppGoodButton class="btn" :text="text3" @click="subscribeGroup" />
                 <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
@@ -69,6 +70,7 @@
                 totalGroups: 20,
                 skipCounts: 10,
                 noSubscribe: false,
+                tooFast: false,
                 noSkips: false,
                 isPlans: false,
                 currentGroupIndex: 0,
@@ -175,6 +177,7 @@
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;
+                    this.tooFast = false;
 
                     if (this.addGroups === this.totalGroups) {
                         this.watchVideo();
@@ -195,6 +198,7 @@
                 else {
                     this.noSkips = false;
                     this.noSubscribe = false;
+                    this.tooFast = false;
                     this.skipCounts--;
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     if (this.groupsQueue.length === 0) {
@@ -222,13 +226,14 @@
                 console.log('nadleFocus');
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
-                    if (elapsed > 5000) { // Например, если прошло более 5 секунд
+                    if (elapsed > 1000) { // Например, если прошло более 5 секунд
+                        this.tooFast = false;
                         this.noSubscribe = false;
                         console.log('nandler');
                         this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
-                        this.noSubscribe = true;
+                        this.tooFast = true;
                     }
                 }
             },

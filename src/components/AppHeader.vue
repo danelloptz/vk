@@ -136,6 +136,9 @@
         position: relative;
         z-index: 15;
         padding-top: 10px;
+        @media (max-width: 650px) {
+            margin-top: 20px;
+        }
         @media (max-width: 600px) {
             position: static;
         }

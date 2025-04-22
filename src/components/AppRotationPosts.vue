@@ -17,6 +17,7 @@
             <span>Необходимо просмотреть и поставить лайк на последний пост в группе, если есть закрепленное сообщение, пропустите его</span>
             <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png">Не осталось пропусков!</span>
             <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не поставили лайк на последний пост в группе, нажмите «Пропустить» или поставьте лайк.</span>
+            <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" class="btn" @click="subscribeGroup" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" class="btn" @click="skipGroup" />
@@ -24,8 +25,8 @@
         </div>
     </section>
     <section class="rotation_end" v-if="isRotationEnd && !isPlans">
-        <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
-        <strong><span>Вы успешно прошли Ротацию групп!</span></strong>
+        <span class="counter">Просмотры {{ addGroups }} из {{ totalGroups }}</span>
+        <strong><span>Вы успешно прошли Ротацию постов!</span></strong>
         <span>Ваша группа добавлена в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
         <AppGoodButton :text="text2" @click="openPlans"  />
     </section>
@@ -54,6 +55,7 @@
                 totalGroups: 20,
                 skipCounts: 10,
                 noSubscribe: false,
+                tooFast: false,
                 noSkips: false,
                 isPlans: false,
                 currentGroupIndex: 0,
@@ -169,6 +171,7 @@
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;
+                    this.tooFast = false;
 
                     if (this.addGroups === this.totalGroups) {
                         this.endRotation();
@@ -189,6 +192,7 @@
                 else {
                     this.noSkips = false;
                     this.noSubscribe = false;
+                    this.tooFast = false;
                     this.skipCounts--;
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     if (this.groupsQueue.length === 0) {
@@ -218,13 +222,15 @@
             handleFocus() {
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
-                    if (elapsed > 5000) { // Например, если прошло более 5 секунд
+                    if (elapsed > 1000) { // Например, если прошло более 5 секунд
+                        this.tooFast = false;
                         const group_id = this.groupsQueue[this.currentGroupIndex].group_id;
                         const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
 
                         this.checkSubscription(post_link, group_id, this.userData.vk_id);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
+                        this.tooFast = true;
                     }
                 }
             },

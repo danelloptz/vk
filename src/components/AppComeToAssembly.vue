@@ -9,7 +9,6 @@
     <section class="come">
         <h1>Рекламная лента</h1>
         <span>Тысячи пользователей с бизнес интересами ежедневно и многократно посещают кабинет Intelektaz. У нас точно есть ваши клиенты. Покажите им свое предложение по самой низкой цене:</span>
-        <span class="error" v-if="isError">{{ errorMsg }}</span>
         <div class="content">
             <div class="prices">
                 <div class="row" v-for="(tarrif, index) in tarrifs" :key="index">
@@ -24,9 +23,10 @@
                         <span>{{ userData.group.group_name }}</span>
                     </div>
                 </div>
-                <AppGoodButton :text="text1" class="btn" @click="comeToAss" />
+                <AppGoodButton :text="isError ? text2 : text1" class="btn" @click="comeToAss" />
             </div>
         </div>
+        <span class="error" v-if="isError"><img src="@/assets/images/cross2.png" /> {{ errorMsg }}</span>
     </section>
 </template>
 
@@ -43,6 +43,7 @@
             return {
                 tarrifs: ["Leader, Business", "VIP", "Start, Standart", "Free"],
                 text1: "ПОПАСТЬ В ЛЕНТУ",
+                text2: "ПОПОЛНИТЬ БАЛАНС",
                 isModal: false,
                 title: "",
                 msg: "",
@@ -67,6 +68,7 @@
         methods: {
             async comeToAss() {
                 if (this.disabled) return;
+                if (this.isError) this.$emit('open-balance');
                 this.disabled = true;
                 if (!this.userData.group.group_link) {
                     this.isError = true;
@@ -90,7 +92,7 @@
                 }
                 if (this.userData.balance < this.price) {
                     this.isError = true;
-                    this.errorMsg = "Не хватает средств на балансе!";
+                    this.errorMsg = `Недостаточно средств. Не хватает ${this.price - this.userData.balance} USDT. Пополните баланс`;
                     this.disabled = false;
                     return;
                 }
@@ -120,20 +122,33 @@
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .content {
         display: flex;
         justify-content: space-between;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 24px;
+        }
     }
     .prices {
         display: flex;
         flex-direction: column;
         row-gap: 10px;
+        @media (max-width: 650px) {
+            max-width: 220px;
+        }
     }
     .row {
         display: flex;
@@ -143,14 +158,26 @@
     .row span {
         font-size: 20px;
         text-align: start;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .group {
         display: flex;
         align-items: center;
         column-gap: 50px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 20px;
+            align-self: center;
+        }
     }
     .btn {
         width: 189px;
+        @media (max-width: 650px) {
+            width: 200px;
+            height: 40px;
+        }
     }
 
     .item {
@@ -162,13 +189,9 @@
         display: flex;
         align-items: end;
         cursor: pointer;
-        @media (max-width: 600px) {
-            width: 100px;
-            height: 100px;
-        }
-        @media (max-width: 360px) {
-            width: 120px;
-            height: 120px;
+        @media (max-width: 650px) {
+            width: 200px;
+            height: 200px;
         }
     }
     .item img {
@@ -200,6 +223,13 @@
         font-family: 'OpenSans';
     }
     .error {
-        color: red;
+        color: #FF6666;
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+    }
+    .error img {
+        width: 20px;
+        height: 20px;
     }
 </style>

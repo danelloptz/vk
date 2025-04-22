@@ -282,60 +282,62 @@
             </div>
         </div>
 
-        <div class="content" v-if="activeIndex == 1 && windowWidth > 650">
-            <table>
-                <thead>
-                    <tr class="head">
-                        <th>
-                            <input type="checkbox" v-model="allCheckboxesContent">
-                        </th>
-                        <th>День</th>
-                        <th>Тема</th>
-                        <th>Пост</th>
-                        <th>Баннер</th>
-                        <th>Дата / время публикации</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in plan" :key="index">
-                        <td v-if="item.date_publication">
-                            <input 
-                                v-if="item.date_publication" 
-                                type="checkbox" 
-                                v-model="aprovedPostsIndexes[index]" 
-                                :checked="allCheckboxesContent" 
-                            />
-                        </td>
-                        <td v-if="item.date_publication">
-                            <span class="content_text">{{ index + 1 }}</span>
-                        </td>
-                        <td v-if="item.date_publication">
-                            <span class="content_text">{{ item?.topic_name }}</span>
-                        </td>
-                        <td v-if="item.date_publication">
-                            <span class="content_text" v-html="formatedPost(item.post_text[item.chose_post_index])"></span>
-                        </td>
-                        <td v-if="item.date_publication">
-                            <img class="accepted_banner" :src="item.image_links[item.chose_image_index]" />
-                        </td>
-                        <td class="col" v-if="item.date_publication">
-                            <span
-                                class="content_text"
-                                :contenteditable="isEditableContent"
-                                :ref="'editableDate_' + index"
-                                @input="updateSelectedDate"
-                            >{{ formatedDate(item.date_publication * 1000) }}</span>
-                            <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
-                            <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
-                            <span class="error" v-if="badDate">Неправильный формат даты. Введите дату в формате: 01.01.2000 12:00</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <span v-if="isLoading">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
-            <span v-if="isPostPubl">Посты были успешно отправлены.</span>
-            <AppGoodButton :text="text7" @click="publicate" />
+        <div class="table_container">
+            <div class="content" v-if="activeIndex == 1 && windowWidth > 650">
+                <table>
+                    <thead>
+                        <tr class="head">
+                            <th>
+                                <input type="checkbox" v-model="allCheckboxesContent">
+                            </th>
+                            <th>День</th>
+                            <th>Тема</th>
+                            <th>Пост</th>
+                            <th>Баннер</th>
+                            <th>Дата / время публикации</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in plan" :key="index">
+                            <td v-if="item.date_publication">
+                                <input 
+                                    v-if="item.date_publication" 
+                                    type="checkbox" 
+                                    v-model="aprovedPostsIndexes[index]" 
+                                    :checked="allCheckboxesContent" 
+                                />
+                            </td>
+                            <td v-if="item.date_publication">
+                                <span class="content_text">{{ index + 1 }}</span>
+                            </td>
+                            <td v-if="item.date_publication">
+                                <span class="content_text">{{ item?.topic_name }}</span>
+                            </td>
+                            <td v-if="item.date_publication">
+                                <span class="content_text" v-html="formatedPost(item.post_text[item.chose_post_index])"></span>
+                            </td>
+                            <td v-if="item.date_publication">
+                                <img class="accepted_banner" :src="item.image_links[item.chose_image_index]" />
+                            </td>
+                            <td class="col" v-if="item.date_publication">
+                                <span
+                                    class="content_text"
+                                    :contenteditable="isEditableContent"
+                                    :ref="'editableDate_' + index"
+                                    @input="updateSelectedDate"
+                                >{{ formatedDate(item.date_publication * 1000) }}</span>
+                                <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
+                                <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
+                                <span class="error" v-if="badDate">Неправильный формат даты. Введите дату в формате: 01.01.2000 12:00</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <span v-if="isLoading">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
+                <span v-if="isPostPubl">Посты были успешно отправлены.</span>
+            </div>
         </div>
+        <AppGoodButton class="publ_btn" :text="text7" @click="publicate" />
     </section>
     
 </template>
@@ -1241,5 +1243,8 @@
         height: auto !important;
         text-align: start !important;
         padding: 0 !important;
+    }
+    .publ_btn {
+        align-self: center;
     }
 </style>

@@ -297,6 +297,12 @@
             min-width: 150px;
         }
     }
+    .btn {
+        @media (max-width: 650px) {
+            width: 190px !important;
+            align-self: center !important;
+        }
+    }
     .active {
         background: #7023EC;
         border: none !important;
@@ -394,10 +400,6 @@
             line-height: 1.3;
             word-break: break-all;
         }
-    }
-    .btn {
-        width: 190px !important;
-        align-self: center;
     }
     .right {
         @media (max-width: 650px) {
