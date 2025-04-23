@@ -187,6 +187,31 @@ export async function acceptPlan(plan, token) {
     }
 }
 
+export async function uploadUserImage(user_id, topic_id, img_form_data) {
+    try {
+        const formData = new FormData();
+        formData.append("img_form_data", img_form_data);
+        const response = await axios.post(
+            `https://web.intelektaz.com/api/v3/choose-custom-image-content-plan/${user_id}/${topic_id}`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+                params: {
+                    user_id: user_id,
+                    topic_id: topic_id
+                }
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при загрузке изображения для поста контент плана", error);
+        return false;
+    }
+}
+
 export async function getAnalytics(vk_id) {
     try {
         const response = await axios.post('https://web.intelektaz.com/api/v2/users/get_stats', {

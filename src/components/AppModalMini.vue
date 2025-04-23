@@ -68,8 +68,7 @@
             },
             exit() {
                 localStorage.clear();
-                location.reload();
-                location.reload();
+                this.$router.push('/');
             },
             openRef() {
                 console.log('modal mini');

@@ -152,7 +152,7 @@
                             <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
                                 <div class="line"></div>
                             </div>
-                            <img v-if="!(isLoading && step == 0)" :src="item?.image_links[item.chose_image_index]" class="banner" />
+                            <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index]" class="banner" />
                             <div class="plan_item_variants" v-if="!(isLoading && step == 0) && step >= 3">
                                 <AppGoodButton 
                                     v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
@@ -162,6 +162,21 @@
                                     :class="{ not_active: index_var !== plan[index].chose_image_index }"
                                     @click="setActiveImageVar(index_var, index)"
                                 />
+                                <AppGoodButton 
+                                    :text="user_label" 
+                                    class="variant_btn"
+                                    v-if="flagsImages[index]"
+                                    :class="{ not_active: plan[index].chose_image_index !== 3 }"
+                                    @click="setUserImage(index)"
+                                />
+                                <input 
+                                    type="file" 
+                                    :ref="'fileInput_' + index"
+                                    @change="handleFileUpload"
+                                    accept="image/*"
+                                    style="display: none;"
+                                />
+                                <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" />
                             </div>
                         </div>
                     </div>
@@ -214,7 +229,7 @@
                                 <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
                                     <div class="line"></div>
                                 </div>
-                                <img v-if="!(isLoading && step == 0)" :src="item?.image_links[item.chose_image_index]" class="banner" />
+                                <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index]" class="banner" />
                                 <div class="plan_item_variants" v-if="!(isLoading && step == 0)">
                                     <AppGoodButton 
                                         v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
@@ -224,6 +239,21 @@
                                         :class="{ not_active: index_var !== plan[index].chose_image_index }"
                                         @click="setActiveImageVar(index_var, index)"
                                     />
+                                    <AppGoodButton 
+                                        :text="user_label" 
+                                        class="variant_btn"
+                                        v-if="flagsImages[index]"
+                                        :class="{ not_active: plan[index].chose_image_index !== 3 }"
+                                        @click="setUserImage(index)"
+                                    />
+                                    <input 
+                                        type="file" 
+                                        :ref="'fileInput_' + index"
+                                        @change="handleFileUpload"
+                                        accept="image/*"
+                                        style="display: none;"
+                                    />
+                                    <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" />
                                 </div>
                             </td>
                         </tr>
@@ -248,7 +278,7 @@
 
         <div class="table_container_mob" v-if="activeIndex == 1 && windowWidth <= 650">
             <div class="table_mob">
-                <div class="table_item_mob" v-for="(item, index) in plan" :key="index">
+                <div class="table_item_mob" v-for="(item, index) in fileredPlan" :key="index">
                     <input 
                         v-if="item.date_publication" 
                         type="checkbox" 
@@ -298,7 +328,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(item, index) in plan" :key="index">
+                        <tr v-for="(item, index) in fileredPlan" :key="index">
                             <td v-if="item.date_publication">
                                 <input 
                                     v-if="item.date_publication" 
@@ -333,24 +363,40 @@
                         </tr>
                     </tbody>
                 </table>
-                <span v-if="isLoading">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
-                <span v-if="isPostPubl">Посты были успешно отправлены.</span>
+                
             </div>
         </div>
-        <AppGoodButton class="publ_btn" :text="text7" @click="publicate" />
+        <span class="info_msg" v-if="isLoading">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
+        <span class="info_msg" v-if="isPostPubl">Посты были успешно отправлены.</span>
+        <AppGoodButton class="publ_btn" v-if="fileredPlan.length > 0 && !isLoading && activeIndex == 1 && !isPostPubl" :text="text7" @click="publicate" />
     </section>
     
 </template>
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
-    import { sendBrief, getBrief, updateBrief, getContentPlan, generateTopics, generatePostsText, regenerateThemes, generateBanners, regeneratePosts, updateContentPlan, regenerateBanners, acceptPlan } from "@/services/ai";
+    import { 
+        sendBrief, 
+        getBrief, 
+        updateBrief, 
+        getContentPlan, 
+        generateTopics, 
+        generatePostsText, 
+        regenerateThemes, 
+        generateBanners, 
+        regeneratePosts, 
+        updateContentPlan, 
+        regenerateBanners, 
+        acceptPlan,
+        uploadUserImage
+    } from "@/services/ai";
     import { sendPosting } from "@/services/user";
 
     export default {
         components: { AppGoodButton },
         props: {
-            windowWidth: Number
+            windowWidth: Number,
+            userData: Object
         },
         data() {
             return {
@@ -406,7 +452,7 @@
                 step: -1,
                 currBanners: [],
                 currTexts: [],
-                variants: ["ВАРИАНТ 1", "ВАРИАНТ 2", "ВАРИАНТ 3"],
+                variants: ["ВАРИАНТ 1", "ВАРИАНТ 2", "ВАРИАНТ 3", "ВАРИАНТ 4"],
                 result: [],
                 badDate: false,
                 maxSymbols: 3500,
@@ -414,6 +460,9 @@
                 types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"],
                 isPostPubl: false,
                 selectedDate: null, // Общая дата для всех выделенных элементов
+                currPostToChangeImage: null,
+                flagsImages: [],
+                user_label: "ВАШЕ ФОТО"
             }
         },
         watch: {
@@ -459,10 +508,18 @@
             this.aprovedPostsIndexes = Array.from({ length: this.plan.length }, () => false);
             this.currTexts = Array.from({ length: this.plan.length }, () => 0);
             this.currBanners = Array.from({ length: this.plan.length }, () => 0);
+            this.flagsImages =  Array.from({ length: this.plan.length }, () => false);
+            this.plan.forEach((item, index) => {
+                this.flagsImages[index] = item.custom_image_url != '';
+            });
+            console.log(this.flagsImages);
             
             this.step = this.getStep();
         },
         computed: { 
+            fileredPlan() {
+                return this.plan.filter(item => !item.is_published);
+            },
             allCountsOfTexts() {
                 return this.plan.map(item => item.chose_post_index);
             },
@@ -482,6 +539,35 @@
             }
         },
         methods: {
+            setUserImage(index) {
+                this.flagsImages[index] = true;
+                this.plan[index].chose_image_index = 3;
+            },
+            getUserImage(post, index) {
+                const fileInputRef = this.$refs['fileInput_' + index];
+                console.log(fileInputRef);
+                if (fileInputRef) {
+                    fileInputRef[0].click();
+                }
+                this.currPostToChangeImage = post;
+            },
+            async handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = async () => {
+                    const formData = new FormData();
+                    formData.append("img_form_data ", file);
+                    const resp = await uploadUserImage(this.userData.id, this.currPostToChangeImage.topic_id, file);
+                    this.plan = resp.content_plan;
+                    this.plan.forEach((item, index) => {
+                        this.flagsImages[index] = item.custom_image_url && item.custom_image_url != '';
+                        if (this.flagsImages[index]) this.plan[index].chose_image_index = 3;
+                    });
+                };
+            },
             hideDropdown() {
                 this.isDropdownVisible = false;
             },
@@ -569,6 +655,7 @@
                 this.plan[post_index].chose_post_index = var_index;
             },
             setActiveImageVar(var_index, post_index) {
+                this.flagsImages[post_index] = false;
                 this.plan[post_index].chose_image_index = var_index;
             },
             async savePlan(index) {
@@ -799,6 +886,7 @@
             requestAnimationFrame(updateProgress);
         },
         async publicate() {
+            if (this.isLoading) return;
             this.isLoading = true;
             const resp = await sendPosting(localStorage.getItem("token"));
             this.isLoading = false;
@@ -1246,5 +1334,17 @@
     }
     .publ_btn {
         align-self: center;
+    }
+    .info_msg {
+        @media (max-width: 650px) {
+            font-size: 14px;
+            text-align: start;
+            align-content: start;
+        }
+    }
+    .addImageBtn {
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
     }
 </style>

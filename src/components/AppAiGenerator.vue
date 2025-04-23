@@ -14,7 +14,7 @@
             >{{ item.name }}</span>
         </div>  
         <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
-        <AppAiGeneratorContent v-if="activeIndex == 0" :windowWidth="windowWidth" />
+        <AppAiGeneratorContent v-if="activeIndex == 0" :windowWidth="windowWidth" :userData="userData" />
         <AppAiAnalytics v-if="activeIndex == 1" :windowWidth="windowWidth" />
         <AppAiScene v-if="activeIndex == 2" :userData="userData" />
         <AppAiChat v-if="activeIndex == 3" :userData="userData" />
