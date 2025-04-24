@@ -314,6 +314,7 @@ export default {
         column-gap: 23px;
         @media (max-width: 650px) {
             column-gap: 19px;
+            padding-top: 15px;
         }
     }
     .footer_data_links img {

@@ -242,7 +242,7 @@
                                     <AppGoodButton 
                                         :text="user_label" 
                                         class="variant_btn"
-                                        v-if="flagsImages[index]"
+                                        v-if="item.custom_image_url != ''"
                                         :class="{ not_active: plan[index].chose_image_index !== 3 }"
                                         @click="setUserImage(index)"
                                     />
@@ -253,7 +253,7 @@
                                         accept="image/*"
                                         style="display: none;"
                                     />
-                                    <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" />
+                                    <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" />
                                 </div>
                             </td>
                         </tr>
@@ -366,8 +366,8 @@
                 
             </div>
         </div>
-        <span class="info_msg" v-if="isLoading">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
-        <span class="info_msg" v-if="isPostPubl">Посты были успешно отправлены.</span>
+        <span class="info_msg" v-if="isLoading && activeIndex == 1">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
+        <span class="info_msg" v-if="isPostPubl && activeIndex == 1">Посты были успешно отправлены.</span>
         <AppGoodButton class="publ_btn" v-if="fileredPlan.length > 0 && !isLoading && activeIndex == 1 && !isPostPubl" :text="text7" @click="publicate" />
     </section>
     
@@ -511,6 +511,7 @@
             this.flagsImages =  Array.from({ length: this.plan.length }, () => false);
             this.plan.forEach((item, index) => {
                 this.flagsImages[index] = item.custom_image_url != '';
+                if (this.flagsImages[index]) this.plan[index].chose_image_index = 3;    
             });
             console.log(this.flagsImages);
             
@@ -560,8 +561,8 @@
                 img.onload = async () => {
                     const formData = new FormData();
                     formData.append("img_form_data ", file);
-                    const resp = await uploadUserImage(this.userData.id, this.currPostToChangeImage.topic_id, file);
-                    this.plan = resp.content_plan;
+                    const resp = await uploadUserImage(this.currPostToChangeImage.topic_id, file, localStorage.getItem("token"));
+                    this.plan = resp;
                     this.plan.forEach((item, index) => {
                         this.flagsImages[index] = item.custom_image_url && item.custom_image_url != '';
                         if (this.flagsImages[index]) this.plan[index].chose_image_index = 3;

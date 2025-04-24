@@ -423,7 +423,7 @@ export default {
                     this.searchQuery = this.userData.country == '""' ? "" : this.userData.country;
                 if (this.userData.city)
                     this.selectedCity = this.userData.city == '""' ? "" : this.userData.city;
-                if (this.userData.sex)
+                if (this.userData.sex_db)
                     this.searchQueryGender = this.userData.sex_db;
                 if (this.userData.interests) 
                     this.selectedInterests = [...this.userData.interests];

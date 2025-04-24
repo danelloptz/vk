@@ -187,19 +187,19 @@ export async function acceptPlan(plan, token) {
     }
 }
 
-export async function uploadUserImage(user_id, topic_id, img_form_data) {
+export async function uploadUserImage(topic_id, file, token) {
     try {
         const formData = new FormData();
-        formData.append("img_form_data", img_form_data);
+        formData.append("file", file);
         const response = await axios.post(
-            `https://web.intelektaz.com/api/v3/choose-custom-image-content-plan/${user_id}/${topic_id}`,
+            `https://web.intelektaz.com/api/v1/content_plan/content_plan_custom_image/${topic_id}`,
             formData,
             {
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     "Content-Type": "multipart/form-data"
                 },
                 params: {
-                    user_id: user_id,
                     topic_id: topic_id
                 }
             }

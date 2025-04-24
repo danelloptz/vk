@@ -15,7 +15,7 @@
             <hr>
         </div>
         <div class="groups_block">
-            <AppGroupOrUser :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
+            <AppGroupOrUser style="width: 100%;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text1" @click="subscribeGroup" />
                 <AppBadButton :text="`${text2} (${skipCounts})`" @click="skipGroup" />

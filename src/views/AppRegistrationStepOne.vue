@@ -81,6 +81,7 @@
                         @focus="isDropdownVisibleInterest = true"
                         @blur="hideDropdown"
                         ref="selectInterest"
+                        readonly
                     />
                     <img :class="{'rotated': isDropdownVisibleInterest}" src="@/assets/images/arrow_down.png" class="arrow_down">
                     <ul v-if="isDropdownVisibleInterest" class="dropdown-menu">
@@ -191,12 +192,12 @@
                 this.isDropdownVisibleInterest = false;
             },
             nextStep() {
-                this.isNotSelectCountry = !this.countries.some(country => country === this.selectedCountry);
+                this.isNotSelectCountry = !(this.searchQuery != "");
                 this.isNotSelectGender = !(this.selectedGender != "");
                 this.isNotSelectInterest = !(this.selectedInterests.length > 0);
                 this.isNotCheckboxChecked = !this.isCheckboxChecked;
                 if (!(this.isNotSelectCountry || this.isNotSelectGender || this.isNotSelectInterest || this.isNotCheckboxChecked)) {
-                    localStorage.setItem("country", this.selectedCountry);
+                    localStorage.setItem("country", this.searchQuery);
                     localStorage.setItem("city", this.selectedCity);
                     localStorage.setItem("sex", this.selectedGender);
                     localStorage.setItem("interests", JSON.stringify(this.selectedInterests));
