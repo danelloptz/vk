@@ -133,24 +133,39 @@
                         localStorage.setItem("token_refresh", response.data.refresh_token);
                         localStorage.setItem("is_new_user", response.data.is_new_user);
 
-                        const user = await getUserInfo(localStorage.getItem("token"));
-                        const refererId = ref; // если есть рефер, то отмечаем это
-                        console.log("refererId", refererId);
+                        try {
+                            const user = await getUserInfo(localStorage.getItem("token"));
+                            const refererId = ref; // если есть рефер, то отмечаем это
+                            console.log("refererId", refererId);
+                            
+                            if (response.data.is_new_user) {
+                                if (refererId) {
+                                    const resp = await addReferer(refererId, user.id);
+                                    console.log(resp);
+                                    if (!resp.status) console.log(resp.message);
+                                }   
+                                localStorage.setItem("points", 0);
+                                this.$router.push('/signup_1');
+                            }
+                            else {
+                                localStorage.setItem("points", 0);
+                                localStorage.setItem("page", 1);
+                                this.$router.push('/home');
+                            }
+                        } catch(err) {
+                            const referal = localStorage.getItem("referer");
+                            localStorage.clear();
+                            localStorage.setItem("first", true);
+                            localStorage.setItem("referer", referal);
+                            location.reload();
+                        }
                         
-                        if (response.data.is_new_user) {
-                            if (refererId) {
-                                const resp = await addReferer(refererId, user.id);
-                                console.log(resp);
-                                if (!resp.status) console.log(resp.message);
-                            }   
-                            localStorage.setItem("points", 0);
-                            this.$router.push('/signup_1');
-                        }
-                        else {
-                            localStorage.setItem("points", 0);
-                            localStorage.setItem("page", 1);
-                            this.$router.push('/home');
-                        }
+                    } else {
+                        const ref = localStorage.getItem("referer");
+                        localStorage.clear();
+                        localStorage.setItem("first", true);
+                        localStorage.setItem("referer", ref);
+                        location.reload();
                     }
                      
                 } else {
