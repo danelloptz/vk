@@ -22,6 +22,10 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
         return response;
     })
     .catch((error) => {
+        const ref   = localStorage.getItem("referer");
+        localStorage.clear();
+        localStorage.setItem("first", true);
+        localStorage.setItem("referer", ref);
         console.error("Error during request:", error.response || error);
         throw error;
     });

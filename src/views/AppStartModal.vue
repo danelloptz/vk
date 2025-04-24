@@ -124,7 +124,15 @@
                 const code_verifier = localStorage.getItem("code_verifier");
 
                 if (code && state && device_id) {
-                    const response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
+                    let response;
+                    try {
+                        response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
+                    } catch (err) {
+                        const cleanUrl = window.location.origin + window.location.pathname; 
+                        window.history.replaceState({}, document.title, cleanUrl);
+
+                        location.reload();
+                    }
                     if (response.status == 200) {
                         // оставляем только эти три поля, которые будут использоваться на страницах
                         const ref = localStorage.getItem("referer");
@@ -165,6 +173,8 @@
                         localStorage.clear();
                         localStorage.setItem("first", true);
                         localStorage.setItem("referer", ref);
+                        const cleanUrl = window.location.origin + window.location.pathname; 
+                        window.history.replaceState({}, document.title, cleanUrl);
                         location.reload();
                     }
                      
