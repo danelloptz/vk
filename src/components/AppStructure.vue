@@ -139,7 +139,7 @@
             <span>Листай вправо</span>
             <img src="@/assets/images/arrow.png">
         </div>
-        <div class="binar" ref="binar" :style="{overflowX: users.length > 1 ? 'auto' : 'visible'}">
+        <div class="binar" ref="binar" :style="{overflowX: users.length > 1 && windowWidth <= 650 ? 'auto' : 'visible'}">
             <AppStructureBinar 
                 v-if="binarTree && !notFound && activeIndex == 1" 
                 :isRoot="true" 

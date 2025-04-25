@@ -85,8 +85,8 @@
                 const ref = localStorage.getItem("referer");
                 localStorage.clear();
                 localStorage.setItem("referer", ref);
-                const cleanUrl = window.location.origin + window.location.pathname; 
-                window.history.replaceState({}, document.title, cleanUrl);
+                // const cleanUrl = window.location.origin + window.location.pathname; 
+                // window.history.replaceState({}, document.title, cleanUrl);
 
                 location.reload();
             },
@@ -139,8 +139,13 @@
                     try {
                         response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
                     } catch (err) {
-                        const cleanUrl = window.location.origin + window.location.pathname; 
-                        window.history.replaceState({}, document.title, cleanUrl);
+
+                        const referal = localStorage.getItem("referer");
+                        localStorage.clear();
+                        localStorage.setItem("referer", referal);
+
+                        // const cleanUrl = window.location.origin + window.location.pathname; 
+                        // window.history.replaceState({}, document.title, cleanUrl);
 
                         location.reload();
                     }
@@ -184,8 +189,8 @@
                         localStorage.clear();
                         localStorage.setItem("first", true);
                         localStorage.setItem("referer", ref);
-                        const cleanUrl = window.location.origin + window.location.pathname; 
-                        window.history.replaceState({}, document.title, cleanUrl);
+                        // const cleanUrl = window.location.origin + window.location.pathname; 
+                        // window.history.replaceState({}, document.title, cleanUrl);
                         location.reload();
                     }
                      
