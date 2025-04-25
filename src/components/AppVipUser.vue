@@ -99,6 +99,7 @@
         font-size: 16px;
         font-family: 'OpenSans';
         font-weight: normal;
+        word-break: break-all;
         @media (max-width: 650px) {
             font-size: 14px;
         }
