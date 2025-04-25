@@ -4,7 +4,7 @@
             <!-- <div class="modal-background"></div> -->
             <img src="@/assets/images/close.png" class="close" @click="close">
             <h1>ОПЛАТА</h1>
-            <span>Баланс: {{ userData.balance }}</span>
+            <span>Баланс: {{ userData?.balance?.toFixed(2)  }}</span>
             
             <div class="item">
                 <h2>Услуга:</h2>
@@ -212,7 +212,7 @@ export default {
             } else {
                 if (!this.disabled) {
                     this.error = true;
-                    this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance} USDT!`;
+                    this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance.toFixed(2)} USDT!`;
                 }
             }
         }

@@ -62,7 +62,7 @@
             updatedMenuItems() {
                 return this.menuItems.map((item, index) => {
                     if (index === 0 && this.userData) {
-                        return { ...item, label: `Баланс: ${this.userData.balance} USDT` };
+                        return { ...item, label: `Баланс: ${this.userData?.balance?.toFixed(2) } USDT` };
                     }
                     return item;
                 });

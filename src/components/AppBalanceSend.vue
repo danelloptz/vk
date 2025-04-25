@@ -9,7 +9,7 @@
     <section class="send" v-if="!stepTwo">
         <div class="row">
             <img src="@/assets/images/balance.png">
-            <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
+            <h2 v-if="userData">Ваш баланс: {{ userData?.balance?.toFixed(2)  }} USDT</h2>
         </div>
         <div class="item">
             <input 
@@ -32,7 +32,7 @@
     <section class="send" v-if="stepTwo">
         <div class="row">
             <img src="@/assets/images/balance.png">
-            <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
+            <h2 v-if="userData">Ваш баланс: {{ userData?.balance?.toFixed(2)  }} USDT</h2>
         </div>
         <span>Подтвердите перевод. Вы хотите перевести {{ usdt }} USDT пользователю</span>
         <div class="user_tosend">

@@ -10,7 +10,7 @@
         <div class="left">
             <div class="row" v-if="windowWidth > 650">
                 <img src="@/assets/images/balance.png">
-                <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
+                <h2 v-if="userData">Ваш баланс: {{ userData?.balance?.toFixed(2) }} USDT</h2>
             </div>
             <div class="item">
                 <input 
@@ -37,7 +37,7 @@
         <div class="right">
             <div class="row" v-if="windowWidth <= 650">
                 <img src="@/assets/images/balance.png">
-                <h2 v-if="userData">Ваш баланс: {{ userData.balance }} USDT</h2>
+                <h2 v-if="userData">Ваш баланс: {{ userData?.balance?.toFixed(2) }} USDT</h2>
             </div>
             <h2>Выберите сеть для вывода:</h2>
             <div class="right_row">

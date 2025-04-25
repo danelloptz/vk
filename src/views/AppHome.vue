@@ -161,7 +161,7 @@
             updatedMenuItems() {
                 return this.menuItems.map((item, index) => {
                     if (index === 0 && this.userInfo) {
-                        return { ...item, label: `Баланс: ${this.userInfo.balance} USDT` };
+                        return { ...item, label: `Баланс: ${this.userInfo?.balance?.toFixed(2) } USDT` };
                     }
                     return item;
                 });
@@ -173,7 +173,15 @@
             }
         },
         async created() {
-            let userInfo = await getUserInfo(localStorage.getItem("token"));
+            let userInfo;
+            try {
+                userInfo = await getUserInfo(localStorage.getItem("token"));
+            } catch(err) {
+                localStorage.clear();
+                this.$router.push('/');
+                return;
+            }
+
             localStorage.setItem("points", userInfo.gift_score);
             console.log(userInfo);
             if (userInfo && !userInfo.activation) {

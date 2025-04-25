@@ -1,6 +1,6 @@
 <template>
     <section class="modal">
-        <img src="@/assets/images/close.png" class="close">
+        <img src="@/assets/images/close.png" class="close" @click=reboot>
         <div class="text_wrapper">
             <h1>АВТОРИЗАЦИЯ</h1>
             <span>Чтобы авторизироваться воспользуйся VK ID</span>
@@ -79,6 +79,16 @@
             
         },
         methods: {
+            reboot() {
+                console.log("HERE");    
+                const ref = localStorage.getItem("referer");
+                localStorage.clear();
+                localStorage.setItem("referer", ref);
+                const cleanUrl = window.location.origin + window.location.pathname; 
+                window.history.replaceState({}, document.title, cleanUrl);
+
+                location.reload();
+            },
             async tap() {
                 if (!this.isDisabled) {
                     this.isDisabled = true;
@@ -275,6 +285,7 @@
         width: 21px;
         height: 21px;
         cursor: pointer;
+        z-index: 999;
         @media (max-width: 450px) {
             right: 20px;
             top: 20px;

@@ -92,7 +92,7 @@
                 }
                 if (this.userData.balance < this.price) {
                     this.isError = true;
-                    this.errorMsg = `Недостаточно средств. Не хватает ${this.price - this.userData.balance} USDT. Пополните баланс`;
+                    this.errorMsg = `Недостаточно средств. Не хватает ${this.price - this.userData.balance.toFixed(2)} USDT. Пополните баланс`;
                     this.disabled = false;
                     return;
                 }
