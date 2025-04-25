@@ -70,9 +70,10 @@
             // 210966706
             console.log(!localStorage.getItem("first"));
             if (!localStorage.getItem("first")) {
+                const referer = localStorage.getItem("referer");
                 localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
                 const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
-                localStorage.setItem("referer", urlParams.get('ref'));
+                localStorage.setItem("referer", urlParams.get('ref') || referer);
                 console.log(urlParams.get('ref'))
                 localStorage.setItem("first", true); // будет редирект с вк сюда, так что нельзя чистить после него
         }
