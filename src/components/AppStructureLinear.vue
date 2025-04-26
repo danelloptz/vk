@@ -199,7 +199,7 @@
                 </div>
             </div>
         </div>
-        <div class="switchs" v-if="totalPages > 1 && isRoot">
+        <div class="switchs" v-if="totalPages > 1">
             <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
 
             <span v-for="page in visiblePages" :key="page" @click="goToPage(page)" 
@@ -260,6 +260,7 @@
 
             this.updateOpenedUsers();
 
+            console.log('created: ', this.referersStackData, this.searchUsers, this.referersStack);
             if (this.searchUsers.length == 0) this.referersStackData = this.referersStack
             else this.referersStackData = [...this.searchUsers];
             this.isHide = this.showNums;
@@ -318,9 +319,11 @@
                     if (!this.zopaIndex) {
                         if (this.isUser) {
                             this.referersStackData = [...newStack];
+                            console.log("referersStack if: ", newStack);
                         } 
                         else {
-                            if (this.searchUsers.length != 0) this.referersStackData = [...this.searchUsers]
+                            console.log("referersStack else: ", this.referersStackData, this.searchUsers, newStack);
+                            if (this.searchUsers.length != 0 && this.referersStackData.length != 1) this.referersStackData = [...this.searchUsers]
                             else this.referersStackData = [...newStack];
                         } 
                     }
@@ -338,6 +341,7 @@
             },
             searchUsers: {
                 handler(newValue) {
+                    console.log("searchUsers: ", newValue);
                     this.referersStackData = this.newValue && this.newValue.length > 0 ? [...newValue] : [];
                 },
                 deep: true,
@@ -351,20 +355,19 @@
             },
             currUser: {
                 async handler(newValue) {
-                    console.log('ДООООО', newValue);
                     if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                     else this.isFirstLine = false;
                     if (newValue?.vk_id) {
                         const referals = await getReferals(this.rootUser.vk_id, newValue.vk_id);
                         this.node = referals.referrals;
                     }
-                    console.log('ПОООООСЛЕ', newValue);
                 },
                 deep: true,
                 immediate: true
             },
             referersStackData: {
                 handler(newValue) {
+                    console.log("referersStackData: ", newValue);
                     this.referersStackData = newValue;
                 },
                 deep: true,
@@ -446,9 +449,8 @@
                 }
             },
             async updateUser(vk_id, index = false) {
-                console.log("updateUser");
                 this.totalOpened = 0;
-                if (!this.isNewLay) this.$emit("cleanCurrSearchUser", this.referersStackData, index);
+                if (!this.isNewLay) this.$emit("cleanCurrSearchUser", index === 0 ? [{ "vk_id": this.rootUser.vk_id, "name": this.rootUser.name }] : this.referersStackData, index);
                 this.isNewLay = false;
                 this.zopaIndex = index;
 
@@ -458,6 +460,10 @@
                 if (vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                 else this.isFirstLine = false;
                 
+                if (vk_id == this.rootUser.vk_id) {
+                    this.referersStackData = [];
+                    this.referersStackData.push({ "vk_id": this.rootUser.vk_id, "name": this.rootUser.name })
+                }
                 const referals = await getReferals(this.rootUser.vk_id, vk_id);
                 this.node = referals.referrals;
             },
@@ -485,6 +491,9 @@
 </script>
 
 <style scoped>
+    .linear {
+        margin-bottom: 20px;
+    }
     .table {
         width: 100%;
         display: flex;

@@ -431,12 +431,16 @@ export default {
             return value; // Если не число, возвращаем как есть
         },
         cleanCurrSearchUser(stackData, flag) {
+            console.log("cleanCurrSearchUser");
             this.currUser = null;
             this.binarStack = [];
             this.isUser = false;
             if (!flag && flag !== 0) {
+                console.log("СРАБОТАЛО: ", stackData);
                 this.searchUsers = stackData;
-            } 
+            } else {
+                if (this.searchUsers.length == 1) this.searchUsers = stackData;
+            }
         },
         backNode() {
             if (this.binarStack.length > 1) {
