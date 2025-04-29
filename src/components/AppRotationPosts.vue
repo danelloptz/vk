@@ -20,6 +20,7 @@
             <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" class="btn" @click="subscribeGroup" />
+                <AppGoodButton :text="text5" class="btn" @click="checkSubscription(groupsQueue[currentGroupIndex].post_link, groupsQueue[currentGroupIndex].group_id), userData.vk_id" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" class="btn" @click="skipGroup" />
             </div>
         </div>
@@ -48,6 +49,7 @@
                 text2: "ВЫБРАТЬ ТАРИФ",
                 text3: "ПОСМОТРЕТЬ ПОСТ",
                 text4: "ПРОПУСТИТЬ",
+                text5: "ПРОВЕРИТЬ ЛАЙК",
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,

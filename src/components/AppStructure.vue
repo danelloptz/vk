@@ -356,7 +356,7 @@ export default {
             this.isLinks = true;
         },
         async next(vk_id) {
-            const tree = await getTree(vk_id);
+            const tree = await getTree(vk_id, this.userData.vk_id);
             this.binarTree = tree;
             this.getAllId(this.binarTree);
             if (this.binarTree.left_leg) this.widthChild = 1000;
@@ -373,10 +373,11 @@ export default {
         async searchId() {
             this.notFound = false;
             if (this.activeIndex == 1) {
-                if (this.users.includes(+this.search)) {
-                    this.binarTree = await getTree(+this.search);
-                    this.binarStack.push(this.binarTree);
-                } else {
+                try {
+                    this.binarTree = await getTree(+this.search, this.userData.vk_id);
+                    if (this.binarStack.indexOf(this.binarTree.vk_id) == -1) this.binarStack.push(this.binarTree);
+                } catch(err) {
+                    console.log("notFound: ", this.notFound);
                     this.notFound = true;
                 }
             } else {    
@@ -404,9 +405,9 @@ export default {
         async backup() {
             this.cleanCurrSearchUser();
             this.notFound = false;
-            this.binarTree = await getTree(this.userData.vk_id);
+            this.binarTree = await getTree(this.userData.vk_id, this.userData.vk_id);
             this.searchUsers = [];
-            this.binarStack.push(this.binarTree);
+            if (this.binarStack.indexOf(this.binarTree.vk_id) == -1) this.binarStack.push(this.binarTree);
             this.root_vk_id = this.userData.vk_id;
         },
         changeActiveLeg(index, name) {
@@ -442,10 +443,12 @@ export default {
                 if (this.searchUsers.length == 1) this.searchUsers = stackData;
             }
         },
-        backNode() {
+        async backNode() {
             if (this.binarStack.length > 1) {
                 this.binarStack.pop();
                 this.binarTree = this.binarStack.at(-1);
+            } else {
+                await this.next(this.userData.vk_id);
             }
         }
     }

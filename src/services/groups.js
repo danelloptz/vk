@@ -42,7 +42,7 @@ export async function checkGroupSub(vk_link, vk_id, move) {
         return response.data;
     } catch (error) {
         console.error("Ошибка при получении проверки подписки на группу", error);
-        return 'zopa'; 
+        return false; 
     }
 }
 

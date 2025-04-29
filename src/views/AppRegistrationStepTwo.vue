@@ -1,4 +1,11 @@
 <template>
+    <AppModalMessage 
+        :visibility1="isModal"
+        :link="this.groupsQueue[this.currentGroupIndex].group_link"
+        :user="userInfo.id"
+        @close="close"
+        @update:visibility1="isModal = $event"
+    />
     <section class="modal">
         <div class="modal-background"></div>
         <img src="@/assets/images/close.png" class="close" @click="this.$router.push('/signup_1')">
@@ -18,7 +25,9 @@
             <AppGroupOrUser style="width: 100%;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text1" @click="subscribeGroup" />
+                <AppGoodButton class="big_btn" :text="text3" @click="checkSubscription(groupsQueue[currentGroupIndex]?.group_link)" />
                 <AppBadButton :text="`${text2} (${skipCounts})`" @click="skipGroup" />
+                <AppBadButton v-if="userInfo.vk_id == 513698557 || userInfo.vk_id == 345465696" :text="text4" @click="openModal" />
                 <span class="error_message" v-if="noSkips">Не осталось пропусков!</span>
                 <span class="error_message" v-if="noSubscribe">Не подписались!</span>
                 <span class="error_message" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
@@ -35,9 +44,10 @@
     import { checkGroupSub, getGroups } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
     import { refreshToken, changeStatus } from '@/services/auth';
+    import AppModalMessage from '@/components/AppModalMessage.vue';
 
     export default {
-        components: { AppGroupOrUser, AppGoodButton, AppBadButton },
+        components: { AppGroupOrUser, AppGoodButton, AppBadButton, AppModalMessage },
         data() {
             return {
                 addGroups: 0,
@@ -47,6 +57,8 @@
                 userInfo: [],
                 text1: "ПОДПИСАТЬСЯ",
                 text2: "ПРОПУСТИТЬ",
+                text3: "ПРОВЕРИТЬ ПОДПИСКУ",
+                text4: "ПОЖАЛОВАТЬСЯ",
                 noSkips: false,
                 noSubscribe: false,
                 tooFast: false,
@@ -57,10 +69,12 @@
                 subscribedCount: 0,
                 waitingForCheck: false, // Флаг для отслеживания момента проверки подписки
                 wasBlurred: false,
-                blurTime: 0
+                blurTime: 0,
+                isModal: false
             };
         },
         async created() {
+            const lcs_addGroups = localStorage.getItem("addGroups");
             let response = await getUserInfo(localStorage.getItem("token"));
             if (!response) {
                 const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
@@ -71,16 +85,19 @@
                     response = await getUserInfo(localStorage.getItem("token"));
                     if (!response) {
                         localStorage.clear();
+                        localStorage.setItem("addGroups", lcs_addGroups);
                         this.$router.push('/');
                         return;
                     }
                 } else {
                     localStorage.clear();
+                    localStorage.setItem("addGroups", lcs_addGroups);
                     this.$router.push('/');
                     return;
                 }
             }
             this.userInfo = response;
+            if (lcs_addGroups) this.addGroups = lcs_addGroups;
             const groups = await getGroups(this.userInfo.vk_id);
             this.groupInfo = groups;
             console.log(this.groupInfo);
@@ -103,6 +120,9 @@
             });
         },
         methods: {
+            openModal() {
+                this.isModal = true;
+            },
             updateGroupQueue() {
                 const priorityKey = this.groupPriorities[this.currentPriorityIndex];
                 if (this.groupInfo && this.groupInfo[priorityKey]) {
@@ -124,13 +144,21 @@
             async checkSubscription(groupLink) {
                 if (!this.waitingForCheck) return;
                 this.waitingForCheck = false;
-                const response = await checkGroupSub(groupLink, this.userInfo.vk_id, "registration");
+                let response;
+                try {
+                    response = await checkGroupSub(groupLink, this.userInfo.vk_id, "registration");
+                    if (!response) location.reload();
+                } catch(err) {
+                    location.reload();
+                }
+                
                 console.log(response);
 
                 if (response.status) {
                     this.addGroups++;
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
+                    localStorage.setItem("addGroups", this.addGroups);
                     this.noSubscribe = false;
                     this.tooFast = false;
 

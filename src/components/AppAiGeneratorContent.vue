@@ -518,6 +518,9 @@
             this.step = this.getStep();
         },
         computed: { 
+            isBlockGenerate() {
+                return this.plan.filter(item => item.is_published).length > 0
+            },
             fileredPlan() {
                 return this.plan.filter(item => !item.is_published);
             },
@@ -723,6 +726,7 @@
 
             },
             async generateThemes() {
+                if (this.isBlockGenerate) return;
                 this.step = 0;
                 this.saveSettings();
                 this.isLoading = true;

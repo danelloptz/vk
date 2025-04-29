@@ -104,15 +104,16 @@ export async function getVipUser(vk_id) {
     }
 }
 
-export async function getTree(vk_id) {
+export async function getTree(vk_id, root_vk_id) {
     try {
         const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_tree`, { 
-            "vk_id": vk_id
+            "vk_id": vk_id,
+            "root_vk_id": root_vk_id
          });
         return response.data;
     } catch (error) {
         console.error("Ошибка при получении информации для структуры", error);
-        return false; 
+        throw error;
     }
 }
 

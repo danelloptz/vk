@@ -1,5 +1,5 @@
 <template>
-    <AppVideoModal
+    <!-- <AppVideoModal
         v-if="groupInfo"
         :visibility1="isVideoShown"
         :isWatched="isWatched"
@@ -9,7 +9,7 @@
         @update:visibility1="isVideoShown = $event"
         @update:isWatched="isWatched = $event"
         @close="closeVideo" 
-    />
+    /> -->
     <AppRotationPlans v-if="isPlans" />
     <section class="rotation_preview" v-if="isRotationPreview && !isPlans && !isTarif">
         <span>Вы можете увеличить количество целевых подписчиков на свою ВК группу совершенно бесплатно за счет прохождения Ротации. </span>
@@ -21,7 +21,10 @@
         </div>
     </section>
     <section class="rotation" v-if="isRotation && !isPlans && !isTarif">
-        <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
+        <div class="row">
+            <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
+        </div>
+        
         <div class="group">
             <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" :isRotation="true" />
             <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png"> Не осталось пропусков!</span>
@@ -29,6 +32,7 @@
             <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
                 <AppGoodButton class="btn" :text="text3" @click="subscribeGroup" />
+                <AppGoodButton class="btn" :text="text5" @click="checkSubscription(groupsQueue[currentGroupIndex]?.group_link)" />
                 <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
             </div>
         </div>
@@ -46,12 +50,13 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
-    import AppVideoModal from "@/components/AppVideoModal.vue";
+    // import AppVideoModal from "@/components/AppVideoModal.vue";
 
     import { addInRotation, checkGroupSub, getRotationGroups } from "@/services/groups";
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppVideoModal },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
+        // components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppVideoModal },
         props: {
             isTarif: Boolean,
             userData: Object,
@@ -63,6 +68,7 @@
                 text2: "ВЫБРАТЬ ТАРИФ",
                 text3: "ПОДПИСАТЬСЯ",
                 text4: "ПРОПУСТИТЬ",
+                text5: "ПРОВЕРИТЬ ПОДПИСКУ",
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,
@@ -180,7 +186,8 @@
                     this.tooFast = false;
 
                     if (this.addGroups === this.totalGroups) {
-                        this.watchVideo();
+                        // this.watchVideo();
+                        this.endRotation();
                     }
                     if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
                         (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 
@@ -242,20 +249,20 @@
                 // this.$emit("update:isTarif", true);
                 this.$emit('openPlans');
             },
-            watchVideo() {
-                this.isVideoShown = true;
-            },
-            closeVideo() {
-                this.isVideoShown = false;
-                if (this.isWatched) {
-                    console.log("посмотрели видео");
-                    this.notWatched = false;
-                    this.endRotation();
-                } else {
-                    console.log("не посмотрели видео");
-                    this.notWatched = true;
-                }
-            },
+            // watchVideo() {
+            //     this.isVideoShown = true;
+            // },
+            // closeVideo() {
+            //     this.isVideoShown = false;
+            //     if (this.isWatched) {
+            //         console.log("посмотрели видео");
+            //         this.notWatched = false;
+            //         this.endRotation();
+            //     } else {
+            //         console.log("не посмотрели видео");
+            //         this.notWatched = true;
+            //     }
+            // },
         },
         watch: {
             isTarif(newValue) {
@@ -349,5 +356,13 @@
         width: 20px;
         height: 20px;
         margin-right: 10px;
+    }
+    .row {
+        display: flex;
+        column-gap: 20px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
 </style>

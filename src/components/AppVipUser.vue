@@ -92,6 +92,7 @@
         row-gap: 5px;
         @media (max-width: 650px) {
             flex-direction: row;
+            flex-wrap: wrap;
         }
     }
     .text_wrapper h2 {
@@ -113,7 +114,7 @@
         background: #7023EC;
         border-radius: 5px;
         width: max-content;
-        word-wrap: break-word;
+        /* word-wrap: break-word; */
         @media (max-width: 650px) {
             font-size: 12px;
             height: 16px;

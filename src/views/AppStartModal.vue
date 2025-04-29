@@ -71,9 +71,11 @@
             console.log(!localStorage.getItem("first"));
             if (!localStorage.getItem("first")) {
                 const referer = localStorage.getItem("referer");
+                const addGroups = localStorage.getItem("addGroups");
                 localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
                 const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
                 localStorage.setItem("referer", urlParams.get('ref') || referer);
+                if (addGroups) localStorage.setItem("addGroups", addGroups);
                 console.log(urlParams.get('ref'))
                 localStorage.setItem("first", true); // будет редирект с вк сюда, так что нельзя чистить после него
         }
@@ -83,8 +85,11 @@
             reboot() {
                 console.log("HERE");    
                 const ref = localStorage.getItem("referer");
+                const addGroups = localStorage.getItem("addGroups");
                 localStorage.clear();
                 localStorage.setItem("referer", ref);
+                if (addGroups) localStorage.setItem("addGroups", addGroups);
+
                 // const cleanUrl = window.location.origin + window.location.pathname; 
                 // window.history.replaceState({}, document.title, cleanUrl);
 
@@ -118,7 +123,9 @@
                         window.location.href = vkAuthUrl;
                     } catch(err) {
                         const ref = localStorage.getItem("referer");
+                        const addGroups = localStorage.getItem("addGroups");
                         localStorage.clear();
+                        if (addGroups) localStorage.setItem("addGroups", addGroups);
                         localStorage.setItem("first", true);
                         localStorage.setItem("referer", ref);
                     }
@@ -141,18 +148,22 @@
                     } catch (err) {
 
                         const referal = localStorage.getItem("referer");
+                        const addGroups = localStorage.getItem("addGroups");
                         localStorage.clear();
+                        if (addGroups) localStorage.setItem("addGroups", addGroups);
                         localStorage.setItem("referer", referal);
 
-                        // const cleanUrl = window.location.origin + window.location.pathname; 
-                        // window.history.replaceState({}, document.title, cleanUrl);
+                        const cleanUrl = window.location.origin + window.location.pathname; 
+                        window.history.replaceState({}, document.title, cleanUrl);
 
                         location.reload();
                     }
                     if (response.status == 200) {
                         // оставляем только эти три поля, которые будут использоваться на страницах
                         const ref = localStorage.getItem("referer");
+                        const addGroups = localStorage.getItem("addGroups");
                         localStorage.clear();
+                        if (addGroups) localStorage.setItem("addGroups", addGroups);
                         localStorage.setItem("token", response.data.access_token);
                         localStorage.setItem("token_refresh", response.data.refresh_token);
                         localStorage.setItem("is_new_user", response.data.is_new_user);
@@ -169,7 +180,8 @@
                                     if (!resp.status) console.log(resp.message);
                                 }   
                                 localStorage.setItem("points", 0);
-                                this.$router.push('/signup_1');
+                                if (addGroups) this.$router.push('/signup_2')
+                                else this.$router.push('/signup_2');
                             }
                             else {
                                 localStorage.setItem("points", 0);
@@ -178,7 +190,9 @@
                             }
                         } catch(err) {
                             const referal = localStorage.getItem("referer");
+                            const addGroups = localStorage.getItem("addGroups");
                             localStorage.clear();
+                            if (addGroups) localStorage.setItem("addGroups", addGroups);
                             localStorage.setItem("first", true);
                             localStorage.setItem("referer", referal);
                             location.reload();
@@ -186,7 +200,9 @@
                         
                     } else {
                         const ref = localStorage.getItem("referer");
+                        const addGroups = localStorage.getItem("addGroups");
                         localStorage.clear();
+                        if (addGroups) localStorage.setItem("addGroups", addGroups);
                         localStorage.setItem("first", true);
                         localStorage.setItem("referer", ref);
                         // const cleanUrl = window.location.origin + window.location.pathname; 
