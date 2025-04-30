@@ -1,10 +1,18 @@
 <template>
     <AppModalMessage 
         :visibility1="isModal"
-        :link="this.groupsQueue[this.currentGroupIndex].group_link"
+        :link="this.groupsQueue[this.currentGroupIndex]?.group_link"
         :user="userInfo.id"
         @close="close"
         @update:visibility1="isModal = $event"
+        @update:success="isSuccess = $event"
+    />
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isSuccess"
+        @close="close"
+        @update:visibility1="isSuccess = $event"
     />
     <section class="modal">
         <div class="modal-background"></div>
@@ -27,7 +35,7 @@
                 <AppGoodButton :text="text1" @click="subscribeGroup" />
                 <AppGoodButton class="big_btn" :text="text3" @click="checkSubscription(groupsQueue[currentGroupIndex]?.group_link)" />
                 <AppBadButton :text="`${text2} (${skipCounts})`" @click="skipGroup" />
-                <AppBadButton v-if="userInfo.vk_id == 513698557 || userInfo.vk_id == 345465696" :text="text4" @click="openModal" />
+                <AppBadButton :text="text4" @click="openModal" />
                 <span class="error_message" v-if="noSkips">Не осталось пропусков!</span>
                 <span class="error_message" v-if="noSubscribe">Не подписались!</span>
                 <span class="error_message" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
@@ -45,9 +53,10 @@
     import { getUserInfo } from '@/services/user';
     import { refreshToken, changeStatus } from '@/services/auth';
     import AppModalMessage from '@/components/AppModalMessage.vue';
+    import AppModal from '@/components/AppModal.vue';
 
     export default {
-        components: { AppGroupOrUser, AppGoodButton, AppBadButton, AppModalMessage },
+        components: { AppGroupOrUser, AppGoodButton, AppBadButton, AppModalMessage, AppModal },
         data() {
             return {
                 addGroups: 0,
@@ -70,7 +79,10 @@
                 waitingForCheck: false, // Флаг для отслеживания момента проверки подписки
                 wasBlurred: false,
                 blurTime: 0,
-                isModal: false
+                isModal: false,
+                isSuccess: false,
+                title: "УСПЕШНО",
+                msg: "Ваше сообщение было успешно отправлено техподдержке. Спасибо за понимание!"
             };
         },
         async created() {
@@ -85,19 +97,19 @@
                     response = await getUserInfo(localStorage.getItem("token"));
                     if (!response) {
                         localStorage.clear();
-                        localStorage.setItem("addGroups", lcs_addGroups);
+                        if (lcs_addGroups) localStorage.setItem("addGroups", lcs_addGroups);
                         this.$router.push('/');
                         return;
                     }
                 } else {
                     localStorage.clear();
-                    localStorage.setItem("addGroups", lcs_addGroups);
+                    if (lcs_addGroups) localStorage.setItem("addGroups", lcs_addGroups);
                     this.$router.push('/');
                     return;
                 }
             }
             this.userInfo = response;
-            if (lcs_addGroups) this.addGroups = lcs_addGroups;
+            if (lcs_addGroups) this.addGroups = lcs_addGroups || 0;
             const groups = await getGroups(this.userInfo.vk_id);
             this.groupInfo = groups;
             console.log(this.groupInfo);
@@ -165,8 +177,11 @@
                     if (this.addGroups === this.totalGroups) {
                         console.log("сработал changestatus", this.addGroups, this.totalGroups);
                         const updateUser = await changeStatus(this.userInfo.vk_access_token);
-                        if (updateUser.status)
+                        if (updateUser.status) {
+                            localStorage.removeItem("addGroups");
                             this.$router.push("/signup_3");
+                        }
+                            
                     }
 
                     const curr_group = this.groupPriorities[this.currentPriorityIndex];

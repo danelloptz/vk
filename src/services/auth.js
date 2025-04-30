@@ -23,9 +23,11 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
     })
     .catch((error) => {
         const ref   = localStorage.getItem("referer");
+        const addGroups = localStorage.getItem("addGroups");
         localStorage.clear();
         localStorage.setItem("first", true);
         localStorage.setItem("referer", ref);
+        localStorage.setItem("addGroups", addGroups);
         console.error("Error during request:", error.response || error);
         throw error;
     });

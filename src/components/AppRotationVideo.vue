@@ -1,5 +1,5 @@
 <template>
-    <AppRotationPlans v-if="isPlans" />
+    <AppRotationPlans v-if="isPlans" :userData="userData"  />
     <AppVideoModal
         v-if="videosInfo"
         :visibility1="isVideoShown"
@@ -8,6 +8,21 @@
         @update:visibility1="isVideoShown = $event"
         @update:isWatched="isWatched = $event"
         @close="closeVideo" 
+    />
+    <AppModalMessage 
+        :visibility1="isModal"
+        :link="videosQueue[currentVideoIndex]?.video_link"
+        :user="userData.id"
+        @close="close"
+        @update:visibility1="isModal = $event"
+        @update:success="isSuccess = $event"
+    />
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isSuccess"
+        @close="close"
+        @update:visibility1="isSuccess = $event"
     />
     <section class="rotation_preview" v-if="isRotationPreview && !isPlans">
         <span>Вы можете получать целевые просмотры своего ВК видео совершенно бесплатно за счет прохождения Ротации. </span>
@@ -27,6 +42,7 @@
             <div class="groups_block_btns">
                 <AppGoodButton :text="text3" class="btn" @click="watchVideo" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" class="btn" @click="skipGroup" />
+                <AppBadButton class="btn" :text="text5" @click="openModal" />
             </div>
         </div>
     </section>
@@ -44,11 +60,13 @@
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppVideoModal from "@/components/AppVideoModal.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
+    import AppModalMessage from "@/components/AppModalMessage.vue";
+    import AppModal from "@/components/AppModal.vue";
     import { addInRotation, getRotationVideos } from "@/services/groups";
     import { addView } from "@/services/groups";
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppVideoModal, AppRotationPlans },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppVideoModal, AppRotationPlans, AppModal, AppModalMessage },
         props: { userData: Object },
         data() {
             return {
@@ -56,6 +74,7 @@
                 text2: "ВЫБРАТЬ ТАРИФ",
                 text3: "ЗАПУСТИТЬ ВИДЕО",
                 text4: "ПРОПУСТИТЬ",
+                text5: "ПОЖАЛОВАТЬСЯ",
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,
@@ -79,7 +98,11 @@
                 subscribedCount: 0,
                 wasBlurred: false,
                 blurTime: 0,
-                tariff: ""
+                tariff: "",
+                isModal: false,
+                isSuccess: false,
+                title: "УСПЕШНО",
+                msg: "Ваше сообщение было успешно отправлено техподдержке. Спасибо за понимание!"
             }
         },
         async created() {
@@ -108,6 +131,7 @@
             console.log(videos);
 
             this.videosInfo = videos;
+            if (localStorage.getItem("watchedVideos")) this.watchedVideos = localStorage.getItem("watchedVideos");
 
             // this.videosInfo.first.forEach(item => {
             //     item["package_name"] = "Leader";
@@ -123,6 +147,9 @@
 
         },
         methods: {
+            openModal() {
+                this.isModal = true;
+            },
             makeRotation() {
                 this.isRotationPreview = false;
                 this.isRotationEnd = false;
@@ -140,10 +167,12 @@
             },
             async endRotation() {
                 const response = await addInRotation(this.userData.vk_id, "video");
+                if (!response) location.reload();
                 console.log(response.status);
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
+                localStorage.setItem("watchedVideos", 0);
             },
             skipGroup() {
                 console.log("пропустили группу");
@@ -182,6 +211,7 @@
                     const resp = await addView(this.userData.id, this.videosQueue[this.currentVideoIndex].db_id);
                     console.log(this.userData.id, this.videosQueue[this.currentVideoIndex].db_id, resp);
                     this.watchedVideos++;
+                    localStorage.setItem("watchedVideos", this.watchedVideos);
                     this.videosQueue.splice(this.currentVideoIndex, 1);
                     this.subscribedCount++;
 
@@ -265,13 +295,16 @@
     .groups_block_btns {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         column-gap: 30px;
+        row-gap: 10px;
         @media (max-width: 650px) {
             flex-direction: column;
             align-items: center;
             row-gap: 21px;
         }
     }
+    
     span {
         font-size: 18px;
         color: white;

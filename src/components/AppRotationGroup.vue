@@ -1,16 +1,20 @@
 <template>
-    <!-- <AppVideoModal
-        v-if="groupInfo"
-        :visibility1="isVideoShown"
-        :isWatched="isWatched"
-        :link="groupInfo.videos?.[0]?.link || defaultLink"
-        :uncloseable="true"
-        :listOfLinks="groupInfo.videos"
-        @update:visibility1="isVideoShown = $event"
-        @update:isWatched="isWatched = $event"
-        @close="closeVideo" 
-    /> -->
-    <AppRotationPlans v-if="isPlans" />
+   <AppModalMessage 
+        :visibility1="isModal"
+        :link="this.groupsQueue[this.currentGroupIndex]?.group_link"
+        :user="userData.id"
+        @close="close"
+        @update:visibility1="isModal = $event"
+        @update:success="isSuccess = $event"
+    />
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isSuccess"
+        @close="close"
+        @update:visibility1="isSuccess = $event"
+    />
+    <AppRotationPlans v-if="isPlans" :userData="userData" />
     <section class="rotation_preview" v-if="isRotationPreview && !isPlans && !isTarif">
         <span>Вы можете увеличить количество целевых подписчиков на свою ВК группу совершенно бесплатно за счет прохождения Ротации. </span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо подписаться на 20 предложенных ВК групп, посмотреть одно ВК видео 20 секунд, и в ответ получаете 10 подписок на свою ВК группу.</span>
@@ -34,6 +38,7 @@
                 <AppGoodButton class="btn" :text="text3" @click="subscribeGroup" />
                 <AppGoodButton class="btn" :text="text5" @click="checkSubscription(groupsQueue[currentGroupIndex]?.group_link)" />
                 <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
+                <AppBadButton class="btn" :text="text6" @click="openModal" />
             </div>
         </div>
     </section>
@@ -50,12 +55,14 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
+    import AppModalMessage from "@/components/AppModalMessage.vue";
+    import AppModal from "@/components/AppModal.vue";
     // import AppVideoModal from "@/components/AppVideoModal.vue";
 
-    import { addInRotation, checkGroupSub, getRotationGroups } from "@/services/groups";
+    import { addInRotation, checkGroupSub, getRotationGroups} from "@/services/groups";
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppModal, AppModalMessage  },
         // components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppVideoModal },
         props: {
             isTarif: Boolean,
@@ -69,6 +76,7 @@
                 text3: "ПОДПИСАТЬСЯ",
                 text4: "ПРОПУСТИТЬ",
                 text5: "ПРОВЕРИТЬ ПОДПИСКУ",
+                text6: "ПОЖАЛОВАТЬСЯ",
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,
@@ -92,7 +100,11 @@
                 subscribedCount: 0,
                 wasBlurred: false,
                 blurTime: 0,
-                tariff: ""
+                tariff: "",
+                isModal: false,
+                isSuccess: false,
+                title: "УСПЕШНО",
+                msg: "Ваше сообщение было успешно отправлено техподдержке. Спасибо за понимание!"
             }
         },
         async created() {
@@ -117,11 +129,14 @@
             }
 
             const groups = await getRotationGroups(this.userData.vk_id, this.tariff);
+            if (!groups) location.reload();
             console.log(groups);
 
             this.groupInfo = groups;
 
             this.updateGroupQueue();
+            
+            if (localStorage.getItem("addGroups")) this.addGroups = localStorage.getItem("addGroups");
 
             window.addEventListener("blur", () => {
                 this.wasBlurred = true;
@@ -140,6 +155,9 @@
             });
         },
         methods: {
+            openModal() {
+                this.isModal = true;
+            },
             updateGroupQueue() {
                 const priorityKey = this.groupPriorities[this.currentPriorityIndex];
                 if (this.groupInfo && this.groupInfo[priorityKey]) {
@@ -160,6 +178,7 @@
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
+                localStorage.setItem("addGroups", 0);
             },
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
@@ -175,11 +194,13 @@
                 if (!this.waitingForCheck) return;
                 console.log(groupLink);
                 const response = await checkGroupSub(groupLink, this.userData.vk_id, "rotation");
+                if (!response) location.reload();
                 console.log(response);
 
                 if (response.status) {
                     this.waitingForCheck = false;
                     this.addGroups++;
+                    localStorage.setItem("addGroups", this.addGroups);
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;
@@ -334,7 +355,9 @@
     .groups_block_btns {
         display: flex;
         align-items: center;
-        column-gap: 30px;
+        flex-wrap: wrap;
+        column-gap  : 30px;
+        row-gap: 10px;
         @media (max-width: 650px) {
             flex-direction: column;
             align-items: center;

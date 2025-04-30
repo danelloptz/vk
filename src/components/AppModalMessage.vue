@@ -75,7 +75,8 @@ export default {
             if (this.unworkedSub) reason += 'Не срабатывает проверка подписки.';
             const resp = await sendTrouble(this.link, this.user, reason, this.text);
             console.log(resp);
-            // this.$emit("update:visibility1", false);
+            this.$emit("update:visibility1", false);
+            this.$emit("update:success", true);
         },
         cancel() {
             this.$emit("update:visibility1", false);
@@ -198,6 +199,7 @@ export default {
         font-family: 'Tektur';
         line-height: 62.4px;
         font-weight: 400;
+        width: fit-content;
         @media (max-width: 900px) {
             font-size: 35px;
         }

@@ -176,11 +176,29 @@
             let userInfo;
             try {
                 userInfo = await getUserInfo(localStorage.getItem("token"));
-            } catch(err) {
+                if (!userInfo) {
+                const addGroups = localStorage.getItem("addGroups");
+                const watchedVideos = localStorage.getItem("watchedVideos");
+                const addPosts = localStorage.getItem("addPosts");
                 localStorage.clear();
+                if (addGroups) localStorage.setItem("addGroups", addGroups);
+                if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                if (addPosts) localStorage.setItem("addPosts", addPosts);
                 this.$router.push('/');
                 return;
             }
+            } catch(err) {
+                const addGroups = localStorage.getItem("addGroups");
+                const watchedVideos = localStorage.getItem("watchedVideos");
+                const addPosts = localStorage.getItem("addPosts");
+                localStorage.clear();
+                if (addGroups) localStorage.setItem("addGroups", addGroups);
+                if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                if (addPosts) localStorage.setItem("addPosts", addPosts);
+                this.$router.push('/');
+                return;
+            }
+            
 
             localStorage.setItem("points", userInfo.gift_score);
             console.log(userInfo);
@@ -196,7 +214,13 @@
                     localStorage.setItem("token_refresh", isAuthorized.refresh_token);
                     userInfo = await getUserInfo(localStorage.getItem("token"));
                     if (!userInfo) {
+                        const addGroups = localStorage.getItem("addGroups");
+                        const watchedVideos = localStorage.getItem("watchedVideos");
+                        const addPosts = localStorage.getItem("addPosts");
                         localStorage.clear();
+                        if (addGroups) localStorage.setItem("addGroups", addGroups);
+                        if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                        if (addPosts) localStorage.setItem("addPosts", addPosts);
                         this.$router.push('/');
                         return;
                     }
@@ -205,7 +229,13 @@
                         return;
                     }
                 } else {
+                    const addGroups = localStorage.getItem("addGroups");
+                    const watchedVideos = localStorage.getItem("watchedVideos");
+                    const addPosts = localStorage.getItem("addPosts");
                     localStorage.clear();
+                    if (addGroups) localStorage.setItem("addGroups", addGroups);
+                    if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                    if (addPosts) localStorage.setItem("addPosts", addPosts);
                     this.$router.push('/');
                     return;
                 }

@@ -72,10 +72,14 @@
             if (!localStorage.getItem("first")) {
                 const referer = localStorage.getItem("referer");
                 const addGroups = localStorage.getItem("addGroups");
+                const watchedVideos = localStorage.getItem("watchedVideos");
+                const addPosts = localStorage.getItem("addPosts");
                 localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
                 const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
                 localStorage.setItem("referer", urlParams.get('ref') || referer);
                 if (addGroups) localStorage.setItem("addGroups", addGroups);
+                if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                if (addPosts) localStorage.setItem("addPosts", addPosts);
                 console.log(urlParams.get('ref'))
                 localStorage.setItem("first", true); // будет редирект с вк сюда, так что нельзя чистить после него
         }
@@ -86,9 +90,13 @@
                 console.log("HERE");    
                 const ref = localStorage.getItem("referer");
                 const addGroups = localStorage.getItem("addGroups");
+                const watchedVideos = localStorage.getItem("watchedVideos");
+                const addPosts = localStorage.getItem("addPosts");
                 localStorage.clear();
                 localStorage.setItem("referer", ref);
                 if (addGroups) localStorage.setItem("addGroups", addGroups);
+                if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                if (addPosts) localStorage.setItem("addPosts", addPosts);
 
                 // const cleanUrl = window.location.origin + window.location.pathname; 
                 // window.history.replaceState({}, document.title, cleanUrl);
@@ -124,8 +132,12 @@
                     } catch(err) {
                         const ref = localStorage.getItem("referer");
                         const addGroups = localStorage.getItem("addGroups");
+                        const watchedVideos = localStorage.getItem("watchedVideos");
+                        const addPosts = localStorage.getItem("addPosts");
                         localStorage.clear();
                         if (addGroups) localStorage.setItem("addGroups", addGroups);
+                        if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                        if (addPosts) localStorage.setItem("addPosts", addPosts);
                         localStorage.setItem("first", true);
                         localStorage.setItem("referer", ref);
                     }
@@ -149,8 +161,12 @@
 
                         const referal = localStorage.getItem("referer");
                         const addGroups = localStorage.getItem("addGroups");
+                        const watchedVideos = localStorage.getItem("watchedVideos");
+                        const addPosts = localStorage.getItem("addPosts");
                         localStorage.clear();
                         if (addGroups) localStorage.setItem("addGroups", addGroups);
+                        if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                        if (addPosts) localStorage.setItem("addPosts", addPosts);
                         localStorage.setItem("referer", referal);
 
                         const cleanUrl = window.location.origin + window.location.pathname; 
@@ -162,8 +178,12 @@
                         // оставляем только эти три поля, которые будут использоваться на страницах
                         const ref = localStorage.getItem("referer");
                         const addGroups = localStorage.getItem("addGroups");
+                        const watchedVideos = localStorage.getItem("watchedVideos");
+                        const addPosts = localStorage.getItem("addPosts");
                         localStorage.clear();
                         if (addGroups) localStorage.setItem("addGroups", addGroups);
+                        if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                        if (addPosts) localStorage.setItem("addPosts", addPosts);
                         localStorage.setItem("token", response.data.access_token);
                         localStorage.setItem("token_refresh", response.data.refresh_token);
                         localStorage.setItem("is_new_user", response.data.is_new_user);
@@ -191,8 +211,12 @@
                         } catch(err) {
                             const referal = localStorage.getItem("referer");
                             const addGroups = localStorage.getItem("addGroups");
+                            const watchedVideos = localStorage.getItem("watchedVideos");
+                            const addPosts = localStorage.getItem("addPosts");
                             localStorage.clear();
                             if (addGroups) localStorage.setItem("addGroups", addGroups);
+                            if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                            if (addPosts) localStorage.setItem("addPosts", addPosts);
                             localStorage.setItem("first", true);
                             localStorage.setItem("referer", referal);
                             location.reload();
@@ -201,8 +225,12 @@
                     } else {
                         const ref = localStorage.getItem("referer");
                         const addGroups = localStorage.getItem("addGroups");
+                        const watchedVideos = localStorage.getItem("watchedVideos");
+                        const addPosts = localStorage.getItem("addPosts");
                         localStorage.clear();
                         if (addGroups) localStorage.setItem("addGroups", addGroups);
+                        if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                        if (addPosts) localStorage.setItem("addPosts", addPosts);
                         localStorage.setItem("first", true);
                         localStorage.setItem("referer", ref);
                         // const cleanUrl = window.location.origin + window.location.pathname; 

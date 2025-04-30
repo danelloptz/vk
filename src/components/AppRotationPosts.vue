@@ -1,5 +1,20 @@
 <template>
-    <AppRotationPlans v-if="isPlans" />
+    <AppRotationPlans v-if="isPlans" :userData="userData"  />
+    <AppModalMessage 
+        :visibility1="isModal"
+        :link="groupsQueue[currentGroupIndex]?.post_link"
+        :user="userData.id"
+        @close="close"
+        @update:visibility1="isModal = $event"
+        @update:success="isSuccess = $event"
+    />
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isSuccess"
+        @close="close"
+        @update:visibility1="isSuccess = $event"
+    />
     <section class="rotation_preview" v-if="isRotationPreview && !isPlans">
         <span>Вы можете получать целевые просмотры и реакции на свой последний  пост совершенно бесплатно за счет прохождения Ротации постов.</span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных постов ВК,
@@ -22,6 +37,7 @@
                 <AppGoodButton :text="text3" class="btn" @click="subscribeGroup" />
                 <AppGoodButton :text="text5" class="btn" @click="checkSubscription(groupsQueue[currentGroupIndex].post_link, groupsQueue[currentGroupIndex].group_id), userData.vk_id" />
                 <AppBadButton :text="`${text4} (${skipCounts})`" class="btn" @click="skipGroup" />
+                <AppBadButton class="btn" :text="text6" @click="openModal" />
             </div>
         </div>
     </section>
@@ -39,9 +55,11 @@
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
     import { addInRotation, checkLike, getRotationPosts } from "@/services/groups";
+    import AppModalMessage from "@/components/AppModalMessage.vue";
+    import AppModal from "@/components/AppModal.vue";
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppModalMessage, AppModal },
         props: { userData: Object },
         data() {
             return {
@@ -50,6 +68,7 @@
                 text3: "ПОСМОТРЕТЬ ПОСТ",
                 text4: "ПРОПУСТИТЬ",
                 text5: "ПРОВЕРИТЬ ЛАЙК",
+                text6: "ПОЖАЛОВАТЬСЯ",
                 isRotation: false,
                 isRotationPreview: true,
                 isRotationEnd: false,
@@ -73,7 +92,11 @@
                 subscribedCount: 0,
                 wasBlurred: false,
                 blurTime: 0,
-                tariff: ""
+                tariff: "",
+                isModal: false,
+                isSuccess: false,
+                title: "УСПЕШНО",
+                msg: "Ваше сообщение было успешно отправлено техподдержке. Спасибо за понимание!"
             }
         },
         async created() {
@@ -101,6 +124,8 @@
             console.log(groups);
 
             this.groupInfo = groups;
+            if (localStorage.getItem("addPosts")) this.addGroups = localStorage.getItem("addPosts");
+
 
             // this.groupInfo.first.forEach(item => {
             //     item["package_name"] = "Leader";
@@ -130,6 +155,9 @@
             });
         },
         methods: {
+            openModal() {
+                this.isModal = true;
+            },
             updateGroupQueue() {
                 const priorityKey = this.groupPriorities[this.currentPriorityIndex];
                 if (this.groupInfo && this.groupInfo[priorityKey]) {
@@ -150,6 +178,7 @@
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
+                localStorage.setItem("addPosts", 0);
             },
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
@@ -166,10 +195,12 @@
                 if (!this.waitingForCheck) return;
                 this.waitingForCheck = false;
                 const response = await checkLike(post_link, group_id, this.userData.vk_id);
+                if (!response) location.reload();
                 console.log(response);
 
                 if (response.status) {
                     this.addGroups++;
+                    localStorage.setItem("addPosts", this.addGroups);
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;
@@ -321,7 +352,9 @@
     .groups_block_btns {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         column-gap: 30px;
+        row-gap: 10px;
         @media (max-width: 650px) {
             flex-direction: column;
             align-items: center;
