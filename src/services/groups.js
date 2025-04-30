@@ -175,3 +175,16 @@ export async function addView(user_id, video_id) {
         return false; 
     }
 }
+
+export async function subToGroup(vk_token, group_link) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/subscribe_on_group', {
+            "vk_token": vk_token,
+            "group_link": group_link,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при автоматической подписке на группу ", error);
+        return error; 
+    }
+}

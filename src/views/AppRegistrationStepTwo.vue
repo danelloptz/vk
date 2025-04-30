@@ -49,7 +49,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     // import { getGroupInfo, isSubscribe } from '@/services/user';  !!!!! РАБОЧАЯ ВЕРСИЯ, РАССКОМЕНТИРОВАТЬ !!!!!
-    import { checkGroupSub, getGroups } from '@/services/groups';
+    import { checkGroupSub, getGroups, subToGroup } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
     import { refreshToken, changeStatus } from '@/services/auth';
     import AppModalMessage from '@/components/AppModalMessage.vue';
@@ -146,11 +146,37 @@
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
-                    this.blurTime = Date.now();
-                    this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
-                    window.open(groupLink, "_blank", "width=800, height=600");
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    if (isMobile) { 
+                        const resp = await subToGroup(this.userInfo.vk_access_token, this.groupsQueue[this.currentGroupIndex].group_link);
+                        if (!resp) location.reload();
+                        if (resp.status) {
+                            this.waitingForCheck = false;
+                            this.addGroups++;
+                            localStorage.setItem("addGroups", this.addGroups);
+                            this.groupsQueue.splice(this.currentGroupIndex, 1);
+                            this.subscribedCount++;
+                            this.noSubscribe = false;
+                            this.tooFast = false;
 
+                            if (this.addGroups === this.totalGroups) {
+                                // this.watchVideo();
+                                this.endRotation();
+                            }
+                            if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
+                                (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 
+                                this.groupsQueue.length === 0) {
+                                    this.nextPriorityGroup();
+                            }
+                        } else {
+                            this.noSubscribe = true;
+                        }
+                    } else {
+                        const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
+                        this.blurTime = Date.now();
+                        this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
+                        window.open(groupLink, "_blank", "width=800, height=600");
+                    }
                 }
             },
             async checkSubscription(groupLink) {
