@@ -110,6 +110,15 @@
             }
             this.userInfo = response;
             if (lcs_addGroups) this.addGroups = lcs_addGroups || 0;
+            if (this.addGroups >= this.totalGroups) {
+                // this.watchVideo();
+                console.log("END");
+                const updateUser = await changeStatus(this.userInfo.vk_access_token);
+                if (updateUser.status) {
+                    localStorage.removeItem("addGroups");
+                    this.$router.push("/signup_3");
+                }
+            }
             const groups = await getGroups(this.userInfo.vk_id);
             this.groupInfo = groups;
             console.log(this.groupInfo);
@@ -159,9 +168,15 @@
                             this.noSubscribe = false;
                             this.tooFast = false;
 
-                            if (this.addGroups === this.totalGroups) {
+                            console.log(this.addGroups, this.totalGroups);
+                            if (this.addGroups >= this.totalGroups) {
                                 // this.watchVideo();
-                                this.endRotation();
+                                console.log("END");
+                                const updateUser = await changeStatus(this.userInfo.vk_access_token);
+                                if (updateUser.status) {
+                                    localStorage.removeItem("addGroups");
+                                    this.$router.push("/signup_3");
+                                }
                             }
                             if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
                                 (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 

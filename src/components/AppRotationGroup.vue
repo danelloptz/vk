@@ -137,6 +137,7 @@
             this.updateGroupQueue();
             
             if (localStorage.getItem("addGroups")) this.addGroups = localStorage.getItem("addGroups");
+            if (this.addGroups >= this.totalGroups) this.endRotation();
 
             window.addEventListener("blur", () => {
                 this.wasBlurred = true;
@@ -196,7 +197,9 @@
                             this.noSubscribe = false;
                             this.tooFast = false;
 
+                            console.log(this.addGroups, this.totalGroups);
                             if (this.addGroups === this.totalGroups) {
+                                console.log("END");
                                 // this.watchVideo();
                                 this.endRotation();
                             }

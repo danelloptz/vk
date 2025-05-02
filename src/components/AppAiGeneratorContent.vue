@@ -350,15 +350,30 @@
                                 <img class="accepted_banner" :src="item.image_links[item.chose_image_index]" />
                             </td>
                             <td class="col" v-if="item.date_publication">
+                                <!-- Поле для даты -->
                                 <span
-                                    class="content_text"
+                                    class="content_text date"
                                     :contenteditable="isEditableContent"
                                     :ref="'editableDate_' + index"
-                                    @input="updateSelectedDate"
-                                >{{ formatedDate(item.date_publication * 1000) }}</span>
+                                    @input="updateSelectedDate(index, 'date')"
+                                >{{ formatDateOnly(item.date_publication * 1000) }}</span>
+
+                                <!-- Поле для времени -->
+                                <span
+                                    class="content_text time"
+                                    :contenteditable="isEditableContent"
+                                    :ref="'editableTime_' + index"
+                                    @input="updateSelectedDate(index, 'time')"
+                                >{{ formatTimeOnly(item.date_publication * 1000) }}</span>
+
+                                <!-- Кнопка "Изменить" -->
                                 <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
+
+                                <!-- Кнопка сохранения -->
                                 <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
-                                <span class="error" v-if="badDate">Неправильный формат даты. Введите дату в формате: 01.01.2000 12:00</span>
+
+                                <!-- Ошибка ввода -->
+                                <span class="error" v-if="badDate">Неправильный формат даты/времени.</span>
                             </td>
                         </tr>
                     </tbody>
@@ -543,6 +558,19 @@
             }
         },
         methods: {
+            formatDateOnly(time) {
+                const date = new Date(time);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}.${month}.${year}`;
+            },
+            formatTimeOnly(time) {
+                const date = new Date(time);
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${hours}:${minutes}`;
+            },
             setUserImage(index) {
                 this.flagsImages[index] = true;
                 this.plan[index].chose_image_index = 3;
@@ -663,14 +691,15 @@
                 this.plan[post_index].chose_image_index = var_index;
             },
             async savePlan(index) {
-                const editableElement = this.$refs['editableDate_' + index];
+                const editableElementDate = this.$refs['editableDate_' + index];
+                const editableElementHours = this.$refs['editableTime_' + index];
 
-                if (!editableElement) {
+                if (!editableElementDate || !editableElementHours) {
                     console.error("Редактируемый элемент не найден");
                     return;
                 }
 
-                const editedDate = editableElement[0].innerText.trim();
+                const editedDate = editableElementDate[0].innerText.trim() + " " + editableElementHours[0].innerText.trim();
                 const newTimestamp = this.convertToTimestamp(editedDate);
 
                 if (newTimestamp) {
@@ -747,17 +776,25 @@
                 // }
             },
             saveSelectedDates() {
-                // Применяем выбранную дату ко всем выделенным элементам
                 const selectedIndexes = this.aprovedPostsIndexes.reduce((acc, isChecked, index) => {
                     if (isChecked) acc.push(index);
                     return acc;
                 }, []);
-                console.log("selectedIndexes: ", selectedIndexes, this.aprovedPostsIndexes);
+
                 selectedIndexes.forEach(index => {
                     const dateElement = this.$refs[`editableDate_${index}`]?.[0];
-                    if (dateElement && this.selectedDate) {
-                        dateElement.textContent = this.selectedDate;
-                        this.plan[index].date_publication = this.convertToTimestamp(this.selectedDate); // Обновляем данные в массиве
+                    const timeElement = this.$refs[`editableTime_${index}`]?.[0];
+
+                    if (dateElement && timeElement && this.selectedTime) {
+                        const currentDateString = dateElement.textContent.trim();
+                        const newTimestamp = this.convertToTimestamp(currentDateString + " " + this.selectedTime);
+
+                        if (newTimestamp) {
+                            this.plan[index].date_publication = newTimestamp;
+                            timeElement.textContent = this.selectedTime; // Обновляем отображаемое время
+                        } else {
+                            this.badDate = true;
+                        }
                     }
                 });
 
@@ -773,9 +810,24 @@
                 }
                 return Math.floor(date.getTime() / 1000); // Возвращаем в секундах
             },
-            updateSelectedDate(event) {
-                // Обновляем общую дату при изменении одного из полей
-                this.selectedDate = event.target.textContent.trim();
+            updateSelectedDate(index, type) {
+                const editableElement = this.$refs[`editable${type.charAt(0).toUpperCase() + type.slice(1)}_${index}`]?.[0];
+                if (!editableElement) return;
+
+                const newValue = editableElement.innerText.trim();
+
+                if (type === "date") {
+                    // Обновляем только дату для текущего элемента
+                    const newTimestamp = this.convertToTimestamp(newValue + " " + this.formatTimeOnly(this.plan[index].date_publication * 1000));
+                    if (newTimestamp) {
+                        this.plan[index].date_publication = newTimestamp;
+                    } else {
+                        this.badDate = true;
+                    }
+                } else if (type === "time") {
+                    // Обновляем время для всех выбранных элементов
+                    this.selectedTime = newValue; // Сохраняем выбранное время
+                }
             },
             async regenerateCurrentPosts() {
                 this.step = this.getStep();
@@ -851,22 +903,19 @@
 
                 return `${day}.${month}.${year} ${hours}:${minutes}`;
             },
-            convertToTimestamp(dateString) {
-                try {
-                    // Разбиваем строку на компоненты даты и времени
-                    const [datePart, timePart] = dateString.split(' ');
-                    const [day, month, year] = datePart.split('.').map(Number);
-                    const [hours, minutes] = timePart.split(':').map(Number);
+            convertToTimestamp(dateTimeString) {
+                console.log(dateTimeString);
+                const [datePart, timePart] = dateTimeString.split(" ");
+                const [day, month, year] = datePart.split(".").map(Number);
+                const [hours, minutes] = timePart.split(":").map(Number);
 
-                    const date = new Date(year, month - 1, day, hours, minutes);
-
-                    const timestamp = Math.floor(date.getTime() / 1000);
-
-                    return timestamp;
-                } catch(err) {
-                    return false;
+                const date = new Date(year, month - 1, day, hours, minutes);
+                if (isNaN(date.getTime())) {
+                    console.error("Неверный формат даты/времени:", dateTimeString);
+                    return null;
                 }
-                
+
+                return Math.floor(date.getTime() / 1000); // Возвращаем timestamp в секундах
             },
             Timer(countOfPosts, time) {
                 let initialLineWidth = 0; // Начальная ширина полосы загрузки (в пикселях)
@@ -1195,7 +1244,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        row-gap: 26px;
+        row-gap: 10px;
     }
     .change_text {
         text-decoration: underline;
