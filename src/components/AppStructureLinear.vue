@@ -123,7 +123,7 @@
                         </div>
                         <div class="row_col_modal">
                             <span>Дата регистрации: </span>
-                            <span>{{ formatedDate(item.date_created) }}</span>
+                            <span>{{ formatedDate(selectedUser.date_created) }}</span>
                         </div>
                         </div>
                     </div>

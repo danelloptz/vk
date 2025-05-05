@@ -587,6 +587,12 @@
                 const file = event.target.files[0];
                 if (!file) return;
 
+                const maxSize = 2 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert("Файл слишком большой! Максимальный размер файла: 2 МБ.");
+                    return;
+                }
+
                 const img = new Image();
                 img.src = URL.createObjectURL(file);
                 img.onload = async () => {

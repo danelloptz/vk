@@ -129,7 +129,7 @@
                 v-model="vkVideoLink" 
                 placeholder="ВК видео" >
             <span @click="addVKVideo">ДОБАВИТЬ</span>
-            <h3 v-if="userData">Просмотры: {{ userData.videoStat || 0 }}</h3>
+            <h3 v-if="userData">Просмотры: {{ userData?.video?.count_subs_from_service || 0 }}</h3>
         </div>
 
         <div v-if="selectedInterests.length > 0" class="selected-countries">
@@ -415,8 +415,8 @@ export default {
                 }
                 if (this.userData.group?.group_link)
                     this.vkGroupLink = this.userData.group.group_link;
-                if (this.userData.video?.video_link)
-                    this.vkVideoLink = this.userData.video?.video_link;
+                if (this.userData?.video?.video_link)
+                    this.vkVideoLink = this.userData?.video?.video_link;
                 if (this.userData.email)
                     this.emailData = this.userData.email == '""' ? "" : this.userData.email;
                 if (this.userData.country)

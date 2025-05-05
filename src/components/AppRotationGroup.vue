@@ -136,7 +136,7 @@
 
             this.updateGroupQueue();
             
-            if (localStorage.getItem("addGroups")) this.addGroups = localStorage.getItem("addGroups");
+            if ( /^\d+$/.test(localStorage.getItem("addGroups")) && +localStorage.getItem("addGroups") >= 0 ) this.addGroups = localStorage.getItem("addGroups");
             if (this.addGroups >= this.totalGroups) this.endRotation();
 
             window.addEventListener("blur", () => {
