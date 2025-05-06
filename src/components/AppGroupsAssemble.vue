@@ -180,13 +180,17 @@
         border-radius: 10px;
         z-index: 6;
         @media (max-width: 650px) {
-            display: none;
+            max-height: 65px;
+            overflow: hidden;
         }
     }
     span {
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 12px;
+        }
     }
     .add_group {
         width: 60px;
