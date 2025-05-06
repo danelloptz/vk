@@ -271,6 +271,8 @@
             },
             paginatedHistory() {
                 const start = (this.currentPage - 1) * this.perPage;
+                console.log(this.currentPage, start, start+ this.perPage, this.maskedNode);
+                console.log(this.maskedNode.slice(start, start + this.perPage));
                 return this.maskedNode.slice(start, start + this.perPage);
             },
             visiblePages() {
@@ -288,6 +290,7 @@
                 return pages;
             },
             maskedNode() {
+                console.log("MASKED NODE: ", this.node);
                 return this.node.map(item => ({
                     ...item,
                     all_volume: this.isHide ? item.all_volume : '*'.repeat(item.all_volume.toString().length),
@@ -360,6 +363,7 @@
                     if (newValue?.vk_id) {
                         const referals = await getReferals(this.rootUser.vk_id, newValue.vk_id);
                         this.node = referals.referrals;
+                        console.log("НОДА В currUser: ", this.node);
                     }
                 },
                 deep: true,
@@ -466,6 +470,7 @@
                 }
                 const referals = await getReferals(this.rootUser.vk_id, vk_id);
                 this.node = referals.referrals;
+                this.currentPage = 1;
             },
             resetOpenedUsers() {
                 this.openedUsers.forEach((row, i) => {

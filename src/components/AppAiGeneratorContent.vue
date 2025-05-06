@@ -383,6 +383,7 @@
         </div>
         <span class="info_msg" v-if="isLoading && activeIndex == 1">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
         <span class="info_msg" v-if="isPostPubl && activeIndex == 1">Посты были успешно отправлены.</span>
+        <span class="error" v-if="publPostsError && activeIndex == 1">При отправке постов произошла ошибка. Пожалуйста, нажмите кнопку "ОПУБЛИКОВАТЬ" ещё раз.</span>
         <AppGoodButton class="publ_btn" v-if="fileredPlan.length > 0 && !isLoading && activeIndex == 1 && !isPostPubl" :text="text7" @click="publicate" />
     </section>
     
@@ -477,7 +478,8 @@
                 selectedDate: null, // Общая дата для всех выделенных элементов
                 currPostToChangeImage: null,
                 flagsImages: [],
-                user_label: "ВАШЕ ФОТО"
+                user_label: "ВАШЕ ФОТО",
+                publPostsError: false
             }
         },
         watch: {
@@ -948,9 +950,19 @@
         async publicate() {
             if (this.isLoading) return;
             this.isLoading = true;
-            const resp = await sendPosting(localStorage.getItem("token"));
-            this.isLoading = false;
-            if (resp) this.isPostPubl = true;
+            try {
+                const resp = await sendPosting(localStorage.getItem("token"));
+                this.isLoading = false;
+                if (resp && !resp.invalid_topic_ids) {
+                    this.isPostPubl = true;
+                    this.publPostsError = false;
+                } 
+                else this.publPostsError = true;
+            } catch(err) {
+                this.publPostsError = true;
+                this.isLoading = false;
+            }
+            
         }
         },
     };
