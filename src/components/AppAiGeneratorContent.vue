@@ -107,20 +107,20 @@
                     >
                 </div>
             </div>
-            <div class="row" v-if="windowWidth > 650" style="margin-top: 50px; margin-bottom: 44px;">
+            <div class="row" v-if="windowWidth > 1000" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text1" @click="saveSettings"/>
                 <AppGoodButton :text="text2" @click="editSettings" />
                 <AppGoodButton :text="text3" @click="generateThemes" />
             </div>  
-            <div class="mob_btns" v-if="windowWidth <= 650">
+            <div class="mob_btns" v-if="windowWidth <= 1000">
                 <div class="mob_btns_row">
                     <AppGoodButton class="mob_btn" :text="text1" @click="saveSettings"/>
                     <AppGoodButton class="mob_btn" :text="text2" @click="editSettings" />
                 </div>
                 <AppGoodButton class="mob_btn" :text="text3" @click="generateThemes" />
             </div>
-            <input type="checkbox" v-if="windowWidth <= 650" v-model="allCheckboxes" style="margin-bottom: 20px;">
-            <div class="table_container_mob" v-if="windowWidth <= 650">
+            <input type="checkbox" v-if="windowWidth <= 1000" v-model="allCheckboxes" style="margin-bottom: 20px;">
+            <div class="table_container_mob" v-if="windowWidth <= 1000">
                 <div class="table_mob">
                     <div class="table_item_mob" v-for="(item, index) in plan" :key="index">
                         <input type="checkbox" v-model="aprovedPostsIndexes[index]" :checked="allCheckboxes" style="margin-bottom: 20px;">
@@ -152,14 +152,14 @@
                             <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
                                 <div class="line"></div>
                             </div>
-                            <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index]" class="banner" />
+                            <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
                             <div class="plan_item_variants" v-if="!(isLoading && step == 0) && step >= 3">
                                 <AppGoodButton 
                                     v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
                                     :key="index_var" 
                                     :text="name" 
                                     class="variant_btn"
-                                    :class="{ not_active: index_var !== plan[index].chose_image_index }"
+                                    :class="{ not_active: index_var !== (plan[index].chose_image_index || 0) }"
                                     @click="setActiveImageVar(index_var, index)"
                                 />
                                 <AppGoodButton 
@@ -182,7 +182,7 @@
                     </div>
                 </div>
             </div>
-            <div class="table_container" v-if="windowWidth > 650">
+            <div class="table_container" v-if="windowWidth > 1000">
                 <table>
                     <thead>
                         <tr class="head">
@@ -229,14 +229,14 @@
                                 <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
                                     <div class="line"></div>
                                 </div>
-                                <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index]" class="banner" />
+                                <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
                                 <div class="plan_item_variants" v-if="!(isLoading && step == 0)">
                                     <AppGoodButton 
                                         v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
                                         :key="index_var" 
                                         :text="name" 
                                         class="variant_btn"
-                                        :class="{ not_active: index_var !== plan[index].chose_image_index }"
+                                        :class="{ not_active: index_var !== (plan[index].chose_image_index || 0) }"
                                         @click="setActiveImageVar(index_var, index)"
                                     />
                                     <AppGoodButton 
@@ -262,12 +262,12 @@
             </div>
             
             <span v-if="isLoading">Подождите, пока закончится генерация.</span>
-            <div class="row" v-if="windowWidth > 650" style="margin-top: 50px; margin-bottom: 44px;">
+            <div class="row" v-if="windowWidth > 1000" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text4" @click="confirmCurrentPosts" />
                 <AppGoodButton :text="text5" @click="regenerateCurrentPosts" />
                 <AppGoodButton :text="text6" @click="editInfo" />
             </div>
-            <div class="mob_btns" v-if="windowWidth <= 650">
+            <div class="mob_btns" v-if="windowWidth <= 1000">
                 <div class="mob_btns_row">
                     <AppGoodButton class="mob_btn" :text="text4" @click="confirmCurrentPosts" />
                     <AppGoodButton class="mob_btn" :text="text5" @click="regenerateCurrentPosts" />
@@ -276,7 +276,7 @@
             </div>
         </div>
 
-        <div class="table_container_mob" v-if="activeIndex == 1 && windowWidth <= 650">
+        <div class="table_container_mob" v-if="activeIndex == 1 && windowWidth <= 1000">
             <div class="table_mob">
                 <div class="table_item_mob" v-for="(item, index) in fileredPlan" :key="index">
                     <input 
@@ -295,7 +295,7 @@
                         <span v-html="formatedPost(item?.post_text[item.chose_post_index])"></span>
 
                         <span>Баннер: </span>
-                        <img :src="item?.image_links[item.chose_image_index]" class="banner" />
+                        <img :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index]" class="banner" />
 
                         <span>Дата / время публикации: </span>
                         <span
@@ -313,7 +313,7 @@
         </div>
 
         <div class="table_container">
-            <div class="content" v-if="activeIndex == 1 && windowWidth > 650">
+            <div class="content" v-if="activeIndex == 1 && windowWidth > 1000">
                 <table>
                     <thead>
                         <tr class="head">
@@ -347,7 +347,7 @@
                                 <span class="content_text" v-html="formatedPost(item.post_text[item.chose_post_index])"></span>
                             </td>
                             <td v-if="item.date_publication">
-                                <img class="accepted_banner" :src="item.image_links[item.chose_image_index]" />
+                                <img class="accepted_banner" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index]" />
                             </td>
                             <td class="col" v-if="item.date_publication">
                                 <!-- Поле для даты -->
@@ -384,7 +384,7 @@
         <span class="info_msg" v-if="isLoading && activeIndex == 1">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
         <span class="info_msg" v-if="isPostPubl && activeIndex == 1">Посты были успешно отправлены.</span>
         <span class="error" v-if="publPostsError && activeIndex == 1">При отправке постов произошла ошибка. Пожалуйста, нажмите кнопку "ОПУБЛИКОВАТЬ" ещё раз.</span>
-        <AppGoodButton class="publ_btn" v-if="fileredPlan.length > 0 && !isLoading && activeIndex == 1 && !isPostPubl" :text="text7" @click="publicate" />
+        <AppGoodButton class="publ_btn" v-if="isContentPlan && fileredPlan.length > 0 && !isLoading && activeIndex == 1 && !isPostPubl" :text="text7" @click="publicate" />
     </section>
     
 </template>
@@ -535,6 +535,9 @@
             this.step = this.getStep();
         },
         computed: { 
+            isContentPlan() {
+                return this.plan.filter(item => item?.date_publication).length > 0;
+            },
             isBlockGenerate() {
                 return this.plan.filter(item => item.is_published).length > 0
             },
@@ -674,7 +677,10 @@
                     }
                     if (this.step > 2) {
                         try {
-                            this.plan.forEach(item => item.is_accept_pairs = true);
+                            this.plan.forEach(item => {
+                                item.is_accept_pairs = true;
+                                if (item.chose_image_index != 0 && !item.chose_image_index) item.chose_image_index = 0;
+                            });
                             let resp = await acceptPlan(this.plan, localStorage.getItem("token"));
                             if (!resp) resp = await acceptPlan(this.plan, localStorage.getItem("token"));
                             this.plan = resp;
@@ -953,7 +959,7 @@
             try {
                 const resp = await sendPosting(localStorage.getItem("token"));
                 this.isLoading = false;
-                if (resp && !resp.invalid_topic_ids) {
+                if (resp && resp.invalid_topic_ids.length == 0) {
                     this.isPostPubl = true;
                     this.publPostsError = false;
                 } 

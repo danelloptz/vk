@@ -207,3 +207,18 @@ export async function sendPosting(token) {
         return false; 
     }
 }
+
+export async function sendPosts(token) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/api/v1/content_plan/send_posts_during_registration`, {},{
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при выгрзуке постов", error);
+        return false; 
+    }
+}

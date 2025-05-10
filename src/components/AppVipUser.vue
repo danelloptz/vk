@@ -7,7 +7,7 @@
                 <span>{{ vipUser.package_name }}</span>
             </div>
         </div>
-        <span>{{ vipUser.vip_offer_text.slice(0, 60) }}</span>
+        <span>{{ vipUser.vip_offer_text.slice(0, 90) }}</span>
         <a :href="vipUser.group_link" target="_blank">Ссылка</a>
         <div class="vip_footer">
             <div class="vip_links">
@@ -32,7 +32,7 @@
             <div class="text_wrapper">
                 <h2>{{ vipUser.name }}<span>{{ vipUser.package_name }}</span></h2>
             </div>
-            <span class="vip_user_text_mobile">{{ vipUser.vip_offer_text.slice(0, 60) }}</span>
+            <span class="vip_user_text_mobile">{{ vipUser.vip_offer_text.slice(0, 90) }}</span>
             <a class="vip_user_text_mobile" :href="vipUser.group_link" target="_blank">Ссылка</a>
         </div>
         <span class="vip_label">VIP-предложение</span>

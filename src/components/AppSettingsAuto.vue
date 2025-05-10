@@ -1,4 +1,11 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @close="close"
+        @update:visibility1="isModal = $event"
+    />
     <div class="container">
         <div class="zopaaaaa">
             <h2>Автопродвижение вашего бизнеса Intelektaz</h2>
@@ -34,6 +41,7 @@
                     </div>
                 </div>
             </div>
+            <AppGoodButton :text="text" @click="dropPosts" />
 
             <div v-for="(post, index) in paginatedPosts" :key="index" class="row2">
                 <span  >{{ (index + 1) + (currentPage - 1)*pageSize }}</span>
@@ -60,10 +68,13 @@
 </template>
 
 <script>
-import { getUserInfo, sendNewSettings, setAutoposting } from "@/services/user";
+import { getUserInfo, sendNewSettings, setAutoposting, sendPosts } from "@/services/user";
 import { getPosts } from "@/services/posts";
+import AppGoodButton from '@/components/AppGoodButton.vue';
+import AppModal from '@/components/AppModal.vue';
 
 export default {
+    components: { AppGoodButton, AppModal },
     data() {
         return {
             socials: [],
@@ -72,6 +83,10 @@ export default {
             isAutoposting: true,
             currentPage: 1, // Текущая страница
             pageSize: 5, // Количество постов на странице
+            text: "ВЫГРУЗИТЬ",
+            isModal: false,
+            title: "",
+            msg: ""
         };
     },
     computed: {
@@ -129,6 +144,23 @@ export default {
         this.posts = await getPosts();
     },
     methods: {
+        async dropPosts() {
+            try {
+                const resp = await sendPosts(localStorage.getItem("token"));
+                if (!resp || !resp.status) {
+                    console.error("ошибка выгрузки!");
+                    return;
+                }
+                this.title = "УСПЕШНО!";
+                this.msg = "Посты для автопродвижения были успешно выгруженны на вашу страницу. Вы сможете найти их в разделе 'Отложенные посты'. ";
+                this.isModal = true;
+            } catch(error) {
+                console.error(error);
+                this.title = "ОШИБКА!";
+                this.msg = "При выгрузке постов произошла ошибка. Перезагрузите страницу и попробуйте ещё раз.";
+                this.isModal = true;
+            }
+        },
         addSocial(social, index) {
             this.socials.splice(index + 1, 0, { type: social.type, link: "", isNew: true });
         },
