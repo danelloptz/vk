@@ -159,6 +159,7 @@
                         else {
                             this.isError = true;
                             if (response.message.indexOf("been used")) this.errorMessage = "Этот хэш уже был использован!"
+                            else if (response.message.indexOf("Хэш не найден")) this.errorMessage = "Хэш не найден!"
                             else this.errorMessage = response.message;
                         }
                         this.disabled = false;

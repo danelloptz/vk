@@ -67,6 +67,7 @@
         },  
         methods: {
             async comeToAss() {
+                // имена функций я, конечно, придумывать умею ;)
                 if (this.disabled) return;
                 if (this.isError) this.$emit('open-balance');
                 this.disabled = true;
@@ -76,6 +77,7 @@
                     return;
                 }
                 const tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
+                alert(tariff);
                 switch (tariff) {
                     case "Leader" || "Business":
                         this.price = 1;
@@ -83,7 +85,7 @@
                     case "VIP":
                         this.price = 1.5;
                         break;
-                    case "Start" || "Standart":
+                    case "Start" || "Standard":
                         this.price = 2;
                         break;
                     default: 
@@ -97,7 +99,6 @@
                     return;
                 }
                 this.isError = false;
-                // имена функций я, конечно, придумывать умею ;)
                 const resp = await setAdds(this.userData.group.group_link, this.userData.vk_id);
                 this.isModal = true;
                 this.title = resp.status ? "УСПЕШНО!" : "ОШИБКА!";
