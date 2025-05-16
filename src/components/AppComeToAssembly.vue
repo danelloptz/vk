@@ -77,15 +77,20 @@
                     return;
                 }
                 const tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
-                alert(tariff);
                 switch (tariff) {
-                    case "Leader" || "Business":
+                    case "Leader":
+                        this.price = 1;
+                        break;
+                    case "Business":
                         this.price = 1;
                         break;
                     case "VIP":
                         this.price = 1.5;
                         break;
-                    case "Start" || "Standard":
+                    case "Start":
+                        this.price = 2;
+                        break;
+                    case "Standard":
                         this.price = 2;
                         break;
                     default: 

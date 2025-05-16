@@ -160,6 +160,8 @@
                         const resp = await subToGroup(this.userInfo.vk_access_token, this.groupsQueue[this.currentGroupIndex].group_link);
                         if (!resp) location.reload();
                         if (resp.status) {
+                            const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
+                            await checkGroupSub(groupLink, this.userInfo.vk_id, "registration");
                             this.waitingForCheck = false;
                             this.addGroups++;
                             localStorage.setItem("addGroups", this.addGroups);
