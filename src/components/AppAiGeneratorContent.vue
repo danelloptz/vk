@@ -1,4 +1,5 @@
 <template>
+    <AppAiEditor v-if="isEditor" />
     <section class="ai">
         <div class="switch">
             <span
@@ -177,6 +178,10 @@
                                     style="display: none;"
                                 />
                                 <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" />
+                                <div class="editor" v-if="userData.vk_id == 513698557" @click="openEditor">
+                                    <img src="@/assets/images/pen.png" />
+                                    <span>Редактор</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -254,6 +259,10 @@
                                         style="display: none;"
                                     />
                                     <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" />
+                                    <div class="editor" v-if="userData.vk_id == 513698557" @click="openEditor">
+                                        <img src="@/assets/images/pen.png" />
+                                        <span>Редактор</span>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -391,6 +400,7 @@
 
 <script>
     import AppGoodButton from "@/components/AppGoodButton.vue";
+    import AppAiEditor from "@/components/AppAiEditor.vue";
     import { 
         sendBrief, 
         getBrief, 
@@ -409,7 +419,7 @@
     import { sendPosting } from "@/services/user";
 
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppAiEditor },
         props: {
             windowWidth: Number,
             userData: Object
@@ -479,7 +489,8 @@
                 currPostToChangeImage: null,
                 flagsImages: [],
                 user_label: "ВАШЕ ФОТО",
-                publPostsError: false
+                publPostsError: false,
+                isEditor: false
             }
         },
         watch: {
@@ -563,6 +574,10 @@
             }
         },
         methods: {
+            openEditor() {
+                this.isEditor = true;
+                console.log("открылся");
+            },
             formatDateOnly(time) {
                 const date = new Date(time);
                 const day = String(date.getDate()).padStart(2, '0');
@@ -1424,5 +1439,21 @@
         width: 15px;
         height: 15px;
         cursor: pointer;
+    }
+
+    .editor {
+        display: flex;
+        column-gap: 5px;
+        align-items: center;
+    }
+    .editor img {
+        width: 12px;
+        height: 12px;
+    }
+    .editor span {
+        font-size: 12px;
+        color: white;
+        font-family: 'OpenSans';
+        text-decoration: underline;
     }
 </style>

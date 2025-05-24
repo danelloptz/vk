@@ -122,6 +122,7 @@
             },
             redirect() {
                 // Перенаправление, если нужно
+                localStorage.setItem("page", 1);
                 this.$router.push('/home');
             },
             openSecondModal() {

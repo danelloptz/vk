@@ -36,7 +36,7 @@
             <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
                 <AppGoodButton class="btn" :text="text3" @click="subscribeGroup" />
-                <AppGoodButton class="btn" :text="text5" @click="checkSubscription(groupsQueue[currentGroupIndex]?.group_link)" />
+                <AppGoodButton class="btn" :text="text5" @click="checkSubscription(groupsQueue[currentGroupIndex]?.vk_id)" />
                 <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
                 <AppBadButton class="btn" :text="text6" @click="openModal" />
             </div>
@@ -189,8 +189,8 @@
                         const resp = await subToGroup(this.userData.vk_access_token, this.groupsQueue[this.currentGroupIndex].group_link);
                         if (!resp) location.reload();
                         if (resp.status) {
-                            const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
-                            await checkGroupSub(groupLink, this.userData.vk_id, "rotation");
+                            const groupId = String(this.groupsQueue[this.currentGroupIndex].vk_id);
+                            await checkGroupSub(groupId, this.userData.vk_id, "rotation");
                             this.waitingForCheck = false;
                             this.addGroups++;
                             localStorage.setItem("addGroups", this.addGroups);
@@ -224,7 +224,7 @@
             async checkSubscription(groupLink) {
                 if (!this.waitingForCheck) return;
                 console.log(groupLink);
-                const response = await checkGroupSub(groupLink, this.userData.vk_id, "rotation");
+                const response = await checkGroupSub(String(groupLink), this.userData.vk_id, "rotation");
                 if (!response) location.reload();
                 console.log(response);
 
@@ -278,7 +278,7 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
+                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
                 }
             },
             handleFocus() {
@@ -289,7 +289,7 @@
                         this.tooFast = false;
                         this.noSubscribe = false;
                         console.log('nandler');
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                         this.tooFast = true;

@@ -33,7 +33,7 @@
             <AppGroupOrUser style="width: 100%;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text1" @click="subscribeGroup" />
-                <AppGoodButton class="big_btn" :text="text3" @click="checkSubscription(groupsQueue[currentGroupIndex]?.group_link)" />
+                <AppGoodButton class="big_btn" :text="text3" @click="checkSubscription(groupsQueue[currentGroupIndex]?.vk_id)" />
                 <AppBadButton :text="`${text2} (${skipCounts})`" @click="skipGroup" />
                 <AppBadButton :text="text4" @click="openModal" />
                 <span class="error_message" v-if="noSkips">Не осталось пропусков!</span>
@@ -160,8 +160,8 @@
                         const resp = await subToGroup(this.userInfo.vk_access_token, this.groupsQueue[this.currentGroupIndex].group_link);
                         if (!resp) location.reload();
                         if (resp.status) {
-                            const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
-                            await checkGroupSub(groupLink, this.userInfo.vk_id, "registration");
+                            const groupId = String(this.groupsQueue[this.currentGroupIndex].vk_id);
+                            await checkGroupSub(groupId, this.userInfo.vk_id, "registration");
                             this.waitingForCheck = false;
                             this.addGroups++;
                             localStorage.setItem("addGroups", this.addGroups);
@@ -201,7 +201,7 @@
                 this.waitingForCheck = false;
                 let response;
                 try {
-                    response = await checkGroupSub(groupLink, this.userInfo.vk_id, "registration");
+                    response = await checkGroupSub(String(groupLink), this.userInfo.vk_id, "registration");
                     if (!response) location.reload();
                 } catch(err) {
                     location.reload();
@@ -261,7 +261,7 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
+                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
                 }
             },
             handleFocus() {
@@ -269,7 +269,7 @@
                     const elapsed = Date.now() - this.blurTime;
                     if (elapsed > 1000) { // Например, если прошло более 5 секунд
                         this.tooFast = false;
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.group_link);
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                         this.tooFast = true;
