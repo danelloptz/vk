@@ -7,8 +7,8 @@
                 <div class="header_tools">
                     <img src="@/assets/images/hand.png">
                     <img src="@/assets/images/crop.png" @click="changeCrop">
-                    <img src="@/assets/images/return_back.png">
-                    <img src="@/assets/images/return_towards.png">
+                    <img src="@/assets/images/return_back.png" @click="undo">
+                    <img src="@/assets/images/return_towards.png" @click="redo">
                     <img src="@/assets/images/delete_ai.png">
                 </div>
                 <AppBadButton :text="text1" class="save" @click="save"/>
@@ -161,7 +161,7 @@
             <div class="text_tools">
                 <div class="text_tools_row">
                     <div class="color_rectangle">
-                        <input type="color" class="color_rect" v-model="selectedRectangle.color" />
+                        <input type="color" class="color_rect" v-model="selectedRectangle.color" @change="captureState" />
                         <h2>Цвет</h2>
                     </div>
                     <div class="vertical_line"></div>
@@ -189,6 +189,7 @@
                             style="visibility: hidden; height: 0px;" 
                             ref="colorInput" 
                             v-model="selectedBlock.color" 
+                            @change="captureState"
                         />
                         <h2>Цвет</h2>
                     </div>
@@ -202,7 +203,7 @@
                             }"
                         ></div>
                         <h3>Заливка: </h3>
-                        <input type="range" v-model="selectedRectangle.opacity" min="0" max="1" step="0.01" />
+                        <input type="range" class="custom-range" v-model="selectedRectangle.opacity" min="0" max="1" step="0.01" @change="captureState" />
                     </div>
                     <div class="text_align">
                         <div class="text_align_item" @click="changeTextAling('left')">
@@ -234,19 +235,19 @@
                         </div>
                     </div>
                 </div>
-                <AppGoodButton :text="text3" class="upload_logo" @click="addImage" />
+                <!-- <AppGoodButton :text="text3" class="upload_logo" @click="addImage" /> -->
                 <div class="text_tools_row">
                     <h2>Размер текста: </h2>
-                    <input type="range" v-model.number="selectedBlock.fontSize" min="5" max="256" step="1" />
-                    <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="256" :key="selectedBlock.fontSize" />
+                    <input type="range" class="custom-range" v-model.number="selectedBlock.fontSize" min="5" max="256" step="1" @change="captureState" />
+                    <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="256" @change="captureState" :key="selectedBlock.fontSize" />
                 </div>
                 <div class="text_tools_row">
                     <h2>Шрифт: </h2>
                     <select class="font_dropdown" v-model="selectedBlock.fontFamily">
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Courier New">Courier New</option>
-                        <option value="Verdana">Verdana</option>
+                        <option value="Arial" @click="captureState">Arial</option>
+                        <option value="Times New Roman" @click="captureState">Times New Roman</option>
+                        <option value="Courier New" @click="captureState">Courier New</option>
+                        <option value="Verdana" @click="captureState">Verdana</option>
                     </select>
                 </div>
             </div>
@@ -316,6 +317,9 @@
                 isShiftPressed: false,
                 textColor: "#000000",
                 isCroped: false,
+                history: [], // Стек для хранения истории действий
+                future: [],  // Стек для хранения отменённых действий
+                historyLimit: 50,
             }
         },
         mounted() {
@@ -356,6 +360,52 @@
             }, 300);
         },
         methods: {
+            // Метод для добавления действия в историю
+            addHistory(state) {
+                this.history.push(state);
+                if (this.history.length > this.historyLimit) {
+                    this.history.shift(); // Удаляем самое старое действие при превышении лимита
+                }
+                this.future = []; // При новом действии очищаем стек "вперёд"
+            },
+            // Метод для создания снимка текущего состояния
+            captureState() {
+                const state = {
+                    textBlocks: JSON.parse(JSON.stringify(this.textBlocks)),
+                    rectangles: JSON.parse(JSON.stringify(this.rectangles)),
+                    images: JSON.parse(JSON.stringify(this.images)),
+                    croppedImage: this.croppedImage,
+                    imageSrc: this.imageSrc
+                };
+                this.addHistory(state);
+            },
+            undo() {
+                if (this.history.length == 1) return; // Нечего отменять
+                
+                const currentState = this.history.pop(); // Текущее состояние
+                this.future.push(currentState); // Перемещаем текущее состояние в будущее
+                
+                const prevState = this.history[this.history.length - 1];
+                this.restoreState(prevState);
+
+                console.log(this.history);
+            },
+            
+            redo() {
+                console.log(this.future);
+                if (this.future.length === 0) return; // Нечего возвращать
+                
+                const nextState = this.future.pop();
+                // this.addHistory(nextState); // Добавляем восстановленное состояние в историю
+                this.restoreState(nextState);
+            },
+            restoreState(state) {
+                this.textBlocks = JSON.parse(JSON.stringify(state.textBlocks));
+                this.rectangles = JSON.parse(JSON.stringify(state.rectangles));
+                this.images = JSON.parse(JSON.stringify(state.images));
+                this.croppedImage = state.croppedImage;
+                this.currentImage = state.imageSrc;
+            },
             close() {
                 this.$emit('update:visibility1', false);
             },
@@ -381,6 +431,7 @@
             },
             changeTextAling(align) {
                 this.selectedBlock.textAlign = align;
+                this.captureState();
             },
             changeTextStyle(style) {
                 switch (style) {
@@ -394,219 +445,232 @@
                         this.selectedBlock.fontStyle = this.selectedBlock.fontStyle == 'italic' ? 'normal' : style;
                         break;
                 }
+                this.captureState();
             },
             openColorPicker() {
                 // Имитация клика по скрытому input[type="color"]
                 this.$refs.colorInput.click();
             },
             handleKeyDown(event) {
-            if (event.key === 'Shift') {
-                this.isShiftPressed = true;
-            }
+                if (event.key === 'Shift') {
+                    this.isShiftPressed = true;
+                }
             },
             handleKeyUp(event) {
-            if (event.key === 'Shift') {
-                this.isShiftPressed = false;
-            }
+                if (event.key === 'Shift') {
+                    this.isShiftPressed = false;
+                }
             },
             selectImage(id, event) {
-            if (!this.isResizingImage) {
-                this.selectedImageId = id;
-                this.startDragImage(event, id);
-            }
+                if (!this.isResizingImage) {
+                    this.selectedImageId = id;
+                    this.startDragImage(event, id);
+                }
             },
             startDragImage(event, id) {
-            const image = this.images.find((img) => img.id === id);
-            if (!image) return;
-            this.isDraggingImage = true;
-            this.dragStartX = event.clientX - image.left;
-            this.dragStartY = event.clientY - image.top;
-            document.addEventListener('mousemove', this.dragImage);
-            document.addEventListener('mouseup', this.stopDragImage);
+                const image = this.images.find((img) => img.id === id);
+                if (!image) return;
+                this.isDraggingImage = true;
+                this.dragStartX = event.clientX - image.left;
+                this.dragStartY = event.clientY - image.top;
+                document.addEventListener('mousemove', this.dragImage);
+                document.addEventListener('mouseup', this.stopDragImage);
             },
             dragImage(event) {
-            if (!this.isDraggingImage || !this.selectedImageId) return;
-            const image = this.images.find((img) => img.id === this.selectedImageId);
-            if (!image) return;
-            image.left = event.clientX - this.dragStartX;
-            image.top = event.clientY - this.dragStartY;
-            if (image.left < 0) image.left = 0;
-            if (image.top < 0) image.top = 0;
+                if (!this.isDraggingImage || !this.selectedImageId) return;
+                const image = this.images.find((img) => img.id === this.selectedImageId);
+
+                if (!image) return;
+
+                image.left = event.clientX - this.dragStartX;
+                image.top = event.clientY - this.dragStartY;
+
+                if (image.left < 0) image.left = 0;
+                if (image.top < 0) image.top = 0;
             },
             stopDragImage() {
-            this.isDraggingImage = false;
-            document.removeEventListener('mousemove', this.dragImage);
-            document.removeEventListener('mouseup', this.stopDragImage);
+                this.isDraggingImage = false;
+                this.captureState();
+                document.removeEventListener('mousemove', this.dragImage);
+                document.removeEventListener('mouseup', this.stopDragImage);
             },
             startResizeImage(event, position, id) {
-            this.isResizingImage = true;
-            this.resizePosition = position;
+                this.isResizingImage = true;
+                this.resizePosition = position;
 
-            const image = this.images.find((img) => img.id === id);
-            if (!image) return;
+                const image = this.images.find((img) => img.id === id);
+                if (!image) return;
 
-            // Сохраняем начальные значения
-            this.initialImageLeft = image.left;
-            this.initialImageTop = image.top;
-            this.initialImageWidth = image.width;
-            this.initialImageHeight = image.height;
+                // Сохраняем начальные значения
+                this.initialImageLeft = image.left;
+                this.initialImageTop = image.top;
+                this.initialImageWidth = image.width;
+                this.initialImageHeight = image.height;
 
-            // Сохраняем начальные координаты мыши
-            this.startX = event.clientX;
-            this.startY = event.clientY;
+                // Сохраняем начальные координаты мыши
+                this.startX = event.clientX;
+                this.startY = event.clientY;
 
-            document.addEventListener('mousemove', this.resizeImage);
-            document.addEventListener('mouseup', this.stopResizeImage);
+                document.addEventListener('mousemove', this.resizeImage);
+                document.addEventListener('mouseup', this.stopResizeImage);
             },
             resizeImage(event) {
-            if (!this.isResizingImage || !this.selectedImageId) return;
+                if (!this.isResizingImage || !this.selectedImageId) return;
 
-            const image = this.images.find((img) => img.id === this.selectedImageId);
-            if (!image) return;
+                const image = this.images.find((img) => img.id === this.selectedImageId);
+                if (!image) return;
 
-            const deltaX = event.clientX - this.startX;
-            const deltaY = event.clientY - this.startY;
+                const deltaX = event.clientX - this.startX;
+                const deltaY = event.clientY - this.startY;
 
-            // Сохраняем исходное соотношение сторон
-            const aspectRatio = this.initialImageWidth / this.initialImageHeight;
+                // Сохраняем исходное соотношение сторон
+                const aspectRatio = this.initialImageWidth / this.initialImageHeight;
 
-            switch (this.resizePosition) {
-                case 'top-left':
-                image.width = this.initialImageWidth - deltaX;
-                image.height = image.width / aspectRatio; // Пропорциональная высота
-                image.left = this.initialImageLeft + deltaX;
-                image.top = this.initialImageTop + (this.initialImageHeight - image.height);
-                break;
+                switch (this.resizePosition) {
+                    case 'top-left':
+                        image.width = this.initialImageWidth - deltaX;
+                        image.height = image.width / aspectRatio; // Пропорциональная высота
+                        image.left = this.initialImageLeft + deltaX;
+                        image.top = this.initialImageTop + (this.initialImageHeight - image.height);
+                        break;
 
-                case 'top-right':
-                image.width = this.initialImageWidth + deltaX;
-                image.height = image.width / aspectRatio; // Пропорциональная высота
-                image.top = this.initialImageTop + (this.initialImageHeight - image.height);
-                break;
+                    case 'top-right':
+                        image.width = this.initialImageWidth + deltaX;
+                        image.height = image.width / aspectRatio; // Пропорциональная высота
+                        image.top = this.initialImageTop + (this.initialImageHeight - image.height);
+                        break;
 
-                case 'bottom-left':
-                image.height = this.initialImageHeight + deltaY;
-                image.width = image.height * aspectRatio; // Пропорциональная ширина
-                image.left = this.initialImageLeft - (image.width - this.initialImageWidth);
-                break;
+                    case 'bottom-left':
+                        image.height = this.initialImageHeight + deltaY;
+                        image.width = image.height * aspectRatio; // Пропорциональная ширина
+                        image.left = this.initialImageLeft - (image.width - this.initialImageWidth);
+                        break;
 
-                case 'bottom-right':
-                image.width = this.initialImageWidth + deltaX;
-                image.height = image.width / aspectRatio; // Пропорциональная высота
-                break;
-            }
-
-            // Ограничение минимальных размеров
-            if (image.width < 10) {
-                image.width = 10;
-                image.height = image.width / aspectRatio; // Пропорциональная высота
-                if (this.resizePosition.includes('left')) {
-                image.left -= 10 - image.width; // Корректируем позицию
+                    case 'bottom-right':
+                        image.width = this.initialImageWidth + deltaX;
+                        image.height = image.width / aspectRatio; // Пропорциональная высота
+                        break;
                 }
-            }
 
-            if (image.height < 10) {
-                image.height = 10;
-                image.width = image.height * aspectRatio; // Пропорциональная ширина
-                if (this.resizePosition.includes('top')) {
-                image.top -= 10 - image.height; // Корректируем позицию
+                // Ограничение минимальных размеров
+                if (image.width < 10) {
+                    image.width = 10;
+                    image.height = image.width / aspectRatio; // Пропорциональная высота
+                    if (this.resizePosition.includes('left')) {
+                        image.left -= 10 - image.width; // Корректируем позицию
+                    }
                 }
-            }
 
-            // Ограничение перемещения за пределы контейнера
-            if (image.left < 0) image.left = 0;
-            if (image.top < 0) image.top = 0;
+                if (image.height < 10) {
+                    image.height = 10;
+                    image.width = image.height * aspectRatio; // Пропорциональная ширина
+                    if (this.resizePosition.includes('top')) {
+                        image.top -= 10 - image.height; // Корректируем позицию
+                    }
+                }
+
+                // Ограничение перемещения за пределы контейнера
+                if (image.left < 0) image.left = 0;
+                if (image.top < 0) image.top = 0;
             },
             stopResizeImage() {
-            this.isResizingImage = false;
-            document.removeEventListener('mousemove', this.resizeImage);
-            document.removeEventListener('mouseup', this.stopResizeImage);
+                this.isResizingImage = false;
+                this.captureState();
+                document.removeEventListener('mousemove', this.resizeImage);
+                document.removeEventListener('mouseup', this.stopResizeImage);
             },
             addImage() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
 
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                const newImage = {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                    const newImage = {
+                        id: Date.now(),
+                        top: 50,
+                        left: 50,
+                        width: 100,
+                        height: 100,
+                        src: e.target.result,
+                    };
+                    this.images.push(newImage);
+                    this.selectedImageId = newImage.id;
+                    };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+                this.captureState();
+            },
+            deleteImage(id) {
+                this.images = this.images.filter((img) => img.id !== id);
+                if (this.selectedImageId === id) {
+                    this.selectedImageId = null;
+                }
+                this.captureState();
+            },
+            enableEditing(id) {
+                this.editingBlockId = id;
+            },
+            disableEditing() {
+                this.editingBlockId = null;
+            },
+            updateText(id, event) {
+                const block = this.textBlocks.find((b) => b.id === id);
+                if (block) {
+                    block.text = event.target.innerText; // Обновляем текст из содержимого элемента
+                    this.captureState();
+                }
+            },
+            deselectBlock() {
+                this.selectedBlockId = null; // Снимаем выделение при потере фокуса
+            },
+            selectBlock(id, event) {
+                this.selectedBlockId = id; // Выбираем блок
+                this.startDragText(event, id); // Начинаем перетаскивание
+            },
+            addRectangle() {
+                const newRectangle = {
                     id: Date.now(),
                     top: 50,
                     left: 50,
                     width: 100,
-                    height: 100,
-                    src: e.target.result,
+                    height: 50,
+                    color: '#000000',
+                    opacity: 0.5,
                 };
-                this.images.push(newImage);
-                this.selectedImageId = newImage.id;
-                };
-                reader.readAsDataURL(file);
-            };
-            input.click();
-            },
-            deleteImage(id) {
-            this.images = this.images.filter((img) => img.id !== id);
-            if (this.selectedImageId === id) {
-                this.selectedImageId = null;
-            }
-            },
-            enableEditing(id) {
-            this.editingBlockId = id;
-            },
-            disableEditing() {
-            this.editingBlockId = null;
-            },
-            updateText(id, event) {
-            const block = this.textBlocks.find((b) => b.id === id);
-            if (block) {
-                block.text = event.target.innerText; // Обновляем текст из содержимого элемента
-            }
-            },
-            deselectBlock() {
-            this.selectedBlockId = null; // Снимаем выделение при потере фокуса
-            },
-            selectBlock(id, event) {
-            this.selectedBlockId = id; // Выбираем блок
-            this.startDragText(event, id); // Начинаем перетаскивание
-            },
-            addRectangle() {
-            const newRectangle = {
-                id: Date.now(),
-                top: 50,
-                left: 50,
-                width: 100,
-                height: 50,
-                color: '#000000',
-                opacity: 0.5,
-            };
-            this.rectangles.push(newRectangle);
-            this.selectedRectangleId = newRectangle.id;
+                this.rectangles.push(newRectangle);
+                this.selectedRectangleId = newRectangle.id;
+                this.captureState();
             },
             deleteRectangle(id) {
-            this.rectangles = this.rectangles.filter((r) => r.id !== id);
-            if (this.selectedRectangleId === id) {
-                this.selectedRectangleId = null;
-            }
+                this.rectangles = this.rectangles.filter((r) => r.id !== id);
+                if (this.selectedRectangleId === id) {
+                    this.selectedRectangleId = null;
+                    this.captureState();
+                }
             },
             selectRectangle(id, event) {
-            // Проверяем, что событие не связано с изменением размера
-            if (!this.isResizing) {
-                this.selectedRectangleId = id;
-                this.selectedRectangle = this.rectangles.filter(rect => rect.id == id)[0];
-                this.startDragRectangle(event, id);
-            }
+                // Проверяем, что событие не связано с изменением размера
+                if (!this.isResizing) {
+                    this.selectedRectangleId = id;
+                    this.selectedRectangle = this.rectangles.filter(rect => rect.id == id)[0];
+                    this.startDragRectangle(event, id);
+                }
             },
             startDragRectangle(event, id) {
-            const rectangle = this.rectangles.find((r) => r.id === id);
-            if (!rectangle) return;
-            this.isDraggingRectangle = true;
-            this.dragStartX = event.clientX - rectangle.left;
-            this.dragStartY = event.clientY - rectangle.top;
-            document.addEventListener('mousemove', this.dragRectangle);
-            document.addEventListener('mouseup', this.stopDragRectangle);
+                const rectangle = this.rectangles.find((r) => r.id === id);
+                if (!rectangle) return;
+
+                this.isDraggingRectangle = true;
+                this.dragStartX = event.clientX - rectangle.left;
+                this.dragStartY = event.clientY - rectangle.top;
+
+                document.addEventListener('mousemove', this.dragRectangle);
+                document.addEventListener('mouseup', this.stopDragRectangle);
             },
             dragRectangle(event) {
                 if (!this.isDraggingRectangle || !this.selectedRectangleId) return;
@@ -641,112 +705,114 @@
                 rectangle.top = newTop;
             },
             stopDragRectangle() {
-            this.isDraggingRectangle = false;
-            document.removeEventListener('mousemove', this.dragRectangle);
-            document.removeEventListener('mouseup', this.stopDragRectangle);
+                this.isDraggingRectangle = false;
+                this.captureState();
+                document.removeEventListener('mousemove', this.dragRectangle);
+                document.removeEventListener('mouseup', this.stopDragRectangle);
             },
             startResizeRectangle(event, position, id) {
-            this.isResizing = true;
-            this.resizePosition = position;
+                this.isResizing = true;
+                this.resizePosition = position;
 
-            const rectangle = this.rectangles.find((r) => r.id === id);
-            if (!rectangle) return;
+                const rectangle = this.rectangles.find((r) => r.id === id);
+                if (!rectangle) return;
 
-            // Сохраняем начальные значения
-            this.initialCropLeft = rectangle.left;
-            this.initialCropTop = rectangle.top;
-            this.initialCropWidth = rectangle.width;
-            this.initialCropHeight = rectangle.height;
+                // Сохраняем начальные значения
+                this.initialCropLeft = rectangle.left;
+                this.initialCropTop = rectangle.top;
+                this.initialCropWidth = rectangle.width;
+                this.initialCropHeight = rectangle.height;
 
-            // Сохраняем начальные координаты мыши
-            this.startX = event.clientX;
-            this.startY = event.clientY;
+                // Сохраняем начальные координаты мыши
+                this.startX = event.clientX;
+                this.startY = event.clientY;
 
-            document.addEventListener('mousemove', this.resizeRectangle);
-            document.addEventListener('mouseup', this.stopResizeRectangle);
+                document.addEventListener('mousemove', this.resizeRectangle);
+                document.addEventListener('mouseup', this.stopResizeRectangle);
             },
             resizeRectangle(event) {
-            if (!this.isResizing || !this.selectedRectangleId) return;
+                if (!this.isResizing || !this.selectedRectangleId) return;
 
-            const rectangle = this.rectangles.find((r) => r.id === this.selectedRectangleId);
-            if (!rectangle) return;
+                const rectangle = this.rectangles.find((r) => r.id === this.selectedRectangleId);
+                if (!rectangle) return;
 
-            const deltaX = event.clientX - this.startX;
-            const deltaY = event.clientY - this.startY;
+                const deltaX = event.clientX - this.startX;
+                const deltaY = event.clientY - this.startY;
 
-            switch (this.resizePosition) {
-                case 'top-left':
-                rectangle.left = this.initialCropLeft + deltaX;
-                rectangle.top = this.initialCropTop + deltaY;
-                rectangle.width = this.initialCropWidth - deltaX;
-                rectangle.height = this.initialCropHeight - deltaY;
-                break;
+                switch (this.resizePosition) {
+                    case 'top-left':
+                        rectangle.left = this.initialCropLeft + deltaX;
+                        rectangle.top = this.initialCropTop + deltaY;
+                        rectangle.width = this.initialCropWidth - deltaX;
+                        rectangle.height = this.initialCropHeight - deltaY;
+                        break;
 
-                case 'top-right':
-                rectangle.top = this.initialCropTop + deltaY;
-                rectangle.width = this.initialCropWidth + deltaX;
-                rectangle.height = this.initialCropHeight - deltaY;
-                break;
+                    case 'top-right':
+                        rectangle.top = this.initialCropTop + deltaY;
+                        rectangle.width = this.initialCropWidth + deltaX;
+                        rectangle.height = this.initialCropHeight - deltaY;
+                        break;
 
-                case 'bottom-left':
-                rectangle.left = this.initialCropLeft + deltaX;
-                rectangle.width = this.initialCropWidth - deltaX;
-                rectangle.height = this.initialCropHeight + deltaY;
-                break;
+                    case 'bottom-left':
+                        rectangle.left = this.initialCropLeft + deltaX;
+                        rectangle.width = this.initialCropWidth - deltaX;
+                        rectangle.height = this.initialCropHeight + deltaY;
+                        break;
 
-                case 'bottom-right':
-                rectangle.width = this.initialCropWidth + deltaX;
-                rectangle.height = this.initialCropHeight + deltaY;
-                break;
-            }
-
-            // Ограничение минимальных размеров
-            if (rectangle.width < 10) {
-                if (this.resizePosition.includes('left')) {
-                rectangle.left -= 10 - rectangle.width; // Корректируем позицию
+                    case 'bottom-right':
+                        rectangle.width = this.initialCropWidth + deltaX;
+                        rectangle.height = this.initialCropHeight + deltaY;
+                        break;
                 }
-                rectangle.width = 10;
-            }
 
-            if (rectangle.height < 10) {
-                if (this.resizePosition.includes('top')) {
-                rectangle.top -= 10 - rectangle.height; // Корректируем позицию
+                // Ограничение минимальных размеров
+                if (rectangle.width < 10) {
+                    if (this.resizePosition.includes('left')) {
+                    rectangle.left -= 10 - rectangle.width; // Корректируем позицию
+                    }
+                    rectangle.width = 10;
                 }
-                rectangle.height = 10;
-            }
 
-            // Ограничение перемещения за пределы контейнера
-            if (rectangle.left < 0) rectangle.left = 0;
-            if (rectangle.top < 0) rectangle.top = 0;
+                if (rectangle.height < 10) {
+                    if (this.resizePosition.includes('top')) {
+                    rectangle.top -= 10 - rectangle.height; // Корректируем позицию
+                    }
+                    rectangle.height = 10;
+                }
+
+                // Ограничение перемещения за пределы контейнера
+                if (rectangle.left < 0) rectangle.left = 0;
+                if (rectangle.top < 0) rectangle.top = 0;
             },
             stopResizeRectangle() {
-            this.isResizing = false;
-            document.removeEventListener('mousemove', this.resizeRectangle);
-            document.removeEventListener('mouseup', this.stopResizeRectangle);
+                this.isResizing = false;
+                this.captureState();
+                document.removeEventListener('mousemove', this.resizeRectangle);
+                document.removeEventListener('mouseup', this.stopResizeRectangle);
             },
             splitTextIntoLines(text) {
-            return text.split('\n');
+                return text.split('\n');
             },
             wrapText(ctx, text, x, y, maxWidth) {
-            const words = text.split(' ');
-            let line = '';
-            let lines = [];
+                const words = text.split(' ');
+                let line = '';
+                let lines = [];
 
-            for (let n = 0; n < words.length; n++) {
-                const testLine = line + words[n] + ' ';
-                const metrics = ctx.measureText(testLine);
-                const testWidth = metrics.width;
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
 
-                if (testWidth > maxWidth && n > 0) {
-                lines.push(line.trim());
-                line = words[n] + ' ';
-                } else {
-                line = testLine;
+                    if (testWidth > maxWidth && n > 0) {
+                    lines.push(line.trim());
+                    line = words[n] + ' ';
+                    } else {
+                    line = testLine;
+                    }
                 }
-            }
 
-            lines.push(line.trim());
-            return lines;
+                lines.push(line.trim());
+                return lines;
             },
             getShift() {
                 const wrapper = document.querySelector('.vue-rectangle-stencil');
@@ -766,11 +832,11 @@
                 }
             },
             defaultSize({ imageSize, visibleArea }) {
-                    return {
-                        width: (visibleArea || imageSize).width,
-                        height: (visibleArea || imageSize).height,
-                    };
-                },
+                return {
+                    width: (visibleArea || imageSize).width,
+                    height: (visibleArea || imageSize).height,
+                };
+            },
             // Загрузка изображения
             // loadImage(event) {
             // const file = event.target.files[0];
@@ -797,7 +863,7 @@
 
             // Обработка изменений в области обрезки
             onCropChange({ coordinates }) {
-            this.cord = coordinates;
+                this.cord = coordinates;
             },
 
             // Обрезка изображения
@@ -820,6 +886,7 @@
                 this.textBlocks = this.textBlocks.filter(item => item.left >= cords.left && item.top >= cords.top && item.top + item.fontSize <= cords.top + cords.height);
                 this.rectangles = this.rectangles.filter(item => item.left >= cords.left && item.top >= cords.top && item.top <= cords.top + cords.height);
                 this.images = this.images.filter(item => item.left >= cords.left && item.top >= cords.top && item.top <= cords.top + cords.height);
+                this.captureState();
             },
 
             crop() {
@@ -961,12 +1028,14 @@
                 };
                 this.textBlocks.push(newBlock);
                 this.selectedBlockId = newBlock.id; // Выбираем новый блок
+                this.captureState();
             },
             // Удаление текстового блока
             deleteBlock(id) {
                 this.textBlocks = this.textBlocks.filter((block) => block.id !== id);
                 if (this.selectedBlockId === id) {
                     this.selectedBlockId = null; // Снимаем выделение
+                    this.captureState();
                 }
             },
 
@@ -1042,6 +1111,7 @@
             // Остановка перетаскивания текстового блока
             stopDragText() {
                 this.isDraggingText = false;
+                this.captureState();
                 document.removeEventListener('mousemove', this.dragText);
                 document.removeEventListener('mouseup', this.stopDragText);
             },
@@ -1150,7 +1220,7 @@
     .text_tools {
         display: flex;
         flex-direction: column;
-        row-gap: 10px;
+        row-gap: 20px;
     }
     .text_tools_row {
         width: 100%;
@@ -1343,6 +1413,47 @@
     }
     .vue-advanced-cropper__background, .vue-advanced-cropper__foreground {
         background: none !important;
+    }
+
+    /* Стилизация трека (полосы) */
+    .custom-range {
+        -webkit-appearance: none; /* Убираем стандартный вид */
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.502);
+        border-radius: 5px;
+        outline: none;
+    }
+
+
+    /* Стилизация для thumb (кругляшка) */
+    .custom-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18.23px;
+        height: 18.23px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    /* Для Firefox */
+    .custom-range::-moz-range-thumb {
+        width: 18.23px;
+        height: 18.23px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        border: none;
+    }
+
+    /* Стилизация трека для Firefox */
+    .custom-range::-moz-range-track {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.504);
+        border-radius: 5px;
     }
 
 
