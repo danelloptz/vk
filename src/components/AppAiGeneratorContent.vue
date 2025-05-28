@@ -1,5 +1,10 @@
 <template>
-    <AppAiEditor v-if="isEditor" />
+    <AppAiEditor 
+        v-if="isEditor" 
+        :imageSrc="aiEditorLink"
+        @update:visibility1="isEditor = $event"
+        @update:save="updateImage"
+    />
     <section class="ai">
         <div class="switch">
             <span
@@ -178,7 +183,7 @@
                                     style="display: none;"
                                 />
                                 <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" />
-                                <div class="editor" v-if="userData.vk_id == 513698557" @click="openEditor">
+                                <div class="editor" v-if="userData.vk_id == 513698557" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
                                     <img src="@/assets/images/pen.png" />
                                     <span>Редактор</span>
                                 </div>
@@ -259,7 +264,7 @@
                                         style="display: none;"
                                     />
                                     <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" />
-                                    <div class="editor" v-if="userData.vk_id == 513698557" @click="openEditor">
+                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
                                     </div>
@@ -417,6 +422,7 @@
         uploadUserImage
     } from "@/services/ai";
     import { sendPosting } from "@/services/user";
+    import { getConfig } from "@/services/config";
 
     export default {
         components: { AppGoodButton, AppAiEditor },
@@ -490,7 +496,11 @@
                 flagsImages: [],
                 user_label: "ВАШЕ ФОТО",
                 publPostsError: false,
-                isEditor: false
+                isEditor: false,
+                aiEditorLink: "",
+                testers: null,
+                isCustomEdit: false,
+                indexEdit: null
             }
         },
         watch: {
@@ -544,6 +554,9 @@
             console.log(this.flagsImages);
             
             this.step = this.getStep();
+
+            const testers = await getConfig("testers_for_cropper", localStorage.getItem("token"));
+            this.testers = testers.ids;
         },
         computed: { 
             isContentPlan() {
@@ -574,9 +587,16 @@
             }
         },
         methods: {
-            openEditor() {
+            updateImage(link) {
+                
+                if (this.isCustomEdit) this.plan[this.indexEdit].custom_image_url = link
+                else  this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link;
+            },
+            openEditor(link, isCustom, index) {
                 this.isEditor = true;
-                console.log("открылся");
+                this.aiEditorLink = link;
+                this.isCustomEdit = isCustom; // является ли фотография загруженной пользователем
+                this.indexEdit = index; // индекс редактируемой фотографии
             },
             formatDateOnly(time) {
                 const date = new Date(time);
