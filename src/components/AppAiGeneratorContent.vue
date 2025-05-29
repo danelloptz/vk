@@ -587,10 +587,55 @@
             }
         },
         methods: {
-            updateImage(link) {
-                
-                if (this.isCustomEdit) this.plan[this.indexEdit].custom_image_url = link
-                else  this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link;
+            async updateImage(link) {
+                let file;
+
+                // Check if the link is a base64 string
+                if (link.startsWith("data:image")) {
+                    // Convert base64 to Blob
+                    const contentType = link.split(';')[0].split(':')[1]; // Extract content type (e.g., "image/png")
+                    file = this.base64ToBlob(link, contentType);
+                    console.log("я тут");
+                } else {
+                    // If it's already a File object, use it directly
+                    file = link;
+                    console.log("я тут2");
+                }
+
+                if (this.isCustomEdit) {
+                    console.log("я тут3");
+                    this.plan[this.indexEdit].custom_image_url = link;
+                    const resp = await uploadUserImage(this.plan[this.indexEdit].topic_id, file, localStorage.getItem("token"));
+                    this.plan = resp;
+                } else {
+                    console.log("я тут4");
+                    this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link;
+                    const resp = await uploadUserImage(
+                        this.plan[this.indexEdit].topic_id,
+                        file,
+                        localStorage.getItem("token"),
+                        this.plan[this.indexEdit].chose_image_index || 0
+                    );
+                    this.plan = resp;
+                }
+            },
+            base64ToBlob(base64String, contentType = '', sliceSize = 512) {
+                const byteCharacters = atob(base64String.split(',')[1]); // Remove the "data:image/png;base64," prefix
+                const byteArrays = [];
+
+                for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+                    const byteNumbers = new Array(slice.length);
+                    for (let i = 0; i < slice.length; i++) {
+                        byteNumbers[i] = slice.charCodeAt(i);
+                    }
+
+                    const byteArray = new Uint8Array(byteNumbers);
+                    byteArrays.push(byteArray);
+                }
+
+                return new Blob(byteArrays, { type: contentType });
             },
             openEditor(link, isCustom, index) {
                 this.isEditor = true;

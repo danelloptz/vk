@@ -132,6 +132,9 @@
                 :default-size="defaultSize"
             />
         </div>
+        <!-- <img :src="croppedImage" /> -->
+        <!-- <img :src="currentImage" /> -->
+
         <div class="crop_msg" v-if="isCroped">
             <span>Обрезать?</span>
             <AppGoodButton :text="text7" @click="resize" class="crop" /> 
@@ -346,7 +349,7 @@
             },
         },
         async created() {
-            this.currentImage = this.imageSrc;
+            this.currentImage = this.imageSrc; // просто сохраняем пропс
             setTimeout(() => {
                 this.getShift();
                 const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth; 
@@ -404,17 +407,20 @@
                 this.rectangles = JSON.parse(JSON.stringify(state.rectangles));
                 this.images = JSON.parse(JSON.stringify(state.images));
                 this.croppedImage = state.croppedImage;
-                this.currentImage = state.imageSrc;
+                this.currentImage = state.imageSrc; // возвращаем изображение для пользователя (тут проблемы нет)
             },
             close() {
                 this.$emit('update:visibility1', false);
             },
             save() {
                 this.crop();
-                if (!this.croppedImage) return;
-
-                this.$emit('update:save', this.croppedImage);
-                setTimeout(() => this.close(), 300);
+                
+                setTimeout(() => {
+                    this.$emit('update:save', this.croppedImage);
+                    this.close();
+                }, 300)
+ 
+                
             },
             changeCrop() {
                 this.isCroped = !this.isCroped;
@@ -872,16 +878,13 @@
                 const result = this.$refs.cropper.getResult().canvas.toDataURL();
                 const cords = this.$refs.cropper.getResult().coordinates;
                 console.log(cords);
-                this.currentImage = result;
+                this.currentImage = result; // тут устанавливаем обрезанное изображение для пользователя
                 this.isCroped = false;
 
                 const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth; 
                 const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
                 this.startSizeW = widthImagePage;
                 this.startSizeH = heightImagePage;
-
-                const img = new Image();
-                img.src = this.currentImage;
 
                 this.textBlocks = this.textBlocks.filter(item => item.left >= cords.left && item.top >= cords.top && item.top + item.fontSize <= cords.top + cords.height);
                 this.rectangles = this.rectangles.filter(item => item.left >= cords.left && item.top >= cords.top && item.top <= cords.top + cords.height);
@@ -910,7 +913,7 @@
 
                 // Получаем исходные размеры изображения
                 const img = new Image();
-                img.src = this.currentImage;
+                img.src = canvas.toDataURL();
                 this.getShift();
 
                 img.onload = () => {
@@ -918,6 +921,8 @@
                     console.log(document.querySelector('.vue-preview__wrapper'));
                     const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth;
                     const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
+                    this.startSizeW = widthImagePage;
+                    this.startSizeH = heightImagePage;
                     const scaleFactorX = img.width / widthImagePage;
                     const scaleFactorY = img.height / heightImagePage;
 
@@ -938,25 +943,25 @@
                     ctx.globalAlpha = 1;
 
                     const imagePromises = this.images.map((image) => {
-                    return new Promise((resolve) => {
-                        const overlayImg = new Image();
-                        overlayImg.src = image.src;
+                        return new Promise((resolve) => {
+                            const overlayImg = new Image();
+                            overlayImg.src = image.src;
 
-                        overlayImg.onload = () => {
-                        const scaledLeft = (image.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                        const scaledTop = (image.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
-                        const scaledWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
-                        const scaledHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
+                            overlayImg.onload = () => {
+                                const scaledLeft = (image.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
+                                const scaledTop = (image.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
+                                const scaledWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
+                                const scaledHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
 
-                        ctx.drawImage(overlayImg, scaledLeft, scaledTop, scaledWidth, scaledHeight);
-                        resolve(); // Разрешаем Promise после отрисовки изображения
-                        };
+                                ctx.drawImage(overlayImg, scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                resolve(); // Разрешаем Promise после отрисовки изображения
+                            };
 
-                        overlayImg.onerror = () => {
-                        console.error('Ошибка загрузки изображения:', image.src);
-                        resolve(); // Разрешаем Promise даже при ошибке
-                        };
-                    });
+                            overlayImg.onerror = () => {
+                                console.error('Ошибка загрузки изображения:', image.src);
+                                resolve(); // Разрешаем Promise даже при ошибке
+                            };
+                        });
                     });
 
                     // Добавляем текстовые блоки
@@ -987,14 +992,15 @@
                         // Рисуем каждую строку
                         lines.forEach((line, index) => {
                             ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+                            console.log(line, scaledLeft, scaledTop + index * lineHeight);
                         });
                     });
 
                     // Ждём завершения загрузки всех изображений
                     Promise.all(imagePromises).then(() => {
-                    // Сохраняем результат в Base64
-                    this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
-                    console.log(this.croppedImage);
+                        // Сохраняем результат в Base64
+                        this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
+                        console.log(this.croppedImage);
                     });
                 };
             },
@@ -1003,12 +1009,17 @@
             downloadImage() {
                 this.crop();
 
-                if (!this.croppedImage) return;
+                // if (!this.croppedImage) return;
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = this.croppedImage;
+                    link.download = `cropped-image.${this.fileExtension}`;
+                    link.click();
+                    this.croppedImage = null;
+                    console.log(this.croppedImage);
+                }, 300);
 
-                const link = document.createElement('a');
-                link.href = this.croppedImage;
-                link.download = `cropped-image.${this.fileExtension}`;
-                link.click();
+                
             },
 
             // Добавление текстового блока
