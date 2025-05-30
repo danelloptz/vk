@@ -471,34 +471,74 @@
                 if (!this.isResizingImage) {
                     this.selectedImageId = id;
                     this.startDragImage(event, id);
+                    event.preventDefault();
                 }
             },
             startDragImage(event, id) {
+                console.log("start", event);
                 const image = this.images.find((img) => img.id === id);
                 if (!image) return;
+
+                // Определяем координаты события (мыши или касания)
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
                 this.isDraggingImage = true;
-                this.dragStartX = event.clientX - image.left;
-                this.dragStartY = event.clientY - image.top;
+                this.dragStartX = clientX - image.left;
+                this.dragStartY = clientY - image.top;
+            
+                console.log(clientX, clientY, this.dragStartX, this.dragStartY);
+
+                // Добавляем обработчики для мыши и касаний
                 document.addEventListener('mousemove', this.dragImage);
+                document.addEventListener('touchmove', (event) => {
+                    this.dragImage(event);
+                }, { passive: false });
                 document.addEventListener('mouseup', this.stopDragImage);
+                document.addEventListener('touchend', this.stopDragImage, false);
+                event.preventDefault();
             },
             dragImage(event) {
-                if (!this.isDraggingImage || !this.selectedImageId) return;
-                const image = this.images.find((img) => img.id === this.selectedImageId);
+                event.preventDefault();
+                if (!(event.touches && event.target.classList.contains('overlay-image')) && (!this.isDraggingImage || !this.selectedImageId)) return;
 
+                const image = this.images.find((img) => img.id === this.selectedImageId);
                 if (!image) return;
 
-                image.left = event.clientX - this.dragStartX;
-                image.top = event.clientY - this.dragStartY;
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
 
-                if (image.left < 0) image.left = 0;
-                if (image.top < 0) image.top = 0;
+                const scrollX = document.querySelector('.editor').scrollLeft;
+                const scrollY = document.querySelector('.editor').scrollTop;
+
+                let newLeft = event.touches ? clientX - this.dragStartX + scrollX : clientX - this.dragStartX;
+                let newTop = event.touches ? clientY - this.dragStartY + scrollY : clientY - this.dragStartY;
+
+                const containerWidth = document.querySelector('.cropper-container').offsetWidth;
+                const containerHeight = document.querySelector('.cropper-container').offsetHeight;
+
+                if (newLeft < 0) newLeft = 0;
+                if (newTop < 0) newTop = 0;
+
+                if (newLeft + image.width > containerWidth) {
+                    newLeft = containerWidth - image.width;
+                }
+                if (newTop + image.height > containerHeight) {
+                    newTop = containerHeight - image.height;
+                }
+
+                image.left = newLeft;
+                image.top = newTop;
             },
             stopDragImage() {
+                console.log("stop");
                 this.isDraggingImage = false;
-                this.captureState();
+
+                // Удаляем обработчики для мыши и касаний
                 document.removeEventListener('mousemove', this.dragImage);
+                document.removeEventListener('touchmove', this.dragImage);
                 document.removeEventListener('mouseup', this.stopDragImage);
+                document.removeEventListener('touchend', this.stopDragImage);
             },
             startResizeImage(event, position, id) {
                 this.isResizingImage = true;
@@ -518,10 +558,13 @@
                 this.startY = event.clientY;
 
                 document.addEventListener('mousemove', this.resizeImage);
+                document.addEventListener('touchmove', this.resizeImage);
                 document.addEventListener('mouseup', this.stopResizeImage);
+                document.addEventListener('touchend', this.stopResizeImage);
+
             },
             resizeImage(event) {
-                if (!this.isResizingImage || !this.selectedImageId) return;
+                if (!event.touches && (!this.isResizingImage || !this.selectedImageId)) return;
 
                 const image = this.images.find((img) => img.id === this.selectedImageId);
                 if (!image) return;
@@ -584,6 +627,8 @@
                 this.captureState();
                 document.removeEventListener('mousemove', this.resizeImage);
                 document.removeEventListener('mouseup', this.stopResizeImage);
+                document.addEventListener('touchmove', this.resizeImage);
+                document.addEventListener('touchend', this.stopResizeImage);
             },
             addImage() {
                 const input = document.createElement('input');
