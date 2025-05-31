@@ -21,17 +21,16 @@
                 :key="block.id"
                 class="text-block"
                 :style="{
-                top: `${block.top}px`,
-                left: `${block.left}px`,
-                fontSize: `${block.fontSize}px`,
-                color: block.color,
-                fontWeight: block.fontWeight,
-                fontStyle: block.fontStyle,
-                fontFamily: block.fontFamily,
-                textAlign: block.textAlign, // Выравнивание текста
-                cursor: 'move',
-                zIndex: block.id === selectedBlockId ? 950 : 900,
-                border: block.id === selectedBlockId ? '2px solid blue' : 'none',
+                    top: `${block.top}px`,
+                    left: `${block.left}px`,
+                    fontSize: `${block.fontSize}px`,
+                    color: block.color,
+                    fontWeight: block.fontWeight,
+                    fontStyle: block.fontStyle,
+                    fontFamily: block.fontFamily,
+                    textAlign: block.textAlign, // Выравнивание текста
+                    cursor: 'pointer',
+                    zIndex: block.id === selectedBlockId ? 950 : 900,
                 }"
                 @mousedown="selectBlock(block.id, $event)"
                 @click="enableEditing(block.id)"
@@ -43,6 +42,7 @@
                 :style="{
                     whiteSpace: 'pre-wrap', // Сохраняем переносы строк
                     wordWrap: 'break-word', // Переносим длинные слова
+                    cursor: 'pointer'
                 }"
                 >
                 {{ block.text }}
@@ -61,6 +61,7 @@
                 border: image.id === selectedImageId ? '2px solid blue' : 'none',
                 }"
                 @mousedown="selectImage(image.id, $event)"
+                @touchstart="selectImage(image.id, $event)"
             >
                 <div
                 v-for="handle in rectangleHandles"
@@ -95,16 +96,16 @@
             >
             <!-- eslint-disable vue/no-use-v-if-with-v-for  -->
                 <div
-                v-if="rectangle.id === selectedRectangleId"
-                v-for="handle in rectangleHandles"
-                :key="handle.position"
-                :class="['handle', handle.position]"
-                @mousedown="startResizeRectangle($event, handle.position, rectangle.id)"
+                    v-if="rectangle.id === selectedRectangleId"
+                    v-for="handle in rectangleHandles"
+                    :key="handle.position"
+                    :class="['handle', handle.position]"
+                    @mousedown="startResizeRectangle($event, handle.position, rectangle.id)"
                 ></div>
             </div>
-            <div :style="{backgroundImage: 'url(' + imageSrc + ')'}" class="image-background"></div>
             <cropper
                 ref="cropper"
+                class="cropper"
                 :src="currentImage"
                 :resize-image="{
                     wheel: false
@@ -122,12 +123,10 @@
                         east: false,
                     } : {},
                 }"
-                background-class="cropper-background"
                 @change="onCropChange"
                 :style="{
-                maxWidth: '80vw',
-                maxHeight: '100vh',
-                background: 'none'
+                    maxWidth: '100%',
+                    background: 'none'
                 }"
                 :default-size="defaultSize"
             />
@@ -323,11 +322,13 @@
                 history: [], // Стек для хранения истории действий
                 future: [],  // Стек для хранения отменённых действий
                 historyLimit: 50,
+                canvasWidth: 0
             }
         },
         mounted() {
             document.addEventListener('keydown', this.handleKeyDown);
             document.addEventListener('keyup', this.handleKeyUp);
+            this.canvasWidth = window.innerWidth;
         },
         computed: {
             selectedBlock() {
@@ -363,6 +364,28 @@
             }, 300);
         },
         methods: {
+            getCropperBounds() {
+                const cropperImage = document.querySelector('.vue-advanced-cropper__image');
+                const cropperImageWrapper = document.querySelector('.vue-advanced-cropper__image-wrapper');
+                
+                if (!cropperImage) return null;
+
+                const rect = cropperImage.getBoundingClientRect();
+
+                let left = 0;
+                let top = 0;
+
+                left = (cropperImageWrapper.offsetWidth - rect.width) / 2;
+
+                return {
+                    left: left,
+                    top: top,
+                    width: rect.width,
+                    height: rect.height,
+                    right: left,
+                    bottom: top
+                };
+            },
             // Метод для добавления действия в историю
             addHistory(state) {
                 this.history.push(state);
@@ -505,28 +528,31 @@
                 const image = this.images.find((img) => img.id === this.selectedImageId);
                 if (!image) return;
 
+                const bounds = this.getCropperBounds();
+                if (!bounds) return;
+
                 const clientX = event.touches ? event.touches[0].pageX : event.pageX;
                 const clientY = event.touches ? event.touches[0].pageY : event.pageY;
 
-                const scrollX = document.querySelector('.editor').scrollLeft;
-                const scrollY = document.querySelector('.editor').scrollTop;
+                let newLeft = clientX - this.dragStartX;
+                let newTop = clientY - this.dragStartY;
 
-                let newLeft = event.touches ? clientX - this.dragStartX + scrollX : clientX - this.dragStartX;
-                let newTop = event.touches ? clientY - this.dragStartY + scrollY : clientY - this.dragStartY;
+                console.log(newLeft, newTop, image.height, bounds);
 
-                const containerWidth = document.querySelector('.cropper-container').offsetWidth;
-                const containerHeight = document.querySelector('.cropper-container').offsetHeight;
+                // Ограничение по горизонтали
+                if (newLeft < bounds.left) {
+                    console.log('за границей!');
+                    newLeft = bounds.left;
+                } 
+                if (newLeft + image.width > bounds.width + bounds.left) newLeft = bounds.width + bounds.left - image.width;
+                
+                // Ограничение по вертикали
+                if (newTop < bounds.top) newTop = bounds.top;
+                if (newTop + image.height > bounds.height) newTop = bounds.height - image.height;
 
                 if (newLeft < 0) newLeft = 0;
                 if (newTop < 0) newTop = 0;
-
-                if (newLeft + image.width > containerWidth) {
-                    newLeft = containerWidth - image.width;
-                }
-                if (newTop + image.height > containerHeight) {
-                    newTop = containerHeight - image.height;
-                }
-
+                
                 image.left = newLeft;
                 image.top = newTop;
             },
@@ -640,21 +666,37 @@
 
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                    const newImage = {
-                        id: Date.now(),
-                        top: 50,
-                        left: 50,
-                        width: 100,
-                        height: 100,
-                        src: e.target.result,
-                    };
-                    this.images.push(newImage);
-                    this.selectedImageId = newImage.id;
+                        const img = new Image(); // Создаем объект Image для загрузки изображения
+                        img.src = e.target.result; // Устанавливаем источник изображения
+
+                        img.onload = () => {
+                            // Вычисляем пропорции изображения
+                            const originalWidth = img.width;
+                            const originalHeight = img.height;
+                            const aspectRatio = originalHeight / originalWidth;
+
+                            // Устанавливаем ширину 200 и вычисляем высоту с сохранением пропорций
+                            const width = 200;
+                            const height = width * aspectRatio;
+
+                            // Создаем новый объект изображения
+                            const newImage = {
+                                id: Date.now(),
+                                top: 50,
+                                left: 50,
+                                width: width,
+                                height: height,
+                                src: e.target.result,
+                            };
+
+                            // Добавляем изображение в массив и выбираем его
+                            this.images.push(newImage);
+                            this.selectedImageId = newImage.id;
+                        };
                     };
                     reader.readAsDataURL(file);
                 };
                 input.click();
-                this.captureState();
             },
             deleteImage(id) {
                 this.images = this.images.filter((img) => img.id !== id);
@@ -882,11 +924,18 @@
                     console.error("Неверный формат matrix");
                 }
             },
+            // eslint-disable-next-line no-unused-vars
             defaultSize({ imageSize, visibleArea }) {
                 return {
                     width: (visibleArea || imageSize).width,
                     height: (visibleArea || imageSize).height,
                 };
+            },
+            stencilSize({ boundaries }) {
+                return {
+                    width: boundaries.width - 100,
+                    height: boundaries.height - 100,
+                }
             },
             // Загрузка изображения
             // loadImage(event) {
@@ -1108,21 +1157,6 @@
                 document.addEventListener('mousemove', this.dragText);
                 document.addEventListener('mouseup', this.stopDragText);
             },
-
-            // Перетаскивание текстового блока
-            // dragText(event) {
-            //     if (!this.isDraggingText || !this.selectedBlockId) return;
-
-            //     const block = this.textBlocks.find((b) => b.id === this.selectedBlockId);
-            //     if (!block) return;
-
-            //     block.left = event.clientX - this.dragStartX;
-            //     block.top = event.clientY - this.dragStartY;
-
-            //     // Ограничение перемещения внутри контейнера
-            //     if (block.left < 0) block.left = 0;
-            //     if (block.top < 0) block.top = 0;
-            // },
             dragText(event) {
                 console.log("dragEvent");
                 if (!this.isDraggingText || !this.selectedBlockId) return;
@@ -1470,6 +1504,10 @@
     .vue-advanced-cropper__background, .vue-advanced-cropper__foreground {
         background: none !important;
     }
+    .vue-advanced-cropper__image {
+        width: 100% !important;
+        height: auto;
+    }
 
     /* Стилизация трека (полосы) */
     .custom-range {
@@ -1537,6 +1575,7 @@
         pointer-events: auto;
         line-height: normal;
         display: inline-block;
+        cursor: pointer;
     }
 
     .text-block:hover {

@@ -183,7 +183,7 @@
                                     style="display: none;"
                                 />
                                 <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" />
-                                <div class="editor" v-if="userData.vk_id == 513698557" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
+                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
                                     <img src="@/assets/images/pen.png" />
                                     <span>Редактор</span>
                                 </div>
