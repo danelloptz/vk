@@ -70,6 +70,7 @@
                 :key="handle.position"
                 :class="['handle', handle.position]"
                 @mousedown="startResizeImage($event, handle.position, image.id)"
+                @touchstart="startResizeImage($event, handle.position, image.id)"
                 ></div>
                 <img
                 :src="image.src"
@@ -598,50 +599,69 @@
                 this.initialImageHeight = image.height;
 
                 // Сохраняем начальные координаты мыши
-                this.startX = event.clientX;
-                this.startY = event.clientY;
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
+                this.startX = clientX;
+                this.startY = clientY;
 
                 document.addEventListener('mousemove', this.resizeImage);
-                document.addEventListener('touchmove', this.resizeImage);
+                document.addEventListener('touchmove', (event) => {
+                    this.resizeImage(event);
+                }, { passive: false });
                 document.addEventListener('mouseup', this.stopResizeImage);
-                document.addEventListener('touchend', this.stopResizeImage);
-
+                document.addEventListener('touchend', this.stopResizeImage, false);
+                event.preventDefault();
             },
             resizeImage(event) {
-                if (!event.touches && (!this.isResizingImage || !this.selectedImageId)) return;
+                if (!(event.touches && event.target.classList.contains('handles')) && (!this.isResizingImage || !this.selectedImageId)) return;
 
                 const image = this.images.find((img) => img.id === this.selectedImageId);
                 if (!image) return;
 
-                const deltaX = event.clientX - this.startX;
-                const deltaY = event.clientY - this.startY;
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
+                const bounds = this.getCropperBounds();
+                if (!bounds) return;
+
+                const deltaX = clientX - this.startX;
+                const deltaY = clientY - this.startY;
 
                 // Сохраняем исходное соотношение сторон
                 const aspectRatio = this.initialImageWidth / this.initialImageHeight;
 
                 switch (this.resizePosition) {
                     case 'top-left':
-                        image.width = this.initialImageWidth - deltaX;
-                        image.height = image.width / aspectRatio; // Пропорциональная высота
-                        image.left = this.initialImageLeft + deltaX;
-                        image.top = this.initialImageTop + (this.initialImageHeight - image.height);
+                        if (this.initialImageLeft + deltaX >= bounds.left && this.initialImageTop + (this.initialImageHeight - image.height) >= bounds.top) {
+                            image.width = this.initialImageWidth - deltaX;
+                            image.height = image.width / aspectRatio; // Пропорциональная высота
+                            image.left = this.initialImageLeft + deltaX;
+                            image.top = this.initialImageTop + (this.initialImageHeight - image.height);
+                        }
                         break;
 
                     case 'top-right':
-                        image.width = this.initialImageWidth + deltaX;
-                        image.height = image.width / aspectRatio; // Пропорциональная высота
-                        image.top = this.initialImageTop + (this.initialImageHeight - image.height);
+                        if (this.initialImageTop + (this.initialImageHeight - image.height) >= bounds.top && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
+                            image.width = this.initialImageWidth + deltaX;
+                            image.height = image.width / aspectRatio; // Пропорциональная высота
+                            image.top = this.initialImageTop + (this.initialImageHeight - image.height);
+                        }
                         break;
 
                     case 'bottom-left':
-                        image.height = this.initialImageHeight + deltaY;
-                        image.width = image.height * aspectRatio; // Пропорциональная ширина
-                        image.left = this.initialImageLeft - (image.width - this.initialImageWidth);
+                        if (this.initialImageLeft - (image.width - this.initialImageWidth) >= bounds.left && this.initialImageTop + this.initialImageHeight + (this.initialImageHeight - image.height) <= bounds.height) {
+                            image.height = this.initialImageHeight + deltaY;
+                            image.width = image.height * aspectRatio; // Пропорциональная ширина
+                            image.left = this.initialImageLeft - (image.width - this.initialImageWidth);
+                        }
                         break;
 
                     case 'bottom-right':
-                        image.width = this.initialImageWidth + deltaX;
-                        image.height = image.width / aspectRatio; // Пропорциональная высота
+                        if (this.initialImageTop + this.initialImageHeight + (this.initialImageHeight - image.height) <= bounds.height && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
+                            image.width = this.initialImageWidth + deltaX;
+                            image.height = image.width / aspectRatio; // Пропорциональная высота
+                        }
                         break;
                 }
 
