@@ -20,6 +20,7 @@
                 v-for="block in textBlocks"
                 :key="block.id"
                 class="text-block"
+                :data-id="block.id"
                 :style="{
                     top: `${block.top}px`,
                     left: `${block.left}px`,
@@ -33,6 +34,7 @@
                     zIndex: block.id === selectedBlockId ? 950 : 900,
                 }"
                 @mousedown="selectBlock(block.id, $event)"
+                @touchstart="selectBlock(block.id, $event)"
                 @click="enableEditing(block.id)"
             >
                 <!-- Редактируемый текст -->
@@ -324,6 +326,7 @@
                 future: [],  // Стек для хранения отменённых действий
                 historyLimit: 50,
                 canvasWidth: 0,
+                resizeObservers: {}
             }
         },
         mounted() {
@@ -365,6 +368,25 @@
             }, 300);
         },
         methods: {
+            initResizeObserver(id) {
+                const blockElement = document.querySelector(`.text-block[data-id="${id}"]`);
+                if (!blockElement) return;
+
+                // Создаем нового наблюдателя
+                this.resizeObservers[id] = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    const block = this.textBlocks.find(b => b.id === id);
+                    if (block) {
+                    block.width = Math.round(width);
+                    block.height = Math.round(height);
+                    }
+                }
+                });
+
+                // Начинаем наблюдение
+                this.resizeObservers[id].observe(blockElement);
+            },
             getCropperBounds() {
                 const cropperImage = document.querySelector('.vue-advanced-cropper__image');
                 const cropperImageWrapper = document.querySelector('.vue-advanced-cropper__image-wrapper');
@@ -1135,15 +1157,26 @@
                     fontWeight: 'normal', // По умолчанию обычный текст
                     fontStyle: 'normal',  // По умолчанию без курсива
                     fontFamily: 'Arial',  // По умолчанию Arial
-                    width: 200,           // Ширина текстового блока
                     textAlign: 'left',
+                    width: 0, 
+                    height: 0
                 };
                 this.textBlocks.push(newBlock);
                 this.selectedBlockId = newBlock.id; // Выбираем новый блок
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id); // Инициализируем наблюдатель после добавления блока
+                });
                 this.captureState();
             },
             // Удаление текстового блока
             deleteBlock(id) {
+                if (this.resizeObservers[id]) {
+                    const blockElement = document.querySelector(`.text-block[data-id="${id}"]`);
+                    if (blockElement) {
+                        this.resizeObservers[id].unobserve(blockElement);
+                    }
+                    delete this.resizeObservers[id];
+                }   
                 this.textBlocks = this.textBlocks.filter((block) => block.id !== id);
                 if (this.selectedBlockId === id) {
                     this.selectedBlockId = null; // Снимаем выделение
@@ -1157,50 +1190,50 @@
                 const block = this.textBlocks.find((b) => b.id === id);
                 if (!block) return;
 
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
                 this.isDraggingText = true;
-                this.dragStartX = event.clientX - block.left;
-                this.dragStartY = event.clientY - block.top;
+                this.dragStartX = clientX - block.left;
+                this.dragStartY = clientY - block.top;
 
                 document.addEventListener('mousemove', this.dragText);
+                document.addEventListener('touchmove', (event) => {
+                    this.dragText(event);
+                }, { passive: false });
                 document.addEventListener('mouseup', this.stopDragText);
+                document.addEventListener('touchend', this.stopDragText, false);
+                event.preventDefault();
             },
             dragText(event) {
-                console.log("dragEvent");
-                if (!this.isDraggingText || !this.selectedBlockId) return;
+                event.preventDefault();
+                if (!(event.touches && event.target.classList.contains('text-block')) && (!this.isDraggingText || !this.selectedBlockId)) return;
   
                 const block = this.textBlocks.find((b) => b.id === this.selectedBlockId);
                 if (!block) return;
 
+                const bounds = this.getCropperBounds();
+                if (!bounds) return;
+
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
                 // Вычисляем новые координаты
-                let newLeft = event.clientX - this.dragStartX;
-                let newTop = event.clientY - this.dragStartY;
+                let newLeft = clientX - this.dragStartX;
+                let newTop = clientY - this.dragStartY;
 
-                // Ограничение перемещения внутри контейнера
-                const container = this.$refs.container; // Получаем контейнер
+                if (newLeft < bounds.left) {
+                    newLeft = bounds.left;
+                } 
+                if (newLeft + block.width > bounds.width + bounds.left) newLeft = bounds.width + bounds.left - block.width;
                 
-                if (container) {
-                    const containerRect = container.getBoundingClientRect();
-                    
-                    // Ограничение по левому краю
-                    if (newLeft < 0) newLeft = 0;
-                    
-                    // Ограничение по верхнему краю
-                    if (newTop < 0) newTop = 0;
-                    
-                    // Ограничение по правому краю
-                    if (newLeft + block.width > containerRect.width) {
-                        newLeft = containerRect.width - block.width;
-                    }
-                    
-                    console.log(newTop, block.fontSize, containerRect.height);
-                    // Ограничение по нижнему краю
-                    if (newTop + block.fontSize > containerRect.height) {
-                        console.log('опа');
-                        newTop = containerRect.height - block.fontSize;
-                    }
-                }
+                // Ограничение по вертикали
+                if (newTop < bounds.top) newTop = bounds.top;
+                if (newTop + block.height > bounds.height) newTop = bounds.height - block.height;
 
-                // Применяем новые координаты
+                if (newLeft < 0) newLeft = 0;
+                if (newTop < 0) newTop = 0;
+
                 block.left = newLeft;
                 block.top = newTop;
             },
@@ -1210,7 +1243,9 @@
                 this.isDraggingText = false;
                 this.captureState();
                 document.removeEventListener('mousemove', this.dragText);
+                document.removeEventListener('touchmove', this.dragText);
                 document.removeEventListener('mouseup', this.stopDragText);
+                document.removeEventListener('touchend', this.stopDragText);
             },
         },
     };
