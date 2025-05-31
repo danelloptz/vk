@@ -105,6 +105,7 @@
                     :key="handle.position"
                     :class="['handle', handle.position]"
                     @mousedown="startResizeRectangle($event, handle.position, rectangle.id)"
+                    @touchstart="startResizeRectangle($event, handle.position, rectangle.id)"
                 ></div>
             </div>
             <cropper
@@ -650,7 +651,7 @@
                         break;
 
                     case 'bottom-left':
-                        if (this.initialImageLeft - (image.width - this.initialImageWidth) >= bounds.left && this.initialImageTop + this.initialImageHeight + (this.initialImageHeight - image.height) <= bounds.height) {
+                        if (this.initialImageLeft - (image.width - this.initialImageWidth) >= bounds.left && this.initialImageTop + this.initialImageHeight + deltaY <= bounds.height) {
                             image.height = this.initialImageHeight + deltaY;
                             image.width = image.height * aspectRatio; // Пропорциональная ширина
                             image.left = this.initialImageLeft - (image.width - this.initialImageWidth);
@@ -658,7 +659,7 @@
                         break;
 
                     case 'bottom-right':
-                        if (this.initialImageTop + this.initialImageHeight + (this.initialImageHeight - image.height) <= bounds.height && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
+                        if (this.initialImageTop + this.initialImageHeight + deltaY <= bounds.height && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
                             image.width = this.initialImageWidth + deltaX;
                             image.height = image.width / aspectRatio; // Пропорциональная высота
                         }
@@ -865,45 +866,66 @@
                 this.initialCropWidth = rectangle.width;
                 this.initialCropHeight = rectangle.height;
 
-                // Сохраняем начальные координаты мыши
-                this.startX = event.clientX;
-                this.startY = event.clientY;
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
+                this.startX = clientX;
+                this.startY = clientY;
 
                 document.addEventListener('mousemove', this.resizeRectangle);
+                document.addEventListener('touchmove', (event) => {
+                    this.resizeRectangle(event);
+                }, { passive: false });
                 document.addEventListener('mouseup', this.stopResizeRectangle);
+                document.addEventListener('touchend', this.stopResizeRectangle, false);
+                event.preventDefault();
             },
             resizeRectangle(event) {
-                if (!this.isResizing || !this.selectedRectangleId) return;
+                if (!(event.touches && event.target.classList.contains('handles')) && (!this.isResizing || !this.selectedRectangleId)) return;
 
                 const rectangle = this.rectangles.find((r) => r.id === this.selectedRectangleId);
                 if (!rectangle) return;
 
-                const deltaX = event.clientX - this.startX;
-                const deltaY = event.clientY - this.startY;
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
+                const bounds = this.getCropperBounds();
+                if (!bounds) return;
+
+                const deltaX = clientX - this.startX;
+                const deltaY = clientY - this.startY;
 
                 switch (this.resizePosition) {
                     case 'top-left':
-                        rectangle.left = this.initialCropLeft + deltaX;
-                        rectangle.top = this.initialCropTop + deltaY;
-                        rectangle.width = this.initialCropWidth - deltaX;
-                        rectangle.height = this.initialCropHeight - deltaY;
+                        if (this.initialCropLeft + deltaX >= bounds.left && this.initialCropTop + (this.initialCropHeight - rectangle.height) >= bounds.top) {
+                            rectangle.left = this.initialCropLeft + deltaX;
+                            rectangle.top = this.initialCropTop + deltaY;
+                            rectangle.width = this.initialCropWidth - deltaX;
+                            rectangle.height = this.initialCropHeight - deltaY;
+                        }
                         break;
 
                     case 'top-right':
-                        rectangle.top = this.initialCropTop + deltaY;
-                        rectangle.width = this.initialCropWidth + deltaX;
-                        rectangle.height = this.initialCropHeight - deltaY;
+                        if (this.initialCropTop + (this.initialCropHeight - rectangle.height) >= bounds.top && this.initialCropLeft + this.initialCropWidth + deltaX <= bounds.left + bounds.width) {
+                            rectangle.top = this.initialCropTop + deltaY;
+                            rectangle.width = this.initialCropWidth + deltaX;
+                            rectangle.height = this.initialCropHeight - deltaY;
+                        }
                         break;
 
                     case 'bottom-left':
-                        rectangle.left = this.initialCropLeft + deltaX;
-                        rectangle.width = this.initialCropWidth - deltaX;
-                        rectangle.height = this.initialCropHeight + deltaY;
+                        if (this.initialCropLeft - (rectangle.width - this.initialCropWidth) >= bounds.left && this.initialCropTop + this.initialCropHeight + deltaY <= bounds.height) {
+                            rectangle.left = this.initialCropLeft + deltaX;
+                            rectangle.width = this.initialCropWidth - deltaX;
+                            rectangle.height = this.initialCropHeight + deltaY;
+                        }
                         break;
 
                     case 'bottom-right':
-                        rectangle.width = this.initialCropWidth + deltaX;
-                        rectangle.height = this.initialCropHeight + deltaY;
+                        if (this.initialCropTop + this.initialCropHeight + deltaY <= bounds.height && this.initialCropLeft + this.initialCropWidth + deltaX <= bounds.left + bounds.width) {
+                            rectangle.width = this.initialCropWidth + deltaX;
+                            rectangle.height = this.initialCropHeight + deltaY;
+                        }
                         break;
                 }
 
@@ -930,7 +952,9 @@
                 this.isResizing = false;
                 this.captureState();
                 document.removeEventListener('mousemove', this.resizeRectangle);
+                document.removeEventListener('touchmove', this.resizeRectangle);
                 document.removeEventListener('mouseup', this.stopResizeRectangle);
+                document.removeEventListener('touchend', this.stopResizeRectangle);
             },
             splitTextIntoLines(text) {
                 return text.split('\n');
