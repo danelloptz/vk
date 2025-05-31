@@ -5,11 +5,9 @@
             <h1>Редактор</h1>
             <div class="header">
                 <div class="header_tools">
-                    <img src="@/assets/images/hand.png">
                     <img src="@/assets/images/crop.png" @click="changeCrop">
                     <img src="@/assets/images/return_back.png" @click="undo">
                     <img src="@/assets/images/return_towards.png" @click="redo">
-                    <img src="@/assets/images/delete_ai.png">
                 </div>
                 <AppBadButton :text="text1" class="save" @click="save"/>
                 <AppGoodButton :text="text2" class="download" @click="downloadImage"/>
@@ -33,13 +31,13 @@
                     cursor: 'pointer',
                     zIndex: block.id === selectedBlockId ? 950 : 900,
                 }"
-                @mousedown="selectBlock(block.id, $event)"
-                @touchstart="selectBlock(block.id, $event)"
-                @click="enableEditing(block.id)"
+                @mousedown.stop="selectBlock(block.id, $event)"
+                @touchstart.stop="selectBlock(block.id, $event)"
             >
                 <!-- Редактируемый текст -->
                 <div
                 :contenteditable="block.id === editingBlockId"
+                @click.stop="enableEditing(block.id); $event.stopPropagation()"
                 @blur="disableEditing(block.id)"
                 :style="{
                     whiteSpace: 'pre-wrap', // Сохраняем переносы строк
@@ -746,8 +744,16 @@
             },
             enableEditing(id) {
                 this.editingBlockId = id;
+                this.$nextTick(() => {
+                    const editableElement = document.querySelector(`.text-block[data-id="${id}"]`);
+                    console.log(editableElement);
+                    if (editableElement) {
+                        editableElement.focus();
+                    }
+                });
             },
             disableEditing() {
+                console.log('disable');
                 this.editingBlockId = null;
             },
             updateText(id, event) {
@@ -762,6 +768,7 @@
             },
             selectBlock(id, event) {
                 this.selectedBlockId = id; // Выбираем блок
+                this.enableEditing(id);
                 this.startDragText(event, id); // Начинаем перетаскивание
             },
             addRectangle() {
@@ -1247,7 +1254,7 @@
                 }, { passive: false });
                 document.addEventListener('mouseup', this.stopDragText);
                 document.addEventListener('touchend', this.stopDragText, false);
-                event.preventDefault();
+                // event.preventDefault();
             },
             dragText(event) {
                 event.preventDefault();
