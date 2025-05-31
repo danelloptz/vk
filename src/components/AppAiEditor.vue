@@ -93,6 +93,7 @@
                 border: rectangle.id === selectedRectangleId ? '2px solid blue' : 'none',
                 }"
                 @mousedown="selectRectangle(rectangle.id, $event)"
+                @touchstart="selectRectangle(rectangle.id, $event)"
             >
             <!-- eslint-disable vue/no-use-v-if-with-v-for  -->
                 <div
@@ -322,7 +323,7 @@
                 history: [], // Стек для хранения истории действий
                 future: [],  // Стек для хранения отменённых действий
                 historyLimit: 50,
-                canvasWidth: 0
+                canvasWidth: 0,
             }
         },
         mounted() {
@@ -498,7 +499,6 @@
                 }
             },
             startDragImage(event, id) {
-                console.log("start", event);
                 const image = this.images.find((img) => img.id === id);
                 if (!image) return;
 
@@ -510,8 +510,6 @@
                 this.dragStartX = clientX - image.left;
                 this.dragStartY = clientY - image.top;
             
-                console.log(clientX, clientY, this.dragStartX, this.dragStartY);
-
                 // Добавляем обработчики для мыши и касаний
                 document.addEventListener('mousemove', this.dragImage);
                 document.addEventListener('touchmove', (event) => {
@@ -536,8 +534,6 @@
 
                 let newLeft = clientX - this.dragStartX;
                 let newTop = clientY - this.dragStartY;
-
-                console.log(newLeft, newTop, image.height, bounds);
 
                 // Ограничение по горизонтали
                 if (newLeft < bounds.left) {
@@ -758,50 +754,61 @@
                 const rectangle = this.rectangles.find((r) => r.id === id);
                 if (!rectangle) return;
 
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
+
                 this.isDraggingRectangle = true;
-                this.dragStartX = event.clientX - rectangle.left;
-                this.dragStartY = event.clientY - rectangle.top;
+                this.dragStartX = clientX - rectangle.left;
+                this.dragStartY = clientY - rectangle.top;
 
                 document.addEventListener('mousemove', this.dragRectangle);
+                document.addEventListener('touchmove', (event) => {
+                    this.dragRectangle(event);
+                }, { passive: false });
                 document.addEventListener('mouseup', this.stopDragRectangle);
+                document.addEventListener('touchend', this.stopDragRectangle, false);
+                event.preventDefault();
+
             },
             dragRectangle(event) {
+                event.preventDefault();
                 if (!this.isDraggingRectangle || !this.selectedRectangleId) return;
+                if (!(event.touches && event.target.classList.contains('rectangle')) && (!this.isDraggingRectangle || !this.selectedRectangleId)) return;
                 const rectangle = this.rectangles.find((r) => r.id === this.selectedRectangleId);
                 if (!rectangle) return;
 
-                // Получаем текущие координаты контейнера
-                const container = this.$refs.container;
-                const containerWidth = container.offsetWidth;
-                const containerHeight = container.offsetHeight;
+                const bounds = this.getCropperBounds();
+                if (!bounds) return;
 
-                // Вычисляем новые координаты прямоугольника
-                let newLeft = event.clientX - this.dragStartX;
-                let newTop = event.clientY - this.dragStartY;
+                const clientX = event.touches ? event.touches[0].pageX : event.pageX;
+                const clientY = event.touches ? event.touches[0].pageY : event.pageY;
 
-                // Ограничиваем перемещение по горизонтали (left)
-                if (newLeft < 0) {
-                    newLeft = 0; // Не выходит за левый край
-                } else if (newLeft + rectangle.width > containerWidth) {
-                    newLeft = containerWidth - rectangle.width; // Не выходит за правый край
-                }
+                let newLeft = clientX - this.dragStartX;
+                let newTop = clientY - this.dragStartY;
 
-                // Ограничиваем перемещение по вертикали (top)
-                if (newTop < 0) {
-                    newTop = 0; // Не выходит за верхний край
-                } else if (newTop + rectangle.height > containerHeight) {
-                    newTop = containerHeight - rectangle.height; // Не выходит за нижний край
-                }
+                // Ограничение по горизонтали
+                if (newLeft < bounds.left) {
+                    newLeft = bounds.left;
+                } 
+                if (newLeft + rectangle.width > bounds.width + bounds.left) newLeft = bounds.width + bounds.left - rectangle.width;
+                
+                // Ограничение по вертикали
+                if (newTop < bounds.top) newTop = bounds.top;
+                if (newTop + rectangle.height > bounds.height) newTop = bounds.height - rectangle.height;
 
-                // Применяем новые координаты
+                if (newLeft < 0) newLeft = 0;
+                if (newTop < 0) newTop = 0;
+
                 rectangle.left = newLeft;
                 rectangle.top = newTop;
-            },
+            }, 
             stopDragRectangle() {
                 this.isDraggingRectangle = false;
                 this.captureState();
                 document.removeEventListener('mousemove', this.dragRectangle);
+                document.removeEventListener('touchmove', this.dragRectangle);
                 document.removeEventListener('mouseup', this.stopDragRectangle);
+                document.removeEventListener('touchend', this.stopDragRectangle);
             },
             startResizeRectangle(event, position, id) {
                 this.isResizing = true;
