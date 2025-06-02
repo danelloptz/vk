@@ -169,7 +169,7 @@
                                     @click="setActiveImageVar(index_var, index)"
                                 />
                                 <AppGoodButton 
-                                    :text="user_label" 
+                                    :text="user_label(item)" 
                                     class="variant_btn"
                                     v-if="flagsImages[index]"
                                     :class="{ not_active: plan[index].chose_image_index !== 3 }"
@@ -241,16 +241,26 @@
                                 </div>
                                 <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
                                 <div class="plan_item_variants" v-if="!(isLoading && step == 0)">
+                                    <!-- <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" /> -->
+                                    <AppGoodButton 
+                                        :text="user_photo"
+                                        v-if="step >= 2 && !isLoading"
+                                        class="not_active variant_btn"
+                                        @click="getUserImage(item, index)"
+                                    />
                                     <AppGoodButton 
                                         v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
                                         :key="index_var" 
                                         :text="name" 
                                         class="variant_btn"
-                                        :class="{ not_active: index_var !== (plan[index].chose_image_index || 0) }"
+                                        :class="{ 
+                                            not_active: index_var !== (plan[index].chose_image_index || 0),
+                                            big_variant_btn: index_var > 1
+                                        }"
                                         @click="setActiveImageVar(index_var, index)"
                                     />
                                     <AppGoodButton 
-                                        :text="user_label" 
+                                        :text="user_label(item)" 
                                         class="variant_btn"
                                         v-if="item.custom_image_url != ''"
                                         :class="{ not_active: plan[index].chose_image_index !== 3 }"
@@ -263,11 +273,10 @@
                                         accept="image/*"
                                         style="display: none;"
                                     />
-                                    <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" />
-                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
-                                        <img src="@/assets/images/pen.png" />
-                                        <span>Редактор</span>
-                                    </div>
+                                </div>
+                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                                    <img src="@/assets/images/pen.png" />
+                                    <span>Редактор</span>
                                 </div>
                             </td>
                         </tr>
@@ -494,13 +503,13 @@
                 selectedDate: null, // Общая дата для всех выделенных элементов
                 currPostToChangeImage: null,
                 flagsImages: [],
-                user_label: "ВАШЕ ФОТО",
                 publPostsError: false,
                 isEditor: false,
                 aiEditorLink: "",
                 testers: null,
                 isCustomEdit: false,
-                indexEdit: null
+                indexEdit: null,
+                user_photo: "ВАШЕ ФОТО"
             }
         },
         watch: {
@@ -559,6 +568,11 @@
             this.testers = testers.ids;
         },
         computed: { 
+            user_label() {
+                return (item) => {
+                    return this.variants[item.image_links.length];
+                };
+            },
             isContentPlan() {
                 return this.plan.filter(item => item?.date_publication).length > 0;
             },
@@ -1371,10 +1385,13 @@
     }
 
     .variant_btn {
-        width: 70px;
+        min-width: 70px;
         height: 20px;
         font-size: 7px;
         border-radius: 5px;
+    }
+    .big_variant_btn {
+        width: 110px;
     }
 
     .not_active {
@@ -1386,10 +1403,20 @@
     }
     .plan_item_variants {
         display: flex;
-        row-gap: 10px;
         column-gap: 10px;
+        row-gap: 10px;
         flex-wrap: wrap;
         margin-top: 20px;
+        align-items: center;
+    }
+    .plan_item_variants > * {
+        flex: 1 1 calc(33.33% - 20px); /* 3 кнопки в первой строке */
+        max-width: calc(33.33% - 20px); /* Ограничение ширины */
+    }
+
+    .plan_item_variants > :nth-child(n + 4) {
+        flex: 1 1 calc(50% - 5px); /* 2 кнопки во второй строке */
+        max-width: calc(50% - 5px); /* Ограничение ширины */
     }
     .accepted_banner {
         width: 180px;
@@ -1510,6 +1537,7 @@
         display: flex;
         column-gap: 5px;
         align-items: center;
+        width: fit-content;
     }
     .editor img {
         width: 12px;

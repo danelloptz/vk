@@ -58,7 +58,7 @@ export async function editOtherAdd(payload, ad_id, timestamp) {
     try {
         console.log(ad_id, timestamp);
         payload.append("ad_id", ad_id);
-        timestamp = timestamp / 1000;
+        timestamp = Math.floor(timestamp / 1000);
         console.log(timestamp);
         payload.append("date_view_end", String(timestamp));
         const response = await axios.patch("https://web.intelektaz.com/api/v2/others/add_ads", 
