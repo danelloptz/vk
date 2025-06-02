@@ -37,6 +37,7 @@
                 <!-- Редактируемый текст -->
                 <div
                 :contenteditable="block.id === editingBlockId"
+                @input="updateText(block.id, $event)"
                 @click.stop="enableEditing(block.id); $event.stopPropagation()"
                 @blur="disableEditing(block.id)"
                 :style="{
@@ -759,8 +760,28 @@
             updateText(id, event) {
                 const block = this.textBlocks.find((b) => b.id === id);
                 if (block) {
-                    block.text = event.target.innerText; // Обновляем текст из содержимого элемента
-                    this.captureState();
+                    // Получаем текущее значение из contenteditable элемента
+                    const newText = event.target.innerText;
+                    
+                    // Убедитесь, что текст обновляется корректно
+                    if (block.text !== newText) {
+                        block.text = newText; // Обновляем текст из содержимого элемента
+                        
+                        // Сохраняем состояние после изменения
+                        this.captureState();
+                    }
+                    
+                    // Важно: Сбрасываем положение курсора в конец текста
+                    this.$nextTick(() => {
+                        if (this.editingBlockId === id) {
+                            const selection = window.getSelection();
+                            const range = document.createRange();
+                            range.selectNodeContents(event.target);
+                            range.collapse(false); // Перемещаем курсор в конец
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        }
+                    });
                 }
             },
             deselectBlock() {
