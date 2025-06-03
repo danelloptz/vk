@@ -29,7 +29,7 @@
                     fontFamily: block.fontFamily,
                     textAlign: block.textAlign, // Выравнивание текста
                     cursor: 'pointer',
-                    zIndex: block.id === selectedBlockId ? 950 : 900,
+                    zIndex: block.zIndex
                 }"
                 @mousedown.stop="selectBlock(block.id, $event)"
                 @touchstart.stop="selectBlock(block.id, $event)"
@@ -58,7 +58,7 @@
                 left: `${image.left}px`,
                 width: `${image.width}px`,
                 height: `${image.height}px`,
-                zIndex: image.id === selectedImageId ? 10 : 1,
+                zIndex: image.zIndex,
                 border: image.id === selectedImageId ? '2px solid blue' : 'none',
                 }"
                 @mousedown="selectImage(image.id, $event)"
@@ -91,7 +91,7 @@
                 height: `${rectangle.height}px`,
                 backgroundColor: rectangle.color,
                 opacity: rectangle.opacity,
-                zIndex: rectangle.id === selectedRectangleId ? 850 : 800,
+                zIndex: rectangle.zIndex,
                 border: rectangle.id === selectedRectangleId ? '2px solid blue' : 'none',
                 }"
                 @mousedown="selectRectangle(rectangle.id, $event)"
@@ -146,19 +146,27 @@
             <div class="layers">
                 <h2>Слои:</h2>
                 <div class="line"></div>
-                <div v-for="block in textBlocks" :key="block.id" class="layer-item">
-                    <span>{{ block.text || 'Без имени' }}</span>
-                    <img class="delete_lay" src="@/assets/images/close.png" @click="deleteBlock(block.id)">
-                </div>
-                <div v-for="(rectangle, index) in rectangles" :key="rectangle.id" class="layer-item">
-                    <span>Прямоугольник {{ index + 1 }}</span>
-                    <img class="delete_lay" src="@/assets/images/close.png" @click="deleteRectangle(rectangle.id)">
-                </div>
-                <div v-for="(image, index) in images" :key="image.id" class="layer-item">
-                    <img :src="image.src" class="preview" />
-                    <span>Изображение {{ index + 1 }}</span>
-                    <img class="delete_lay" src="@/assets/images/close.png" @click="deleteImage(image.id)">
-                </div>
+
+                <!-- @end="onDragEnd" -->
+                <draggable 
+                    tag="ul"
+                    :list="layers"
+                    ghost-class="ghost"
+                    class="layers-list"
+                    item-key="name"
+                >
+                    <template #item="{element, index}">
+                        <div class="layer-item">
+                            <span class="drag-handle">≡</span>
+                            <span>{{ element.name }}</span>
+                            <img 
+                                class="delete_lay" 
+                                src="@/assets/images/close.png" 
+                                @click="deleteLayer(element, index)"
+                            >
+                        </div>
+                    </template>
+                </draggable>
                 <AppGoodButton @click="addTextBlock" :text="text4" />
                 <AppGoodButton @click="addRectangle" :text="text5" />
                 <AppGoodButton @click="addImage" :text="text6" />
@@ -265,18 +273,55 @@
 
 <script>
     import { Cropper } from 'vue-advanced-cropper';
+    import draggable from 'vuedraggable';
     import 'vue-advanced-cropper/dist/style.css';
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
 
     export default {
-        components: { AppGoodButton, AppBadButton, Cropper },
+        components: { AppGoodButton, AppBadButton, Cropper, draggable },
         props: {
             imageSrc: String,
         },
         watch: {
-            imageSrc(val) {
-                console.log(val)
+            textBlocks: {
+                handler(newVal, oldVal) {
+                    const change = this.isOnlyZIndexChanged(newVal, oldVal);
+                    console.log(change);
+                    if (this.ignoreWatch || change) {
+                        console.log('ignore text');
+                        return;
+                    }
+                    console.log('textBlocks');
+                    this.updateLayers();
+                },
+                deep: true
+            },
+            images: {
+                handler(newVal, oldVal) {
+                    const change = this.isOnlyZIndexChanged(newVal, oldVal);
+                    console.log(change);
+                    if (this.ignoreWatch || change) {
+                        console.log('ignore image');
+                        return;
+                    }
+                    console.log('images');
+                    this.updateLayers();
+                },
+                deep: true
+            },
+            rectangles: {
+                handler(newVal, oldVal) {
+                    const change = this.isOnlyZIndexChanged(newVal, oldVal);
+                    console.log(change);
+                    if (this.ignoreWatch || change) {
+                        console.log('ignore rect');
+                        return;
+                    }
+                    console.log('rects');
+                    this.updateLayers();
+                },
+                deep: true
             }
         },
         data() {
@@ -327,7 +372,10 @@
                 future: [],  // Стек для хранения отменённых действий
                 historyLimit: 50,
                 canvasWidth: 0,
-                resizeObservers: {}
+                resizeObservers: {},
+                layers: [],
+                dragging: false,
+                ignoreWatch: false
             }
         },
         mounted() {
@@ -369,6 +417,64 @@
             }, 300);
         },
         methods: {
+            isOnlyZIndexChanged(newArray, oldArray) {
+                console.log(newArray, oldArray);
+                for (let i = 0; i < newArray.length; i++) {
+                    const newItem = { ...newArray[i] };
+                    const oldItem = { ...oldArray[i] };
+
+                    console.log(newItem, oldItem);
+
+                    if (newItem.zIndex == oldItem.zIndex) return false;
+
+                    // Удаляем свойство zIndex из сравнения
+                    delete newItem.zIndex;
+                    delete oldItem.zIndex;
+
+                    // Сравниваем оставшиеся свойства
+                    console.log(JSON.stringify(newItem) !== JSON.stringify(oldItem), JSON.stringify(newItem) != JSON.stringify(oldItem), JSON.stringify(newItem), JSON.stringify(oldItem));
+                    if (JSON.stringify(newItem) !== JSON.stringify(oldItem)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            updateLayers() {
+                console.log(this.layers);
+                this.layers = [
+                    ...this.textBlocks.map(block => ({ id: block.id, type: 'text', name: block.text || 'Текстовый блок' })),
+                    ...this.images.map((image, index) => ({ id: image.id, type: 'image', name: `Изображение ${index + 1}` })),
+                    ...this.rectangles.map((rect, index) => ({ id: rect.id, type: 'rectangle', name: `Прямоугольник ${index + 1}` }))
+                ];
+                console.log(this.layers);
+            },
+            onDragEnd() {
+                this.ignoreWatch = true;
+                this.layers.forEach((layer, index) => {
+                    if (layer.type === 'text') {
+                        const block = this.textBlocks.find(b => b.id === layer.id);
+                        if (block) block.zIndex = 999 - index - 1;
+                    } else if (layer.type === 'image') {
+                        const image = this.images.find(img => img.id === layer.id);
+                        if (image) image.zIndex = 999 - index - 1;
+                    } else if (layer.type === 'rectangle') {
+                        const rect = this.rectangles.find(r => r.id === layer.id);
+                        if (rect) rect.zIndex = 999 - index - 1;
+                    }
+                });
+                this.ignoreWatch = false;
+            },
+            deleteLayer(layer, index) {
+                if (layer.type === 'text') {
+                    this.deleteBlock(layer.id);
+                } else if (layer.type === 'image') {
+                    this.deleteImage(layer.id);
+                } else if (layer.type === 'rectangle') {
+                    this.deleteRectangle(layer.id);
+                }
+                this.layers.splice(index, 1);
+            },
             initResizeObserver(id) {
                 const blockElement = document.querySelector(`.text-block[data-id="${id}"]`);
                 if (!blockElement) return;
@@ -725,6 +831,7 @@
                                 width: width,
                                 height: height,
                                 src: e.target.result,
+                                zIndex: 1,
                             };
 
                             // Добавляем изображение в массив и выбираем его
@@ -801,6 +908,7 @@
                     height: 50,
                     color: '#000000',
                     opacity: 0.5,
+                    zIndex: 1,
                 };
                 this.rectangles.push(newRectangle);
                 this.selectedRectangleId = newRectangle.id;
@@ -1231,7 +1339,8 @@
                     fontFamily: 'Arial',  // По умолчанию Arial
                     textAlign: 'left',
                     width: 0, 
-                    height: 0
+                    height: 0,
+                    zIndex: 1,
                 };
                 this.textBlocks.push(newBlock);
                 this.selectedBlockId = newBlock.id; // Выбираем новый блок
@@ -1766,5 +1875,24 @@
     .text-block {
         position: absolute;
         pointer-events: auto;
+    }
+    .layers-list {
+        position: relative;
+    }
+
+    .layer-item {
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        cursor: move;
+    }
+
+    .drag-handle {
+        cursor: grab;
+        margin-right: 10px;
+    }
+    .ghost {
+        opacity: 0.5;
+        background: #c8ebfb;
     }
 </style>
