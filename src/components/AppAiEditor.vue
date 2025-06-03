@@ -135,8 +135,6 @@
                 :default-size="defaultSize"
             />
         </div>
-        <!-- <img :src="croppedImage" /> -->
-        <!-- <img :src="currentImage" /> -->
 
         <div class="crop_msg" v-if="isCroped">
             <span>Обрезать?</span>
@@ -147,18 +145,31 @@
                 <h2>Слои:</h2>
                 <div class="line"></div>
 
-                <!-- @end="onDragEnd" -->
                 <draggable 
                     tag="ul"
                     :list="layers"
                     ghost-class="ghost"
                     class="layers-list"
+                    @end="onDragEnd" 
                     item-key="name"
                 >
                     <template #item="{element, index}">
                         <div class="layer-item">
-                            <span class="drag-handle">≡</span>
+                            <span 
+                                v-if="element.type == 'text'"
+                                class="drag-handle"
+                            >T</span>
+                            <img 
+                                v-if="element.type == 'image' && element?.link"
+                                :src="element?.link"
+                                class="preview"
+                            />
+                            <div 
+                                v-if="element.type == 'rectangle'"
+                                class="preview_rect"
+                            ></div>
                             <span>{{ element.name }}</span>
+                            
                             <img 
                                 class="delete_lay" 
                                 src="@/assets/images/close.png" 
@@ -283,47 +294,6 @@
         props: {
             imageSrc: String,
         },
-        watch: {
-            textBlocks: {
-                handler(newVal, oldVal) {
-                    const change = this.isOnlyZIndexChanged(newVal, oldVal);
-                    console.log(change);
-                    if (this.ignoreWatch || change) {
-                        console.log('ignore text');
-                        return;
-                    }
-                    console.log('textBlocks');
-                    this.updateLayers();
-                },
-                deep: true
-            },
-            images: {
-                handler(newVal, oldVal) {
-                    const change = this.isOnlyZIndexChanged(newVal, oldVal);
-                    console.log(change);
-                    if (this.ignoreWatch || change) {
-                        console.log('ignore image');
-                        return;
-                    }
-                    console.log('images');
-                    this.updateLayers();
-                },
-                deep: true
-            },
-            rectangles: {
-                handler(newVal, oldVal) {
-                    const change = this.isOnlyZIndexChanged(newVal, oldVal);
-                    console.log(change);
-                    if (this.ignoreWatch || change) {
-                        console.log('ignore rect');
-                        return;
-                    }
-                    console.log('rects');
-                    this.updateLayers();
-                },
-                deep: true
-            }
-        },
         data() {
             return {
                 text1: "СОХРАНИТЬ",
@@ -375,7 +345,8 @@
                 resizeObservers: {},
                 layers: [],
                 dragging: false,
-                ignoreWatch: false
+                ignoreWatch: false,
+                lay_id: 1,
             }
         },
         mounted() {
@@ -440,15 +411,6 @@
 
                 return true;
             },
-            updateLayers() {
-                console.log(this.layers);
-                this.layers = [
-                    ...this.textBlocks.map(block => ({ id: block.id, type: 'text', name: block.text || 'Текстовый блок' })),
-                    ...this.images.map((image, index) => ({ id: image.id, type: 'image', name: `Изображение ${index + 1}` })),
-                    ...this.rectangles.map((rect, index) => ({ id: rect.id, type: 'rectangle', name: `Прямоугольник ${index + 1}` }))
-                ];
-                console.log(this.layers);
-            },
             onDragEnd() {
                 this.ignoreWatch = true;
                 this.layers.forEach((layer, index) => {
@@ -466,14 +428,17 @@
                 this.ignoreWatch = false;
             },
             deleteLayer(layer, index) {
+                console.log(layer, index);
                 if (layer.type === 'text') {
+                    console.log("удаление текста");
                     this.deleteBlock(layer.id);
                 } else if (layer.type === 'image') {
+                    console.log("удаление картинки");
                     this.deleteImage(layer.id);
                 } else if (layer.type === 'rectangle') {
+                    console.log("удаление прямоугольника");
                     this.deleteRectangle(layer.id);
                 }
-                this.layers.splice(index, 1);
             },
             initResizeObserver(id) {
                 const blockElement = document.querySelector(`.text-block[data-id="${id}"]`);
@@ -831,11 +796,12 @@
                                 width: width,
                                 height: height,
                                 src: e.target.result,
-                                zIndex: 1,
+                                zIndex: 1 + this.layers.length,
                             };
 
                             // Добавляем изображение в массив и выбираем его
                             this.images.push(newImage);
+                            this.layers.unshift({ name: `Изображение ${this.images.length}`, id: newImage.id, type: "image", link: newImage.src });
                             this.selectedImageId = newImage.id;
                         };
                     };
@@ -844,7 +810,9 @@
                 input.click();
             },
             deleteImage(id) {
+                console.log(id);
                 this.images = this.images.filter((img) => img.id !== id);
+                this.layers = this.layers.filter((img) => img.id !== id);
                 if (this.selectedImageId === id) {
                     this.selectedImageId = null;
                 }
@@ -866,6 +834,8 @@
             },
             updateText(id, event) {
                 const block = this.textBlocks.find((b) => b.id === id);
+                const lay_index = this.layers.findIndex(lay => lay.id === id);
+                console.log(lay_index, this.layers);
                 if (block) {
                     // Получаем текущее значение из contenteditable элемента
                     const newText = event.target.innerText;
@@ -873,7 +843,7 @@
                     // Убедитесь, что текст обновляется корректно
                     if (block.text !== newText) {
                         block.text = newText; // Обновляем текст из содержимого элемента
-                        
+                        if (lay_index || lay_index == 0) this.layers[lay_index].name = newText;
                         // Сохраняем состояние после изменения
                         this.captureState();
                     }
@@ -908,14 +878,17 @@
                     height: 50,
                     color: '#000000',
                     opacity: 0.5,
-                    zIndex: 1,
+                    zIndex: 1 + this.layers.length,
                 };
                 this.rectangles.push(newRectangle);
+                this.layers.unshift({ name: `Прямоугольник ${this.rectangles.length}`, id: newRectangle.id, type: "rectangle" });
                 this.selectedRectangleId = newRectangle.id;
                 this.captureState();
             },
             deleteRectangle(id) {
+                console.log(id);
                 this.rectangles = this.rectangles.filter((r) => r.id !== id);
+                this.layers = this.layers.filter((r) => r.id !== id);
                 if (this.selectedRectangleId === id) {
                     this.selectedRectangleId = null;
                     this.captureState();
@@ -1340,9 +1313,10 @@
                     textAlign: 'left',
                     width: 0, 
                     height: 0,
-                    zIndex: 1,
+                    zIndex: 1 + this.layers.length,
                 };
                 this.textBlocks.push(newBlock);
+                this.layers.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
                 this.selectedBlockId = newBlock.id; // Выбираем новый блок
                 this.$nextTick(() => {
                     this.initResizeObserver(newBlock.id); // Инициализируем наблюдатель после добавления блока
@@ -1351,6 +1325,7 @@
             },
             // Удаление текстового блока
             deleteBlock(id) {
+                console.log(id);
                 if (this.resizeObservers[id]) {
                     const blockElement = document.querySelector(`.text-block[data-id="${id}"]`);
                     if (blockElement) {
@@ -1359,6 +1334,10 @@
                     delete this.resizeObservers[id];
                 }   
                 this.textBlocks = this.textBlocks.filter((block) => block.id !== id);
+                console.log(this.layers);
+                const indexToRemove = this.layers.findIndex(item => item.id === id);
+                this.layers.splice(indexToRemove, 1);
+                console.log(this.layers);
                 if (this.selectedBlockId === id) {
                     this.selectedBlockId = null; // Снимаем выделение
                     this.captureState();
@@ -1493,6 +1472,7 @@
         margin-top: 50px;
     }
     .layers {
+        max-width: 353px;
         display: flex;
         flex-direction: column;
         row-gap: 15px;
@@ -1512,23 +1492,39 @@
         background: white;
     }
     .layer-item {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1fr 5fr 1fr;
         align-items: center;
+        column-gap: 10px;
         margin-bottom: 5px;
         color: white;
         font-size: 16.4px;
         font-family: 'OpenSans';
+        padding: 5px 10px;
+    }
+    .lay_row {
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
     }
     .delete_lay {
         width: 17px;
         height: 17px;
+        justify-self: end;
     }
     .preview {
         max-width: 40px;
         max-height: 25px;
         width: auto;
         object-fit: cover;
+        justify-self: center;
+    }
+    .preview_rect {
+        width: 20px;
+        height: 20px;
+        background: #282826;
+        border: 1px solid white;
+        justify-self: center;
     }
     .text_tools {
         display: flex;
@@ -1880,16 +1876,10 @@
         position: relative;
     }
 
-    .layer-item {
-        display: flex;
-        align-items: center;
-        padding: 5px;
-        cursor: move;
-    }
-
     .drag-handle {
-        cursor: grab;
-        margin-right: 10px;
+        font-size: 23.11px;
+        font-family: 'OpenSans';
+        justify-self: center;
     }
     .ghost {
         opacity: 0.5;
