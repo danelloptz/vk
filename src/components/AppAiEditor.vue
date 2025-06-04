@@ -38,6 +38,7 @@
                 <div
                 :contenteditable="block.id === editingBlockId"
                 @input="updateText(block.id, $event)"
+                @keydown="handleEnterDown($event)"
                 @click.stop="enableEditing(block.id); $event.stopPropagation()"
                 @blur="disableEditing(block.id)"
                 :style="{
@@ -59,17 +60,18 @@
                 width: `${image.width}px`,
                 height: `${image.height}px`,
                 zIndex: image.zIndex,
-                border: image.id === selectedImageId ? '2px solid blue' : 'none',
                 }"
                 @mousedown="selectImage(image.id, $event)"
                 @touchstart="selectImage(image.id, $event)"
             >
+            <!-- eslint-disable vue/no-use-v-if-with-v-for  -->
                 <div
-                v-for="handle in rectangleHandles"
-                :key="handle.position"
-                :class="['handle', handle.position]"
-                @mousedown="startResizeImage($event, handle.position, image.id)"
-                @touchstart="startResizeImage($event, handle.position, image.id)"
+                    v-if="selectedLay == image.id"
+                    v-for="handle in rectangleHandles"
+                    :key="handle.position"
+                    :class="['handle', handle.position]"
+                    @mousedown="startResizeImage($event, handle.position, image.id)"
+                    @touchstart="startResizeImage($event, handle.position, image.id)"
                 ></div>
                 <img
                 :src="image.src"
@@ -99,7 +101,7 @@
             >
             <!-- eslint-disable vue/no-use-v-if-with-v-for  -->
                 <div
-                    v-if="rectangle.id === selectedRectangleId"
+                    v-if="rectangle.id === selectedLay"
                     v-for="handle in rectangleHandles"
                     :key="handle.position"
                     :class="['handle', handle.position]"
@@ -133,6 +135,7 @@
                     background: 'none'
                 }"
                 :default-size="defaultSize"
+                @click="resetSelect"
             />
         </div>
 
@@ -154,7 +157,10 @@
                     item-key="name"
                 >
                     <template #item="{element, index}">
-                        <div class="layer-item">
+                        <div 
+                            class="layer-item"
+                            :class="{ active_lay_item: selectedLay == element.id }"
+                        >
                             <span 
                                 v-if="element.type == 'text'"
                                 class="drag-handle"
@@ -168,7 +174,7 @@
                                 v-if="element.type == 'rectangle'"
                                 class="preview_rect"
                             ></div>
-                            <span>{{ element.name }}</span>
+                            <span style="word-break: break-all;">{{ element.name }}</span>
                             
                             <img 
                                 class="delete_lay" 
@@ -347,6 +353,9 @@
                 dragging: false,
                 ignoreWatch: false,
                 lay_id: 1,
+                active_lay: null,
+                selectedLay: null,
+                cursor_pos: null
             }
         },
         mounted() {
@@ -388,6 +397,9 @@
             }, 300);
         },
         methods: {
+            resetSelect() {
+                this.selectedLay = null;
+            },
             isOnlyZIndexChanged(newArray, oldArray) {
                 console.log(newArray, oldArray);
                 for (let i = 0; i < newArray.length; i++) {
@@ -588,6 +600,7 @@
             selectImage(id, event) {
                 if (!this.isResizingImage) {
                     this.selectedImageId = id;
+                    this.selectedLay = id;
                     this.startDragImage(event, id);
                     event.preventDefault();
                 }
@@ -834,31 +847,52 @@
             },
             updateText(id, event) {
                 const block = this.textBlocks.find((b) => b.id === id);
-                const lay_index = this.layers.findIndex(lay => lay.id === id);
-                console.log(lay_index, this.layers);
                 if (block) {
                     // Получаем текущее значение из contenteditable элемента
                     const newText = event.target.innerText;
-                    
+
                     // Убедитесь, что текст обновляется корректно
                     if (block.text !== newText) {
                         block.text = newText; // Обновляем текст из содержимого элемента
-                        if (lay_index || lay_index == 0) this.layers[lay_index].name = newText;
-                        // Сохраняем состояние после изменения
-                        this.captureState();
+                        this.captureState(); // Сохраняем состояние после изменения
                     }
-                    
-                    // Важно: Сбрасываем положение курсора в конец текста
+
+                    // Сохраняем текущую позицию курсора
+                    const selection = window.getSelection();
+                    if (selection.rangeCount === 0) return;
+
+                    const range = selection.getRangeAt(0); // Текущий диапазон выделения
+                    const currentCursorPosition = range.startOffset; // Позиция курсора
+                    console.log(this.cursor_pos);
+                    // Важно: Используем $nextTick, чтобы дождаться обновления DOM
                     this.$nextTick(() => {
-                        if (this.editingBlockId === id) {
-                            const selection = window.getSelection();
-                            const range = document.createRange();
-                            range.selectNodeContents(event.target);
-                            range.collapse(false); // Перемещаем курсор в конец
+                        const contentEditableElement = event.target;
+
+                        // Создаем новый диапазон для восстановления позиции курсора
+                        const newRange = document.createRange();
+                        const textNode = contentEditableElement.childNodes[0]; // Первый текстовый узел
+
+                        if (textNode) {
+                            // Устанавливаем позицию курсора
+                            const newPosition = this.cursor_pos ? this.cursor_pos + 1 : Math.min(currentCursorPosition, textNode.length);
+                            this.cursor_pos = null;
+                            newRange.setStart(textNode, newPosition);
+                            newRange.collapse(true);
+
+                            // Применяем новый диапазон к выделению
                             selection.removeAllRanges();
-                            selection.addRange(range);
+                            selection.addRange(newRange);
                         }
                     });
+                }
+            },
+            handleEnterDown(event) {
+                if (event.key === 'Enter') {
+                    const selection = window.getSelection();
+                    const range = selection.getRangeAt(0); // Текущий диапазон выделения
+                    const currentCursorPosition = range.startOffset; // Позиция курсора
+
+                    this.cursor_pos = currentCursorPosition;
                 }
             },
             deselectBlock() {
@@ -866,6 +900,7 @@
             },
             selectBlock(id, event) {
                 this.selectedBlockId = id; // Выбираем блок
+                this.selectedLay = id;
                 this.enableEditing(id);
                 this.startDragText(event, id); // Начинаем перетаскивание
             },
@@ -898,6 +933,7 @@
                 // Проверяем, что событие не связано с изменением размера
                 if (!this.isResizing) {
                     this.selectedRectangleId = id;
+                    this.selectedLay = id;
                     this.selectedRectangle = this.rectangles.filter(rect => rect.id == id)[0];
                     this.startDragRectangle(event, id);
                 }
@@ -1168,6 +1204,118 @@
                 this.captureState();
             },
 
+            // crop() {
+            //     // eslint-disable-next-line no-unused-vars
+            //     const { coordinates, canvas } = this.$refs.cropper.getResult();
+            //     if (!canvas) {
+            //         console.error('Canvas is not available');
+            //         return;
+            //     }
+
+            //     // Создаем новый canvas для добавления текстовых блоков
+            //     const finalCanvas = document.createElement('canvas');
+            //     const ctx = finalCanvas.getContext('2d');
+
+            //     // Устанавливаем размеры нового canvas
+            //     finalCanvas.width = canvas.width;
+            //     finalCanvas.height = canvas.height;
+
+            //     // Рисуем обрезанное изображение на новом canvas
+            //     ctx.drawImage(canvas, 0, 0);
+
+            //     // Получаем исходные размеры изображения
+            //     const img = new Image();
+            //     img.src = canvas.toDataURL();
+            //     this.getShift();
+
+            //     img.onload = () => {
+            //         // Вычисляем масштаб изображения
+            //         console.log(document.querySelector('.vue-preview__wrapper'));
+            //         const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth;
+            //         const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
+            //         this.startSizeW = widthImagePage;
+            //         this.startSizeH = heightImagePage;
+            //         const scaleFactorX = img.width / widthImagePage;
+            //         const scaleFactorY = img.height / heightImagePage;
+
+            //         // Отрисовка прямоугольников
+            //         this.rectangles.forEach((rectangle) => {
+            //             ctx.fillStyle = rectangle.color;
+            //             ctx.globalAlpha = rectangle.opacity; // Прозрачность прямоугольника
+
+            //             const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
+            //             const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
+            //             const scaledWidth = rectangle.width * scaleFactorX * (widthImagePage / this.startSizeW);
+            //             const scaledHeight = rectangle.height * scaleFactorY * (heightImagePage / this.startSizeH);
+
+            //             ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
+            //         });
+
+            //         // Возвращаем прозрачность к стандартному значению
+            //         ctx.globalAlpha = 1;
+
+            //         const imagePromises = this.images.map((image) => {
+            //             return new Promise((resolve) => {
+            //                 const overlayImg = new Image();
+            //                 overlayImg.src = image.src;
+
+            //                 overlayImg.onload = () => {
+            //                     const scaledLeft = (image.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
+            //                     const scaledTop = (image.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
+            //                     const scaledWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
+            //                     const scaledHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
+
+            //                     ctx.drawImage(overlayImg, scaledLeft, scaledTop, scaledWidth, scaledHeight);
+            //                     resolve(); // Разрешаем Promise после отрисовки изображения
+            //                 };
+
+            //                 overlayImg.onerror = () => {
+            //                     console.error('Ошибка загрузки изображения:', image.src);
+            //                     resolve(); // Разрешаем Promise даже при ошибке
+            //                 };
+            //             });
+            //         });
+
+            //         // Добавляем текстовые блоки
+            //         this.textBlocks.forEach((block) => {
+            //             ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH)}px ${block.fontFamily}`;
+            //             ctx.fillStyle = block.color;
+
+            //             // Пересчитываем позицию текста с учётом масштаба
+            //             let scaledLeft = (block.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
+            //             const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH)  * 1.2;
+
+            //             // Разбиваем текст на строки
+            //             const lines = this.splitTextIntoLines(block.text);
+            //             const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
+                        
+            //             const textMetrics = ctx.measureText(lines[0]);
+            //             const textWidth = textMetrics.width;
+
+            //             if (block.textAlign === 'center') {
+            //                 scaledLeft += textWidth / 2; // Центрируем по ширине текста
+            //                 ctx.textAlign = 'center';
+            //             } else if (block.textAlign === 'right') {
+            //                 scaledLeft += textWidth; // Выравниваем по правому краю
+            //                 ctx.textAlign = 'right';
+            //             } else {
+            //                 ctx.textAlign = 'left'; // По умолчанию выравнивание по левому краю
+            //             }
+            //             // Рисуем каждую строку
+            //             lines.forEach((line, index) => {
+            //                 ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+            //                 console.log(line, scaledLeft, scaledTop + index * lineHeight);
+            //             });
+            //         });
+
+            //         // Ждём завершения загрузки всех изображений
+            //         Promise.all(imagePromises).then(() => {
+            //             // Сохраняем результат в Base64
+            //             this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
+            //             console.log(this.croppedImage);
+            //         });
+            //     };
+            // },
             crop() {
                 // eslint-disable-next-line no-unused-vars
                 const { coordinates, canvas } = this.$refs.cropper.getResult();
@@ -1194,7 +1342,6 @@
 
                 img.onload = () => {
                     // Вычисляем масштаб изображения
-                    console.log(document.querySelector('.vue-preview__wrapper'));
                     const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth;
                     const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
                     this.startSizeW = widthImagePage;
@@ -1202,82 +1349,121 @@
                     const scaleFactorX = img.width / widthImagePage;
                     const scaleFactorY = img.height / heightImagePage;
 
-                    // Отрисовка прямоугольников
+                    // Создаем общий массив элементов для сортировки по z-index
+                    const allElements = [];
+                    const drawPromises = [];
+
+                    // Добавляем прямоугольники
                     this.rectangles.forEach((rectangle) => {
-                        ctx.fillStyle = rectangle.color;
-                        ctx.globalAlpha = rectangle.opacity; // Прозрачность прямоугольника
+                        allElements.push({
+                            type: 'rectangle',
+                            zIndex: rectangle.zIndex || 800,
+                            draw: () => {
+                                return new Promise((resolve) => {
+                                    ctx.fillStyle = rectangle.color;
+                                    ctx.globalAlpha = rectangle.opacity; // Прозрачность прямоугольника
 
-                        const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                        const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
-                        const scaledWidth = rectangle.width * scaleFactorX * (widthImagePage / this.startSizeW);
-                        const scaledHeight = rectangle.height * scaleFactorY * (heightImagePage / this.startSizeH);
+                                    const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
+                                    const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
+                                    const scaledWidth = rectangle.width * scaleFactorX * (widthImagePage / this.startSizeW);
+                                    const scaledHeight = rectangle.height * scaleFactorY * (heightImagePage / this.startSizeH);
 
-                        ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                    ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                    resolve();
+                                });
+                            }
+                        });
                     });
 
-                    // Возвращаем прозрачность к стандартному значению
-                    ctx.globalAlpha = 1;
+                    // Добавляем изображения
+                    this.images.forEach((image) => {
+                        allElements.push({
+                            type: 'image',
+                            zIndex: image.zIndex || 1,
+                            draw: () => {
+                                return new Promise((resolve, reject) => {
+                                    const overlayImg = new Image();
+                                    overlayImg.src = image.src;
 
-                    const imagePromises = this.images.map((image) => {
-                        return new Promise((resolve) => {
-                            const overlayImg = new Image();
-                            overlayImg.src = image.src;
+                                    overlayImg.onload = () => {
+                                        const scaledLeft = (image.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
+                                        const scaledTop = (image.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
+                                        const scaledWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
+                                        const scaledHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
 
-                            overlayImg.onload = () => {
-                                const scaledLeft = (image.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                                const scaledTop = (image.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
-                                const scaledWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
-                                const scaledHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
+                                        ctx.drawImage(overlayImg, scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                        resolve();
+                                    };
 
-                                ctx.drawImage(overlayImg, scaledLeft, scaledTop, scaledWidth, scaledHeight);
-                                resolve(); // Разрешаем Promise после отрисовки изображения
-                            };
-
-                            overlayImg.onerror = () => {
-                                console.error('Ошибка загрузки изображения:', image.src);
-                                resolve(); // Разрешаем Promise даже при ошибке
-                            };
+                                    overlayImg.onerror = () => {
+                                        console.error('Ошибка загрузки изображения:', image.src);
+                                        reject(new Error(`Failed to load image: ${image.src}`));
+                                    };
+                                });
+                            }
                         });
                     });
 
                     // Добавляем текстовые блоки
                     this.textBlocks.forEach((block) => {
-                        ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH)}px ${block.fontFamily}`;
-                        ctx.fillStyle = block.color;
+                        allElements.push({
+                            type: 'text',
+                            zIndex: block.zIndex || 900,
+                            draw: () => {
+                                return new Promise((resolve) => {
+                                    ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH)}px ${block.fontFamily}`;
+                                    ctx.fillStyle = block.color;
 
-                        // Пересчитываем позицию текста с учётом масштаба
-                        let scaledLeft = (block.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                        const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH)  * 1.2;
+                                    // Пересчитываем позицию текста с учётом масштаба
+                                    let scaledLeft = (block.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
+                                    const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH) * 1.2;
 
-                        // Разбиваем текст на строки
-                        const lines = this.splitTextIntoLines(block.text);
-                        const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
-                        
-                        const textMetrics = ctx.measureText(lines[0]);
-                        const textWidth = textMetrics.width;
+                                    // Разбиваем текст на строки
+                                    const lines = this.splitTextIntoLines(block.text);
+                                    const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
 
-                        if (block.textAlign === 'center') {
-                            scaledLeft += textWidth / 2; // Центрируем по ширине текста
-                            ctx.textAlign = 'center';
-                        } else if (block.textAlign === 'right') {
-                            scaledLeft += textWidth; // Выравниваем по правому краю
-                            ctx.textAlign = 'right';
-                        } else {
-                            ctx.textAlign = 'left'; // По умолчанию выравнивание по левому краю
-                        }
-                        // Рисуем каждую строку
-                        lines.forEach((line, index) => {
-                            ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
-                            console.log(line, scaledLeft, scaledTop + index * lineHeight);
+                                    const textMetrics = ctx.measureText(lines[0]);
+                                    const textWidth = textMetrics.width;
+
+                                    if (block.textAlign === 'center') {
+                                        scaledLeft += textWidth / 2; // Центрируем по ширине текста
+                                        ctx.textAlign = 'center';
+                                    } else if (block.textAlign === 'right') {
+                                        scaledLeft += textWidth; // Выравниваем по правому краю
+                                        ctx.textAlign = 'right';
+                                    } else {
+                                        ctx.textAlign = 'left'; // По умолчанию выравнивание по левому краю
+                                    }
+
+                                    // Рисуем каждую строку
+                                    lines.forEach((line, index) => {
+                                        ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+                                    });
+
+                                    resolve();
+                                });
+                            }
                         });
                     });
 
-                    // Ждём завершения загрузки всех изображений
-                    Promise.all(imagePromises).then(() => {
-                        // Сохраняем результат в Base64
-                        this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
-                        console.log(this.croppedImage);
+                    // Сортируем элементы по z-index
+                    allElements.sort((a, b) => a.zIndex - b.zIndex);
+
+                    // Рисуем элементы в отсортированном порядке
+                    allElements.forEach((element) => {
+                        drawPromises.push(element.draw());
                     });
+
+                    // Ждём завершения всех промисов
+                    Promise.all(drawPromises)
+                        .then(() => {
+                            // Сохраняем результат в Base64
+                            this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
+                            console.log(this.croppedImage);
+                        })
+                        .catch((error) => {
+                            console.error('Ошибка при отрисовке элементов:', error);
+                        });
                 };
             },
 
@@ -1884,5 +2070,9 @@
     .ghost {
         opacity: 0.5;
         background: #c8ebfb;
+    }
+    .active_lay_item {
+        background: #4D506F;
+        border-radius: 5px;
     }
 </style>
