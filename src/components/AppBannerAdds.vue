@@ -570,6 +570,7 @@
 
                     console.log(formData);
 
+                    console.log(this.timestamp * 1000, this.daysSummary * 24*60*60*1000, this.timestamp * 1000 + this.daysSummary * 24*60*60*1000);
                     const payment = this.isEdit ? await editOtherAdd(formData, this.ad_id, this.timestamp * 1000 + this.daysSummary * 24*60*60*1000) : await sendOtherAdd(formData);
                     this.isModal = true;
                     this.title = payment.status ? "УСПЕШНО!" : "ОШИБКА!";
@@ -609,9 +610,10 @@
                 this.posBefore = data.position;
 
                 const curr_date = new Date();
-                if (this.timestamp * 1000 < curr_date.getTime()) {
+                console.log(this.timestamp);
+                if (add.time_left == -1) {
                     console.log("ВРЕМЯ РЕКЛАМЫ ПРОШЛО");
-                    this.timestamp = curr_date.getTime();
+                    this.timestamp = Math.floor(curr_date.getTime() / 1000);
                 }
 
                 this.isImageUploaded = true;
