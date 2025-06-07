@@ -15,10 +15,11 @@
         </div>  
         <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
         <AppAiGeneratorContent v-if="activeIndex == 0" :windowWidth="windowWidth" :userData="userData" />
-        <AppAiAnalytics v-if="activeIndex == 1" :windowWidth="windowWidth" />
-        <AppAiScene v-if="activeIndex == 2" :userData="userData" />
-        <AppAiChat v-if="activeIndex == 3" :userData="userData" />
-        <AppAiManager v-if="activeIndex == 4" />
+        <AppAiBanner v-if="activeIndex == 1 && testers.indexOf(userData.vk_id) != -1" />
+        <AppAiAnalytics v-if="activeIndex == 2" :windowWidth="windowWidth" />
+        <AppAiScene v-if="activeIndex == 3" :userData="userData" />
+        <AppAiChat v-if="activeIndex == 4" :userData="userData" />
+        <AppAiManager v-if="activeIndex == 5" />
     </section>
 </template>
 
@@ -30,13 +31,16 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppAiManager from '@/components/AppAiManager.vue';
     import AppDropdown from '@/components/AppDropdown.vue';
+    import AppAiBanner from '@/components/AppAiBanner.vue';
+
+    import { getConfig } from "@/services/config";
     
     export default {
         props: { 
             userData: Object,
-            windowWidth: Number
+            windowWidth: Number,
         },
-        components: { AppAiGeneratorContent, AppAiAnalytics, AppAiScene, AppAiChat, AppGoodButton, AppAiManager, AppDropdown },
+        components: { AppAiGeneratorContent, AppAiAnalytics, AppAiScene, AppAiChat, AppGoodButton, AppAiManager, AppDropdown, AppAiBanner },
         data() {
             return {
                 activeIndex: 0,
@@ -47,23 +51,32 @@
                     },
                     {
                         index: 1,
+                        name: "ИИ баннер"
+                    },
+                    {
+                        index: 2,
                         name: "ИИ анализ"
                     }, 
                     {
-                        index: 2,
+                        index: 3,
                         name: "ИИ сценарий"
                     }, 
                     {
-                        index: 3,
+                        index: 4,
                         name: "ИИ помощник"
                     }, 
                     {
-                        index: 4,
+                        index: 5,
                         name: "ИИ менеджер"
                     },
                 ],
-                text1: "ВЫБРАТЬ ПАКЕТ"
+                text1: "ВЫБРАТЬ ПАКЕТ",
+                testers: null
             }
+        },
+        async created() {
+            const testers = await getConfig("testers_for_cropper", localStorage.getItem("token"));
+            this.testers = testers.ids;
         },
         methods: {
             setActive(index) {

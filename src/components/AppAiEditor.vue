@@ -142,6 +142,17 @@
                         <AppGoodButton :text="text7" @click="resize" class="crop" /> 
                     </div>
                     <div class="row">
+                        <span>Шаблон: </span>
+                        <AppGoodButton 
+                            v-for="(item, index) in ['1', '2', '3']"
+                            :text="item" 
+                            :key="index"
+                            class="square_btn" 
+                            :class="{ not_active: index !== selectedTemplate }"
+                            @click="selectTemplate(index)"
+                        />
+                    </div>
+                    <div class="row">
                         <AppBadButton :text="text1" class="save" @click="save"/>
                         <AppGoodButton :text="text2" class="download" @click="downloadImage"/>
                     </div>
@@ -362,7 +373,8 @@
                 lay_id: 1,
                 active_lay: null,
                 selectedLay: null,
-                cursor_pos: null
+                cursor_pos: null,
+                selectedTemplate: null,
             }
         },
         mounted() {
@@ -404,6 +416,9 @@
             }, 300);
         },
         methods: {
+            selectTemplate(index) {
+                this.selectedTemplate = this.selectedTemplate == index ? null : index;
+            },
             resetSelect() {
                 this.selectedLay = null;
             },
@@ -2119,6 +2134,7 @@
         display: flex;
         column-gap: 30px;
         align-self: center;
+        align-items: center;
     }
     .adding_btns span {
         font-size: 24px;
@@ -2133,6 +2149,12 @@
         column-gap: 30px;
         margin-top: 23px;
     }
+    .row span {
+        font-size: 24px;
+        color: white;
+        font-family: 'OpenSans';
+        font-weight: bold;
+    }
     .main {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -2142,5 +2164,13 @@
         display: flex;
         flex-direction: column;
         row-gap: 17px;
+    }
+    .square_btn {
+        width: 60px;
+        height: 60px;
+    }
+    .not_active {
+        background: none !important;
+        border: 1px solid white;
     }
 </style>
