@@ -28,6 +28,62 @@
                         <span>{{ item.name }}</span>
                     </div>
                 </div>
+                <h2 class="aspect_title">Соотношение сторон</h2>
+                <div class="aspect_wrapper">
+                    <div class="aspect_wrapper_left">
+                        <div 
+                            class="aspect_rect"
+                            :style="{ aspectRatio: aspects_choices[selectedAspect] == '1:1 (квадратная)' ? '1/1' : currAspect }"
+                        >
+                            <span>{{ aspects_choices[selectedAspect] }}</span>
+                        </div>
+                        <input type="range" class="custom-range custom-range-big" v-model.number="imgWidth" min="300" max="2000" step="1" @change="captureState" />
+                        <span class="sm_txt">Ширина: <span style="opacity: .7;">{{ imgWidth + ' ' }}px</span></span>
+                        <span class="sm_txt">Высота: <span style="opacity: .7;">{{ computedHeight + ' ' }}px</span></span>
+                    </div>
+                    <div class="aspect_wrapper_right">
+                        <div class="asp_wr_cols">
+                            <div class="aspect_wrapper_right_col">
+                                <div class="aspect_wrapper_right_col_item">
+                                    <div class="rect_figure_vert"></div>
+                                    <span>портретная</span>
+                                </div>
+                                <div 
+                                    class="aspect_wrapper_right_col_item"
+                                    v-for="(item, index) in aspects_choices.slice(0, 7)"
+                                    :key="index"
+                                    :style="{ background: index == selectedAspect ? '#2F3251' : 'none'}"
+                                    @click="selectAspect(index)"
+                                >
+                                    {{ item }}
+                                </div>
+                            </div>
+                            <div class="aspect_wrapper_right_col">
+                                <div class="aspect_wrapper_right_col_item">
+                                    <div class="rect_figure_album"></div>
+                                    <span>альбомная</span>
+                                </div>
+                                <div 
+                                    class="aspect_wrapper_right_col_item"
+                                    v-for="(item, index) in aspects_choices.slice(7, 14)"
+                                    :key="index"
+                                    :style="{ background: index + 7 == selectedAspect ? '#2F3251' : 'none'}"
+                                    @click="selectAspect(index + 7)"
+                                >
+                                    {{ item }}
+                                </div>
+                            </div>
+                        </div>
+                        <span
+                            class="aspect_wrapper_right_col_item"
+                            :style="{ background: 14 == selectedAspect ? '#2F3251' : 'none'}"
+                            style="align-self: center;"
+                            @click="selectAspect(14)"
+                        >{{ aspects_choices[14] }}</span>
+                        
+                    </div>
+                    
+                </div>
             </div>
             <div class="color">
                 <h2>Цвет</h2>
@@ -55,15 +111,20 @@
                         />
                     </div>
                 </div>
+                <AppGoodButton 
+                    :text="'СГЕНЕРИРОВАТЬ'" 
+                    class="generate_btn"
+                />
             </div>
-
         </div>
-        
     </section>
 </template>
 
 <script>
+    import AppGoodButton from '@/components/AppGoodButton.vue';
+
     export default {
+        components: { AppGoodButton },
         data() {
             return {
                 descr: "",
@@ -129,7 +190,23 @@
                         colors: ["#050930", "#001261", "#0425F6", "#93C1E6"]
                     }
                 ],
-                selectedColors: 0
+                selectedColors: 0,
+                selectedAspect: 14,
+                aspects_choices: ["1:3", "1:2", "9:16", "10:16", "2:3", "3:4", "4:5", "3:1", "2:1", "16:9", "16:10", "3:2", "4:3", "5:4", "1:1 (квадратная)"],
+                imgWidth: 700,
+                imgHeight: 1,
+            }
+        },
+        computed: {
+            currAspect() {
+                return this.aspects_choices[this.selectedAspect].replace(":", "/");
+            },
+            computedHeight() {
+                if (this.currAspect == "1/1 (квадратная)") return this.imgWidth;
+
+                const [widthRatio, heightRatio] = this.currAspect.split("/").map(Number);
+                console.log(this.currAspect, widthRatio, heightRatio);
+                return Math.round((this.imgWidth * heightRatio) / widthRatio); 
             }
         },
         methods: {
@@ -138,6 +215,9 @@
             },
             selectStyle(index) {
                 this.active_style = index;
+            },
+            selectAspect(index) {
+                this.selectedAspect = index;
             }
         }
     };
@@ -276,5 +356,139 @@
         width: 18px;
         height: 12px;
         justify-self: end;
+    }
+    /* Стилизация трека (полосы) */
+    .custom-range {
+        -webkit-appearance: none; /* Убираем стандартный вид */
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.502);
+        border-radius: 5px;
+        outline: none;
+    }
+    .custom-range-big {
+        width: 195px;
+    }
+    .custom-range-sm {
+        width: 74px;
+    }
+
+
+    /* Стилизация для thumb (кругляшка) */
+    .custom-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18.23px;
+        height: 18.23px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    .custom-range-sm::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 8.67px;
+        height: 8.67px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    .custom-range-sm::-moz-range-thumb {
+        width: 8.67px;
+        height: 8.67px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        border: none;
+    }
+
+    /* Для Firefox */
+    .custom-range-big::-moz-range-thumb {
+        width: 18.23px;
+        height: 18.23px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        border: none;
+    }
+
+    /* Стилизация трека для Firefox */
+    .custom-range::-moz-range-track {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.504);
+        border-radius: 5px;
+    }
+    .aspect_wrapper {
+        display: flex;
+        column-gap: 20px;
+    }
+    .aspect_wrapper_left, .aspect_wrapper_right {
+        display: flex;
+        flex-direction: column;
+        row-gap: 16px;
+    }
+    .aspect_rect {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 220px;
+        border: 1px solid white;
+        border-radius: 10px;
+    }
+    .aspect_rect span {
+        font-size: 20px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .sm_txt {
+        font-size: 12px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .asp_wr_cols {
+        display: flex;
+        column-gap: 30px;
+    }
+    .aspect_wrapper_right_col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+    }
+    .aspect_wrapper_right_col_item {
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+        color: white;
+        font-size: 14px;
+        font-family: 'OpenSans';
+        padding: 0px 8px;
+        border-radius: 2px;
+    }
+    .aspect_wrapper_right_col_item span {
+        color: white;
+        font-size: 14px;
+        font-family: 'OpenSans';
+    }
+    .rect_figure_vert {
+        width: 10px;
+        height: 18px;
+        border: 1px solid white;
+    }
+    .rect_figure_album {
+        width: 18px;
+        height: 10px;
+        border: 1px solid white;
+    }
+    .aspect_title {
+        margin-top: 30px;
+    }
+    .generate_btn {
+        width: 220px;
+        height: 51px;
+        align-self: end;
+        margin-top: 120px;
     }
 </style>
