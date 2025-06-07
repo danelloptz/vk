@@ -1,6 +1,6 @@
 <template>
     <div class="wrapper">
-        <div class="editor">
+        <div class="editor" v-if="windowWidth > 900">
             <img src="@/assets/images/close.png" class="close" @click="close">
             <h1>Редактор</h1>
             <div class="adding_btns">
@@ -130,7 +130,7 @@
                             }"
                             @change="onCropChange"
                             :style="{
-                                maxWidth: '511px',
+                                maxWidth: windowWidth > 1000 ? '511px' : '400px',
                                 background: 'none'
                             }"
                             :default-size="defaultSize"
@@ -285,7 +285,7 @@
                             </div>
                         </div>
                         <!-- <AppGoodButton :text="text3" class="upload_logo" @click="addImage" /> -->
-                        <div class="text_tools_row">
+                        <div class="text_tools_row" style="flex-wrap: wrap;">
                             <h2>Размер текста: </h2>
                             <input type="range" class="custom-range custom-range-big" v-model.number="selectedBlock.fontSize" min="5" max="256" step="1" @change="captureState" />
                             <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="256" @change="captureState" :key="selectedBlock.fontSize" />
@@ -301,6 +301,304 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="editor" v-if="windowWidth <= 900">
+            <img src="@/assets/images/close.png" class="close" @click="close">
+            <h1>Редактор</h1>
+             <div class="header_tools">
+                <img src="@/assets/images/crop.png" @click="changeCrop">
+                <img src="@/assets/images/return_back.png" @click="undo">
+                <img src="@/assets/images/return_towards.png" @click="redo">
+            </div>
+            <div class="adding_btns">
+                <AppGoodButton @click="addImage" :text="text6" class="btn1"/>
+                <AppGoodButton @click="addTextBlock" :text="text4" class="btn2" />
+                <AppGoodButton @click="addRectangle" :text="text5" class="btn1" />
+            </div>
+            <div class="cropper_wrapper">
+                <!-- Контейнер для vue-advanced-cropper -->
+                <div v-if="imageSrc" class="cropper-container" ref="container">
+                    <div
+                        v-for="block in textBlocks"
+                        :key="block.id"
+                        class="text-block"
+                        :data-id="block.id"
+                        :style="{
+                            top: `${block.top}px`,
+                            left: `${block.left}px`,
+                            fontSize: `${block.fontSize}px`,
+                            color: block.color,
+                            fontWeight: block.fontWeight,
+                            fontStyle: block.fontStyle,
+                            fontFamily: block.fontFamily,
+                            textAlign: block.textAlign, // Выравнивание текста
+                            cursor: 'pointer',
+                            zIndex: block.zIndex
+                        }"
+                        @mousedown.stop="selectBlock(block.id, $event)"
+                        @touchstart.stop="selectBlock(block.id, $event)"
+                    >
+                        <!-- Редактируемый текст -->
+                        <div
+                        :contenteditable="block.id === editingBlockId"
+                        @input="updateText(block.id, $event)"
+                        @keydown="handleEnterDown($event)"
+                        @click.stop="enableEditing(block.id); $event.stopPropagation()"
+                        @blur="disableEditing(block.id)"
+                        :style="{
+                            whiteSpace: 'pre-wrap', // Сохраняем переносы строк
+                            wordWrap: 'break-word', // Переносим длинные слова
+                            cursor: 'pointer'
+                        }"
+                        >
+                        {{ block.text }}
+                        </div>
+                    </div>
+                    <div
+                        v-for="image in images"
+                        :key="image.id"
+                        class="overlay-image"
+                        :style="{
+                        top: `${image.top}px`,
+                        left: `${image.left}px`,
+                        width: `${image.width}px`,
+                        height: `${image.height}px`,
+                        zIndex: image.zIndex,
+                        }"
+                        @mousedown="selectImage(image.id, $event)"
+                        @touchstart="selectImage(image.id, $event)"
+                    >
+                    <!-- eslint-disable vue/no-use-v-if-with-v-for  -->
+                        <div
+                            v-if="selectedLay == image.id"
+                            v-for="handle in rectangleHandles"
+                            :key="handle.position"
+                            :class="['handle', handle.position]"
+                            @mousedown="startResizeImage($event, handle.position, image.id)"
+                            @touchstart="startResizeImage($event, handle.position, image.id)"
+                        ></div>
+                        <img
+                        :src="image.src"
+                        :style="{
+                            width: '100%',
+                            height: '100%',
+                            pointerEvents: 'none'
+                        }"
+                        />
+                    </div>
+                    <div
+                        v-for="rectangle in rectangles"
+                        :key="rectangle.id"
+                        class="rectangle"
+                        :style="{
+                        top: `${rectangle.top}px`,
+                        left: `${rectangle.left}px`,
+                        width: `${rectangle.width}px`,
+                        height: `${rectangle.height}px`,
+                        backgroundColor: rectangle.color,
+                        opacity: rectangle.opacity,
+                        zIndex: rectangle.zIndex,
+                        border: rectangle.id === selectedRectangleId ? '2px solid blue' : 'none',
+                        }"
+                        @mousedown="selectRectangle(rectangle.id, $event)"
+                        @touchstart="selectRectangle(rectangle.id, $event)"
+                    >
+                    <!-- eslint-disable vue/no-use-v-if-with-v-for  -->
+                        <div
+                            v-if="rectangle.id === selectedLay"
+                            v-for="handle in rectangleHandles"
+                            :key="handle.position"
+                            :class="['handle', handle.position]"
+                            @mousedown="startResizeRectangle($event, handle.position, rectangle.id)"
+                            @touchstart="startResizeRectangle($event, handle.position, rectangle.id)"
+                        ></div>
+                    </div>
+                    <cropper
+                        ref="cropper"
+                        class="cropper"
+                        :src="currentImage"
+                        :resize-image="{
+                            wheel: false
+                        }"
+                        :stencil-props="{
+                            handlers: isCroped ? 
+                            {
+                                eastNorth: true,
+                                north: false,
+                                westNorth: true,
+                                west: false,
+                                westSouth: true,
+                                south: false,
+                                eastSouth: true,
+                                east: false,
+                            } : {},
+                        }"
+                        @change="onCropChange"
+                        :style="{
+                            maxWidth: `${windowWidth - 30}px`,
+                            background: 'none'
+                        }"
+                        :default-size="defaultSize"
+                        @click="resetSelect"
+                    />
+                </div>
+                <div class="crop_msg" v-if="isCroped">
+                    <span>Обрезать?</span>
+                    <AppGoodButton :text="text7" @click="resize" class="crop" /> 
+                </div>
+                <div class="row">
+                    <span>Шаблон: </span>
+                    <AppGoodButton 
+                        v-for="(item, index) in ['1', '2', '3']"
+                        :text="item" 
+                        :key="index"
+                        class="square_btn" 
+                        :class="{ not_active: index !== selectedTemplate }"
+                        @click="selectTemplate(index)"
+                    />
+                </div>
+            </div>
+            <div class="text_tools">
+                <div class="text_tools_row">
+                    <div class="color_rectangle">
+                        <input type="color" class="color_rect" v-model="selectedRectangle.color" @change="captureState" />
+                        <h2>Цвет</h2>
+                    </div>
+                    <div class="vertical_line"></div>
+                    <div class="text_text" @click="changeTextStyle('normal')">
+                        <span>T</span>
+                        <h2>Text</h2>
+                    </div>
+                    <div class="text_text" @click="changeTextStyle('bold')">
+                        <span class="bold">B</span>
+                        <h2>Bold</h2>
+                    </div>
+                    <div class="text_text">
+                        <span class="italic" @click="changeTextStyle('italic')">I</span>
+                        <h2>Italic</h2>
+                    </div>
+                    <div class="vertical_line"></div>
+                    <div class="color_text">
+                        <div 
+                            class="color_circle" 
+                            @click="openColorPicker" 
+                            :style="{ backgroundColor: selectedBlock.color }"
+                        ></div>
+                        <input 
+                            type="color" 
+                            style="visibility: hidden; height: 0px;" 
+                            ref="colorInput" 
+                            v-model="selectedBlock.color" 
+                            @change="captureState"
+                        />
+                        <h2>Цвет</h2>
+                    </div>
+                </div>
+                <div class="text_tools_row">
+                    <div class="rect_opacity">
+                        <div
+                            class="rect_op"
+                            :style="{
+                                backgroundColor: `rgba(${hexToRgb(selectedRectangle.color).r}, ${hexToRgb(selectedRectangle.color).g}, ${hexToRgb(selectedRectangle.color).b}, ${selectedRectangle.opacity})`
+                            }"
+                        ></div>
+                        <h3>Заливка: </h3>
+                        <input type="range" class="custom-range custom-range-sm" v-model="selectedRectangle.opacity" min="0" max="1" step="0.01" @change="captureState" />
+                    </div>
+                    <div class="text_align">
+                        <div class="text_align_item" @click="changeTextAling('left')">
+                            <div class="text_align_left">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <h2>Left</h2>
+                        </div>
+                        <div class="text_align_item" @click="changeTextAling('center')">
+                            <div class="text_align_center">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <h2>Center</h2>
+                        </div>
+                        <div class="text_align_item" @click="changeTextAling('right')">
+                            <div class="text_align_right">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <h2>Right</h2>
+                        </div>
+                    </div>
+                </div>
+                <!-- <AppGoodButton :text="text3" class="upload_logo" @click="addImage" /> -->
+                <div class="text_tools_row" style="flex-wrap: wrap;">
+                    <h2>Размер текста: </h2>
+                    <input type="range" class="custom-range custom-range-big" v-model.number="selectedBlock.fontSize" min="5" max="256" step="1" @change="captureState" />
+                    <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="256" @change="captureState" :key="selectedBlock.fontSize" />
+                </div>
+                <div class="text_tools_row">
+                    <h2>Шрифт: </h2>
+                    <select class="font_dropdown" v-model="selectedBlock.fontFamily">
+                        <option value="Arial" @click="captureState">Arial</option>
+                        <option value="Times New Roman" @click="captureState">Times New Roman</option>
+                        <option value="Courier New" @click="captureState">Courier New</option>
+                        <option value="Verdana" @click="captureState">Verdana</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layers">
+                <h2>Слои:</h2>
+                <div class="line"></div>
+
+                <draggable 
+                    tag="ul"
+                    :list="layers"
+                    ghost-class="ghost"
+                    class="layers-list"
+                    @end="onDragEnd" 
+                    item-key="name"
+                >
+                    <template #item="{element, index}">
+                        <div 
+                            class="layer-item"
+                            :class="{ active_lay_item: selectedLay == element.id }"
+                        >
+                            <span 
+                                v-if="element.type == 'text'"
+                                class="drag-handle"
+                            >T</span>
+                            <img 
+                                v-if="element.type == 'image' && element?.link"
+                                :src="element?.link"
+                                class="preview"
+                            />
+                            <div 
+                                v-if="element.type == 'rectangle'"
+                                class="preview_rect"
+                            ></div>
+                            <span style="word-break: break-all;">{{ element.name }}</span>
+                            
+                            <img 
+                                class="delete_lay" 
+                                src="@/assets/images/close.png" 
+                                @click="deleteLayer(element, index)"
+                            >
+                        </div>
+                    </template>
+                </draggable>
+                
+
+            </div>
+            <div class="row">
+                <AppBadButton :text="text1" class="save" @click="save"/>
+                <AppGoodButton :text="text2" class="download" @click="downloadImage"/>
             </div>
         </div>
     </div>
@@ -383,6 +681,9 @@
             this.canvasWidth = window.innerWidth;
         },
         computed: {
+            windowWidth() {
+                return window.innerWidth;
+            },
             selectedBlock() {
                 let block = this.textBlocks.find((block) => block.id === this.selectedBlockId);
                 if (block) console.log(block.top, block.fontSize);
@@ -1642,6 +1943,10 @@
         border-radius: 10px;
         overflow-y: auto;
         position: relative;
+        @media (max-width: 900px) {
+            padding: 40px 13px;
+            align-items: center;
+        }
     }
     h1 {
         font-size: 40px;
@@ -1650,6 +1955,9 @@
         font-weight: bold;
         width: fit-content;
         align-self: center;
+        @media (max-width: 900px) {
+            font-size: 24px;
+        }
     }
     .header {
         width: 100%;
@@ -1666,6 +1974,11 @@
         padding: 13px 40px;
         background: #2F3251;
         border-radius: 10px;
+        @media (max-width: 900px) {
+            width: 100%;
+            min-height: 46px;
+            max-width: none;
+        }
     }
     .header_tools img {
         width: 39px;
@@ -1674,9 +1987,15 @@
     }
     .btn1 {
         max-width: 181px;
+        @media (max-width: 900px) {
+            max-width: none;
+        }
     }
     .btn2 {
-        max-width: 115px;
+        max-width: 141px;
+        /* @media (max-width: 900px) {
+            max-width: none;
+        } */
     }
     .save, .download {
         width: 160px;
@@ -1695,6 +2014,10 @@
         padding: 15px 10px;
         background: #2F3251;
         border-radius: 10px;
+        @media (max-width: 900px) {
+            max-width: none;
+            width: 100%;
+        }
     }
     .layers h2 {
         font-size: 16.4px;
@@ -1930,10 +2253,6 @@
         width: 21px;
         height: 21px;
         cursor: pointer;
-        @media (max-width: 450px) {
-            right: 20px;
-            top: 20px;
-        }
     }
     .vue-advanced-cropper__background, .vue-advanced-cropper__foreground {
         background: none !important;
@@ -2135,6 +2454,24 @@
         column-gap: 30px;
         align-self: center;
         align-items: center;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 900px) {
+        .adding_btns {
+            row-gap: 10px;
+            column-gap: 10px;
+        }
+
+        .adding_btns .btn1:nth-child(1),
+        .adding_btns .btn2 {
+            flex: 1 1 auto;
+        }
+
+        .adding_btns .btn1:nth-child(3) {
+            flex: 1 1 100%;
+            width: 100%;
+            margin-right: 0;
+        }
     }
     .adding_btns span {
         font-size: 24px;
@@ -2148,12 +2485,18 @@
         align-self: center;
         column-gap: 30px;
         margin-top: 23px;
+        @media (max-width: 900px) {
+            column-gap: 17.92px;
+        }
     }
     .row span {
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
         font-weight: bold;
+        @media (max-width: 900px) {
+            font-size: 20.52px;
+        }
     }
     .main {
         display: grid;
@@ -2168,6 +2511,11 @@
     .square_btn {
         width: 60px;
         height: 60px;
+        @media (max-width: 900px) {
+            width: 51.29px;
+            height: 51.29px;
+            font-size: 20.52px !important;
+        }
     }
     .not_active {
         background: none !important;
