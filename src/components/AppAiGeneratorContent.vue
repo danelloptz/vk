@@ -301,6 +301,7 @@
 
         <div class="table_container_mob" v-if="activeIndex == 1 && windowWidth <= 1000">
             <div class="table_mob">
+                <input type="checkbox" v-model="allCheckboxesContent">
                 <div class="table_item_mob" v-for="(item, index) in fileredPlan" :key="index">
                     <input 
                         v-if="item.date_publication" 
@@ -321,7 +322,29 @@
                         <img :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index]" class="banner" />
 
                         <span>Дата / время публикации: </span>
+
+                        <!-- Поле для даты -->
                         <span
+                            class="content_text date"
+                            :contenteditable="isEditableContent"
+                            :ref="'editableDate_' + index"
+                            @input="updateSelectedDate(index, 'date')"
+                        >{{ formatDateOnly(item.date_publication * 1000) }}</span>
+                        <!-- Поле для времени -->
+                        <span
+                            class="content_text time"
+                            :contenteditable="isEditableContent"
+                            :ref="'editableTime_' + index"
+                            @input="updateSelectedDate(index, 'time')"
+                        >{{ formatTimeOnly(item.date_publication * 1000) }}</span>
+                        <!-- Кнопка "Изменить" -->
+                        <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
+                        <!-- Кнопка сохранения -->
+                        <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
+                        <!-- Ошибка ввода -->
+                        <span class="error" v-if="badDate">Неправильный формат даты/времени.</span>
+
+                        <!-- <span
                             class="content_text"
                             :contenteditable="isEditableContent"
                             :ref="'editableDate_' + index"
@@ -329,7 +352,7 @@
                         >{{ formatedDate(item.date_publication * 1000) }}</span>
                         <span class="change_text" @click="changeEditableContent">{{ isEditableContent ? "Отменить" : "Изменить" }}</span>
                         <AppGoodButton v-if="isEditableContent" :text="text8" class="sm_btn" @click="savePlan(index)" />
-                        <span class="error" v-if="badDate">Неправильный формат даты. Введите дату в формате: 01.01.2000 12:00</span>
+                        <span class="error" v-if="badDate">Неправильный формат даты. Введите дату в формате: 01.01.2000 12:00</span> -->
                     </div>
                 </div>
             </div>
@@ -500,7 +523,7 @@
                 isDropdownVisible: false,
                 types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"],
                 isPostPubl: false,
-                selectedDate: null, // Общая дата для всех выделенных элементов
+                selectedDate: null,
                 currPostToChangeImage: null,
                 flagsImages: [],
                 publPostsError: false,
@@ -509,7 +532,7 @@
                 testers: null,
                 isCustomEdit: false,
                 indexEdit: null,
-                user_photo: "ВАШЕ ФОТО"
+                user_photo: "ВАШЕ ФОТО",
             }
         },
         watch: {
@@ -899,7 +922,7 @@
 
                         if (newTimestamp) {
                             this.plan[index].date_publication = newTimestamp;
-                            timeElement.textContent = this.selectedTime; // Обновляем отображаемое время
+                            timeElement.textContent = this.selectedTime;
                         } else {
                             this.badDate = true;
                         }
@@ -926,12 +949,13 @@
 
                 if (type === "date") {
                     // Обновляем только дату для текущего элемента
-                    const newTimestamp = this.convertToTimestamp(newValue + " " + this.formatTimeOnly(this.plan[index].date_publication * 1000));
-                    if (newTimestamp) {
-                        this.plan[index].date_publication = newTimestamp;
-                    } else {
-                        this.badDate = true;
-                    }
+                    // const newTimestamp = this.convertToTimestamp(newValue + " " + this.formatTimeOnly(this.plan[index].date_publication * 1000));
+                    // if (newTimestamp) {
+                    //     this.plan[index].date_publication = newTimestamp;
+                    // } else {
+                    //     this.badDate = true;
+                    // }
+                    this.selectedDate = newValue;
                 } else if (type === "time") {
                     // Обновляем время для всех выбранных элементов
                     this.selectedTime = newValue; // Сохраняем выбранное время
@@ -1302,7 +1326,7 @@
         width: 100%;
     }
     th {
-        line-height: 3;
+        line-height: normal;
     }
     td {
         padding: 0px 10px;
