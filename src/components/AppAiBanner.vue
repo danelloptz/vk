@@ -1,4 +1,16 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @close="close"
+        @update:visibility1="isModal = $event"
+    />
+    <AppAiEditor 
+        v-if="isEditor" 
+        :imageSrc="generatedImage"
+        @update:visibility1="isEditor = $event"
+    />
     <section class="banner">
         <h1>Создайте уникальный баннер c Intelektaz</h1>
         <div class="descr">
@@ -37,9 +49,9 @@
                         >
                             <span>{{ aspects_choices[selectedAspect] }}</span>
                         </div>
-                        <input type="range" class="custom-range custom-range-big" v-model.number="imgWidth" min="300" max="2000" step="1" @change="captureState" />
-                        <span class="sm_txt">Ширина: <span style="opacity: .7;">{{ imgWidth + ' ' }}px</span></span>
-                        <span class="sm_txt">Высота: <span style="opacity: .7;">{{ computedHeight + ' ' }}px</span></span>
+                        <!-- <input type="range" class="custom-range custom-range-big" v-model.number="imgWidth" min="300" max="2000" step="1" @change="captureState" /> -->
+                        <!-- <span class="sm_txt">Ширина: <span style="opacity: .7;">{{ imgWidth + ' ' }}px</span></span>
+                        <span class="sm_txt">Высота: <span style="opacity: .7;">{{ computedHeight + ' ' }}px</span></span> -->
                     </div>
                     <div class="aspect_wrapper_right">
                         <div class="asp_wr_cols">
@@ -114,39 +126,82 @@
                 <AppGoodButton 
                     :text="'СГЕНЕРИРОВАТЬ'" 
                     class="generate_btn"
+                    @click="generate"
                 />
             </div>
+        </div>
+        <span class="loading_text" v-if="isLoading">Генерация ...</span>
+        <div class="line_wrapper" v-if="isLoading">
+            <div class="line"></div>
+        </div>
+        <img 
+            v-if="generatedImage"
+            :src="generatedImage"
+            class="generated_image"
+        />
+        <div class="row">
+            <AppGoodButton
+                v-for="(item, index) in variants"
+                :key="index"
+                :text="`Вариант ${index + 1}`"
+                :class="{ not_active: index !== selectedVariant }"
+                @click="selectVariant(item)"
+                class="btn"
+            />
+        </div>
+        <div class="row" v-if="generatedImage">
+            <AppGoodButton 
+                class="btn"
+                :text="'РЕДАКТОР'"
+                @click="openEditor"
+            />
+            <AppGoodButton 
+                class="btn"
+                :text="'СКАЧАТЬ'"
+                @click="download"
+            />
         </div>
     </section>
 </template>
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppAiEditor from '@/components/AppAiEditor.vue';
+    import AppModal from '@/components/AppModal.vue';
+    import { generateCustomImage } from '@/services/ai';
 
     export default {
-        components: { AppGoodButton },
+        props: {
+            userData: Object
+        },
+        components: { AppGoodButton, AppModal, AppAiEditor },
         data() {
             return {
                 descr: "",
                 icons: [
                     {
                         name: "Автоматический",
+                        tag: "AUTO",
                         src: "default.png"
                     },
                     {
                         name: "Случайный",
+                        tag: "RANDOM",
                         src: "random.png"
                     }, 
                     {
                         name: "Общий",
+                        tag: "GENERAL",
                         src: "free.png"
                     },
                     {
                         name: "Реализм",
+                        tag: "REALISTIC",
                         src: "realism.png"
                     },
                     {
                         name: "Дизайн",
+                        tag: "DESIGN",
                         src: "design.png"
                     }
                 ],
@@ -155,38 +210,47 @@
                 colors_choices: [
                     {
                         name: "Авто",
+                        tag: "Auto",
                         colors: []
                     },
                     {
                         name: "Жаркие",
+                        tag: "EMBER",
                         colors: ["#CF064F", "#303440", "#D95953", "#B90656"]
                     },
                     {
                         name: "Свежие",
+                        tag: "FRESH",
                         colors: ["#F0C073", "#F17356", "#2056F3", "#89EF97"]
                     },
                     {
                         name: "Тропические",
+                        tag: "JUNGLE",
                         colors: ["#013F35", "#018B64", "#02573A", "#038A3C"]
                     },
                     {
                         name: "Волшебные",
+                        tag: "MAGIC",
                         colors: ["#E2B3D0", "#ACA5CE", "#2579A9", "#2F219D"]
                     },
                     {
                         name: "Дынные",
+                        tag: "MELON",
                         colors: ["#F04C54", "#25518D", "#F2AE32", "#F17B33"]
                     },
                     {
                         name: "Мозайка",
+                        tag: "MOSAIC",
                         colors: ["#F24B56", "#48D902", "#A9DA19", "#F6AFA0"]
                     },
                     {
                         name: "Пастельные",
+                        tag: "PASTEL",
                         colors: ["#F2B5BD", "#AFE5E5", "#F8E7C9", "#BEF7C9"]
                     },
                     {
                         name: "Ультрамарин",
+                        tag: "ULTRAMARINE",
                         colors: ["#050930", "#001261", "#0425F6", "#93C1E6"]
                     }
                 ],
@@ -195,6 +259,14 @@
                 aspects_choices: ["1:3", "1:2", "9:16", "10:16", "2:3", "3:4", "4:5", "3:1", "2:1", "16:9", "16:10", "3:2", "4:3", "5:4", "1:1 (квадратная)"],
                 imgWidth: 700,
                 imgHeight: 1,
+                generatedImage: null,
+                isLoading: false,
+                title: "",
+                msg: "",
+                isModal: false,
+                isEditor: false,
+                variants: [],
+                selectedVariant: null
             }
         },
         computed: {
@@ -210,6 +282,39 @@
             }
         },
         methods: {
+            selectVariant(item) {
+                this.selectedVariant = item.id - 1;
+                this.generatedImage = item.src;
+            },
+            openEditor() {
+                this.isEditor = true;
+            },
+            download() {
+                const link = document.createElement('a');
+
+                fetch(this.generatedImage)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Ошибка загрузки изображения: ${response.status}`);
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+
+                        link.href = url;
+                        link.download = `generated-image.png`;
+
+                        document.body.appendChild(link);
+                        link.click();
+
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(link);
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при скачивании изображения:', error);
+                    });
+            },
             selectColors(index) {
                 this.selectedColors = index;
             },
@@ -218,7 +323,60 @@
             },
             selectAspect(index) {
                 this.selectedAspect = index;
-            }
+            },
+            async generate() {
+                if (this.variants.length > 2) return;
+                this.isLoading = true;
+                this.Timer(1, 20000);
+                const aspect = this.aspects_choices[this.selectedAspect] == "1:1 (квадратная)" ? "1x1" : this.aspects_choices[this.selectedAspect].replace(":", "x");
+                const resp = await generateCustomImage(this.descr, aspect, this.colors_choices[this.selectedColors].tag, this.icons[this.active_style].tag, this.userData.id);
+                this.isLoading = false;
+                if (resp.isError) {
+                    console.log("Код ошибки: ", resp.code);
+                    this.title = "ОШИБКА!";
+                    switch (resp.code) {
+                        case 505:
+                            this.msg = "Обратитесь, пожалуйста, в техническую поддержку сервиса, чтобы получить лимиты на генерацию изображений."
+                            break;
+                        case 402:
+                            this.msg = "У вас закончился месячный лимит на генерацию изображений. Чтобы продолжить пользоваться этим инстурментом в этом месяце, купите дополнительные лимиты."
+                            break;
+                        default:
+                            this.msg = "Произошла непридвиденная ошибка. Перезагрузите страницу. Если проблема останется, то обратитесь в техническую поддержку.";
+                            break;
+                    }
+                    this.isModal = true;
+                    return;
+                }
+                this.generatedImage = resp;
+                this.variants.push({
+                    id: this.variants.length + 1,
+                    src: resp
+                });
+                this.selectedVariant = this.variants.length - 1;
+            },
+            Timer(countOfPosts, time) {
+                let initialLineWidth = 0; // Начальная ширина полосы загрузки (в пикселях)
+                let maxLineWidth = 233; // Максимальная ширина полосы загрузки (в пикселях)
+                let totalDuration = time ? time : (Math.ceil(countOfPosts / 7)) * 60 * 1000; // Общее время анимации (3 секунды в миллисекундах)
+
+                let startTime = Date.now(); // Время начала анимации
+
+                function updateProgress() {
+                    let lines = document.querySelectorAll('.line');
+                    let elapsedTime = Date.now() - startTime;
+                    let progress = Math.min(elapsedTime / totalDuration, 1);
+
+                    let newLineWidth = initialLineWidth + (maxLineWidth - initialLineWidth) * progress;
+                    lines.forEach(line => line.style.width = `${newLineWidth}px`);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateProgress);
+                    }
+                }
+                // Запускаем анимацию
+                requestAnimationFrame(updateProgress);
+            },
         }
     };
 </script>
@@ -293,6 +451,7 @@
         row-gap: 10px;
         border-radius: 10px;
         transition: .2s ease-out;
+        cursor: pointer;
     }
     .style_item_wrapper span {
         font-size: 14px;
@@ -490,5 +649,49 @@
         height: 51px;
         align-self: end;
         margin-top: 120px;
+    }
+    .generated_image {
+        max-width: 785px;
+        align-self: center;
+    }
+    .line_wrapper {
+        max-width: 685px;
+        width: 80vw;
+        height: 44px;
+        border: 2.94px solid white;
+        /* padding: 5px; */
+        border-radius: 29.42px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 7.88px 8.83px;
+        align-self: center;
+    }
+    .line {
+        width: 0px;
+        height: 28.37px;
+        background: #7023EC;
+        transition: .2s ease-in;
+        border-radius: 29.42px;
+    }
+    .loading_text {
+        font-size: 41.19px;
+        color: white;
+        font-family: 'OpenSans';
+        margin-top: 100px;
+        text-align: center;
+        align-self: center;
+    }
+    .row {
+        display: flex;
+        column-gap: 30px;
+        align-self: center;
+    }
+    .btn {
+        width: 180px;
+    }
+    .not_active {
+        background: none;
+        border: 1px solid white;
     }
 </style>

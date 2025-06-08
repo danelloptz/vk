@@ -289,3 +289,69 @@ export async function editScenario(payload) {
         return false; 
     }
 }
+
+export async function generateCustomImage(text, aspect_ratio, color_palette, style_type, user_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/others/generate_image', {
+            "prompt": text,
+            "aspect_ratio": aspect_ratio,
+            "color_palette": color_palette,
+            "style_type": style_type,
+            "user_id": user_id
+        });
+        return response.data.image_id;
+    } catch(error) {
+        console.error("Ошибка при генерации изображения в ии баннере", error);
+        return {
+            "isError": true,
+            "code": error.response.status
+        };
+    }
+}
+
+export async function getGenerations(user_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/get_generations', {
+            "user_id": user_id
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении генераций", error);
+        return {
+            "isError": true,
+            "code": error.response.status
+        };
+    }
+}
+
+export async function writeOffGenerations(vk_id, count_posts) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/write_off_generations', {
+            "vk_id": vk_id,
+            "count_posts": count_posts,
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при списании генераций", error);
+        return {
+            "isError": true,
+            "code": error.response.status
+        };
+    }
+}
+
+export async function buyGenerations(vk_id, count_posts) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/buy_generations', {
+            "vk_id": vk_id,
+            "count_posts": count_posts,
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при покупке генераций", error);
+        return {
+            "isError": true,
+            "code": error.response.status
+        };
+    }
+}

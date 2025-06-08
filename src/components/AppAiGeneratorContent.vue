@@ -5,6 +5,23 @@
         @update:visibility1="isEditor = $event"
         @update:save="updateImage"
     />
+    <AppModalGenerator 
+        v-if="isModalGenerator" 
+        :userData="userData"
+        :isSecond="isSecond"
+        :visibility1="isModalGenerator"
+        @update:visibility1="isModalGenerator = $event"
+    />
+    <AppModalGeneratorPayment 
+        v-if="isModalGeneratorPayment" 
+        :userData="userData"
+        :visibility1="isModalGeneratorPayment"
+        :bannerAmount="diff"
+        :payment="payment"
+        @update:visibility1="isModalGeneratorPayment = $event"
+        @success_payment="successPayment"
+        @bad_payment="badPayment"
+    />
     <section class="ai">
         <div class="switch">
             <span
@@ -118,12 +135,20 @@
                 <AppGoodButton :text="text2" @click="editSettings" />
                 <AppGoodButton :text="text3" @click="generateThemes" />
             </div>  
-            <div class="mob_btns" v-if="windowWidth <= 1000">
+            <div class="mob_btns" v-if="windowWidth <= 1000">   
                 <div class="mob_btns_row">
                     <AppGoodButton class="mob_btn" :text="text1" @click="saveSettings"/>
                     <AppGoodButton class="mob_btn" :text="text2" @click="editSettings" />
                 </div>
                 <AppGoodButton class="mob_btn" :text="text3" @click="generateThemes" />
+            </div>
+            <div class="generations_wrapper">
+                <span class="generations_item" @click="openGeneratorModal(false)">
+                    Генерация баннеров: {{ generations?.free.remains }} / {{ generations?.free.total }}
+                </span>
+                <span class="generations_item" @click="openGeneratorModal(true)">
+                    Пакет генераций: {{ generations?.paid.remains }} / {{ generations?.paid.total }}
+                </span>
             </div>
             <input type="checkbox" v-if="windowWidth <= 1000" v-model="allCheckboxes" style="margin-bottom: 20px;">
             <div class="table_container_mob" v-if="windowWidth <= 1000">
@@ -161,17 +186,26 @@
                             <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
                             <div class="plan_item_variants" v-if="!(isLoading && step == 0) && step >= 3">
                                 <AppGoodButton 
+                                    :text="user_photo"
+                                    v-if="step >= 3 && !isLoading"
+                                    class="not_active variant_btn"
+                                    @click="getUserImage(item, index)"
+                                />
+                                <AppGoodButton 
                                     v-for="(name, index_var) in variants.slice(0, item.image_links.length)" 
                                     :key="index_var" 
                                     :text="name" 
                                     class="variant_btn"
-                                    :class="{ not_active: index_var !== (plan[index].chose_image_index || 0) }"
+                                    :class="{ 
+                                        not_active: index_var !== (plan[index].chose_image_index || 0),
+                                        big_variant_btn: index_var > 1
+                                    }"
                                     @click="setActiveImageVar(index_var, index)"
                                 />
                                 <AppGoodButton 
                                     :text="user_label(item)" 
                                     class="variant_btn"
-                                    v-if="flagsImages[index]"
+                                    v-if="item.custom_image_url != ''"
                                     :class="{ not_active: plan[index].chose_image_index !== 3 }"
                                     @click="setUserImage(index)"
                                 />
@@ -244,7 +278,7 @@
                                     <!-- <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" /> -->
                                     <AppGoodButton 
                                         :text="user_photo"
-                                        v-if="step >= 2 && !isLoading"
+                                        v-if="step >= 3 && !isLoading"
                                         class="not_active variant_btn"
                                         @click="getUserImage(item, index)"
                                     />
@@ -274,7 +308,7 @@
                                         style="display: none;"
                                     />
                                 </div>
-                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1 && step >= 3 && !isLoading" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                     <img src="@/assets/images/pen.png" />
                                     <span>Редактор</span>
                                 </div>
@@ -451,13 +485,17 @@
         updateContentPlan, 
         regenerateBanners, 
         acceptPlan,
-        uploadUserImage
+        uploadUserImage,
+        getGenerations,
+        writeOffGenerations
     } from "@/services/ai";
     import { sendPosting } from "@/services/user";
     import { getConfig } from "@/services/config";
+    import AppModalGenerator from "@/components/AppModalGenerator.vue";
+    import AppModalGeneratorPayment from "@/components/AppModalGeneratorPayment.vue";
 
     export default {
-        components: { AppGoodButton, AppAiEditor },
+        components: { AppGoodButton, AppAiEditor, AppModalGenerator, AppModalGeneratorPayment },
         props: {
             windowWidth: Number,
             userData: Object
@@ -533,6 +571,15 @@
                 isCustomEdit: false,
                 indexEdit: null,
                 user_photo: "ВАШЕ ФОТО",
+                generations: null,
+                isModalGenerator: false,
+                isSecond: false,
+                diff: null,
+                payment: null,
+                isModalGeneratorPayment: false,
+                backupPlan: null,
+                checkedPlan: null,
+                isReg: false
             }
         },
         watch: {
@@ -589,6 +636,9 @@
 
             const testers = await getConfig("testers_for_cropper", localStorage.getItem("token"));
             this.testers = testers.ids;
+
+            const gener = await getGenerations(this.userData.id);
+            this.generations = gener;
         },
         computed: { 
             user_label() {
@@ -624,6 +674,10 @@
             }
         },
         methods: {
+            openGeneratorModal(flag) {
+                this.isSecond = flag;
+                this.isModalGenerator = true;
+            },
             async updateImage(link) {
                 let file;
 
@@ -749,6 +803,7 @@
             },
             async confirmCurrentPosts() {
                 this.step = this.getStep();
+                this.backupPlan = this.plan;
                 const filtered = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 if (filtered.length > 0) {
                     this.plan = filtered;
@@ -781,13 +836,32 @@
                                 if (!item.chose_post_index) item.chose_post_index = 0;
                             });
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
+
+                            if (this.plan.length > this.generations.free.remains + this.generations.paid.remains) {
+                                this.diff = this.plan.length - this.generations.free.remains - this.generations.paid.remains;
+                                this.payment = this.diff * 0.6;
+                                this.isModalGeneratorPayment = true;
+                                this.isLoading = false;
+                                return;
+                            }
+                            // проверяю что длина плана <= generations.free.remains + generations.paid.remains
+                            // если нет, то считаем: кол-во превышенных генераций, сумма оплаты
+                            // оплата: произвоидим оплату, если успешно, то генерация
+                            // если отмена или крестик, то plan = backup  и return
+
                             let resp = await generateBanners(this.plan, localStorage.getItem("token"));
                             if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
+                            if (resp) {
+                                await writeOffGenerations(this.userData.vk_id, this.plan.length);
+                                const gener = await getGenerations(this.userData.id);
+                                this.generations = gener;
+                            }
                             this.plan = resp;
                             this.plan.forEach(item => {
                                 item.chose_image_index = 0;
                             });
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
+                            this.step = this.getStep();
                         } catch(err) {
                             console.error(err);
                         }
@@ -810,6 +884,56 @@
 
                     this.isLoading = false;
                 }
+            },
+            async successPayment() {
+                this.isLoading = true;
+                if (this.isReg) this.isRegenerate = true;
+                this.isModalGeneratorPayment = false;
+                this.diff = null;
+                this.payment = null;
+                const gener = await getGenerations(this.userData.id);
+                this.generations = gener;
+
+                if (this.isReg) {
+                    this.checkedPlan.forEach(item => {
+                        item.chose_image_index++;
+                    });
+                    const topics = await regenerateBanners(this.checkedPlan, localStorage.getItem("token"));
+                    if (topics) {
+                        await writeOffGenerations(this.userData.vk_id, this.checkedPlan.length);
+                        const gener = await getGenerations(this.userData.id);
+                        this.generations = gener;
+                    } 
+                    this.plan = topics;
+                    this.currBanner++;
+                } else {
+                    let resp = await generateBanners(this.plan, localStorage.getItem("token"));
+                    if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
+                    if (resp) {
+                        await writeOffGenerations(this.userData.vk_id, this.plan.length);
+                        const gener = await getGenerations(this.userData.id);
+                        this.generations = gener;
+                    }
+                    this.plan = resp;
+                    this.plan.forEach(item => {
+                        item.chose_image_index = 0;
+                    });
+                }
+                
+                await updateContentPlan(this.plan, localStorage.getItem("token"));
+                this.isLoading = false;
+                this.isReg = false;
+                this.isRegenerate = false;
+                this.checkedPlan = null;
+                this.step = this.getStep();
+            },
+            badPayment() {
+                this.isModalGeneratorPayment = false;
+                this.plan = this.isReg ? this.plan : this.backupPlan;
+                this.backupPlan = null;
+                this.checkedPlan = null;
+                this.isReg = false;
+                this.step = this.getStep();
             },
             setActive(index) {
                 this.activeIndex = index;
@@ -997,10 +1121,26 @@
                 } 
                 if (this.step == 3 && max_banners < 3) {
                     try {
+                        if (checked_plan.length > this.generations.free.remains + this.generations.paid.remains) {
+                            this.diff = checked_plan.length - this.generations.free.remains - this.generations.paid.remains;
+                            this.payment = this.diff * 0.6;
+                            this.isModalGeneratorPayment = true;
+                            this.isLoading = false;
+                            this.isRegenerate = false;
+                            this.isReg = true;
+                            this.checkedPlan = checked_plan;
+                            console.log("checked_plan", checked_plan);
+                            return;
+                        }
                         checked_plan.forEach(item => {
                             item.chose_image_index++;
                         });
                         const topics = await regenerateBanners(checked_plan, localStorage.getItem("token"));
+                        if (topics) {
+                            await writeOffGenerations(this.userData.vk_id, checked_plan.length);
+                            const gener = await getGenerations(this.userData.id);
+                            this.generations = gener;
+                        } 
                         this.plan = topics;
                         this.currBanner++;
                     } catch(err) {
@@ -1572,5 +1712,29 @@
         color: white;
         font-family: 'OpenSans';
         text-decoration: underline;
+    }
+
+    .generations_wrapper {
+        display: flex;
+        column-gap: 30px;
+        @media (max-width: 750px) {
+            flex-direction: column;
+        }
+    }
+    .generations_item {
+        padding: 10px 20px;
+        background: #111433;
+        border-radius: 10px;
+        color: white;
+        font-size: 20px;
+        font-family: 'OpenSans';
+        width: fit-content;
+        height: fit-content;
+        margin-bottom: 10px;
+        cursor: pointer;
+        @media (max-width: 750px) {
+            width: 100%;
+            font-size: 16px;
+        }
     }
 </style>

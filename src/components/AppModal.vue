@@ -1,7 +1,6 @@
 <template>
     <div v-if="visibility1 || visibility2" class="modal_wrapper" id="modal_wrapper">
         <section class="modal">
-            <div class="modal-background"></div>
             <img src="@/assets/images/close.png" class="close" @click="close">
             <h1>{{ title }}</h1>
             <span>{{ message }}</span>
@@ -65,7 +64,7 @@ export default {
         left: 0;
         top: 0;
         z-index: 900;
-        background: #070a29;
+        background: rgba(0, 0, 0, 0.6);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -88,6 +87,8 @@ export default {
         box-sizing: border-box;
         margin-top: -50px;
         align-self: center;
+        background: #1B1E3D;
+        border-radius: 10px;
         @media (max-width: 1400px) {
             width: 80vw;
         }

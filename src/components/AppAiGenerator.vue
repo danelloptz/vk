@@ -15,7 +15,7 @@
         </div>  
         <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
         <AppAiGeneratorContent v-if="activeIndex == 0" :windowWidth="windowWidth" :userData="userData" />
-        <AppAiBanner v-if="activeIndex == 1 && testers.indexOf(userData.vk_id) != -1" />
+        <AppAiBanner v-if="activeIndex == 1 && testers.indexOf(userData.vk_id) != -1" :userData="userData" />
         <AppAiAnalytics v-if="activeIndex == 2" :windowWidth="windowWidth" />
         <AppAiScene v-if="activeIndex == 3" :userData="userData" />
         <AppAiChat v-if="activeIndex == 4" :userData="userData" />
