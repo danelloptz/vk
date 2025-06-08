@@ -256,36 +256,36 @@
                             </div>
                             <div class="text_align">
                                 <div class="text_align_item" @click="changeTextAling('left')">
-                                    <div class="text_align_left">
+                                    <div class="text_align_left" :class="{ non_active_align: selectedBlock.textAlign != 'left' }">
                                         <div></div>
                                         <div></div>
                                         <div></div>
                                         <div></div>
                                     </div>
-                                    <h2>Left</h2>
+                                    <h2 :class="{ non_active_align: selectedBlock.textAlign != 'left' }">Left</h2>
                                 </div>
                                 <div class="text_align_item" @click="changeTextAling('center')">
-                                    <div class="text_align_center">
+                                    <div class="text_align_center" :class="{ non_active_align: selectedBlock.textAlign != 'center' }">
                                         <div></div>
                                         <div></div>
                                         <div></div>
                                         <div></div>
                                     </div>
-                                    <h2>Center</h2>
+                                    <h2 :class="{ non_active_align: selectedBlock.textAlign != 'center' }">Center</h2>
                                 </div>
                                 <div class="text_align_item" @click="changeTextAling('right')">
-                                    <div class="text_align_right">
+                                    <div class="text_align_right" :class="{ non_active_align: selectedBlock.textAlign != 'right' }">
                                         <div></div>
                                         <div></div>
                                         <div></div>
                                         <div></div>
                                     </div>
-                                    <h2>Right</h2>
+                                    <h2 :class="{ non_active_align: selectedBlock.textAlign != 'right' }">Right</h2>
                                 </div>
                             </div>
                         </div>
                         <!-- <AppGoodButton :text="text3" class="upload_logo" @click="addImage" /> -->
-                        <div class="text_tools_row" style="flex-wrap: wrap;">
+                        <div class="text_tools_row long">
                             <h2>Размер текста: </h2>
                             <input type="range" class="custom-range custom-range-big" v-model.number="selectedBlock.fontSize" min="5" max="256" step="1" @change="captureState" />
                             <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="256" @change="captureState" :key="selectedBlock.fontSize" />
@@ -479,22 +479,7 @@
                         <span class="italic" @click="changeTextStyle('italic')">I</span>
                         <h2>Italic</h2>
                     </div>
-                    <div class="vertical_line"></div>
-                    <div class="color_text">
-                        <div 
-                            class="color_circle" 
-                            @click="openColorPicker" 
-                            :style="{ backgroundColor: selectedBlock.color }"
-                        ></div>
-                        <input 
-                            type="color" 
-                            style="visibility: hidden; height: 0px;" 
-                            ref="colorInput" 
-                            v-model="selectedBlock.color" 
-                            @change="captureState"
-                        />
-                        <h2>Цвет</h2>
-                    </div>
+                    <!-- <div class="vertical_line"></div> -->
                 </div>
                 <div class="text_tools_row">
                     <div class="rect_opacity">
@@ -509,31 +494,31 @@
                     </div>
                     <div class="text_align">
                         <div class="text_align_item" @click="changeTextAling('left')">
-                            <div class="text_align_left">
+                            <div class="text_align_left" :class="{ non_active_align: selectedBlock.textAlign != 'left' }">
                                 <div></div>
                                 <div></div>
                                 <div></div>
                                 <div></div>
                             </div>
-                            <h2>Left</h2>
+                            <h2 :class="{ non_active_align: selectedBlock.textAlign != 'left' }">Left</h2>
                         </div>
                         <div class="text_align_item" @click="changeTextAling('center')">
-                            <div class="text_align_center">
+                            <div class="text_align_center" :class="{ non_active_align: selectedBlock.textAlign != 'center' }">
                                 <div></div>
                                 <div></div>
                                 <div></div>
                                 <div></div>
                             </div>
-                            <h2>Center</h2>
+                            <h2 :class="{ non_active_align: selectedBlock.textAlign != 'center' }">Center</h2>
                         </div>
                         <div class="text_align_item" @click="changeTextAling('right')">
-                            <div class="text_align_right">
+                            <div class="text_align_right" :class="{ non_active_align: selectedBlock.textAlign != 'right' }">
                                 <div></div>
                                 <div></div>
                                 <div></div>
                                 <div></div>
                             </div>
-                            <h2>Right</h2>
+                            <h2 :class="{ non_active_align: selectedBlock.textAlign != 'right' }">Right</h2>
                         </div>
                     </div>
                 </div>
@@ -543,7 +528,7 @@
                     <input type="range" class="custom-range custom-range-big" v-model.number="selectedBlock.fontSize" min="5" max="256" step="1" @change="captureState" />
                     <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="256" @change="captureState" :key="selectedBlock.fontSize" />
                 </div>
-                <div class="text_tools_row">
+                <div class="text_tools_row top_align">
                     <h2>Шрифт: </h2>
                     <select class="font_dropdown" v-model="selectedBlock.fontFamily">
                         <option value="Arial" @click="captureState">Arial</option>
@@ -551,6 +536,21 @@
                         <option value="Courier New" @click="captureState">Courier New</option>
                         <option value="Verdana" @click="captureState">Verdana</option>
                     </select>
+                    <div class="color_text">
+                        <div 
+                            class="color_circle" 
+                            @click="openColorPicker" 
+                            :style="{ backgroundColor: selectedBlock.color }"
+                        ></div>
+                        <h2>Цвет</h2>
+                        <input 
+                            type="color" 
+                            style="visibility: hidden; height: 0px;" 
+                            ref="colorInput" 
+                            v-model="selectedBlock.color" 
+                            @change="captureState"
+                        />
+                    </div>
                 </div>
             </div>
             <div class="layers">
@@ -596,7 +596,7 @@
                 
 
             </div>
-            <div class="row">
+            <div class="row row_btns">
                 <AppBadButton :text="text1" class="save" @click="save"/>
                 <AppGoodButton :text="text2" class="download" @click="downloadImage"/>
             </div>
@@ -1124,11 +1124,13 @@
                             const width = 200;
                             const height = width * aspectRatio;
 
+                            const bounds = this.getCropperBounds();
+
                             // Создаем новый объект изображения
                             const newImage = {
                                 id: Date.now(),
-                                top: 50,
-                                left: 50,
+                                top: bounds.top + bounds.height / 2,
+                                left: bounds.left + bounds.width / 2,
                                 width: width,
                                 height: height,
                                 src: e.target.result,
@@ -1228,10 +1230,11 @@
                 this.startDragText(event, id); // Начинаем перетаскивание
             },
             addRectangle() {
+                const bounds = this.getCropperBounds();
                 const newRectangle = {
                     id: Date.now(),
-                    top: 50,
-                    left: 50,
+                    top: bounds.top + bounds.height / 2,
+                    left: bounds.left + bounds.width / 2,
                     width: 100,
                     height: 50,
                     color: '#000000',
@@ -1809,11 +1812,12 @@
 
             // Добавление текстового блока
             addTextBlock() {
+                const bounds = this.getCropperBounds();
                 const newBlock = {
                     id: Date.now(),
                     text: 'Новый текст',
-                    top: 200,
-                    left: 400,
+                    top: bounds.top + bounds.height / 2,
+                    left: bounds.left + bounds.width / 2,
                     fontSize: 20,
                     color: '#000000',
                     fontWeight: 'normal', // По умолчанию обычный текст
@@ -1976,7 +1980,6 @@
         border-radius: 10px;
         @media (max-width: 900px) {
             width: 100%;
-            min-height: 46px;
             max-width: none;
         }
     }
@@ -2000,6 +2003,11 @@
     .save, .download {
         width: 160px;
         font-size: 16px;
+        @media (max-width: 900px) {
+            width: 140px;
+            height: 40px;
+            font-size: 14px;
+        }
     }
     .tools {
         display: flex;
@@ -2074,8 +2082,13 @@
         width: 100%;
         display: flex;
         align-items: center;
-        column-gap: 20px;
+        column-gap: 22px;
         white-space: nowrap;
+    }
+    .long {
+        @media (max-width: 1100px) {
+            flex-wrap: wrap;
+        }
     }
     .color_rectangle {
         display: flex;
@@ -2087,6 +2100,10 @@
         font-size: 16.4px;
         color: white;
         font-family: 'OpenSans';
+        font-weight: normal;
+        @media (max-width: 900px) {
+            font-size: 14px;
+        }
     }
     .color_rect {
         width: 54px;
@@ -2104,6 +2121,8 @@
         height: 72px;
         width: 1px;
         background: white;
+        margin-left: 10px;
+        margin-right: 10px;
     }
     .text_text {
         cursor: pointer;
@@ -2123,6 +2142,7 @@
     .color_text {
         display: flex;
         flex-direction: column;
+        align-items: center;
         row-gap: 10px;
         position: relative;
     }
@@ -2143,10 +2163,12 @@
         font-size: 11px;
         color: white;
         font-family: 'OpenSans';
+        font-weight: normal;
     }
     .text_align {
         display: flex;
-        column-gap: 23px;        
+        column-gap: 23px;    
+        margin-left: 20px;    
     }
     .text_align_item {
         display: flex;
@@ -2181,6 +2203,9 @@
         height: 1px;
         background: white;
     }
+    .non_active_align {
+        opacity: .5;
+    }
     .upload_logo {
         width: 180px;
         font-size: 16px;
@@ -2195,6 +2220,10 @@
         appearance: none; /* Убирает стандартные стили браузера */
         -moz-appearance: textfield; /* Для Firefox */
         text-align: center;
+        @media (max-width: 900px) {
+            font-size: 16px;
+            font-weight: normal;
+        }
     }
     .font_size::-webkit-inner-spin-button,
     .font_size::-webkit-outer-spin-button {
@@ -2216,6 +2245,10 @@
         background-repeat: no-repeat;
         background-position: right 10px center; /* Позиционируем стрелку */
         background-size: 10px 6px; /* Размер стрелки */
+        @media (max-width: 900px) {
+            width: 175px;
+            height: 30px;
+        }
     }
     .cropper-background {
         background: none;
@@ -2273,6 +2306,9 @@
     }
     .custom-range-big {
         width: 195px;
+        @media (max-width: 900px) {
+            width: 122px;
+        }
     }
     .custom-range-sm {
         width: 74px;
@@ -2487,7 +2523,11 @@
         margin-top: 23px;
         @media (max-width: 900px) {
             column-gap: 17.92px;
+            align-self: self-start;
         }
+    }
+    .row_btns {
+        align-self: center !important;
     }
     .row span {
         font-size: 24px;
@@ -2520,5 +2560,8 @@
     .not_active {
         background: none !important;
         border: 1px solid white;
+    }
+    .top_align {
+        align-items: start !important;
     }
 </style>
