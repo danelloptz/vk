@@ -1,6 +1,6 @@
 <template>
     <div class="wrapper">
-        <div class="editor" v-if="windowWidth > 900">
+        <div class="editor" v-if="windowWidth > 900" @mousedown.self="resetSelect" @touchstart.self="resetSelect">
             <img src="@/assets/images/close.png" class="close" @click="close">
             <h1>Редактор</h1>
             <div class="adding_btns">
@@ -59,6 +59,7 @@
                             width: `${image.width}px`,
                             height: `${image.height}px`,
                             zIndex: image.zIndex,
+                            transform: `rotate(${image.rotation}deg)`,
                             }"
                             @mousedown="selectImage(image.id, $event)"
                             @touchstart="selectImage(image.id, $event)"
@@ -72,6 +73,14 @@
                                 @mousedown="startResizeImage($event, handle.position, image.id)"
                                 @touchstart="startResizeImage($event, handle.position, image.id)"
                             ></div>
+                            <div 
+                                v-if="selectedLay == image.id"
+                                class="rotate_handle"
+                                @mousedown="startRotateImage($event, image.id)"
+                                @touchstart="startRotateImage($event, image.id)"
+                            >
+                                <img src="@/assets/images/return_back.png" />
+                            </div>
                             <img
                             :src="image.src"
                             :style="{
@@ -93,7 +102,6 @@
                             backgroundColor: rectangle.color,
                             opacity: rectangle.opacity,
                             zIndex: rectangle.zIndex,
-                            border: rectangle.id === selectedRectangleId ? '2px solid blue' : 'none',
                             }"
                             @mousedown="selectRectangle(rectangle.id, $event)"
                             @touchstart="selectRectangle(rectangle.id, $event)"
@@ -158,7 +166,7 @@
                     </div>
                     
                 </div>
-                <div class="tools">
+                <div class="tools" @mousedown.self="resetSelect" @touchstart.self="resetSelect">
                     <div class="header_tools">
                         <img src="@/assets/images/crop.png" @click="changeCrop">
                         <img src="@/assets/images/return_back.png" @click="undo">
@@ -180,6 +188,7 @@
                                 <div 
                                     class="layer-item"
                                     :class="{ active_lay_item: selectedLay == element.id }"
+                                    @click="selectLay(element.id)"
                                 >
                                     <span 
                                         v-if="element.type == 'text'"
@@ -304,7 +313,7 @@
             </div>
         </div>
 
-        <div class="editor" v-if="windowWidth <= 900">
+        <div class="editor" v-if="windowWidth <= 900" @mousedown.self="resetSelect" @touchstart.self="resetSelect">
             <img src="@/assets/images/close.png" class="close" @click="close">
             <h1>Редактор</h1>
              <div class="header_tools">
@@ -400,7 +409,6 @@
                         backgroundColor: rectangle.color,
                         opacity: rectangle.opacity,
                         zIndex: rectangle.zIndex,
-                        border: rectangle.id === selectedRectangleId ? '2px solid blue' : 'none',
                         }"
                         @mousedown="selectRectangle(rectangle.id, $event)"
                         @touchstart="selectRectangle(rectangle.id, $event)"
@@ -460,7 +468,7 @@
                     />
                 </div>
             </div>
-            <div class="text_tools">
+            <div class="text_tools" @mousedown.self="resetSelect" @touchstart.self="resetSelect">
                 <div class="text_tools_row">
                     <div class="color_rectangle">
                         <input type="color" class="color_rect" v-model="selectedRectangle.color" @change="captureState" />
@@ -569,6 +577,7 @@
                         <div 
                             class="layer-item"
                             :class="{ active_lay_item: selectedLay == element.id }"
+                            @click="selectLay(element.id)"
                         >
                             <span 
                                 v-if="element.type == 'text'"
@@ -673,6 +682,11 @@
                 selectedLay: null,
                 cursor_pos: null,
                 selectedTemplate: null,
+                rotationStartAngle: 0,
+                isRotatingImage: false,
+                initialAngle: 0,
+                rotationCenterX: 0,
+                rotationCenterY: 0,
             }
         },
         mounted() {
@@ -717,6 +731,62 @@
             }, 300);
         },
         methods: {
+            startRotateImage(event, id) {
+                const image = this.images.find(img => img.id === id);
+                if (!image) return;
+
+                this.isRotatingImage = true;
+                this.selectedImageId = id;
+
+                this.initialAngle = image.rotation || 0;
+
+                const imageElement = event.currentTarget.closest('.overlay-image');
+                const rect = imageElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                this.rotationCenterX = centerX;
+                this.rotationCenterY = centerY;
+
+                const startX = event.touches ? event.touches[0].pageX : event.pageX;
+                const startY = event.touches ? event.touches[0].pageY : event.pageY;
+
+                this.rotationStartAngle = Math.atan2(startY - centerY, startX - centerX) * (180 / Math.PI) - this.initialAngle;
+
+                document.addEventListener('mousemove', this.rotateImage);
+                document.addEventListener('touchmove', this.rotateImage, { passive: false });
+                document.addEventListener('mouseup', this.stopRotateImage);
+                document.addEventListener('touchend', this.stopRotateImage);
+
+                event.preventDefault();
+            },
+            
+            rotateImage(event) {
+                if (!this.isRotatingImage || !this.selectedImageId) return;
+
+                const image = this.images.find(img => img.id === this.selectedImageId);
+                if (!image) return;
+
+                const currentX = event.touches ? event.touches[0].pageX : event.pageX;
+                const currentY = event.touches ? event.touches[0].pageY : event.pageY;
+
+                const currentAngle = Math.atan2(currentY - this.rotationCenterY, currentX - this.rotationCenterX) * (180 / Math.PI);
+
+                image.rotation = currentAngle - this.rotationStartAngle;
+                image.rotation = (image.rotation % 360 + 360) % 360; // нормализация
+            },
+
+            
+            stopRotateImage() {
+                this.isRotatingImage = false;
+                document.removeEventListener('mousemove', this.rotateImage);
+                document.removeEventListener('touchmove', this.rotateImage);
+                document.removeEventListener('mouseup', this.stopRotateImage);
+                document.removeEventListener('touchend', this.stopRotateImage);
+            },
+            selectLay(id) {
+                this.selectedLay = id;
+            },
             selectTemplate(index) {
                 this.selectedTemplate = this.selectedTemplate == index ? null : index;
             },
@@ -748,18 +818,23 @@
             },
             onDragEnd() {
                 this.ignoreWatch = true;
-                this.layers.forEach((layer, index) => {
-                    if (layer.type === 'text') {
-                        const block = this.textBlocks.find(b => b.id === layer.id);
-                        if (block) block.zIndex = 999 - index - 1;
-                    } else if (layer.type === 'image') {
-                        const image = this.images.find(img => img.id === layer.id);
-                        if (image) image.zIndex = 999 - index - 1;
-                    } else if (layer.type === 'rectangle') {
-                        const rect = this.rectangles.find(r => r.id === layer.id);
-                        if (rect) rect.zIndex = 999 - index - 1;
-                    }
-                });
+                this.layers
+                    .slice() // Создаем копию массива, чтобы не мутировать оригинальный массив
+                    .reverse() // Переворачиваем массив для обхода с конца
+                    .forEach((layer, reverseIndex) => {
+                        const zIndex = reverseIndex + 1; // Начинаем zIndex с 1
+
+                        if (layer.type === 'text') {
+                            const block = this.textBlocks.find(b => b.id === layer.id);
+                            if (block) block.zIndex = zIndex;
+                        } else if (layer.type === 'image') {
+                            const image = this.images.find(img => img.id === layer.id);
+                            if (image) image.zIndex = zIndex;
+                        } else if (layer.type === 'rectangle') {
+                            const rect = this.rectangles.find(r => r.id === layer.id);
+                            if (rect) rect.zIndex = zIndex;
+                        }
+                    });
                 this.ignoreWatch = false;
             },
             deleteLayer(layer, index) {
@@ -831,7 +906,10 @@
                     rectangles: JSON.parse(JSON.stringify(this.rectangles)),
                     images: JSON.parse(JSON.stringify(this.images)),
                     croppedImage: this.croppedImage,
-                    imageSrc: this.imageSrc
+                    imageSrc: this.imageSrc,
+                    layers: JSON.parse(JSON.stringify(this.layers)),
+                    selectedLay: this.selectedLay,
+                    selectedTemplate: this.selectedTemplate
                 };
                 this.addHistory(state);
             },
@@ -861,6 +939,9 @@
                 this.images = JSON.parse(JSON.stringify(state.images));
                 this.croppedImage = state.croppedImage;
                 this.currentImage = state.imageSrc; // возвращаем изображение для пользователя (тут проблемы нет)
+                this.layers = JSON.parse(JSON.stringify(state.layers));
+                this.selectedLay = state.selectedLay;
+                this.selectedTemplate = state.selectedTemplate;
             },
             close() {
                 this.$emit('update:visibility1', false);
@@ -921,7 +1002,7 @@
                 }
             },
             selectImage(id, event) {
-                if (!this.isResizingImage) {
+                if (!this.isResizingImage && !this.isRotatingImage) {
                     this.selectedImageId = id;
                     this.selectedLay = id;
                     this.startDragImage(event, id);
@@ -1135,12 +1216,14 @@
                                 height: height,
                                 src: e.target.result,
                                 zIndex: 1 + this.layers.length,
+                                rotation: 0
                             };
 
                             // Добавляем изображение в массив и выбираем его
                             this.images.push(newImage);
                             this.layers.unshift({ name: `Изображение ${this.images.length}`, id: newImage.id, type: "image", link: newImage.src });
                             this.selectedImageId = newImage.id;
+                            this.selectedLay = newImage.id;
                         };
                     };
                     reader.readAsDataURL(file);
@@ -1179,6 +1262,9 @@
                     // Убедитесь, что текст обновляется корректно
                     if (block.text !== newText) {
                         block.text = newText; // Обновляем текст из содержимого элемента
+                        this.layers.forEach(item => {
+                            if (item.id === id) item.name = newText;
+                        })
                         this.captureState(); // Сохраняем состояние после изменения
                     }
 
@@ -1244,6 +1330,7 @@
                 this.rectangles.push(newRectangle);
                 this.layers.unshift({ name: `Прямоугольник ${this.rectangles.length}`, id: newRectangle.id, type: "rectangle" });
                 this.selectedRectangleId = newRectangle.id;
+                this.selectedLay = newRectangle.id;
                 this.captureState();
             },
             deleteRectangle(id) {
@@ -1686,8 +1773,9 @@
                             zIndex: rectangle.zIndex || 800,
                             draw: () => {
                                 return new Promise((resolve) => {
+                                    ctx.save(); // сохраняем текущие настройки контекста
                                     ctx.fillStyle = rectangle.color;
-                                    ctx.globalAlpha = rectangle.opacity; // Прозрачность прямоугольника
+                                    ctx.globalAlpha = rectangle.opacity; // Устанавливаем прозрачность прямоугольника
 
                                     const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
                                     const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
@@ -1695,6 +1783,7 @@
                                     const scaledHeight = rectangle.height * scaleFactorY * (heightImagePage / this.startSizeH);
 
                                     ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                    ctx.restore(); // восстанавливаем настройки (включая globalAlpha)
                                     resolve();
                                 });
                             }
@@ -1831,6 +1920,7 @@
                 this.textBlocks.push(newBlock);
                 this.layers.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
                 this.selectedBlockId = newBlock.id; // Выбираем новый блок
+                this.selectedLay = newBlock.id;
                 this.$nextTick(() => {
                     this.initResizeObserver(newBlock.id); // Инициализируем наблюдатель после добавления блока
                 });
@@ -2048,6 +2138,7 @@
         font-size: 16.4px;
         font-family: 'OpenSans';
         padding: 5px 10px;
+        cursor: pointer;
     }
     .lay_row {
         display: flex;
@@ -2437,6 +2528,32 @@
         border: 1px solid black;
         box-sizing: border-box;
         cursor: pointer;
+    }
+
+    .rotate_handle {
+        position: absolute;
+        top: -35px;
+        left: calc(50% - 10px);
+        width: 25px;
+        height: 25px;
+        background-color: rgb(255, 255, 255);
+        box-sizing: border-box; 
+        display: flex;
+        justify-content: center;
+        align-items: center;   
+        border-radius: 50%;    
+        transform-origin: center;
+    }
+    .rotate_handle:hover {
+        cursor: grab;
+    }
+    .rotate_handle:active {
+        cursor: grabbing;
+    }
+    .rotate_handle img {
+        width: 15px;
+        height: 15px;
+        filter: invert(1);
     }
 
     .handle.top-left {
