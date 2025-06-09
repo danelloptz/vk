@@ -28,7 +28,8 @@
                                 fontFamily: block.fontFamily,
                                 textAlign: block.textAlign, // Выравнивание текста
                                 cursor: 'pointer',
-                                zIndex: block.zIndex
+                                zIndex: block.zIndex,
+                                display: block.display
                             }"
                             @mousedown.stop="selectBlock(block.id, $event)"
                             @touchstart.stop="selectBlock(block.id, $event)"
@@ -60,6 +61,7 @@
                             height: `${image.height}px`,
                             zIndex: image.zIndex,
                             transform: `rotate(${image.rotation}deg)`,
+                            display: image.display
                             }"
                             @mousedown="selectImage(image.id, $event)"
                             @touchstart="selectImage(image.id, $event)"
@@ -102,6 +104,7 @@
                             backgroundColor: rectangle.color,
                             opacity: rectangle.opacity,
                             zIndex: rectangle.zIndex,
+                            display: rectangle.display
                             }"
                             @mousedown="selectRectangle(rectangle.id, $event)"
                             @touchstart="selectRectangle(rectangle.id, $event)"
@@ -205,6 +208,9 @@
                                     ></div>
                                     <span style="word-break: break-all;">{{ element.name }}</span>
                                     
+                                    <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
+                                    <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
+
                                     <img 
                                         class="delete_lay" 
                                         src="@/assets/images/close.png" 
@@ -344,7 +350,8 @@
                             fontFamily: block.fontFamily,
                             textAlign: block.textAlign, // Выравнивание текста
                             cursor: 'pointer',
-                            zIndex: block.zIndex
+                            zIndex: block.zIndex,
+                            display: block.display
                         }"
                         @mousedown.stop="selectBlock(block.id, $event)"
                         @touchstart.stop="selectBlock(block.id, $event)"
@@ -594,6 +601,8 @@
                             ></div>
                             <span style="word-break: break-all;">{{ element.name }}</span>
                             
+                            <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
+                            <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
                             <img 
                                 class="delete_lay" 
                                 src="@/assets/images/close.png" 
@@ -731,6 +740,40 @@
             }, 300);
         },
         methods: {
+            isVisibleLay(layer) {
+                if (layer.type === 'text') {
+                    const item = this.textBlocks.find(item => item.id === layer.id);
+                    return item ? item.display === 'block' : false;
+                } else if (layer.type === 'image') {
+                    const item = this.images.find(item => item.id === layer.id);
+                    return item ? item.display === 'block' : false;
+                } else {
+                    const item = this.rectangles.find(item => item.id === layer.id);
+                    return item ? item.display === 'block' : false;
+                }
+            },
+  
+            changeVisible(layer) {
+                if (layer.type === 'text') {
+                    this.textBlocks.forEach(item => {
+                        if (item.id == layer.id) {
+                            item.display = item.display == 'block' ? 'none' : 'block';
+                        }
+                    });
+                } else if (layer.type === 'image') {
+                    this.images.forEach(item => {
+                        if (item.id == layer.id) {
+                            item.display = item.display == 'block' ? 'none' : 'block';
+                        }
+                    });
+                } else if (layer.type === 'rectangle') {
+                    this.rectangles.forEach(item => {
+                        if (item.id == layer.id) {
+                            item.display = item.display == 'block' ? 'none' : 'block';
+                        }
+                    });
+                }
+            },
             startRotateImage(event, id) {
                 const image = this.images.find(img => img.id === id);
                 if (!image) return;
@@ -971,6 +1014,59 @@
             },
             changeTextAling(align) {
                 this.selectedBlock.textAlign = align;
+                if (this.selectedLay) {
+                    const layer = this.layers.find(item => item.id == this.selectedLay);
+                    const bounds = this.getCropperBounds();
+                    if (layer.type === 'text') {
+                        this.textBlocks.forEach(item => {
+                            if (item.id === layer.id) {
+                                switch (align) {
+                                    case 'left':
+                                        item.left = 0;
+                                        break;
+                                    case 'center':
+                                        item.left = bounds.width / 2 - item.width / 2;
+                                        break;
+                                    case 'right':
+                                        item.left = bounds.width - item.width - 2;
+                                        break;
+                                }
+                            }
+                        });
+                    } else if (layer.type == 'image') {
+                        this.images.forEach(item => {
+                            if (item.id === layer.id) {
+                                switch (align) {
+                                    case 'left':
+                                        item.left = 0;
+                                        break;
+                                    case 'center':
+                                        item.left = bounds.width / 2 - item.width / 2;
+                                        break;
+                                    case 'right':
+                                        item.left = bounds.width - item.width;
+                                        break;
+                                }
+                            }
+                        });
+                    } else {
+                        this.rectangles.forEach(item => {
+                            if (item.id === layer.id) {
+                                switch (align) {
+                                    case 'left':
+                                        item.left = 0;
+                                        break;
+                                    case 'center':
+                                        item.left = bounds.width / 2 - item.width / 2;
+                                        break;
+                                    case 'right':
+                                        item.left = bounds.width - item.width;
+                                        break;
+                                }
+                            }
+                        });
+                    }
+                }
                 this.captureState();
             },
             changeTextStyle(style) {
@@ -1210,13 +1306,14 @@
                             // Создаем новый объект изображения
                             const newImage = {
                                 id: Date.now(),
-                                top: bounds.top + bounds.height / 2,
-                                left: bounds.left + bounds.width / 2,
+                                top: bounds.top + bounds.height / 2 - height / 2,
+                                left: bounds.left + bounds.width / 2 - width / 2,
                                 width: width,
                                 height: height,
                                 src: e.target.result,
                                 zIndex: 1 + this.layers.length,
-                                rotation: 0
+                                rotation: 0,
+                                display: 'block'
                             };
 
                             // Добавляем изображение в массив и выбираем его
@@ -1319,13 +1416,14 @@
                 const bounds = this.getCropperBounds();
                 const newRectangle = {
                     id: Date.now(),
-                    top: bounds.top + bounds.height / 2,
-                    left: bounds.left + bounds.width / 2,
+                    top: bounds.top + bounds.height / 2 - 25,
+                    left: bounds.left + bounds.width / 2 - 50,
                     width: 100,
                     height: 50,
                     color: '#000000',
                     opacity: 0.5,
                     zIndex: 1 + this.layers.length,
+                    display: 'block'
                 };
                 this.rectangles.push(newRectangle);
                 this.layers.unshift({ name: `Прямоугольник ${this.rectangles.length}`, id: newRectangle.id, type: "rectangle" });
@@ -1916,6 +2014,7 @@
                     width: 0, 
                     height: 0,
                     zIndex: 1 + this.layers.length,
+                    display: 'block'
                 };
                 this.textBlocks.push(newBlock);
                 this.layers.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
@@ -2130,7 +2229,7 @@
     }
     .layer-item {
         display: grid;
-        grid-template-columns: 1fr 5fr 1fr;
+        grid-template-columns: 1fr 5fr 1fr 1fr;
         align-items: center;
         column-gap: 10px;
         margin-bottom: 5px;
@@ -2139,6 +2238,11 @@
         font-family: 'OpenSans';
         padding: 5px 10px;
         cursor: pointer;
+    }
+    .eye {
+        width: 17px;
+        cursor: pointer;
+        justify-self: end;
     }
     .lay_row {
         display: flex;
