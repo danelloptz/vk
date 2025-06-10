@@ -3,7 +3,7 @@
         v-if="isEditor" 
         :imageSrc="aiEditorLink"
         @update:visibility1="isEditor = $event"
-        @update:save="updateImage"
+        @update:save="updateImage($event, indexEdit, isCustomEdit)"
     />
     <AppModalGenerator 
         v-if="isModalGenerator" 
@@ -229,7 +229,7 @@
                                 />
                                 <!-- <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" /> -->
                                 <div class="banner_tools">
-                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
+                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
                                     </div>
@@ -326,7 +326,7 @@
                                     />
                                 </div>
                                 <div class="banner_tools">
-                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
+                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
                                     </div>
@@ -706,7 +706,9 @@
             },
             async confirmImage(link) {
                 this.closeBanner();
-                this.plan[this.bannerIndex].custom_image_url = link;
+                this.indexEdit = this.bannerIndex;
+                this.isCustomEdit = true;
+                await this.updateImage(link);
                 await updateContentPlan(this.plan, localStorage.getItem("token"));
             },
             openBanner(index) {
@@ -723,18 +725,28 @@
             async updateImage(link) {
                 let file;
 
-                // Check if the link is a base64 string
                 if (link.startsWith("data:image")) {
                     // Convert base64 to Blob
                     const contentType = link.split(';')[0].split(':')[1]; // Extract content type (e.g., "image/png")
                     file = this.base64ToBlob(link, contentType);
                     console.log("я тут");
                 } else {
-                    // If it's already a File object, use it directly
-                    file = link;
-                    console.log("я тут2");
+                    try {
+                        const response = await fetch(link);
+                        if (!response.ok) {
+                            throw new Error(`Ошибка загрузки изображения: ${response.status}`);
+                        }
+
+                        const blob = await response.blob();
+                        file = blob; // именно Blob, не URL
+                        console.log("я тут2");
+                    } catch (error) {
+                        console.error('Ошибка при скачивании изображения:', error);
+                        return; // остановить выполнение, если ошибка
+                    }
                 }
 
+                // Теперь `file` гарантированно готов к использованию
                 if (this.isCustomEdit) {
                     console.log("я тут3");
                     this.plan[this.indexEdit].custom_image_url = link;
@@ -752,6 +764,7 @@
                     this.plan = resp;
                 }
             },
+
             base64ToBlob(base64String, contentType = '', sliceSize = 512) {
                 const byteCharacters = atob(base64String.split(',')[1]); // Remove the "data:image/png;base64," prefix
                 const byteArrays = [];

@@ -10,6 +10,7 @@
         v-if="isEditor" 
         :imageSrc="generatedImage"
         @update:visibility1="isEditor = $event"
+        @update:save="updateImage"
     />
     <section class="banner">
         <h1 :style="{ alignSelf: isBanner ? 'center' : 'start' }">{{ isBanner ? 'ИИ баннер' : 'Создайте уникальный баннер c Intelektaz' }}</h1>
@@ -289,6 +290,9 @@
             }
         },
         methods: {
+            updateImage(link) {
+                this.generatedImage = link;
+            },
             close() {
                 this.$emit('changePosition');
             },
