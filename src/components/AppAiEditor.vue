@@ -43,8 +43,8 @@
                             @blur="disableEditing(block.id)"
                             :style="{
                                 whiteSpace: 'pre-wrap', // Сохраняем переносы строк
-                                wordWrap: 'break-word', // Переносим длинные слова
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                maxHeight: '100%'
                             }"
                             >
                             {{ block.text }}
@@ -302,8 +302,8 @@
                         <!-- <AppGoodButton :text="text3" class="upload_logo" @click="addImage" /> -->
                         <div class="text_tools_row long">
                             <h2>Размер текста: </h2>
-                            <input type="range" class="custom-range custom-range-big" v-model.number="selectedBlock.fontSize" min="5" max="256" step="1" @change="captureState" />
-                            <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="256" @change="captureState" :key="selectedBlock.fontSize" />
+                            <input type="range" class="custom-range custom-range-big" v-model.number="selectedBlock.fontSize" min="5" max="180" step="1" @change="captureState" />
+                            <input class="font_size" type="number" v-model="selectedBlock.fontSize" min="5" max="180" @change="captureState" :key="selectedBlock.fontSize" />
                         </div>
                         <div class="text_tools_row">
                             <h2>Шрифт: </h2>
@@ -696,6 +696,7 @@
                 initialAngle: 0,
                 rotationCenterX: 0,
                 rotationCenterY: 0,
+                templates: []
             }
         },
         mounted() {
@@ -738,8 +739,83 @@
                 this.startSizeW = widthImagePage;
                 this.startSizeH = heightImagePage;
             }, 300);
+            setTimeout(() => this.setTemplates(), 3000);
         },
         methods: {
+            setTemplates() {
+                // инициализация данных
+                let imagesTemplate = [];
+                let rectanglesTemplate = [];
+                let textBlocksTemplate = [];
+                let layersTemplate = [];
+                let selectedLayTemplate = null;
+                let selectedTemplateTemplate = 0;
+                let croppedImageTemplate = 'https://api.intelektaz.com/assets/b141af93-948f-4179-918b-e67dc22d6ee9';
+                
+                // размеры холста
+                const bounds = this.getCropperBounds();
+                console.log(bounds);
+
+                // масштаб
+                const scaleX = bounds.width / 1280;
+                const scaleY = bounds.height / 1280;
+
+                // логотип
+                const newImage = {
+                    id: Date.now(),
+                    top: bounds.top + 53 * scaleY,
+                    left: bounds.left + 436 * scaleX,
+                    width: bounds.width * 0.0765625,
+                    height: bounds.height * 0.07890625,
+                    src: 'https://api.intelektaz.com/assets/dd7dc63c-8f93-4413-b118-248909faca3b',
+                    zIndex: 1 + layersTemplate.length,
+                    rotation: 0,
+                    display: 'block'
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Логотип ${this.images.length}`, id: newImage.id, type: "image", link: newImage.src })
+                
+                // текст к логотипу
+                const newBlock = {
+                    id: Date.now(),
+                    text: 'INTELEKTAZ',
+                    top: bounds.top + 90 * scaleY,
+                    left: bounds.left + 553 * scaleX,
+                    fontSize: 48 * scaleY,
+                    color: 'white',
+                    fontWeight: 'normal', // По умолчанию обычный текст
+                    fontStyle: 'normal',  // По умолчанию без курсива
+                    fontFamily: 'Arial',  // По умолчанию Arial
+                    textAlign: 'left',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                // итоговый кадр
+                const state = {
+                    textBlocks: JSON.parse(JSON.stringify(textBlocksTemplate)),
+                    rectangles: JSON.parse(JSON.stringify(rectanglesTemplate)),
+                    images: JSON.parse(JSON.stringify(imagesTemplate)),
+                    croppedImage: croppedImageTemplate,
+                    imageSrc: croppedImageTemplate,
+                    layers: JSON.parse(JSON.stringify(layersTemplate)),
+                    selectedLay: selectedLayTemplate,
+                    selectedTemplate: selectedTemplateTemplate
+                };
+                this.templates.push(state);
+            },
+            activateTemplate(index) {
+                if (index >= this.templates.length) return;
+                const template = this.templates[index];
+                this.restoreState(template);
+            },
             isVisibleLay(layer) {
                 if (layer.type === 'text') {
                     const item = this.textBlocks.find(item => item.id === layer.id);
@@ -832,6 +908,7 @@
             },
             selectTemplate(index) {
                 this.selectedTemplate = this.selectedTemplate == index ? null : index;
+                this.activateTemplate(index);
             },
             resetSelect() {
                 this.selectedLay = null;
@@ -985,6 +1062,8 @@
                 this.layers = JSON.parse(JSON.stringify(state.layers));
                 this.selectedLay = state.selectedLay;
                 this.selectedTemplate = state.selectedTemplate;
+
+                console.log(this.images);
             },
             close() {
                 this.$emit('update:visibility1', false);
@@ -1352,47 +1431,54 @@
             },
             updateText(id, event) {
                 const block = this.textBlocks.find((b) => b.id === id);
-                if (block) {
-                    // Получаем текущее значение из contenteditable элемента
-                    const newText = event.target.innerText;
+                if (!block) return;
 
-                    // Убедитесь, что текст обновляется корректно
-                    if (block.text !== newText) {
-                        block.text = newText; // Обновляем текст из содержимого элемента
-                        this.layers.forEach(item => {
-                            if (item.id === id) item.name = newText;
-                        })
-                        this.captureState(); // Сохраняем состояние после изменения
-                    }
-
-                    // Сохраняем текущую позицию курсора
-                    const selection = window.getSelection();
-                    if (selection.rangeCount === 0) return;
-
-                    const range = selection.getRangeAt(0); // Текущий диапазон выделения
-                    const currentCursorPosition = range.startOffset; // Позиция курсора
-                    console.log(this.cursor_pos);
-                    // Важно: Используем $nextTick, чтобы дождаться обновления DOM
-                    this.$nextTick(() => {
-                        const contentEditableElement = event.target;
-
-                        // Создаем новый диапазон для восстановления позиции курсора
-                        const newRange = document.createRange();
-                        const textNode = contentEditableElement.childNodes[0]; // Первый текстовый узел
-
-                        if (textNode) {
-                            // Устанавливаем позицию курсора
-                            const newPosition = this.cursor_pos ? this.cursor_pos + 1 : Math.min(currentCursorPosition, textNode.length);
-                            this.cursor_pos = null;
-                            newRange.setStart(textNode, newPosition);
-                            newRange.collapse(true);
-
-                            // Применяем новый диапазон к выделению
-                            selection.removeAllRanges();
-                            selection.addRange(newRange);
-                        }
-                    });
+                const bounds = this.getCropperBounds();
+                const bottom = bounds.top + bounds.height;
+                if (block.top + block.height > bottom) {
+                    block.top = bounds.top + bounds.height - block.height;
+                    return;
                 }
+
+                // Получаем текущее значение из contenteditable элемента
+                const newText = event.target.innerText;
+
+                // Убедитесь, что текст обновляется корректно
+                if (block.text !== newText) {
+                    block.text = newText; // Обновляем текст из содержимого элемента
+                    this.layers.forEach(item => {
+                        if (item.id === id) item.name = newText;
+                    })
+                    this.captureState(); // Сохраняем состояние после изменения
+                }
+
+                // Сохраняем текущую позицию курсора
+                const selection = window.getSelection();
+                if (selection.rangeCount === 0) return;
+
+                const range = selection.getRangeAt(0); // Текущий диапазон выделения
+                const currentCursorPosition = range.startOffset; // Позиция курсора
+                console.log(this.cursor_pos);
+                // Важно: Используем $nextTick, чтобы дождаться обновления DOM
+                this.$nextTick(() => {
+                    const contentEditableElement = event.target;
+
+                    // Создаем новый диапазон для восстановления позиции курсора
+                    const newRange = document.createRange();
+                    const textNode = contentEditableElement.childNodes[0]; // Первый текстовый узел
+
+                    if (textNode) {
+                        // Устанавливаем позицию курсора
+                        const newPosition = this.cursor_pos ? this.cursor_pos + 1 : Math.min(currentCursorPosition, textNode.length);
+                        this.cursor_pos = null;
+                        newRange.setStart(textNode, newPosition);
+                        newRange.collapse(true);
+
+                        // Применяем новый диапазон к выделению
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                    }
+                });
             },
             handleEnterDown(event) {
                 if (event.key === 'Enter') {
@@ -2084,17 +2170,17 @@
                 let newLeft = clientX - this.dragStartX;
                 let newTop = clientY - this.dragStartY;
 
-                if (newLeft < bounds.left) {
-                    newLeft = bounds.left;
-                } 
-                if (newLeft + block.width > bounds.width + bounds.left) newLeft = bounds.width + bounds.left - block.width;
+                // if (newLeft < bounds.left) {
+                //     newLeft = bounds.left;
+                // } 
+                // if (newLeft + block.width > bounds.width + bounds.left) newLeft = bounds.width + bounds.left - block.width;
                 
                 // Ограничение по вертикали
-                if (newTop < bounds.top) newTop = bounds.top;
-                if (newTop + block.height > bounds.height) newTop = bounds.height - block.height;
+                // if (newTop < bounds.top) newTop = bounds.top;
+                // if (newTop + block.height > bounds.height) newTop = bounds.height - block.height;
 
-                if (newLeft < 0) newLeft = 0;
-                if (newTop < 0) newTop = 0;
+                // if (newLeft < 0) newLeft = 0;
+                // if (newTop < 0) newTop = 0;
 
                 block.left = newLeft;
                 block.top = newTop;
@@ -2566,7 +2652,7 @@
         position: relative;
         width: 100%;
         max-height: 100vh;
-        /* overflow: hidden; */
+        overflow: hidden;
         position: relative;
         /* margin: 20px auto; */
     }
