@@ -22,6 +22,17 @@
         @success_payment="successPayment"
         @bad_payment="badPayment"
     />
+    <div class="modal_wrapper" v-if="isBanner">
+        <div class="modal" :style="{ position: isChangePosition ? 'static' : 'relative' }">
+            <img src="@/assets/images/close.png" class="close" @click="closeBanner">
+            <AppAiBanner 
+                :userData="userData" 
+                :isBanner="true" 
+                @confirm="confirmImage"
+                @changePosition="changePosition"
+            />
+        </div>
+    </div>
     <section class="ai">
         <div class="switch">
             <span
@@ -217,9 +228,15 @@
                                     style="display: none;"
                                 />
                                 <!-- <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" /> -->
-                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
-                                    <img src="@/assets/images/pen.png" />
-                                    <span>Редактор</span>
+                                <div class="banner_tools">
+                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
+                                        <img src="@/assets/images/pen.png" />
+                                        <span>Редактор</span>
+                                    </div>
+                                    <div class="bannerAi" v-if="testers.indexOf(userData.vk_id) != -1" @click="openBanner(index)">
+                                        <img src="@/assets/images/banner.png" />
+                                        <span>ИИ Баннер</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -308,9 +325,15 @@
                                         style="display: none;"
                                     />
                                 </div>
-                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1 && step >= 3 && !isLoading" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
-                                    <img src="@/assets/images/pen.png" />
-                                    <span>Редактор</span>
+                                <div class="banner_tools">
+                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0])">
+                                        <img src="@/assets/images/pen.png" />
+                                        <span>Редактор</span>
+                                    </div>
+                                    <div class="bannerAi" v-if="testers.indexOf(userData.vk_id) != -1" @click="openBanner(index)">
+                                        <img src="@/assets/images/banner.png" />
+                                        <span>ИИ Баннер</span>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -493,9 +516,10 @@
     import { getConfig } from "@/services/config";
     import AppModalGenerator from "@/components/AppModalGenerator.vue";
     import AppModalGeneratorPayment from "@/components/AppModalGeneratorPayment.vue";
+    import AppAiBanner from '@/components/AppAiBanner.vue';
 
     export default {
-        components: { AppGoodButton, AppAiEditor, AppModalGenerator, AppModalGeneratorPayment },
+        components: { AppGoodButton, AppAiEditor, AppModalGenerator, AppModalGeneratorPayment, AppAiBanner },
         props: {
             windowWidth: Number,
             userData: Object
@@ -579,7 +603,10 @@
                 isModalGeneratorPayment: false,
                 backupPlan: null,
                 checkedPlan: null,
-                isReg: false
+                isReg: false,
+                isBanner: false,
+                bannerIndex: null,
+                isChangePosition: false
             }
         },
         watch: {
@@ -674,6 +701,21 @@
             }
         },
         methods: {
+            changePosition() {
+                this.isChangePosition = !this.isChangePosition;
+            },
+            async confirmImage(link) {
+                this.closeBanner();
+                this.plan[this.bannerIndex].custom_image_url = link;
+                await updateContentPlan(this.plan, localStorage.getItem("token"));
+            },
+            openBanner(index) {
+                this.isBanner = true;
+                this.bannerIndex = index;
+            },
+            closeBanner() {
+                this.isBanner = false;
+            },
             openGeneratorModal(flag) {
                 this.isSecond = flag;
                 this.isModalGenerator = true;
@@ -1233,6 +1275,41 @@
 </script>
 
 <style scoped>
+    .modal_wrapper {
+        width: 100vw;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        /* align-items: center; */
+        background: rgba(0, 0, 0, 0.3);
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 995;
+    }
+    .modal {
+        width: 1054px;
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
+        padding: 50px 77px;
+        background: #1B1E3D;
+        border-radius: 10px;
+        overflow-y: auto;
+        position: relative;
+        @media (max-width: 900px) {
+            padding: 40px 13px;
+            align-items: center;
+        }
+    }
+    .close {
+        position: absolute;
+        right: 30px;
+        top: 30px;
+        width: 21px;
+        height: 21px;
+        cursor: pointer;
+    }
     .active {
         background: #7023EC;
         font-weight: bold;
@@ -1696,18 +1773,22 @@
         height: 15px;
         cursor: pointer;
     }
-
-    .editor {
+    .banner_tools {
+        display: flex;
+        column-gap: 20px;
+        align-items: center;
+    }
+    .editor, .bannerAi {
         display: flex;
         column-gap: 5px;
         align-items: center;
         width: fit-content;
     }
-    .editor img {
+    .editor img, .bannerAi img  {
         width: 12px;
         height: 12px;
     }
-    .editor span {
+    .editor span, .bannerAi span {
         font-size: 12px;
         color: white;
         font-family: 'OpenSans';

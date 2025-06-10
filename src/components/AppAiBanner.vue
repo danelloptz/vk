@@ -12,7 +12,7 @@
         @update:visibility1="isEditor = $event"
     />
     <section class="banner">
-        <h1>Создайте уникальный баннер c Intelektaz</h1>
+        <h1 :style="{ alignSelf: isBanner ? 'center' : 'start' }">{{ isBanner ? 'ИИ баннер' : 'Создайте уникальный баннер c Intelektaz' }}</h1>
         <div class="descr">
             <span class="counter">{{ descr.length }}/2000</span>
             <textarea 
@@ -156,6 +156,12 @@
                 @click="openEditor"
             />
             <AppGoodButton 
+                v-if="isBanner"
+                class="btn"
+                :text="'ОДОБРИТЬ'"
+                @click="confirmImage"
+            />
+            <AppGoodButton 
                 class="btn"
                 :text="'СКАЧАТЬ'"
                 @click="download"
@@ -172,7 +178,8 @@
 
     export default {
         props: {
-            userData: Object
+            userData: Object,
+            isBanner: Boolean
         },
         components: { AppGoodButton, AppModal, AppAiEditor },
         data() {
@@ -282,6 +289,12 @@
             }
         },
         methods: {
+            close() {
+                this.$emit('changePosition');
+            },
+            confirmImage() {
+                this.$emit('confirm', this.generatedImage);
+            },
             selectVariant(item) {
                 this.selectedVariant = item.id - 1;
                 this.generatedImage = item.src;
@@ -345,6 +358,7 @@
                             this.msg = "Произошла непридвиденная ошибка. Перезагрузите страницу. Если проблема останется, то обратитесь в техническую поддержку.";
                             break;
                     }
+                    this.$emit('changePosition');
                     this.isModal = true;
                     return;
                 }
