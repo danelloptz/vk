@@ -60,8 +60,9 @@
                             width: `${image.width}px`,
                             height: `${image.height}px`,
                             zIndex: image.zIndex,
-                            transform: `rotate(${image.rotation}deg)`,
-                            display: image.display
+                            transform: `rotate(${image.rotation}deg) scale(${image?.scale ? image?.scale : 1})`,
+                            display: image.display,
+                            filter: image?.filter ? image?.filter : 'none'
                             }"
                             @mousedown="selectImage(image.id, $event)"
                             @touchstart="selectImage(image.id, $event)"
@@ -206,7 +207,9 @@
                                         v-if="element.type == 'rectangle'"
                                         class="preview_rect"
                                     ></div>
-                                    <span style="word-break: break-all;">{{ element.name }}</span>
+                                    <span  
+                                        class="layer_name"    
+                                    >{{ element.name }}</span>
                                     
                                     <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
                                     <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
@@ -296,6 +299,15 @@
                                         <div></div>
                                     </div>
                                     <h2 :class="{ non_active_align: selectedBlock.textAlign != 'right' }">Right</h2>
+                                </div>
+                                <!-- Кнопка вызова панели -->
+                                <button class="emoji_btn" @click="toggleEmojiPanel" ref="emojiButton">😊</button>
+
+                                <!-- Панель смайликов -->
+                                <div v-if="showEmojiPanel" class="emoji-panel" ref="emojiPanel">
+                                    <span v-for="emoji in emojis" :key="emoji" class="emoji" @click="insertEmoji(emoji)">
+                                        {{ emoji }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -599,7 +611,9 @@
                                 v-if="element.type == 'rectangle'"
                                 class="preview_rect"
                             ></div>
-                            <span style="word-break: break-all;">{{ element.name }}</span>
+                            <span  
+                                class="layer_name"    
+                            >{{ element.name }}</span>
                             
                             <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
                             <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
@@ -628,6 +642,7 @@
     import 'vue-advanced-cropper/dist/style.css';
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
+    import { getConfig } from '@/services/config';
 
     export default {
         components: { AppGoodButton, AppBadButton, Cropper, draggable },
@@ -696,12 +711,15 @@
                 initialAngle: 0,
                 rotationCenterX: 0,
                 rotationCenterY: 0,
-                templates: []
+                templates: [],
+                emojis: [],
+                showEmojiPanel: false
             }
         },
         mounted() {
             document.addEventListener('keydown', this.handleKeyDown);
             document.addEventListener('keyup', this.handleKeyUp);
+            document.addEventListener("click", this.handleClickOutside);
             this.canvasWidth = window.innerWidth;
         },
         computed: {
@@ -740,8 +758,33 @@
                 this.startSizeH = heightImagePage;
             }, 300);
             setTimeout(() => this.setTemplates(), 3000);
+
+            const resp = await getConfig('emojis', localStorage.getItem('token'));
+            this.emojis = resp.emojis;
         },
         methods: {
+            handleClickOutside(event) {
+                const panel = this.$refs.emojiPanel;
+                const button = this.$refs.emojiButton;
+
+                if (
+                    panel &&
+                    !panel.contains(event.target) &&
+                    button &&
+                    !button.contains(event.target)
+                ) {
+                    this.showEmojiPanel = false;
+                }
+            },
+            insertEmoji(emoji) {
+                const block = this.textBlocks.find(t => t.id == this.selectedLay);
+                if (block.length == 0) return;
+
+                block.text += emoji;
+            },
+            toggleEmojiPanel() {
+                this.showEmojiPanel = !this.showEmojiPanel;
+            },
             setTemplates() {
                 // инициализация данных
                 let imagesTemplate = [];
@@ -761,14 +804,14 @@
                 const scaleY = bounds.height / 1280;
 
                 // логотип
-                const newImage = {
+                let newImage = {
                     id: Date.now(),
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
                     height: bounds.height * 0.07890625,
                     src: 'https://api.intelektaz.com/assets/dd7dc63c-8f93-4413-b118-248909faca3b',
-                    zIndex: 1 + layersTemplate.length,
+                    zIndex: 2,
                     rotation: 0,
                     display: 'block'
                 };
@@ -776,16 +819,16 @@
                 layersTemplate.unshift({ name: `Логотип ${this.images.length}`, id: newImage.id, type: "image", link: newImage.src })
                 
                 // текст к логотипу
-                const newBlock = {
+                let newBlock = {
                     id: Date.now(),
                     text: 'INTELEKTAZ',
                     top: bounds.top + 90 * scaleY,
                     left: bounds.left + 553 * scaleX,
                     fontSize: 48 * scaleY,
                     color: 'white',
-                    fontWeight: 'normal', // По умолчанию обычный текст
-                    fontStyle: 'normal',  // По умолчанию без курсива
-                    fontFamily: 'Arial',  // По умолчанию Arial
+                    fontWeight: 'normal',
+                    fontStyle: 'normal',
+                    fontFamily: 'Arial',
                     textAlign: 'left',
                     width: 0, 
                     height: 0,
@@ -797,6 +840,101 @@
                 this.$nextTick(() => {
                     this.initResizeObserver(newBlock.id);
                 });
+
+                // текст белым снизу
+                newBlock = {
+                    id: Date.now(),
+                    text: 'Перестань выживать — начни доминировать!',
+                    top: bounds.top + 839 * scaleY,
+                    left: bounds.left + 74 * scaleX,
+                    fontSize: 48 * scaleY,
+                    color: 'white',
+                    fontWeight: 'normal',
+                    fontStyle: 'normal',
+                    fontFamily: 'OpenSans',
+                    textAlign: 'left',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                // красный фон для текста
+                let newRectangle = {
+                    id: Date.now(),
+                    top: bounds.top + 950 * scaleY,
+                    left: 0,
+                    width: bounds.width,
+                    height: 260 * scaleY,
+                    color: '#DE5386',
+                    opacity: 1,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                rectanglesTemplate.push(newRectangle);
+                layersTemplate.unshift({ name: `Прямоугольник ${rectanglesTemplate.length}`, id: newRectangle.id, type: "rectangle" });
+
+                // большой текст на красном фоне
+                newBlock = {
+                    id: Date.now(),
+                    text: 'ИИ ПРЕВРАЩАЕТ СОЦСЕТИ В ЗОЛОТУЮ ЖИЛУ!',
+                    top: bounds.top + 960 * scaleY,
+                    left: bounds.left + 51 * scaleX,
+                    fontSize: 90 * scaleY,
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontStyle: 'normal',
+                    fontFamily: 'Tektur',
+                    textAlign: 'center',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                // затемнение сверху
+                newImage = {
+                    id: Date.now(),
+                    top: bounds.top + (-50) * scaleY,
+                    left: bounds.left + (-164) * scaleX,
+                    width: bounds.width * 1.2390625,
+                    height: bounds.height * 0.2140625,
+                    src: 'https://api.intelektaz.com/assets/42580a50-c96c-4da2-9b68-2882dcb382b6.png',
+                    zIndex: 1,
+                    rotation: 0,
+                    display: 'block',
+                    filter: 'blur(40px)',
+                    scale: 1.5
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Затеменение сверху`, id: newImage.id, type: "image", link: newImage.src });
+
+                // затемнение снизу
+                newImage = {
+                    id: Date.now(),
+                    top: bounds.top + 718 * scaleY,
+                    left: bounds.left + (-308) * scaleX,
+                    width: bounds.width * 1.4359375,
+                    height: bounds.height * 0.596875,
+                    src: 'https://api.intelektaz.com/assets/c5f33da0-3812-4dd2-a457-d2b0f6cde9ec.png',
+                    zIndex: 1,
+                    rotation: 0,
+                    display: 'block',
+                    filter: 'blur(70px)',
+                    scale: 1.5
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
 
                 // итоговый кадр
                 const state = {
@@ -2872,4 +3010,34 @@
     .top_align {
         align-items: start !important;
     }
+    .layer_name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .emoji-panel {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        display: flex;
+        flex-wrap: wrap;
+        padding: 5px;
+        width: 160px;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .emoji {
+        font-size: 20px;
+        margin: 4px;
+        cursor: pointer;
+    }
+
+    .emoji_btn {
+        width: 50px;
+        height: 50px;
+        font-size: 30px;
+    }
+
 </style>
