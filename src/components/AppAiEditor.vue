@@ -62,7 +62,7 @@
                             zIndex: image.zIndex,
                             transform: `rotate(${image.rotation}deg) scale(${image?.scale ? image?.scale : 1})`,
                             display: image.display,
-                            filter: image?.filter ? image?.filter : 'none'
+                            filter: image?.filter ? `blur(${image?.filter}px)` : 'none'
                             }"
                             @mousedown="selectImage(image.id, $event)"
                             @touchstart="selectImage(image.id, $event)"
@@ -644,6 +644,11 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import { getConfig } from '@/services/config';
 
+    import big_dark from '@/assets/images/big_dark.png';
+    import sm_dark from '@/assets/images/sm_dark.png';
+    import logo from '@/assets/images/intelektaz_logo.png';
+    import rect_banner from '@/assets/images/rect_banner.png';
+
     export default {
         components: { AppGoodButton, AppBadButton, Cropper, draggable },
         props: {
@@ -803,14 +808,50 @@
                 const scaleX = bounds.width / 1280;
                 const scaleY = bounds.height / 1280;
 
-                // логотип
+                // затемнение снизу
                 let newImage = {
-                    id: Date.now(),
+                    id: 7,
+                    top: bounds.top + 718 * scaleY,
+                    left: bounds.left + (-308) * scaleX,
+                    width: bounds.width * 1.4359375,
+                    height: bounds.height * 0.596875,
+                    src: sm_dark,
+                    zIndex: 1,
+                    rotation: 0,
+                    display: 'block',
+                    filter: 70,
+                    scale: 1.5
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
+
+                // затемнение сверху
+                newImage = {
+                    id: 6,
+                    top: bounds.top + (-50) * scaleY,
+                    left: bounds.left + (-164) * scaleX,
+                    width: bounds.width * 1.2390625,
+                    height: bounds.height * 0.2140625,
+                    src: big_dark,
+                    zIndex: 1,
+                    rotation: 0,
+                    display: 'block',
+                    filter: 40,
+                    scale: 1.3
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Затеменение сверху`, id: newImage.id, type: "image", link: newImage.src });
+
+                
+
+                // логотип
+                newImage = {
+                    id: 1,
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
                     height: bounds.height * 0.07890625,
-                    src: 'https://api.intelektaz.com/assets/dd7dc63c-8f93-4413-b118-248909faca3b',
+                    src: logo,
                     zIndex: 2,
                     rotation: 0,
                     display: 'block'
@@ -818,11 +859,26 @@
                 imagesTemplate.push(newImage);
                 layersTemplate.unshift({ name: `Логотип ${this.images.length}`, id: newImage.id, type: "image", link: newImage.src })
                 
+                // красный фон для текста
+                let newRectangle = {
+                    id: 4,
+                    top: bounds.top + 950 * scaleY,
+                    left: 0,
+                    width: bounds.width,
+                    height: 260 * scaleY,
+                    color: '#DE5386',
+                    opacity: 1,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                rectanglesTemplate.push(newRectangle);
+                layersTemplate.unshift({ name: `Прямоугольник ${rectanglesTemplate.length}`, id: newRectangle.id, type: "rectangle" });
+
                 // текст к логотипу
                 let newBlock = {
-                    id: Date.now(),
+                    id: 2,
                     text: 'INTELEKTAZ',
-                    top: bounds.top + 90 * scaleY,
+                    top: bounds.top + 73 * scaleY,
                     left: bounds.left + 553 * scaleX,
                     fontSize: 48 * scaleY,
                     color: 'white',
@@ -843,7 +899,7 @@
 
                 // текст белым снизу
                 newBlock = {
-                    id: Date.now(),
+                    id: 3,
                     text: 'Перестань выживать — начни доминировать!',
                     top: bounds.top + 839 * scaleY,
                     left: bounds.left + 74 * scaleX,
@@ -864,25 +920,11 @@
                     this.initResizeObserver(newBlock.id);
                 });
 
-                // красный фон для текста
-                let newRectangle = {
-                    id: Date.now(),
-                    top: bounds.top + 950 * scaleY,
-                    left: 0,
-                    width: bounds.width,
-                    height: 260 * scaleY,
-                    color: '#DE5386',
-                    opacity: 1,
-                    zIndex: 1 + layersTemplate.length,
-                    display: 'block'
-                };
-                rectanglesTemplate.push(newRectangle);
-                layersTemplate.unshift({ name: `Прямоугольник ${rectanglesTemplate.length}`, id: newRectangle.id, type: "rectangle" });
-
+                
                 // большой текст на красном фоне
                 newBlock = {
-                    id: Date.now(),
-                    text: 'ИИ ПРЕВРАЩАЕТ СОЦСЕТИ В ЗОЛОТУЮ ЖИЛУ!',
+                    id: 5,
+                    text: 'ИИ ПРЕВРАЩАЕТ СОЦСЕТИ \nВ ЗОЛОТУЮ ЖИЛУ!',
                     top: bounds.top + 960 * scaleY,
                     left: bounds.left + 51 * scaleX,
                     fontSize: 90 * scaleY,
@@ -901,40 +943,9 @@
                 this.$nextTick(() => {
                     this.initResizeObserver(newBlock.id);
                 });
+                
 
-                // затемнение сверху
-                newImage = {
-                    id: Date.now(),
-                    top: bounds.top + (-50) * scaleY,
-                    left: bounds.left + (-164) * scaleX,
-                    width: bounds.width * 1.2390625,
-                    height: bounds.height * 0.2140625,
-                    src: 'https://api.intelektaz.com/assets/42580a50-c96c-4da2-9b68-2882dcb382b6.png',
-                    zIndex: 1,
-                    rotation: 0,
-                    display: 'block',
-                    filter: 'blur(40px)',
-                    scale: 1.5
-                };
-                imagesTemplate.push(newImage);
-                layersTemplate.unshift({ name: `Затеменение сверху`, id: newImage.id, type: "image", link: newImage.src });
-
-                // затемнение снизу
-                newImage = {
-                    id: Date.now(),
-                    top: bounds.top + 718 * scaleY,
-                    left: bounds.left + (-308) * scaleX,
-                    width: bounds.width * 1.4359375,
-                    height: bounds.height * 0.596875,
-                    src: 'https://api.intelektaz.com/assets/c5f33da0-3812-4dd2-a457-d2b0f6cde9ec.png',
-                    zIndex: 1,
-                    rotation: 0,
-                    display: 'block',
-                    filter: 'blur(70px)',
-                    scale: 1.5
-                };
-                imagesTemplate.push(newImage);
-                layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
+                selectedLayTemplate = newImage.id;
 
                 // итоговый кадр
                 const state = {
@@ -948,6 +959,341 @@
                     selectedTemplate: selectedTemplateTemplate
                 };
                 this.templates.push(state);
+
+
+                // Шаблон 2
+                imagesTemplate = [];
+                rectanglesTemplate = [];
+                textBlocksTemplate = [];
+                layersTemplate = [];
+                selectedTemplateTemplate = 1;
+                croppedImageTemplate = 'https://api.intelektaz.com/assets/fc4846e7-46e5-4360-97ae-153c7464f225';
+                
+                // затемнение снизу
+                newImage = {
+                    id: 7,
+                    top: bounds.top + 718 * scaleY,
+                    left: bounds.left + (-308) * scaleX,
+                    width: bounds.width * 1.4359375,
+                    height: bounds.height * 0.596875,
+                    src: sm_dark,
+                    zIndex: 1,
+                    rotation: 0,
+                    display: 'block',
+                    filter: 70,
+                    scale: 1.5
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
+
+                // затемнение сверху
+                newImage = {
+                    id: 6,
+                    top: bounds.top + (-50) * scaleY,
+                    left: bounds.left + (-164) * scaleX,
+                    width: bounds.width * 1.2390625,
+                    height: bounds.height * 0.2140625,
+                    src: big_dark,
+                    zIndex: 1,
+                    rotation: 0,
+                    display: 'block',
+                    filter: 40,
+                    scale: 1.3
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Затеменение сверху`, id: newImage.id, type: "image", link: newImage.src });
+
+                
+
+                // логотип
+                newImage = {
+                    id: 1,
+                    top: bounds.top + 53 * scaleY,
+                    left: bounds.left + 436 * scaleX,
+                    width: bounds.width * 0.0765625,
+                    height: bounds.height * 0.07890625,
+                    src: logo,
+                    zIndex: 2,
+                    rotation: 0,
+                    display: 'block'
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Логотип ${this.images.length}`, id: newImage.id, type: "image", link: newImage.src })
+
+                // текст к логотипу
+                newBlock = {
+                    id: 2,
+                    text: 'INTELEKTAZ',
+                    top: bounds.top + 73 * scaleY,
+                    left: bounds.left + 553 * scaleX,
+                    fontSize: 48 * scaleY,
+                    color: 'white',
+                    fontWeight: 'normal',
+                    fontStyle: 'normal',
+                    fontFamily: 'Arial',
+                    textAlign: 'left',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                // текст белым снизу
+                newBlock = {
+                    id: 3,
+                    text: 'ТВОЙ БИЗНЕС ЗАХЛЕБЫВАЕТСЯ',
+                    top: bounds.top + 802 * scaleY,
+                    left: bounds.left + 60 * scaleX,
+                    fontSize: 75.75 * scaleY,
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontStyle: 'normal',
+                    fontFamily: 'Tektur',
+                    textAlign: 'left',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                
+                // большой текст на красном фоне
+                newBlock = {
+                    id: 5,
+                    text: 'В РУТИНЕ?',
+                    top: bounds.top + 870 * scaleY,
+                    left: bounds.left + 60 * scaleX,
+                    fontSize: 222.87 * scaleY,
+                    color: '#BAFF26',
+                    fontWeight: 'bold',
+                    fontStyle: 'normal',
+                    fontFamily: 'Tektur',
+                    textAlign: 'center',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                // большой текст на красном фоне
+                newBlock = {
+                    id: 10,
+                    text: 'Выпусти на свободу ИИ и получи взрывной рост продаж!',
+                    top: bounds.top + 1136 * scaleY,
+                    left: bounds.left + 98 * scaleX,
+                    fontSize: 36 * scaleY,
+                    color: 'white',
+                    fontWeight: 'normal',
+                    fontStyle: 'normal',
+                    fontFamily: 'OpenSans',
+                    textAlign: 'center',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+                
+
+                selectedLayTemplate = newImage.id;
+
+                // итоговый кадр
+                const state2 = {
+                    textBlocks: JSON.parse(JSON.stringify(textBlocksTemplate)),
+                    rectangles: JSON.parse(JSON.stringify(rectanglesTemplate)),
+                    images: JSON.parse(JSON.stringify(imagesTemplate)),
+                    croppedImage: croppedImageTemplate,
+                    imageSrc: croppedImageTemplate,
+                    layers: JSON.parse(JSON.stringify(layersTemplate)),
+                    selectedLay: selectedLayTemplate,
+                    selectedTemplate: selectedTemplateTemplate
+                };
+                this.templates.push(state2);
+
+
+                // Шаблон 3
+                imagesTemplate = [];
+                rectanglesTemplate = [];
+                textBlocksTemplate = [];
+                layersTemplate = [];
+                selectedTemplateTemplate = 2;
+                croppedImageTemplate = 'https://api.intelektaz.com/assets/b141af93-948f-4179-918b-e67dc22d6ee9';
+                
+                // затемнение снизу
+                newImage = {
+                    id: 7,
+                    top: bounds.top + 718 * scaleY,
+                    left: bounds.left + (-308) * scaleX,
+                    width: bounds.width * 1.4359375,
+                    height: bounds.height * 0.596875,
+                    src: sm_dark,
+                    zIndex: 1,
+                    rotation: 0,
+                    display: 'block',
+                    filter: 200,
+                    scale: 1.5
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
+                
+
+                // логотип
+                newImage = {
+                    id: 1,
+                    top: bounds.top + 53 * scaleY,
+                    left: bounds.left + 436 * scaleX,
+                    width: bounds.width * 0.0765625,
+                    height: bounds.height * 0.07890625,
+                    src: logo,
+                    zIndex: 2,
+                    rotation: 0,
+                    display: 'block'
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Логотип ${this.images.length}`, id: newImage.id, type: "image", link: newImage.src })
+
+                // логотип
+                newImage = {
+                    id: 12,
+                    top: bounds.top + 1090 * scaleY,
+                    left: bounds.left + 99 * scaleX,
+                    width: bounds.width * 0.84453125,
+                    height: bounds.height * 0.09375,
+                    src: rect_banner,
+                    zIndex: 2,
+                    rotation: 0,
+                    display: 'block'
+                };
+                imagesTemplate.push(newImage);
+                layersTemplate.unshift({ name: `Фон под текст`, id: newImage.id, type: "image", link: newImage.src })
+
+                // текст к логотипу
+                newBlock = {
+                    id: 2,
+                    text: 'INTELEKTAZ',
+                    top: bounds.top + 73 * scaleY,
+                    left: bounds.left + 553 * scaleX,
+                    fontSize: 48 * scaleY,
+                    color: 'white',
+                    fontWeight: 'normal',
+                    fontStyle: 'normal',
+                    fontFamily: 'Arial',
+                    textAlign: 'left',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                // текст красным
+                newBlock = {
+                    id: 3,
+                    text: 'СЕКРЕТНЫЙ',
+                    top: bounds.top + 176 * scaleY,
+                    left: bounds.left + 141 * scaleX,
+                    fontSize: 171.53 * scaleY,
+                    color: '#9C1A1D',
+                    fontWeight: 'bold',
+                    fontStyle: 'normal',
+                    fontFamily: 'Tektur',
+                    textAlign: 'left',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                
+                // большой текст на красном фоне
+                newBlock = {
+                    id: 5,
+                    text: 'ИНГРЕДИЕНТ УСПЕХА:',
+                    top: bounds.top + 376 * scaleY,
+                    left: bounds.left + 141 * scaleX,
+                    fontSize: 94.99 * scaleY,
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontStyle: 'normal',
+                    fontFamily: 'Tektur',
+                    textAlign: 'center',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+
+                // большой текст на красном фоне
+                newBlock = {
+                    id: 10,
+                    text: 'ИИ, который привлекает клиентов 24/7',
+                    top: bounds.top + 1121 * scaleY,
+                    left: bounds.left + 139 * scaleX + 10,
+                    fontSize: 48 * scaleY,
+                    color: 'white',
+                    fontWeight: 'normal',
+                    fontStyle: 'normal',
+                    fontFamily: 'OpenSans',
+                    textAlign: 'center',
+                    width: 0, 
+                    height: 0,
+                    zIndex: 1 + layersTemplate.length,
+                    display: 'block'
+                };
+                textBlocksTemplate.push(newBlock);
+                layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
+                this.$nextTick(() => {
+                    this.initResizeObserver(newBlock.id);
+                });
+                
+
+                selectedLayTemplate = newImage.id;
+
+                // итоговый кадр
+                const state3 = {
+                    textBlocks: JSON.parse(JSON.stringify(textBlocksTemplate)),
+                    rectangles: JSON.parse(JSON.stringify(rectanglesTemplate)),
+                    images: JSON.parse(JSON.stringify(imagesTemplate)),
+                    croppedImage: croppedImageTemplate,
+                    imageSrc: croppedImageTemplate,
+                    layers: JSON.parse(JSON.stringify(layersTemplate)),
+                    selectedLay: selectedLayTemplate,
+                    selectedTemplate: selectedTemplateTemplate
+                };
+                this.templates.push(state3);
             },
             activateTemplate(index) {
                 if (index >= this.templates.length) return;
@@ -2086,7 +2432,7 @@
 
                     // Создаем общий массив элементов для сортировки по z-index
                     const allElements = [];
-                    const drawPromises = [];
+                    // const drawPromises = [];
 
                     // Добавляем прямоугольники
                     this.rectangles.forEach((rectangle) => {
@@ -2112,7 +2458,6 @@
                         });
                     });
 
-                    // Добавляем изображения
                     this.images.forEach((image) => {
                         allElements.push({
                             type: 'image',
@@ -2120,17 +2465,37 @@
                             draw: () => {
                                 return new Promise((resolve, reject) => {
                                     const overlayImg = new Image();
+                                    overlayImg.crossOrigin = 'anonymous'; // важно, если изображение с внешнего источника
                                     overlayImg.src = image.src;
+
+                                    console.log(image);
 
                                     overlayImg.onload = () => {
                                         const scaledLeft = (image.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
                                         const scaledTop = (image.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
-                                        const scaledWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
-                                        const scaledHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
+                                        const baseWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
+                                        const baseHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
 
-                                        ctx.drawImage(overlayImg, scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                        const scale = image.scale || 1;
+
+                                        // 👉 Применяем фильтр
+                                        ctx.filter = image.filter ? `blur(${image.filter * 2}px)` : 'none';
+
+                                        ctx.save(); // Сохраняем состояние контекста
+
+                                        // Перемещаем в центр изображения (чтобы масштаб применился от центра)
+                                        ctx.translate(scaledLeft + baseWidth / 2, scaledTop + baseHeight / 2);
+                                        ctx.scale(scale, scale);
+
+                                        // Отрисовываем изображение смещённое обратно на половину размеров
+                                        ctx.drawImage(overlayImg, -baseWidth / 2, -baseHeight / 2, baseWidth, baseHeight);
+
+                                        ctx.restore(); // Восстанавливаем контекст
+                                        ctx.filter = 'none';
+
                                         resolve();
                                     };
+
 
                                     overlayImg.onerror = () => {
                                         console.error('Ошибка загрузки изображения:', image.src);
@@ -2140,6 +2505,7 @@
                             }
                         });
                     });
+
 
                     // Добавляем текстовые блоки
                     this.textBlocks.forEach((block) => {
@@ -2153,11 +2519,11 @@
 
                                     // Пересчитываем позицию текста с учётом масштаба
                                     let scaledLeft = (block.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                                    const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH) * 1.2;
+                                    const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH);
 
                                     // Разбиваем текст на строки
                                     const lines = this.splitTextIntoLines(block.text);
-                                    const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
+                                    // const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
 
                                     const textMetrics = ctx.measureText(lines[0]);
                                     const textWidth = textMetrics.width;
@@ -2174,8 +2540,8 @@
                                     }
 
                                     // Рисуем каждую строку
-                                    lines.forEach((line, index) => {
-                                        ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+                                    lines.forEach((line) => {
+                                        ctx.fillText(line, scaledLeft, scaledTop);
                                     });
 
                                     resolve();
@@ -2187,21 +2553,22 @@
                     // Сортируем элементы по z-index
                     allElements.sort((a, b) => a.zIndex - b.zIndex);
 
-                    // Рисуем элементы в отсортированном порядке
-                    allElements.forEach((element) => {
-                        drawPromises.push(element.draw());
-                    });
+                    console.log(allElements);
 
-                    // Ждём завершения всех промисов
-                    Promise.all(drawPromises)
-                        .then(() => {
+                    (async () => {
+                        try {
+                            for (const element of allElements) {
+                                await element.draw();
+                            }
+
                             // Сохраняем результат в Base64
                             this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
                             console.log(this.croppedImage);
-                        })
-                        .catch((error) => {
+                        } catch (error) {
                             console.error('Ошибка при отрисовке элементов:', error);
-                        });
+                        }
+                    })();
+
                 };
             },
 
