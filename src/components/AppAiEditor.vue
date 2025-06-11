@@ -1222,18 +1222,18 @@
                 let newTop = clientY - this.dragStartY;
 
                 // Ограничение по горизонтали
-                if (newLeft < bounds.left) {
-                    console.log('за границей!');
-                    newLeft = bounds.left;
-                } 
-                if (newLeft + image.width > bounds.width + bounds.left) newLeft = bounds.width + bounds.left - image.width;
+                // if (newLeft < bounds.left) {
+                //     console.log('за границей!');
+                //     newLeft = bounds.left;
+                // } 
+                // if (newLeft + image.width > bounds.width + bounds.left) newLeft = bounds.width + bounds.left - image.width;
                 
-                // Ограничение по вертикали
-                if (newTop < bounds.top) newTop = bounds.top;
-                if (newTop + image.height > bounds.height) newTop = bounds.height - image.height;
+                // // Ограничение по вертикали
+                // if (newTop < bounds.top) newTop = bounds.top;
+                // if (newTop + image.height > bounds.height) newTop = bounds.height - image.height;
 
-                if (newLeft < 0) newLeft = 0;
-                if (newTop < 0) newTop = 0;
+                // if (newLeft < 0) newLeft = 0;
+                // if (newTop < 0) newTop = 0;
                 
                 image.left = newLeft;
                 image.top = newTop;
@@ -1296,35 +1296,35 @@
 
                 switch (this.resizePosition) {
                     case 'top-left':
-                        if (this.initialImageLeft + deltaX >= bounds.left && this.initialImageTop + (this.initialImageHeight - image.height) >= bounds.top) {
+                        // if (this.initialImageLeft + deltaX >= bounds.left && this.initialImageTop + (this.initialImageHeight - image.height) >= bounds.top) {
                             image.width = this.initialImageWidth - deltaX;
                             image.height = image.width / aspectRatio; // Пропорциональная высота
                             image.left = this.initialImageLeft + deltaX;
                             image.top = this.initialImageTop + (this.initialImageHeight - image.height);
-                        }
+                        // }
                         break;
 
                     case 'top-right':
-                        if (this.initialImageTop + (this.initialImageHeight - image.height) >= bounds.top && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
+                        // if (this.initialImageTop + (this.initialImageHeight - image.height) >= bounds.top && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
                             image.width = this.initialImageWidth + deltaX;
                             image.height = image.width / aspectRatio; // Пропорциональная высота
                             image.top = this.initialImageTop + (this.initialImageHeight - image.height);
-                        }
+                        // }
                         break;
 
                     case 'bottom-left':
-                        if (this.initialImageLeft - (image.width - this.initialImageWidth) >= bounds.left && this.initialImageTop + this.initialImageHeight + deltaY <= bounds.height) {
+                        // if (this.initialImageLeft - (image.width - this.initialImageWidth) >= bounds.left && this.initialImageTop + this.initialImageHeight + deltaY <= bounds.height) {
                             image.height = this.initialImageHeight + deltaY;
                             image.width = image.height * aspectRatio; // Пропорциональная ширина
                             image.left = this.initialImageLeft - (image.width - this.initialImageWidth);
-                        }
+                        // }
                         break;
 
                     case 'bottom-right':
-                        if (this.initialImageTop + this.initialImageHeight + deltaY <= bounds.height && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
+                        // if (this.initialImageTop + this.initialImageHeight + deltaY <= bounds.height && this.initialImageLeft + this.initialImageWidth + deltaX <= bounds.left + bounds.width) {
                             image.width = this.initialImageWidth + deltaX;
                             image.height = image.width / aspectRatio; // Пропорциональная высота
-                        }
+                        // }
                         break;
                 }
 
@@ -2025,6 +2025,7 @@
                                     const textWidth = textMetrics.width;
 
                                     if (block.textAlign === 'center') {
+                                        console.log(scaledLeft, textWidth);
                                         scaledLeft += textWidth / 2; // Центрируем по ширине текста
                                         ctx.textAlign = 'center';
                                     } else if (block.textAlign === 'right') {

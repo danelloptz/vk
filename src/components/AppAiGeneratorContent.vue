@@ -153,7 +153,7 @@
                 </div>
                 <AppGoodButton class="mob_btn" :text="text3" @click="generateThemes" />
             </div>
-            <div class="generations_wrapper">
+            <div class="generations_wrapper" v-if="testers.indexOf(userData.vk_id) != -1">
                 <span class="generations_item" @click="openGeneratorModal(false)">
                     Генерация баннеров: {{ generations?.free.remains }} / {{ generations?.free.total }}
                 </span>
@@ -581,7 +581,7 @@
                 variants: ["ВАРИАНТ 1", "ВАРИАНТ 2", "ВАРИАНТ 3", "ВАРИАНТ 4"],
                 result: [],
                 badDate: false,
-                maxSymbols: 3500,
+                maxSymbols: 10000,
                 isDropdownVisible: false,
                 types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"],
                 isPostPubl: false,
@@ -754,7 +754,9 @@
                     this.plan = resp;
                 } else {
                     console.log("я тут4");
+                    await updateContentPlan(this.plan, localStorage.getItem("token"));
                     this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link;
+                    console.log(this.plan);
                     const resp = await uploadUserImage(
                         this.plan[this.indexEdit].topic_id,
                         file,
@@ -762,6 +764,7 @@
                         this.plan[this.indexEdit].chose_image_index || 0
                     );
                     this.plan = resp;
+                    console.log(this.plan);
                 }
             },
 
