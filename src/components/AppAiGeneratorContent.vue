@@ -228,15 +228,15 @@
                                     style="display: none;"
                                 />
                                 <!-- <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" /> -->
-                                <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3">
-                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
-                                        <img src="@/assets/images/pen.png" />
-                                        <span>Редактор</span>
-                                    </div>
-                                    <div class="bannerAi" v-if="testers.indexOf(userData.vk_id) != -1" @click="openBanner(index)">
-                                        <img src="@/assets/images/banner.png" />
-                                        <span>ИИ Баннер</span>
-                                    </div>
+                            </div>
+                            <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3">
+                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                                    <img src="@/assets/images/pen.png" />
+                                    <span>Редактор</span>
+                                </div>
+                                <div class="bannerAi" v-if="testers.indexOf(userData.vk_id) != -1" @click="openBanner(index)">
+                                    <img src="@/assets/images/banner.png" />
+                                    <span>ИИ Баннер</span>
                                 </div>
                             </div>
                         </div>

@@ -20,6 +20,13 @@
                 <AppGoodButton @click="addImage" :text="text6" class="btn1"/>
                 <AppGoodButton @click="addTextBlock" :text="text4" class="btn2" />
                 <AppGoodButton @click="addRectangle" :text="text5" class="btn1" />
+                <AppGoodButton @click="toggleEmojiPanel" :text="'ЭМОДЗИ'" class="btn2" ref="emojiButton" />
+                <!-- Панель смайликов -->
+                <div v-if="showEmojiPanel" class="emoji-panel" ref="emojiPanel">
+                    <span v-for="emoji in emojis" :key="emoji" class="emoji" @click="insertEmoji(emoji)">
+                        {{ emoji }}
+                    </span>
+                </div>
             </div>
             <div class="main">
                 <div class="cropper_wrapper">
@@ -321,15 +328,6 @@
                                         <div></div>
                                     </div>
                                     <h2 :class="{ non_active_align: selectedBlock.textAlign != 'right' }">Right</h2>
-                                </div>
-                                <!-- Кнопка вызова панели -->
-                                <button class="emoji_btn" @click="toggleEmojiPanel" ref="emojiButton">😊</button>
-
-                                <!-- Панель смайликов -->
-                                <div v-if="showEmojiPanel" class="emoji-panel" ref="emojiPanel">
-                                    <span v-for="emoji in emojis" :key="emoji" class="emoji" @click="insertEmoji(emoji)">
-                                        {{ emoji }}
-                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -877,8 +875,11 @@
                 this.isSaveTemplate = true;
             },
             handleClickOutside(event) {
-                const panel = this.windowWidth > 900 ? this.$refs.emojiPanel : this.$refs.emojiPanel2;
-                const button = this.windowWidth > 900 ? this.$refs.emojiButton : this.$refs.emojiButton2;
+                const panelRef = this.windowWidth > 900 ? this.$refs.emojiPanel : this.$refs.emojiPanel2;
+                const buttonRef = this.windowWidth > 900 ? this.$refs.emojiButton : this.$refs.emojiButton2;
+
+                const panel = panelRef?.$el || panelRef;
+                const button = buttonRef?.$el || buttonRef;
 
                 console.log(panel, button);
 
@@ -3536,7 +3537,7 @@
         display: flex;
         flex-wrap: wrap;
         padding: 5px;
-        width: 160px;
+        width: 180px;
         max-height: 150px;
         overflow-y: auto;
         z-index: 1000;

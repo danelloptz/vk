@@ -107,31 +107,34 @@
                 </div>
             </div>
             <div class="color">
-                <h2 style="align-self: self-start;">Цвет</h2>
-                <div class="colors">
-                    <div 
-                        class="colors_item"
-                        v-for="(item, index) in colors_choices"
-                        :key="index"
-                        :style="{ background: index == selectedColors ? '#2F3251' : 'none'}"
-                        @click="selectColors(index)"
-                    >
-                        <span class="colors_item_name">{{ item.name }}</span>
-                        <div class="colors_item_square_wrapper">
-                            <div 
-                                class="colors_item_square"
-                                v-for="(color, index2) in item.colors"
-                                :key="index2"
-                                :style="{ background: color }"
-                            ></div>
+                <div class="col">
+                    <h2 style="align-self: self-start;">Цвет</h2>
+                    <div class="colors">
+                        <div 
+                            class="colors_item"
+                            v-for="(item, index) in colors_choices"
+                            :key="index"
+                            :style="{ background: index == selectedColors ? '#2F3251' : 'none'}"
+                            @click="selectColors(index)"
+                        >
+                            <span class="colors_item_name">{{ item.name }}</span>
+                            <div class="colors_item_square_wrapper">
+                                <div 
+                                    class="colors_item_square"
+                                    v-for="(color, index2) in item.colors"
+                                    :key="index2"
+                                    :style="{ background: color }"
+                                ></div>
+                            </div>
+                            <img 
+                                src="@/assets/images/ok.png" 
+                                class="ok" 
+                                v-if="index == selectedColors"
+                            />
                         </div>
-                        <img 
-                            src="@/assets/images/ok.png" 
-                            class="ok" 
-                            v-if="index == selectedColors"
-                        />
                     </div>
                 </div>
+                
                 <div class="btns_row">
                     <AppBadButton 
                         :text="'ВАШЕ ФОТО'" 
@@ -557,6 +560,11 @@
         flex-direction: column;
         row-gap: 20px;
         align-items: end;
+    }
+    .col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
     }
     .colors {
         display: flex;
