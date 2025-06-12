@@ -1,4 +1,16 @@
 <template>
+    <div class="modal_wrapper" v-if="isSaveTemplate">
+        <div class="modal" :style="{ position: isChangePosition ? 'static' : 'relative' }">
+            <img src="@/assets/images/close.png" class="close" @click="closeSaveTemplate">
+            <span>Сохранить как шаблон?</span>
+            <div class="modal_row">
+                <AppBadButton :text="'1'" class="square_btn" @click="saveTemplate(0)"/>
+                <AppBadButton :text="'2'" class="square_btn" @click="saveTemplate(1)"/>
+                <AppBadButton :text="'3'" class="square_btn" @click="saveTemplate(2)"/>
+                <AppBadButton :text="'ОТМЕНА'" class="cancel_btn" @click="closeSaveTemplate"/>
+            </div>
+        </div>
+    </div>
     <div class="wrapper">
         <div class="editor" v-if="windowWidth > 900" @mousedown.self="resetSelect" @touchstart.self="resetSelect">
             <img src="@/assets/images/close.png" class="close" @click="close">
@@ -153,8 +165,13 @@
                         <span>Обрезать?</span>
                         <AppGoodButton :text="text7" @click="resize" class="crop" /> 
                     </div>
-                    <div class="row">
+                    <div class="row row_templates">
                         <span>Шаблон: </span>
+                        <AppGoodButton 
+                            :isReboot="true"
+                            class="square_btn not_active"
+                            @click="rebootTemplates"
+                        />
                         <AppGoodButton 
                             v-for="(item, index) in ['1', '2', '3']"
                             :text="item" 
@@ -162,6 +179,11 @@
                             class="square_btn" 
                             :class="{ not_active: index !== selectedTemplate }"
                             @click="selectTemplate(index)"
+                        />
+                        <AppGoodButton 
+                            :isSave="true"
+                            class="square_btn not_active"
+                            @click="openSaveTemplate"
                         />
                     </div>
                     <div class="row">
@@ -194,6 +216,9 @@
                                     :class="{ active_lay_item: selectedLay == element.id }"
                                     @click="selectLay(element.id)"
                                 >
+                                    <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
+                                    <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
+
                                     <span 
                                         v-if="element.type == 'text'"
                                         class="drag-handle"
@@ -210,9 +235,6 @@
                                     <span  
                                         class="layer_name"    
                                     >{{ element.name }}</span>
-                                    
-                                    <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
-                                    <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
 
                                     <img 
                                         class="delete_lay" 
@@ -320,10 +342,11 @@
                         <div class="text_tools_row">
                             <h2>Шрифт: </h2>
                             <select class="font_dropdown" v-model="selectedBlock.fontFamily">
+                                <option value="Tektur" @click="captureState">Tektur</option>
+                                <option value="Montserrat" @click="captureState">Montserrat</option>
                                 <option value="Arial" @click="captureState">Arial</option>
-                                <option value="Times New Roman" @click="captureState">Times New Roman</option>
-                                <option value="Courier New" @click="captureState">Courier New</option>
-                                <option value="Verdana" @click="captureState">Verdana</option>
+                                <option value="OpenSans" @click="captureState">Open Sans</option>
+                                <option value="Roboto" @click="captureState">Roboto</option>
                             </select>
                         </div>
                     </div>
@@ -334,15 +357,43 @@
         <div class="editor" v-if="windowWidth <= 900" @mousedown.self="resetSelect" @touchstart.self="resetSelect">
             <img src="@/assets/images/close.png" class="close" @click="close">
             <h1>Редактор</h1>
+            <div class="adding_row">
+                <span class="adding_btns_text">Добавить:</span>
+                <div class="adding_btns">
+                    <AppGoodButton 
+                        class="square_btn2 not_active"
+                        :isText="true"
+                        @click="addTextBlock"
+                    />
+                    <AppGoodButton 
+                        class="square_btn2 not_active"
+                        :isPics="true"
+                        @click="addImage"
+                    />
+                    <AppGoodButton 
+                        class="square_btn2 not_active"
+                        :isRect="true"
+                        @click="addRectangle"
+                    />
+                    <AppGoodButton 
+                        class="square_btn2 not_active"
+                        :isEmojis="true"
+                        @click="toggleEmojiPanel"
+                        ref="emojiButton2"
+                    />
+                    <!-- Панель смайликов -->
+                    <div v-if="showEmojiPanel" class="emoji-panel" ref="emojiPanel2">
+                        <span v-for="emoji in emojis" :key="emoji" class="emoji" @click="insertEmoji(emoji)">
+                            {{ emoji }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
              <div class="header_tools">
                 <img src="@/assets/images/crop.png" @click="changeCrop">
                 <img src="@/assets/images/return_back.png" @click="undo">
                 <img src="@/assets/images/return_towards.png" @click="redo">
-            </div>
-            <div class="adding_btns">
-                <AppGoodButton @click="addImage" :text="text6" class="btn1"/>
-                <AppGoodButton @click="addTextBlock" :text="text4" class="btn2" />
-                <AppGoodButton @click="addRectangle" :text="text5" class="btn1" />
             </div>
             <div class="cropper_wrapper">
                 <!-- Контейнер для vue-advanced-cropper -->
@@ -394,6 +445,9 @@
                         width: `${image.width}px`,
                         height: `${image.height}px`,
                         zIndex: image.zIndex,
+                        transform: `rotate(${image.rotation}deg) scale(${image?.scale ? image?.scale : 1})`,
+                        display: image.display,
+                        filter: image?.filter ? `blur(${image?.filter}px)` : 'none'
                         }"
                         @mousedown="selectImage(image.id, $event)"
                         @touchstart="selectImage(image.id, $event)"
@@ -407,6 +461,14 @@
                             @mousedown="startResizeImage($event, handle.position, image.id)"
                             @touchstart="startResizeImage($event, handle.position, image.id)"
                         ></div>
+                        <div 
+                            v-if="selectedLay == image.id"
+                            class="rotate_handle"
+                            @mousedown="startRotateImage($event, image.id)"
+                            @touchstart="startRotateImage($event, image.id)"
+                        >
+                            <img src="@/assets/images/return_back.png" />
+                        </div>
                         <img
                         :src="image.src"
                         :style="{
@@ -475,16 +537,28 @@
                     <span>Обрезать?</span>
                     <AppGoodButton :text="text7" @click="resize" class="crop" /> 
                 </div>
-                <div class="row">
+                <div class="row row_templates">
                     <span>Шаблон: </span>
-                    <AppGoodButton 
-                        v-for="(item, index) in ['1', '2', '3']"
-                        :text="item" 
-                        :key="index"
-                        class="square_btn" 
-                        :class="{ not_active: index !== selectedTemplate }"
-                        @click="selectTemplate(index)"
-                    />
+                    <div class="row_templates_sub_row">
+                        <AppGoodButton 
+                            :isReboot="true"
+                            class="square_btn not_active"
+                            @click="rebootTemplates"
+                        />
+                        <AppGoodButton 
+                            v-for="(item, index) in ['1', '2', '3']"
+                            :text="item" 
+                            :key="index"
+                            class="square_btn" 
+                            :class="{ not_active: index !== selectedTemplate }"
+                            @click="selectTemplate(index)"
+                        />
+                        <AppGoodButton 
+                            :isSave="true"
+                            class="square_btn not_active"
+                            @click="openSaveTemplate"
+                        />
+                    </div>
                 </div>
             </div>
             <div class="text_tools" @mousedown.self="resetSelect" @touchstart.self="resetSelect">
@@ -558,10 +632,11 @@
                 <div class="text_tools_row top_align">
                     <h2>Шрифт: </h2>
                     <select class="font_dropdown" v-model="selectedBlock.fontFamily">
+                        <option value="Tektur" @click="captureState">Tektur</option>
+                        <option value="Montserrat" @click="captureState">Montserrat</option>
                         <option value="Arial" @click="captureState">Arial</option>
-                        <option value="Times New Roman" @click="captureState">Times New Roman</option>
-                        <option value="Courier New" @click="captureState">Courier New</option>
-                        <option value="Verdana" @click="captureState">Verdana</option>
+                        <option value="OpenSans" @click="captureState">Open Sans</option>
+                        <option value="Roboto" @click="captureState">Roboto</option>
                     </select>
                     <div class="color_text">
                         <div 
@@ -598,6 +673,9 @@
                             :class="{ active_lay_item: selectedLay == element.id }"
                             @click="selectLay(element.id)"
                         >
+                            <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
+                            <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
+
                             <span 
                                 v-if="element.type == 'text'"
                                 class="drag-handle"
@@ -615,8 +693,6 @@
                                 class="layer_name"    
                             >{{ element.name }}</span>
                             
-                            <img src="@/assets/images/eye.png" v-if="isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
-                            <img src="@/assets/images/close_eye.png" v-if="!isVisibleLay(element)" class="eye" @click="changeVisible(element)" />
                             <img 
                                 class="delete_lay" 
                                 src="@/assets/images/close.png" 
@@ -718,7 +794,8 @@
                 rotationCenterY: 0,
                 templates: [],
                 emojis: [],
-                showEmojiPanel: false
+                showEmojiPanel: false,
+                isSaveTemplate: false
             }
         },
         mounted() {
@@ -768,9 +845,42 @@
             this.emojis = resp.emojis;
         },
         methods: {
+            saveTemplate(index) {
+                if (index >= this.templates.length) return;
+
+                this.captureState();
+                let state = this.history[this.history.length - 1];
+                state.selectedTemplate = index;
+
+                this.templates[index] = state;
+                this.selectedTemplate = index;
+                this.closeSaveTemplate();
+            },  
+            closeSaveTemplate() {
+                this.isSaveTemplate = false;
+            },
+            rebootTemplates() {
+                const state_reboot = {
+                    textBlocks: JSON.parse(JSON.stringify([])),
+                    rectangles: JSON.parse(JSON.stringify([])),
+                    images: JSON.parse(JSON.stringify([])),
+                    croppedImage: this.imageSrc,
+                    imageSrc: this.imageSrc,
+                    layers: JSON.parse(JSON.stringify([])),
+                    selectedLay: null,
+                    selectedTemplate: null
+                };
+                // this.addHistory(state_reboot);
+                this.restoreState(state_reboot);
+            },
+            openSaveTemplate() {
+                this.isSaveTemplate = true;
+            },
             handleClickOutside(event) {
-                const panel = this.$refs.emojiPanel;
-                const button = this.$refs.emojiButton;
+                const panel = this.windowWidth > 900 ? this.$refs.emojiPanel : this.$refs.emojiPanel2;
+                const button = this.windowWidth > 900 ? this.$refs.emojiButton : this.$refs.emojiButton2;
+
+                console.log(panel, button);
 
                 if (
                     panel &&
@@ -1538,6 +1648,7 @@
                 this.restoreState(nextState);
             },
             restoreState(state) {
+                console.log(state);
                 this.textBlocks = JSON.parse(JSON.stringify(state.textBlocks));
                 this.rectangles = JSON.parse(JSON.stringify(state.rectangles));
                 this.images = JSON.parse(JSON.stringify(state.images));
@@ -2706,6 +2817,22 @@
 </script>
 
 <style scoped>
+    @font-face {
+        font-family: 'PathwayExtreme';
+        src: url('@/assets/fonts/PathwayExtreme.ttf');
+    }
+    @font-face {
+        font-family: 'PiazzollaItalic';
+        src: url('@/assets/fonts/Piazzolla-Italic.ttf');
+    }
+    @font-face {
+        font-family: 'Montserrat';
+        src: url('@/assets/fonts/Montserrat.ttf');
+    }
+    @font-face {
+        font-family: 'Roboto';
+        src: url('@/assets/fonts/Roboto.ttf');
+    }
     .wrapper {
         width: 100vw;
         height: 100%;
@@ -2716,7 +2843,7 @@
         position: fixed;
         left: 0;
         top: 0;
-        z-index: 999;
+        z-index: 997;
     }
     .editor {
         width: 1054px;
@@ -2821,7 +2948,7 @@
     }
     .layer-item {
         display: grid;
-        grid-template-columns: 1fr 5fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 9fr 1fr;
         align-items: center;
         column-gap: 10px;
         margin-bottom: 5px;
@@ -2834,7 +2961,7 @@
     .eye {
         width: 17px;
         cursor: pointer;
-        justify-self: end;
+        justify-self: center;
     }
     .lay_row {
         display: flex;
@@ -2915,16 +3042,21 @@
         cursor: pointer;
         display: flex;
         flex-direction: column;
+        align-items: center;
         color: white;
     }
     .text_text span {
         font-size: 58.33px;
+        font-family: 'PathwayExtreme';
     }
     .bold {
-        font-weight: bold;
+        font-weight: normal;
     }
     .italic {
-        font-style: italic;
+        /* font-style: italic; */
+        font-size: 63px !important;
+        font-family: 'PiazzollaItalic' !important;
+        line-height: 1.25;
     }
     .color_text {
         display: flex;
@@ -3304,22 +3436,8 @@
         align-self: center;
         align-items: center;
         flex-wrap: wrap;
-    }
-    @media (max-width: 900px) {
-        .adding_btns {
-            row-gap: 10px;
-            column-gap: 10px;
-        }
-
-        .adding_btns .btn1:nth-child(1),
-        .adding_btns .btn2 {
-            flex: 1 1 auto;
-        }
-
-        .adding_btns .btn1:nth-child(3) {
-            flex: 1 1 100%;
-            width: 100%;
-            margin-right: 0;
+        @media (max-width: 900px) {
+            column-gap: 22px;
         }
     }
     .adding_btns span {
@@ -3327,6 +3445,18 @@
         color: white;
         font-weight: bold;
         font-family: 'OpenSans';
+    }
+    .adding_row {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        align-self: self-start;
+    }
+    .adding_btns_text {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+        align-self: self-start;
     }
     .row {
         display: flex;
@@ -3338,6 +3468,20 @@
             column-gap: 17.92px;
             align-self: self-start;
         }
+    }
+    .row_templates {
+        column-gap: 23px !important;
+        @media (max-width: 900px) {
+            column-gap: 15.78px !important;
+            align-self: self-start;
+            flex-direction: column !important;
+            row-gap: 12px;
+            align-items: start;
+        }
+    }
+    .row_templates_sub_row {
+        display: flex;
+        column-gap: 15.78px !important;
     }
     .row_btns {
         align-self: center !important;
@@ -3364,10 +3508,13 @@
     .square_btn {
         width: 60px;
         height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         @media (max-width: 900px) {
-            width: 51.29px;
-            height: 51.29px;
-            font-size: 20.52px !important;
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 18.93 !important;
         }
     }
     .not_active {
@@ -3406,5 +3553,65 @@
         height: 50px;
         font-size: 30px;
     }
-
+    .modal_wrapper {
+        width: 100vw;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* align-items: center; */
+        background: rgba(0, 0, 0, 0.3);
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 999;
+    }
+    .modal {
+        width: 545px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 30px;
+        padding: 58px;
+        background: #1B1E3D;
+        border-radius: 10px;
+        overflow-y: auto;
+        position: relative;
+        height: fit-content;
+        @media (max-width: 900px) {
+            padding: 40px 13px;
+            align-items: center;
+        }
+    }
+    .close {
+        position: absolute;
+        right: 30px;
+        top: 30px;
+        width: 21px;
+        height: 21px;
+        cursor: pointer;
+    }
+    .modal span {
+        color: white;
+        font-size: 20px;
+        font-family: 'OpenSans';
+    }
+    .modal_row {
+        display: flex;
+        column-gap: 15px;
+    }
+    .cancel_btn {
+        width: 110px;
+        height: 60px;
+        @media (max-width: 900px) {
+            height: 47px;
+        }
+    }
+    .square_btn2 {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 </style>

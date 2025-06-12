@@ -228,7 +228,7 @@
                                     style="display: none;"
                                 />
                                 <!-- <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" /> -->
-                                <div class="banner_tools">
+                                <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3">
                                     <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
@@ -325,7 +325,7 @@
                                         style="display: none;"
                                     />
                                 </div>
-                                <div class="banner_tools">
+                                <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3">
                                     <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
@@ -660,6 +660,7 @@
             console.log(this.flagsImages);
             
             this.step = this.getStep();
+            console.log("ШАГ", this.step);
 
             const testers = await getConfig("testers_for_cropper", localStorage.getItem("token"));
             this.testers = testers.ids;
@@ -885,10 +886,7 @@
                         } catch(err) {
                             console.error(err);
                         }
-                    }
-
-                    console.log(this.step);
-                    if (this.step == 2) {
+                    } else if (this.step == 2) {
                         try {
                             this.plan.forEach(item => {
                                 if (!item.chose_post_index) item.chose_post_index = 0;
@@ -923,8 +921,7 @@
                         } catch(err) {
                             console.error(err);
                         }
-                    }
-                    if (this.step > 2) {
+                    } else if (this.step > 2) {
                         try {
                             this.plan.forEach(item => {
                                 item.is_accept_pairs = true;

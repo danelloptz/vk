@@ -14,6 +14,14 @@
     />
     <section class="banner">
         <h1 :style="{ alignSelf: isBanner ? 'center' : 'start' }">{{ isBanner ? 'ИИ баннер' : 'Создайте уникальный баннер c Intelektaz' }}</h1>
+        <div class="generations_wrapper">
+            <span class="generations_item" @click="openGeneratorModal(false)">
+                Генерация баннеров: {{ generations?.free.remains }} / {{ generations?.free.total }}
+            </span>
+            <span class="generations_item" @click="openGeneratorModal(true)">
+                Пакет генераций: {{ generations?.paid.remains }} / {{ generations?.paid.total }}
+            </span>
+        </div>
         <div class="descr">
             <span class="counter">{{ descr.length }}/2000</span>
             <textarea 
@@ -72,7 +80,7 @@
                                 </div>
                             </div>
                             <div class="aspect_wrapper_right_col">
-                                <div class="aspect_wrapper_right_col_item">
+                                <div class="aspect_wrapper_right_col_item" style="margin-top: 8px;">
                                     <div class="rect_figure_album"></div>
                                     <span>альбомная</span>
                                 </div>
@@ -99,7 +107,7 @@
                 </div>
             </div>
             <div class="color">
-                <h2>Цвет</h2>
+                <h2 style="align-self: self-start;">Цвет</h2>
                 <div class="colors">
                     <div 
                         class="colors_item"
@@ -124,11 +132,19 @@
                         />
                     </div>
                 </div>
-                <AppGoodButton 
-                    :text="'СГЕНЕРИРОВАТЬ'" 
-                    class="generate_btn"
-                    @click="generate"
-                />
+                <div class="btns_row">
+                    <AppBadButton 
+                        :text="'ВАШЕ ФОТО'" 
+                        class="generate_btn_sm"
+                        @click="uploadUserPhoto"
+                    />
+                    <AppGoodButton 
+                        :text="'СГЕНЕРИРОВАТЬ'" 
+                        class="generate_btn"
+                        @click="generate"
+                    />
+                </div>
+                
             </div>
         </div>
         <span class="loading_text" v-if="isLoading">Генерация ...</span>
@@ -147,7 +163,7 @@
                 :text="`Вариант ${index + 1}`"
                 :class="{ not_active: index !== selectedVariant }"
                 @click="selectVariant(item)"
-                class="btn"
+                class="btn btn_sm"
             />
         </div>
         <div class="row" v-if="generatedImage">
@@ -173,16 +189,17 @@
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppBadButton from '@/components/AppBadButton.vue';
     import AppAiEditor from '@/components/AppAiEditor.vue';
     import AppModal from '@/components/AppModal.vue';
-    import { generateCustomImage } from '@/services/ai';
+    import { generateCustomImage, getGenerations } from '@/services/ai';
 
     export default {
         props: {
             userData: Object,
             isBanner: Boolean
         },
-        components: { AppGoodButton, AppModal, AppAiEditor },
+        components: { AppGoodButton, AppModal, AppAiEditor, AppBadButton },
         data() {
             return {
                 descr: "",
@@ -218,7 +235,7 @@
                 colors_choices: [
                     {
                         name: "Авто",
-                        tag: "Auto",
+                        tag: "AUTO",
                         colors: []
                     },
                     {
@@ -274,7 +291,8 @@
                 isModal: false,
                 isEditor: false,
                 variants: [],
-                selectedVariant: null
+                selectedVariant: null,
+                generations: null
             }
         },
         computed: {
@@ -289,7 +307,32 @@
                 return Math.round((this.imgWidth * heightRatio) / widthRatio); 
             }
         },
+        async created() {
+            const gener = await getGenerations(this.userData.id);
+            this.generations = gener;
+        },
         methods: {
+            uploadUserPhoto() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image(); // Создаем объект Image для загрузки изображения
+                        img.src = e.target.result; // Устанавливаем источник изображения
+
+                        img.onload = () => {
+                            this.generatedImage = img.src;
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+            },
             updateImage(link) {
                 this.generatedImage = link;
             },
@@ -410,6 +453,9 @@
         font-size: 32px;
         font-family: 'OpenSans';
         color: white;
+        @media (max-width: 900px) {
+            font-size: 15px;
+        }
     }
     .descr {
         display: flex;
@@ -425,6 +471,9 @@
         color: white;
         opacity: .5;
         font-family: 'OpenSans';
+        @media (max-width: 900px) {
+            font-size: 12px;
+        }
     }
     textarea {
         width: 100%;
@@ -444,6 +493,10 @@
         width: 100%;
         display: flex;
         justify-content: space-between;
+        @media (max-width: 900px) {
+            flex-direction: column;
+            row-gap: 30px;
+        }
     }
     .style {
         max-width: 430px;
@@ -456,6 +509,9 @@
         flex-wrap: wrap;
         row-gap: 10px;
         column-gap: 20px;
+        @media (max-width: 900px) {
+            justify-content: space-between;
+        }
     }
     h2 {
         font-size: 20px;
@@ -484,6 +540,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        @media (max-width: 900px) {
+            width: 140px;
+        }
     }
     .style_item img {
         width: 25px;
@@ -497,6 +556,7 @@
         display: flex;
         flex-direction: column;
         row-gap: 20px;
+        align-items: end;
     }
     .colors {
         display: flex;
@@ -601,6 +661,11 @@
     .aspect_wrapper {
         display: flex;
         column-gap: 20px;
+        @media (max-width: 900px) {
+            flex-direction: column;
+            align-items: center;
+            row-gap: 30px;
+        }
     }
     .aspect_wrapper_left, .aspect_wrapper_right {
         display: flex;
@@ -666,11 +731,25 @@
         width: 220px;
         height: 51px;
         align-self: end;
-        margin-top: 120px;
+        @media (max-width: 900px) {
+            width: 169px;
+        }
+    }
+    .generate_btn_sm {
+        width: 180px;
+        height: 51px;
+        align-self: end;
+        @media (max-width: 900px) {
+            width: 151px;
+        }
     }
     .generated_image {
         max-width: 785px;
         align-self: center;
+        @media (max-width: 900px) {
+            width: 100%;
+            max-width: none;
+        }
     }
     .line_wrapper {
         max-width: 685px;
@@ -704,12 +783,60 @@
         display: flex;
         column-gap: 30px;
         align-self: center;
+        @media (max-width: 900px) {
+            flex-wrap: wrap;
+            column-gap: 10px;
+            row-gap: 10px;
+        }
     }
     .btn {
         width: 180px;
+        @media (max-width: 900px) {
+            width: 150px;
+            height: 40px;
+            font-size: 14px;
+        }
+    }
+    .btn_sm {
+        @media (max-width: 900px) {
+            width: 100px;
+            height: 35px;
+            font-size: 12px;
+        }
     }
     .not_active {
         background: none;
         border: 1px solid white;
+    }
+    .generations_wrapper {
+        display: flex;
+        column-gap: 30px;
+        @media (max-width: 750px) {
+            flex-direction: column;
+        }
+    }
+    .generations_item {
+        padding: 10px 20px;
+        background: #111433;
+        border-radius: 10px;
+        color: white;
+        font-size: 20px;
+        font-family: 'OpenSans';
+        width: fit-content;
+        height: fit-content;
+        margin-bottom: 10px;
+        cursor: pointer;
+        @media (max-width: 750px) {
+            width: 100%;
+            font-size: 16px;
+        }
+    }
+    .btns_row {
+        display: flex;
+        column-gap: 29px;
+        margin-top: 120px;
+        @media (max-width: 900px) {
+            column-gap: 10px;
+        }
     }
 </style>

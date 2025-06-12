@@ -1,11 +1,25 @@
 <template>
-    <button class="button">{{ text }}</button>
+    <button class="button">
+        <img v-if="isSave" src="@/assets/images/save_banner.png" class="save_banner" />
+        <img v-if="isReboot" src="@/assets/images/reboot_banner.png" class="reboot_banner" />
+        <img v-if="isPics" src="@/assets/images/pics_banner.png" class="pics_banner" />
+        <img v-if="isRect" src="@/assets/images/rectangle_banner.png" class="rectangle_banner" />
+        <img v-if="isEmojis" src="@/assets/images/smile_banner.png" class="smile_banner" />
+        <span v-if="isText" class="text_banner">T</span>
+        {{ text }}
+    </button>
 </template>
 
 <script>
     export default {
         props: {
-            text: String
+            text: String,
+            isReboot: Boolean,
+            isSave: Boolean,
+            isText: Boolean,
+            isPics: Boolean,
+            isRect: Boolean,
+            isEmojis: Boolean
         }
     }
 </script>
@@ -46,5 +60,40 @@
     }
     .button:hover {
         background: linear-gradient(to right, #E14A7A, #E14ABB, #A139DE);
+    }
+    .save_banner {
+        width: 23px;
+        height: 23px;
+        @media (max-width: 900px) {
+            width: 18.15px;
+            height: 18.15px;
+        }
+    }
+    .reboot_banner {
+        width: 40px;
+        height: 40px;
+        @media (max-width: 900px) {
+            width: 30px;
+            height: 30px;
+        }
+    }
+    .text_banner {
+        font-size: 23.21px;
+        font-family: 'Tektur';
+        color: white;
+        font-weight: lighter;
+    }
+    .pics_banner {
+        width: 28px;
+        height: 28px;
+    }
+    .rectangle_banner {
+        width: 23.76px;
+        height: 13.58px;
+        border: 1px solid white;
+    }
+    .smile_banner {
+        width: 28px;
+        height: 28px;
     }
 </style>
