@@ -291,14 +291,25 @@ export async function editScenario(payload) {
 }
 
 export async function generateCustomImage(text, aspect_ratio, color_palette, style_type, user_id) {
-    try {
-        const response = await axios.post('https://web.intelektaz.com/api/v2/others/generate_image', {
+    let payload;
+    if (color_palette == 'AUTO') {
+        payload = {
             "prompt": text,
             "aspect_ratio": aspect_ratio,
-            "color_palette": color_palette,
             "style_type": style_type,
             "user_id": user_id
-        });
+        };
+    } else {
+            payload = {
+                "prompt": text,
+                "aspect_ratio": aspect_ratio,
+                "color_palette": color_palette,
+                "style_type": style_type,
+                "user_id": user_id
+            };
+        }
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/others/generate_image', payload);
         return response.data.image_id;
     } catch(error) {
         console.error("Ошибка при генерации изображения в ии баннере", error);
@@ -308,6 +319,7 @@ export async function generateCustomImage(text, aspect_ratio, color_palette, sty
         };
     }
 }
+
 
 export async function getGenerations(user_id) {
     try {
@@ -349,6 +361,38 @@ export async function buyGenerations(vk_id, count_posts) {
         return response.data;
     } catch(error) {
         console.error("Ошибка при покупке генераций", error);
+        return {
+            "isError": true,
+            "code": error.response.status
+        };
+    }
+}
+
+export async function saveTemplate(user_id, index, template) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/save_user_template', {
+            "user_id": user_id,
+            "index": index,
+            "template": template
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при сохранении шаблона", error);
+        return {
+            "isError": true,
+            "code": error.response.status
+        };
+    }
+}
+
+export async function getTemplates(user_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/v2/users/get_user_template', {
+            "user_id": user_id,
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении шаблона", error);
         return {
             "isError": true,
             "code": error.response.status

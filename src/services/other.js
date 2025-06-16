@@ -24,3 +24,20 @@ export async function sendTrouble(group_link, user_id, reason, comment) {
         return false; 
     }
 }
+
+export async function loadImage(file) {
+    try {
+        const formData = new FormData();
+        formData.append("img", file);
+        const response = await axios.post('https://web.intelektaz.com/api/v2/others/load_image', formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при загрузке изображения", error);
+        return false; 
+    }
+}

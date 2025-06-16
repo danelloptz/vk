@@ -5,9 +5,15 @@
         <AppGoodButton :text="text1" style="width: 200px; margin-top: 40px;" @click="openTatiff" />
     </section>
     <section class="ai" v-if="userData.packages.at(-1).package_name == 'Leader' || userData.packages.at(-1).package_name == 'Business'">
-        <div class="switch" v-if="windowWidth > 650">
+        <div 
+            class="switch" 
+            v-if="windowWidth > 650"
+            :style="{
+                gridTemplateColumns: userData?.packages.find(p => p.id === 6) ? 'repeat(6, 1fr)' : 'repeat(5, 1fr)'
+            }"
+        >
             <span
-                v-for="(item, index) in listSwtich"
+                v-for="(item, index) in listSwtich.filter(item => item.index !== 1 || (item.index === 1 && userData?.packages.some(p => p.id === 6)))"
                 :key="index"
                 :class="{ active: activeIndex === item.index }" 
                 @click="setActive(item.index)"
@@ -15,7 +21,7 @@
         </div>  
         <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
         <AppAiGeneratorContent v-if="activeIndex == 0" :windowWidth="windowWidth" :userData="userData" />
-        <AppAiBanner v-if="activeIndex == 1 && testers.indexOf(userData.vk_id) != -1" :userData="userData" />
+        <AppAiBanner v-if="activeIndex == 1 && userData?.packages.find(p => p.id === 6)" :userData="userData" />
         <AppAiAnalytics v-if="activeIndex == 2" :windowWidth="windowWidth" />
         <AppAiScene v-if="activeIndex == 3" :userData="userData" />
         <AppAiChat v-if="activeIndex == 4" :userData="userData" />
@@ -33,8 +39,6 @@
     import AppDropdown from '@/components/AppDropdown.vue';
     import AppAiBanner from '@/components/AppAiBanner.vue';
 
-    import { getConfig } from "@/services/config";
-    
     export default {
         props: { 
             userData: Object,
@@ -71,12 +75,7 @@
                     },
                 ],
                 text1: "ВЫБРАТЬ ПАКЕТ",
-                testers: null
             }
-        },
-        async created() {
-            const testers = await getConfig("testers_for_cropper", localStorage.getItem("token"));
-            this.testers = testers.ids;
         },
         methods: {
             setActive(index) {
@@ -104,7 +103,6 @@
     .switch {
         width: 100%;
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
     }
     span {
         width: 100%;

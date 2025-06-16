@@ -2,6 +2,7 @@
     <AppAiEditor 
         v-if="isEditor" 
         :imageSrc="aiEditorLink"
+        :userData="userData"
         @update:visibility1="isEditor = $event"
         @update:save="updateImage($event, indexEdit, isCustomEdit)"
     />
@@ -153,7 +154,7 @@
                 </div>
                 <AppGoodButton class="mob_btn" :text="text3" @click="generateThemes" />
             </div>
-            <div class="generations_wrapper" v-if="testers.indexOf(userData.vk_id) != -1">
+            <div class="generations_wrapper">
                 <span class="generations_item" @click="openGeneratorModal(false)">
                     Генерация баннеров: {{ generations?.free.remains }} / {{ generations?.free.total }}
                 </span>
@@ -229,12 +230,12 @@
                                 />
                                 <!-- <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" /> -->
                             </div>
-                            <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3">
-                                <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                            <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3 && userData?.packages.find(p => p.id === 6)">
+                                <div class="editor" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                     <img src="@/assets/images/pen.png" />
                                     <span>Редактор</span>
                                 </div>
-                                <div class="bannerAi" v-if="testers.indexOf(userData.vk_id) != -1" @click="openBanner(index)">
+                                <div class="bannerAi" @click="openBanner(index)">
                                     <img src="@/assets/images/banner.png" />
                                     <span>ИИ Баннер</span>
                                 </div>
@@ -325,12 +326,12 @@
                                         style="display: none;"
                                     />
                                 </div>
-                                <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3">
-                                    <div class="editor" v-if="testers.indexOf(userData.vk_id) != -1" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                                <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3 && userData?.packages.find(p => p.id === 6)">
+                                    <div class="editor" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
                                     </div>
-                                    <div class="bannerAi" v-if="testers.indexOf(userData.vk_id) != -1" @click="openBanner(index)">
+                                    <div class="bannerAi" @click="openBanner(index)">
                                         <img src="@/assets/images/banner.png" />
                                         <span>ИИ Баннер</span>
                                     </div>
@@ -513,7 +514,6 @@
         writeOffGenerations
     } from "@/services/ai";
     import { sendPosting } from "@/services/user";
-    import { getConfig } from "@/services/config";
     import AppModalGenerator from "@/components/AppModalGenerator.vue";
     import AppModalGeneratorPayment from "@/components/AppModalGeneratorPayment.vue";
     import AppAiBanner from '@/components/AppAiBanner.vue';
@@ -591,7 +591,6 @@
                 publPostsError: false,
                 isEditor: false,
                 aiEditorLink: "",
-                testers: null,
                 isCustomEdit: false,
                 indexEdit: null,
                 user_photo: "ВАШЕ ФОТО",
@@ -661,9 +660,6 @@
             
             this.step = this.getStep();
             console.log("ШАГ", this.step);
-
-            const testers = await getConfig("testers_for_cropper", localStorage.getItem("token"));
-            this.testers = testers.ids;
 
             const gener = await getGenerations(this.userData.id);
             this.generations = gener;

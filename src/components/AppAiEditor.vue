@@ -63,7 +63,10 @@
                             :style="{
                                 whiteSpace: 'pre-wrap', // Сохраняем переносы строк
                                 cursor: 'pointer',
-                                maxHeight: '100%'
+                                maxHeight: '100%',
+                                textOverflow: 'clip',
+                                overflow: 'hidden',
+                                maxWidth: '511px'
                             }"
                             >
                             {{ block.text }}
@@ -158,6 +161,7 @@
                                     eastSouth: true,
                                     east: false,
                                 } : {},
+                                movable: false,
                             }"
                             @change="onCropChange"
                             :style="{
@@ -717,6 +721,8 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import { getConfig } from '@/services/config';
+    import { saveTemplate, getTemplates } from '@/services/ai';
+    import { loadImage } from '@/services/other';
 
     import big_dark from '@/assets/images/big_dark.png';
     import sm_dark from '@/assets/images/sm_dark.png';
@@ -727,6 +733,7 @@
         components: { AppGoodButton, AppBadButton, Cropper, draggable },
         props: {
             imageSrc: String,
+            userData: Object
         },
         data() {
             return {
@@ -793,7 +800,13 @@
                 templates: [],
                 emojis: [],
                 showEmojiPanel: false,
-                isSaveTemplate: false
+                isSaveTemplate: false,
+                leftBound: null,
+                topBound: null,
+                widthBound: null,
+                heightBound: null,
+                rightBound: null,
+                bottomBound: null
             }
         },
         mounted() {
@@ -837,13 +850,19 @@
                 this.startSizeW = widthImagePage;
                 this.startSizeH = heightImagePage;
             }, 300);
-            setTimeout(() => this.setTemplates(), 3000);
+            setTimeout(async () => {
+                this.setTemplates();
+                const temps = await getTemplates(this.userData.id);
+                temps.templates.forEach((item, index) => {
+                    if (item.length > 0) this.templates[index] = JSON.parse(item);
+                });
+            }, 2000);
 
             const resp = await getConfig('emojis', localStorage.getItem('token'));
             this.emojis = resp.emojis;
         },
         methods: {
-            saveTemplate(index) {
+            async saveTemplate(index) {
                 if (index >= this.templates.length) return;
 
                 this.captureState();
@@ -852,6 +871,10 @@
 
                 this.templates[index] = state;
                 this.selectedTemplate = index;
+
+                const resp = await saveTemplate(this.userData.id, index, JSON.stringify(state));
+                console.log(resp);
+
                 this.closeSaveTemplate();
             },  
             closeSaveTemplate() {
@@ -862,8 +885,6 @@
                     textBlocks: JSON.parse(JSON.stringify([])),
                     rectangles: JSON.parse(JSON.stringify([])),
                     images: JSON.parse(JSON.stringify([])),
-                    croppedImage: this.imageSrc,
-                    imageSrc: this.imageSrc,
                     layers: JSON.parse(JSON.stringify([])),
                     selectedLay: null,
                     selectedTemplate: null
@@ -909,10 +930,10 @@
                 let layersTemplate = [];
                 let selectedLayTemplate = null;
                 let selectedTemplateTemplate = 0;
-                let croppedImageTemplate = 'https://api.intelektaz.com/assets/b141af93-948f-4179-918b-e67dc22d6ee9';
+                // let croppedImageTemplate = 'https://api.intelektaz.com/assets/b141af93-948f-4179-918b-e67dc22d6ee9';
                 
                 // размеры холста
-                const bounds = this.getCropperBounds();
+                const bounds = this.getCropperBoundsDOM();
                 console.log(bounds);
 
                 // масштаб
@@ -1063,8 +1084,6 @@
                     textBlocks: JSON.parse(JSON.stringify(textBlocksTemplate)),
                     rectangles: JSON.parse(JSON.stringify(rectanglesTemplate)),
                     images: JSON.parse(JSON.stringify(imagesTemplate)),
-                    croppedImage: croppedImageTemplate,
-                    imageSrc: croppedImageTemplate,
                     layers: JSON.parse(JSON.stringify(layersTemplate)),
                     selectedLay: selectedLayTemplate,
                     selectedTemplate: selectedTemplateTemplate
@@ -1078,7 +1097,7 @@
                 textBlocksTemplate = [];
                 layersTemplate = [];
                 selectedTemplateTemplate = 1;
-                croppedImageTemplate = 'https://api.intelektaz.com/assets/fc4846e7-46e5-4360-97ae-153c7464f225';
+                // croppedImageTemplate = 'https://api.intelektaz.com/assets/fc4846e7-46e5-4360-97ae-153c7464f225';
                 
                 // затемнение снизу
                 newImage = {
@@ -1232,8 +1251,6 @@
                     textBlocks: JSON.parse(JSON.stringify(textBlocksTemplate)),
                     rectangles: JSON.parse(JSON.stringify(rectanglesTemplate)),
                     images: JSON.parse(JSON.stringify(imagesTemplate)),
-                    croppedImage: croppedImageTemplate,
-                    imageSrc: croppedImageTemplate,
                     layers: JSON.parse(JSON.stringify(layersTemplate)),
                     selectedLay: selectedLayTemplate,
                     selectedTemplate: selectedTemplateTemplate
@@ -1247,7 +1264,7 @@
                 textBlocksTemplate = [];
                 layersTemplate = [];
                 selectedTemplateTemplate = 2;
-                croppedImageTemplate = 'https://api.intelektaz.com/assets/b141af93-948f-4179-918b-e67dc22d6ee9';
+                // croppedImageTemplate = 'https://api.intelektaz.com/assets/b141af93-948f-4179-918b-e67dc22d6ee9';
                 
                 // затемнение снизу
                 newImage = {
@@ -1398,8 +1415,6 @@
                     textBlocks: JSON.parse(JSON.stringify(textBlocksTemplate)),
                     rectangles: JSON.parse(JSON.stringify(rectanglesTemplate)),
                     images: JSON.parse(JSON.stringify(imagesTemplate)),
-                    croppedImage: croppedImageTemplate,
-                    imageSrc: croppedImageTemplate,
                     layers: JSON.parse(JSON.stringify(layersTemplate)),
                     selectedLay: selectedLayTemplate,
                     selectedTemplate: selectedTemplateTemplate
@@ -1584,7 +1599,7 @@
                 // Начинаем наблюдение
                 this.resizeObservers[id].observe(blockElement);
             },
-            getCropperBounds() {
+            getCropperBoundsDOM() {
                 const cropperImage = document.querySelector('.vue-advanced-cropper__image');
                 const cropperImageWrapper = document.querySelector('.vue-advanced-cropper__image-wrapper');
                 
@@ -1597,13 +1612,24 @@
 
                 left = (cropperImageWrapper.offsetWidth - rect.width) / 2;
 
+                this.leftBound = left;
+                this.topBound = top;
+                this.widthBound = rect.width;
+                this.heightBound = rect.height;
+                this.rightBound = left;
+                this.bottomBound = top;
+
+                const bounds =  this.getCropperBounds();
+                return bounds;
+            },
+            getCropperBounds() {
                 return {
-                    left: left,
-                    top: top,
-                    width: rect.width,
-                    height: rect.height,
-                    right: left,
-                    bottom: top
+                    left: this.leftBound,
+                    top: this.topBound,
+                    width: this.widthBound,
+                    height: this.heightBound,
+                    right: this.rightBound,
+                    bottom: this.bottomBound
                 };
             },
             // Метод для добавления действия в историю
@@ -1620,8 +1646,6 @@
                     textBlocks: JSON.parse(JSON.stringify(this.textBlocks)),
                     rectangles: JSON.parse(JSON.stringify(this.rectangles)),
                     images: JSON.parse(JSON.stringify(this.images)),
-                    croppedImage: this.croppedImage,
-                    imageSrc: this.imageSrc,
                     layers: JSON.parse(JSON.stringify(this.layers)),
                     selectedLay: this.selectedLay,
                     selectedTemplate: this.selectedTemplate
@@ -1653,8 +1677,6 @@
                 this.textBlocks = JSON.parse(JSON.stringify(state.textBlocks));
                 this.rectangles = JSON.parse(JSON.stringify(state.rectangles));
                 this.images = JSON.parse(JSON.stringify(state.images));
-                this.croppedImage = state.croppedImage;
-                this.currentImage = state.imageSrc; // возвращаем изображение для пользователя (тут проблемы нет)
                 this.layers = JSON.parse(JSON.stringify(state.layers));
                 this.selectedLay = state.selectedLay;
                 this.selectedTemplate = state.selectedTemplate;
@@ -1791,12 +1813,12 @@
                 this.isDraggingImage = true;
                 this.dragStartX = clientX - image.left;
                 this.dragStartY = clientY - image.top;
+
+                this._touchMoveImageHandler = this.dragImage.bind(this);
             
                 // Добавляем обработчики для мыши и касаний
                 document.addEventListener('mousemove', this.dragImage);
-                document.addEventListener('touchmove', (event) => {
-                    this.dragImage(event);
-                }, { passive: false });
+                document.addEventListener('touchmove', this._touchMoveImageHandler, { passive: false });
                 document.addEventListener('mouseup', this.stopDragImage);
                 document.addEventListener('touchend', this.stopDragImage, false);
                 event.preventDefault();
@@ -1816,6 +1838,7 @@
 
                 let newLeft = clientX - this.dragStartX;
                 let newTop = clientY - this.dragStartY;
+                
 
                 // Ограничение по горизонтали
                 // if (newLeft < bounds.left) {
@@ -1840,7 +1863,10 @@
 
                 // Удаляем обработчики для мыши и касаний
                 document.removeEventListener('mousemove', this.dragImage);
-                document.removeEventListener('touchmove', this.dragImage);
+                if (this._touchMoveImageHandler) {
+                    document.removeEventListener('touchmove', this._touchMoveImageHandler);
+                    this._touchMoveImageHandler = null;
+                }
                 document.removeEventListener('mouseup', this.stopDragImage);
                 document.removeEventListener('touchend', this.stopDragImage);
             },
@@ -1953,18 +1979,20 @@
                 document.addEventListener('touchmove', this.resizeImage);
                 document.addEventListener('touchend', this.stopResizeImage);
             },
-            addImage() {
+            async addImage() {
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = 'image/*';
-                input.onchange = (event) => {
+                input.onchange = async (event) => {
                     const file = event.target.files[0];
                     if (!file) return;
+                    
+                    const link = await loadImage(file);
 
                     const reader = new FileReader();
-                    reader.onload = (e) => {
+                    reader.onload = () => {
                         const img = new Image(); // Создаем объект Image для загрузки изображения
-                        img.src = e.target.result; // Устанавливаем источник изображения
+                        img.src = link.image_id; // Устанавливаем источник изображения
 
                         img.onload = () => {
                             // Вычисляем пропорции изображения
@@ -1985,7 +2013,7 @@
                                 left: bounds.left + bounds.width / 2 - width / 2,
                                 width: width,
                                 height: height,
-                                src: e.target.result,
+                                src: img.src,
                                 zIndex: 1 + this.layers.length,
                                 rotation: 0,
                                 display: 'block'
@@ -2055,6 +2083,7 @@
                 const range = selection.getRangeAt(0); // Текущий диапазон выделения
                 const currentCursorPosition = range.startOffset; // Позиция курсора
                 console.log(this.cursor_pos);
+                console.log(this.textBlocks);
                 // Важно: Используем $nextTick, чтобы дождаться обновления DOM
                 this.$nextTick(() => {
                     const contentEditableElement = event.target;
@@ -2142,10 +2171,10 @@
                 this.dragStartX = clientX - rectangle.left;
                 this.dragStartY = clientY - rectangle.top;
 
+                this._touchMoveRectangleHandler = this.dragRectangle.bind(this);
+
                 document.addEventListener('mousemove', this.dragRectangle);
-                document.addEventListener('touchmove', (event) => {
-                    this.dragRectangle(event);
-                }, { passive: false });
+                document.addEventListener('touchmove', this._touchMoveRectangleHandler, { passive: false });
                 document.addEventListener('mouseup', this.stopDragRectangle);
                 document.addEventListener('touchend', this.stopDragRectangle, false);
                 event.preventDefault();
@@ -2187,7 +2216,10 @@
                 this.isDraggingRectangle = false;
                 this.captureState();
                 document.removeEventListener('mousemove', this.dragRectangle);
-                document.removeEventListener('touchmove', this.dragRectangle);
+                if (this._touchMoveRectangleHandler) {
+                    document.removeEventListener('touchmove', this._touchMoveRectangleHandler);
+                    this._touchMoveRectangleHandler = null;
+                }
                 document.removeEventListener('mouseup', this.stopDragRectangle);
                 document.removeEventListener('touchend', this.stopDragRectangle);
             },
@@ -2209,6 +2241,7 @@
 
                 this.startX = clientX;
                 this.startY = clientY;
+                
 
                 document.addEventListener('mousemove', this.resizeRectangle);
                 document.addEventListener('touchmove', (event) => {
@@ -2763,13 +2796,13 @@
                 this.dragStartX = clientX - block.left;
                 this.dragStartY = clientY - block.top;
 
+                // Сохраняем ссылку на обработчик
+                this._touchMoveHandler = this.dragText.bind(this);
+
                 document.addEventListener('mousemove', this.dragText);
-                document.addEventListener('touchmove', (event) => {
-                    this.dragText(event);
-                }, { passive: false });
+                document.addEventListener('touchmove', this._touchMoveHandler, { passive: false });
                 document.addEventListener('mouseup', this.stopDragText);
                 document.addEventListener('touchend', this.stopDragText, false);
-                // event.preventDefault();
             },
             dragText(event) {
                 event.preventDefault();
@@ -2808,8 +2841,12 @@
             stopDragText() {
                 this.isDraggingText = false;
                 this.captureState();
+
                 document.removeEventListener('mousemove', this.dragText);
-                document.removeEventListener('touchmove', this.dragText);
+                if (this._touchMoveHandler) {
+                    document.removeEventListener('touchmove', this._touchMoveHandler);
+                    this._touchMoveHandler = null;
+                }
                 document.removeEventListener('mouseup', this.stopDragText);
                 document.removeEventListener('touchend', this.stopDragText);
             },
@@ -3289,7 +3326,7 @@
     /* ============================================== */
     .cropper-container {
         position: relative;
-        width: 100%;
+        max-width: 511px;
         max-height: 100vh;
         overflow: hidden;
         position: relative;
@@ -3304,7 +3341,7 @@
         position: absolute;
         font-family: Arial, sans-serif;
         white-space: pre-wrap; /* Сохраняет переносы строк */
-        word-wrap: break-word; /* Переносит длинные слова */
+        word-wrap: break-word; 
         pointer-events: auto;
         line-height: normal;
         display: inline-block;
@@ -3345,8 +3382,10 @@
     }
     .overlay-image {
         position: absolute;
-        pointer-events: auto;
-        user-select: none;
+        pointer-events: all !important;
+        /* user-select: none; */
+        /* .vue-advanced-cropper__stretcher pointer-events: none */
+        /* .vue-advanced-cropper user-select: none */
     }
 
     .handle {
@@ -3438,7 +3477,9 @@
         align-items: center;
         flex-wrap: wrap;
         @media (max-width: 900px) {
-            column-gap: 22px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            column-gap: 15.78px;
         }
     }
     .adding_btns span {
@@ -3481,7 +3522,8 @@
         }
     }
     .row_templates_sub_row {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         column-gap: 15.78px !important;
     }
     .row_btns {
@@ -3513,8 +3555,8 @@
         justify-content: center;
         align-items: center;
         @media (max-width: 900px) {
-            width: 50px !important;
-            height: 50px !important;
+            width: 15vw !important;
+            height: 15vw !important;
             font-size: 18.93 !important;
         }
     }
@@ -3541,6 +3583,7 @@
         max-height: 150px;
         overflow-y: auto;
         z-index: 1000;
+        left: 60%;
     }
 
     .emoji {
@@ -3609,10 +3652,13 @@
         }
     }
     .square_btn2 {
-        width: 58px;
-        height: 58px;
+        width: 20.5vw;
+        height: 20vw;
         display: flex;
         justify-content: center;
         align-items: center;
+        @media (max-width: 410px) {
+            width: 20vw;
+        }
     }
 </style>

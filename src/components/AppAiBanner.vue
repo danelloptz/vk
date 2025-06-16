@@ -9,6 +9,7 @@
     <AppAiEditor 
         v-if="isEditor" 
         :imageSrc="generatedImage"
+        :userData="userData"
         @update:visibility1="isEditor = $event"
         @update:save="updateImage"
     />
@@ -27,7 +28,7 @@
             <textarea 
                 v-model="descr"
                 type="text"
-                placeholder="Подробно опишите детали сюжета"
+                placeholder="Опишите, что вы хотите увидеть"
                 maxlength="2000"
             ></textarea>
         </div>
@@ -330,6 +331,16 @@
 
                         img.onload = () => {
                             this.generatedImage = img.src;
+                            if (this.variants.length < 5) {
+                                this.variants.push({
+                                    id: this.variants.length + 1,
+                                    src: img.src
+                                });
+                            } else {
+                                this.variants[this.variants.length - 1].src = img.src;
+                            }
+                            this.selectedVariant = this.variants.length - 1;
+                            
                         };
                     };
                     reader.readAsDataURL(file);
@@ -338,6 +349,7 @@
             },
             updateImage(link) {
                 this.generatedImage = link;
+                this.variants[this.selectedVariant] = link;
             },
             close() {
                 this.$emit('changePosition');
@@ -388,7 +400,7 @@
                 this.selectedAspect = index;
             },
             async generate() {
-                if (this.variants.length > 2) return;
+                if (this.generations.free.remains + this.generations.paid.remains <= 0) return;
                 this.isLoading = true;
                 this.Timer(1, 20000);
                 const aspect = this.aspects_choices[this.selectedAspect] == "1:1 (квадратная)" ? "1x1" : this.aspects_choices[this.selectedAspect].replace(":", "x");
@@ -413,11 +425,22 @@
                     return;
                 }
                 this.generatedImage = resp;
-                this.variants.push({
-                    id: this.variants.length + 1,
-                    src: resp
-                });
+                if (this.variants.length < 5) {
+                    this.variants.push({
+                        id: this.variants.length + 1,
+                        src: resp
+                    });
+                } else {
+                    this.variants[this.variants.length - 1].src = resp;
+                }
                 this.selectedVariant = this.variants.length - 1;
+                this.download();
+                const gener = await getGenerations(this.userData.id);
+                this.generations = gener;
+
+                this.isModal = true;
+                this.title = "УСПЕШНО!";
+                this.msg = "Картинка сохранена на ваше устройство.";
             },
             Timer(countOfPosts, time) {
                 let initialLineWidth = 0; // Начальная ширина полосы загрузки (в пикселях)
