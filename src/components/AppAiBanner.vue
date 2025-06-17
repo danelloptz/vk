@@ -776,10 +776,10 @@
     }
     .generated_image {
         max-width: 785px;
+        max-height: 400px;
         align-self: center;
         @media (max-width: 900px) {
-            width: 100%;
-            max-width: none;
+            max-width: 100%;
         }
     }
     .line_wrapper {

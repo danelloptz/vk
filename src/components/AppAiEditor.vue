@@ -79,9 +79,8 @@
                             width: `${image.width}px`,
                             height: `${image.height}px`,
                             zIndex: image.zIndex,
-                            transform: `rotate(${image.rotation}deg) scale(${image?.scale ? image?.scale : 1})`,
+                            transform: `rotate(${image.rotation}deg)`,
                             display: image.display,
-                            filter: image?.filter ? `blur(${image?.filter}px)` : 'none'
                             }"
                             @mousedown="selectImage(image.id, $event)"
                             @touchstart="selectImage(image.id, $event)"
@@ -444,9 +443,8 @@
                         width: `${image.width}px`,
                         height: `${image.height}px`,
                         zIndex: image.zIndex,
-                        transform: `rotate(${image.rotation}deg) scale(${image?.scale ? image?.scale : 1})`,
+                        transform: `rotate(${image.rotation}deg)`,
                         display: image.display,
-                        filter: image?.filter ? `blur(${image?.filter}px)` : 'none'
                         }"
                         @mousedown="selectImage(image.id, $event)"
                         @touchstart="selectImage(image.id, $event)"
@@ -942,8 +940,6 @@
                     zIndex: 1,
                     rotation: 0,
                     display: 'block',
-                    filter: 70,
-                    scale: 1.5
                 };
                 imagesTemplate.push(newImage);
                 layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
@@ -959,8 +955,6 @@
                     zIndex: 1,
                     rotation: 0,
                     display: 'block',
-                    filter: 40,
-                    scale: 1.3
                 };
                 imagesTemplate.push(newImage);
                 layersTemplate.unshift({ name: `Затеменение сверху`, id: newImage.id, type: "image", link: newImage.src });
@@ -973,7 +967,7 @@
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
-                    height: bounds.height * 0.07890625,
+                    height: bounds.width * 0.0765625,
                     src: logo,
                     zIndex: 2,
                     rotation: 0,
@@ -1101,8 +1095,6 @@
                     zIndex: 1,
                     rotation: 0,
                     display: 'block',
-                    filter: 70,
-                    scale: 1.5
                 };
                 imagesTemplate.push(newImage);
                 layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
@@ -1118,8 +1110,6 @@
                     zIndex: 1,
                     rotation: 0,
                     display: 'block',
-                    filter: 40,
-                    scale: 1.3
                 };
                 imagesTemplate.push(newImage);
                 layersTemplate.unshift({ name: `Затеменение сверху`, id: newImage.id, type: "image", link: newImage.src });
@@ -1132,7 +1122,7 @@
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
-                    height: bounds.height * 0.07890625,
+                    height: bounds.width * 0.0765625,
                     src: logo,
                     zIndex: 2,
                     rotation: 0,
@@ -1268,8 +1258,6 @@
                     zIndex: 1,
                     rotation: 0,
                     display: 'block',
-                    filter: 200,
-                    scale: 1.5
                 };
                 imagesTemplate.push(newImage);
                 layersTemplate.unshift({ name: `Затеменение снизу`, id: newImage.id, type: "image", link: newImage.src });
@@ -1281,7 +1269,7 @@
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
-                    height: bounds.height * 0.07890625,
+                    height: bounds.width * 0.0765625,
                     src: logo,
                     zIndex: 2,
                     rotation: 0,
@@ -2521,196 +2509,179 @@
             //         });
             //     };
             // },
-            crop() {
+            async crop() {
                 // eslint-disable-next-line no-unused-vars
-                const { coordinates, canvas } = this.$refs.cropper.getResult();
-                if (!canvas) {
-                    console.error('Canvas is not available');
-                    return;
+    const { coordinates, canvas } = this.$refs.cropper.getResult();
+    if (!canvas) {
+        console.error('Canvas is not available');
+        return Promise.reject('Canvas not available');
+    }
+
+    return new Promise((resolve, reject) => {
+        const finalCanvas = document.createElement('canvas');
+        const ctx = finalCanvas.getContext('2d');
+        finalCanvas.width = canvas.width;
+        finalCanvas.height = canvas.height;
+        ctx.drawImage(canvas, 0, 0);
+
+        const img = new Image();
+        img.src = canvas.toDataURL();
+        this.getShift();
+
+        img.onload = async () => {
+            const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth;
+            const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
+            this.startSizeW = widthImagePage;
+            this.startSizeH = heightImagePage;
+            const scaleFactorX = img.width / widthImagePage;
+            const scaleFactorY = img.height / heightImagePage;
+
+            const allElements = [];
+
+            // Прямоугольники
+            this.rectangles.forEach(rectangle => {
+                allElements.push({
+                    type: 'rectangle',
+                    zIndex: rectangle.zIndex || 800,
+                    draw: () => {
+                        return new Promise(resolve => {
+                            ctx.save();
+                            ctx.fillStyle = rectangle.color;
+                            ctx.globalAlpha = rectangle.opacity;
+
+                            const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX;
+                            const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY;
+                            const scaledWidth = rectangle.width * scaleFactorX;
+                            const scaledHeight = rectangle.height * scaleFactorY;
+
+                            ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                            ctx.restore();
+                            resolve();
+                        });
+                    }
+                });
+            });
+
+            // Изображения
+            for (const image of this.images) {
+                allElements.push({
+                    type: 'image',
+                    zIndex: image.zIndex || 1,
+                    draw: () => {
+                        return new Promise((resolve, reject) => {
+                            const overlayImg = new Image();
+                            overlayImg.crossOrigin = 'anonymous';
+                            overlayImg.src = image.src;
+
+                            overlayImg.onload = () => {
+                                const scaledLeft = (image.left - this.shiftX) * scaleFactorX;
+                                const scaledTop = (image.top - this.shiftY) * scaleFactorY;
+                                const baseWidth = image.width * scaleFactorX;
+                                const baseHeight = image.height * scaleFactorY;
+
+                                const scale = image.scale || 1;
+
+                                ctx.filter = image.filter ? `blur(${image.filter * 2}px)` : 'none';
+
+                                ctx.save();
+                                ctx.translate(scaledLeft + baseWidth / 2, scaledTop + baseHeight / 2);
+                                ctx.scale(scale, scale);
+                                ctx.drawImage(overlayImg, -baseWidth / 2, -baseHeight / 2, baseWidth, baseHeight);
+                                ctx.restore();
+                                ctx.filter = 'none';
+
+                                resolve();
+                            };
+
+                            overlayImg.onerror = () => {
+                                reject(new Error(`Failed to load image: ${image.src}`));
+                            };
+                        });
+                    }
+                });
+            }
+
+            // Текстовые блоки
+            this.textBlocks.forEach(block => {
+                allElements.push({
+                    type: 'text',
+                    zIndex: block.zIndex || 900,
+                    draw: () => {
+                        return new Promise(resolve => {
+                            ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY}px ${block.fontFamily}`;
+                            ctx.fillStyle = block.color;
+
+                            let scaledLeft = (block.left - this.shiftX) * scaleFactorX;
+                            const scaledTop = (block.top - this.shiftY) * scaleFactorY + block.fontSize * scaleFactorY * 1.2;
+
+                            const lines = this.splitTextIntoLines(block.text);
+                            const lineHeight = block.fontSize * scaleFactorY;
+
+                            const textMetrics = ctx.measureText(lines[0]);
+                            const textWidth = textMetrics.width;
+
+                            if (block.textAlign === 'center') {
+                                scaledLeft += textWidth / 2;
+                                ctx.textAlign = 'center';
+                            } else if (block.textAlign === 'right') {
+                                scaledLeft += textWidth;
+                                ctx.textAlign = 'right';
+                            } else {
+                                ctx.textAlign = 'left';
+                            }
+
+                            lines.forEach((line, index) => {
+                                ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+                            });
+
+                            resolve();
+                        });
+                    }
+                });
+            });
+
+            allElements.sort((a, b) => a.zIndex - b.zIndex);
+
+            try {
+                for (const element of allElements) {
+                    await element.draw();
                 }
+                this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
+                resolve();
+            } catch (error) {
+                console.error('Ошибка отрисовки:', error);
+                reject(error);
+            }
+        };
 
-                // Создаем новый canvas для добавления текстовых блоков
-                const finalCanvas = document.createElement('canvas');
-                const ctx = finalCanvas.getContext('2d');
+        img.onerror = () => {
+            reject(new Error('Image failed to load'));
+        };
+    });
+},
 
-                // Устанавливаем размеры нового canvas
-                finalCanvas.width = canvas.width;
-                finalCanvas.height = canvas.height;
-
-                // Рисуем обрезанное изображение на новом canvas
-                ctx.drawImage(canvas, 0, 0);
-
-                // Получаем исходные размеры изображения
-                const img = new Image();
-                img.src = canvas.toDataURL();
-                this.getShift();
-
-                img.onload = () => {
-                    // Вычисляем масштаб изображения
-                    const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth;
-                    const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
-                    this.startSizeW = widthImagePage;
-                    this.startSizeH = heightImagePage;
-                    const scaleFactorX = img.width / widthImagePage;
-                    const scaleFactorY = img.height / heightImagePage;
-
-                    // Создаем общий массив элементов для сортировки по z-index
-                    const allElements = [];
-                    // const drawPromises = [];
-
-                    // Добавляем прямоугольники
-                    this.rectangles.forEach((rectangle) => {
-                        allElements.push({
-                            type: 'rectangle',
-                            zIndex: rectangle.zIndex || 800,
-                            draw: () => {
-                                return new Promise((resolve) => {
-                                    ctx.save(); // сохраняем текущие настройки контекста
-                                    ctx.fillStyle = rectangle.color;
-                                    ctx.globalAlpha = rectangle.opacity; // Устанавливаем прозрачность прямоугольника
-
-                                    const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                                    const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
-                                    const scaledWidth = rectangle.width * scaleFactorX * (widthImagePage / this.startSizeW);
-                                    const scaledHeight = rectangle.height * scaleFactorY * (heightImagePage / this.startSizeH);
-
-                                    ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
-                                    ctx.restore(); // восстанавливаем настройки (включая globalAlpha)
-                                    resolve();
-                                });
-                            }
-                        });
-                    });
-
-                    this.images.forEach((image) => {
-                        allElements.push({
-                            type: 'image',
-                            zIndex: image.zIndex || 1,
-                            draw: () => {
-                                return new Promise((resolve, reject) => {
-                                    const overlayImg = new Image();
-                                    overlayImg.crossOrigin = 'anonymous'; // важно, если изображение с внешнего источника
-                                    overlayImg.src = image.src;
-
-                                    console.log(image);
-
-                                    overlayImg.onload = () => {
-                                        const scaledLeft = (image.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                                        const scaledTop = (image.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH);
-                                        const baseWidth = image.width * scaleFactorX * (widthImagePage / this.startSizeW);
-                                        const baseHeight = image.height * scaleFactorY * (heightImagePage / this.startSizeH);
-
-                                        const scale = image.scale || 1;
-
-                                        // 👉 Применяем фильтр
-                                        ctx.filter = image.filter ? `blur(${image.filter * 2}px)` : 'none';
-
-                                        ctx.save(); // Сохраняем состояние контекста
-
-                                        // Перемещаем в центр изображения (чтобы масштаб применился от центра)
-                                        ctx.translate(scaledLeft + baseWidth / 2, scaledTop + baseHeight / 2);
-                                        ctx.scale(scale, scale);
-
-                                        // Отрисовываем изображение смещённое обратно на половину размеров
-                                        ctx.drawImage(overlayImg, -baseWidth / 2, -baseHeight / 2, baseWidth, baseHeight);
-
-                                        ctx.restore(); // Восстанавливаем контекст
-                                        ctx.filter = 'none';
-
-                                        resolve();
-                                    };
-
-
-                                    overlayImg.onerror = () => {
-                                        console.error('Ошибка загрузки изображения:', image.src);
-                                        reject(new Error(`Failed to load image: ${image.src}`));
-                                    };
-                                });
-                            }
-                        });
-                    });
-
-
-                    // Добавляем текстовые блоки
-                    this.textBlocks.forEach((block) => {
-                        allElements.push({
-                            type: 'text',
-                            zIndex: block.zIndex || 900,
-                            draw: () => {
-                                return new Promise((resolve) => {
-                                    ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH)}px ${block.fontFamily}`;
-                                    ctx.fillStyle = block.color;
-
-                                    // Пересчитываем позицию текста с учётом масштаба
-                                    let scaledLeft = (block.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                                    const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH) * 1.2;
-
-                                    // Разбиваем текст на строки
-                                    const lines = this.splitTextIntoLines(block.text);
-                                    const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
-
-                                    const textMetrics = ctx.measureText(lines[0]);
-                                    const textWidth = textMetrics.width;
-
-                                    if (block.textAlign === 'center') {
-                                        scaledLeft += textWidth / 2; // Центрируем по ширине текста
-                                        ctx.textAlign = 'center';
-                                    } else if (block.textAlign === 'right') {
-                                        scaledLeft += textWidth; // Выравниваем по правому краю
-                                        ctx.textAlign = 'right';
-                                    } else {
-                                        ctx.textAlign = 'left'; // По умолчанию выравнивание по левому краю
-                                    }
-
-                                    // Рисуем каждую строку
-                                    lines.forEach((line, index) => {
-                                        ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
-                                    });
-
-                                    resolve();
-                                });
-                            }
-                        });
-                    });
-
-                    // Сортируем элементы по z-index
-                    allElements.sort((a, b) => a.zIndex - b.zIndex);
-
-                    console.log(allElements);
-
-                    (async () => {
-                        try {
-                            for (const element of allElements) {
-                                await element.draw();
-                            }
-
-                            // Сохраняем результат в Base64
-                            this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
-                            console.log(this.croppedImage);
-                        } catch (error) {
-                            console.error('Ошибка при отрисовке элементов:', error);
-                        }
-                    })();
-
-                };
-            },
 
             // Скачивание обрезанного изображения
-            downloadImage() {
-                this.crop();
+            async downloadImage() {
+                try {
+                    await this.crop(); // дождаться полной отрисовки
 
-                // if (!this.croppedImage) return;
-                setTimeout(() => {
+                    if (!this.croppedImage) {
+                        console.error('Обрезанное изображение не готово');
+                        return;
+                    }
+
                     const link = document.createElement('a');
                     link.href = this.croppedImage;
                     link.download = `cropped-image.${this.fileExtension}`;
                     link.click();
-                    this.croppedImage = null;
-                    console.log(this.croppedImage);
-                }, 300);
 
-                
+                    this.croppedImage = null;
+                } catch (error) {
+                    console.error('Не удалось скачать изображение:', error);
+                }
             },
+
 
             // Добавление текстового блока
             addTextBlock() {
@@ -3305,9 +3276,12 @@
     .cropper-container {
         position: relative;
         max-width: 100%;
-        max-height: 100vh;
+        max-height: 500px;
         overflow: hidden;
         position: relative;
+        @media (max-width: 900px) {
+            max-height: 300px;
+        }
         /* margin: 20px auto; */
     }
 
