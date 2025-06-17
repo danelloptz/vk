@@ -63,10 +63,7 @@
                             :style="{
                                 whiteSpace: 'pre-wrap', // Сохраняем переносы строк
                                 cursor: 'pointer',
-                                maxHeight: '100%',
-                                textOverflow: 'clip',
-                                overflow: 'hidden',
-                                maxWidth: '511px'
+                                maxHeight: '100%'
                             }"
                             >
                             {{ block.text }}
@@ -801,12 +798,6 @@
                 emojis: [],
                 showEmojiPanel: false,
                 isSaveTemplate: false,
-                leftBound: null,
-                topBound: null,
-                widthBound: null,
-                heightBound: null,
-                rightBound: null,
-                bottomBound: null
             }
         },
         mounted() {
@@ -933,7 +924,7 @@
                 // let croppedImageTemplate = 'https://api.intelektaz.com/assets/b141af93-948f-4179-918b-e67dc22d6ee9';
                 
                 // размеры холста
-                const bounds = this.getCropperBoundsDOM();
+                const bounds = this.getCropperBounds();
                 console.log(bounds);
 
                 // масштаб
@@ -1599,7 +1590,7 @@
                 // Начинаем наблюдение
                 this.resizeObservers[id].observe(blockElement);
             },
-            getCropperBoundsDOM() {
+            getCropperBounds() {
                 const cropperImage = document.querySelector('.vue-advanced-cropper__image');
                 const cropperImageWrapper = document.querySelector('.vue-advanced-cropper__image-wrapper');
                 
@@ -1612,24 +1603,13 @@
 
                 left = (cropperImageWrapper.offsetWidth - rect.width) / 2;
 
-                this.leftBound = left;
-                this.topBound = top;
-                this.widthBound = rect.width;
-                this.heightBound = rect.height;
-                this.rightBound = left;
-                this.bottomBound = top;
-
-                const bounds =  this.getCropperBounds();
-                return bounds;
-            },
-            getCropperBounds() {
                 return {
-                    left: this.leftBound,
-                    top: this.topBound,
-                    width: this.widthBound,
-                    height: this.heightBound,
-                    right: this.rightBound,
-                    bottom: this.bottomBound
+                    left: left,
+                    top: top,
+                    width: rect.width,
+                    height: rect.height,
+                    right: left,
+                    bottom: top
                 };
             },
             // Метод для добавления действия в историю
@@ -2083,7 +2063,6 @@
                 const range = selection.getRangeAt(0); // Текущий диапазон выделения
                 const currentCursorPosition = range.startOffset; // Позиция курсора
                 console.log(this.cursor_pos);
-                console.log(this.textBlocks);
                 // Важно: Используем $nextTick, чтобы дождаться обновления DOM
                 this.$nextTick(() => {
                     const contentEditableElement = event.target;
@@ -2664,17 +2643,16 @@
 
                                     // Пересчитываем позицию текста с учётом масштаба
                                     let scaledLeft = (block.left - this.shiftX) * scaleFactorX * (widthImagePage / this.startSizeW);
-                                    const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH);
+                                    const scaledTop = (block.top - this.shiftY) * scaleFactorY * (heightImagePage / this.startSizeH) + block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH) * 1.2;
 
                                     // Разбиваем текст на строки
                                     const lines = this.splitTextIntoLines(block.text);
-                                    // const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
+                                    const lineHeight = block.fontSize * scaleFactorY * (heightImagePage / this.startSizeH); // Высота строки
 
                                     const textMetrics = ctx.measureText(lines[0]);
                                     const textWidth = textMetrics.width;
 
                                     if (block.textAlign === 'center') {
-                                        console.log(scaledLeft, textWidth);
                                         scaledLeft += textWidth / 2; // Центрируем по ширине текста
                                         ctx.textAlign = 'center';
                                     } else if (block.textAlign === 'right') {
@@ -2685,8 +2663,8 @@
                                     }
 
                                     // Рисуем каждую строку
-                                    lines.forEach((line) => {
-                                        ctx.fillText(line, scaledLeft, scaledTop);
+                                    lines.forEach((line, index) => {
+                                        ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
                                     });
 
                                     resolve();
@@ -3326,7 +3304,7 @@
     /* ============================================== */
     .cropper-container {
         position: relative;
-        max-width: 511px;
+        max-width: 100%;
         max-height: 100vh;
         overflow: hidden;
         position: relative;
