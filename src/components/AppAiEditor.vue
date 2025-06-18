@@ -827,30 +827,81 @@
             },
         },
         async created() {
-            this.currentImage = this.imageSrc; // просто сохраняем пропс
-            setTimeout(() => {
-                this.getShift();
-                const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth; 
-                const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
-                const background = document.querySelector('.vue-advanced-cropper__foreground');
-                const background2 = document.querySelector('.vue-advanced-cropper__background');
-                background.style.background = 'none';
-                background2.style.background = 'none';
-                this.startSizeW = widthImagePage;
-                this.startSizeH = heightImagePage;
-            }, 300);
-            setTimeout(async () => {
-                this.setTemplates();
-                const temps = await getTemplates(this.userData.id);
-                temps.templates.forEach((item, index) => {
-                    if (item.length > 0) this.templates[index] = JSON.parse(item);
-                });
-            }, 2000);
+            this.currentImage = this.imageSrc;
 
+            await this.waitForImageLoad();
+            await this.waitForPreviewReady();
+
+            this.getShift();
+            const wrapper = document.querySelector('.vue-preview__wrapper');
+            const background = document.querySelector('.vue-advanced-cropper__foreground');
+            const background2 = document.querySelector('.vue-advanced-cropper__background');
+
+            if (wrapper) {
+                this.startSizeW = wrapper.offsetWidth;
+                this.startSizeH = wrapper.offsetHeight;
+            }
+
+            if (background) background.style.background = 'none';
+            if (background2) background2.style.background = 'none';
+
+            // Загружаем шаблоны, когда всё готово
+            this.setTemplates();
+            const temps = await getTemplates(this.userData.id);
+            temps.templates.forEach((item, index) => {
+                if (item.length > 0) this.templates[index] = JSON.parse(item);
+            });
+
+            // Эмодзи
             const resp = await getConfig('emojis', localStorage.getItem('token'));
             this.emojis = resp.emojis;
         },
         methods: {
+                waitForImageLoad() {
+                    return new Promise((resolve) => {
+                        const imageEl = document.querySelector('.vue-advanced-cropper__image, .vue-preview__image');
+
+                        if (imageEl && imageEl.complete) {
+                            resolve();
+                        } else if (imageEl) {
+                            imageEl.addEventListener('load', () => resolve(), { once: true });
+                        } else {
+                            // если элемент еще не в DOM — ждём появления
+                            const observer = new MutationObserver(() => {
+                                const img = document.querySelector('.vue-advanced-cropper__image, .vue-preview__image');
+                                if (img && img.complete) {
+                                    observer.disconnect();
+                                    resolve();
+                                } else if (img) {
+                                    img.addEventListener('load', () => {
+                                        observer.disconnect();
+                                        resolve();
+                                    }, { once: true });
+                                }
+                            });
+
+                            observer.observe(document.body, { childList: true, subtree: true });
+                        }
+                    });
+                },
+
+                waitForPreviewReady() {
+                    return new Promise((resolve) => {
+                        const check = () => {
+                            const wrapper = document.querySelector('.vue-preview__wrapper');
+                            const bg1 = document.querySelector('.vue-advanced-cropper__foreground');
+                            const bg2 = document.querySelector('.vue-advanced-cropper__background');
+
+                            if (wrapper && wrapper.offsetWidth > 0 && wrapper.offsetHeight > 0 && bg1 && bg2) {
+                                resolve();
+                            } else {
+                                requestAnimationFrame(check);
+                            }
+                        };
+                        requestAnimationFrame(check);
+                    });
+                },
+
             async saveTemplate(index) {
                 if (index >= this.templates.length) return;
 
@@ -2511,154 +2562,174 @@
             // },
             async crop() {
                 // eslint-disable-next-line no-unused-vars
-    const { coordinates, canvas } = this.$refs.cropper.getResult();
-    if (!canvas) {
-        console.error('Canvas is not available');
-        return Promise.reject('Canvas not available');
-    }
-
-    return new Promise((resolve, reject) => {
-        const finalCanvas = document.createElement('canvas');
-        const ctx = finalCanvas.getContext('2d');
-        finalCanvas.width = canvas.width;
-        finalCanvas.height = canvas.height;
-        ctx.drawImage(canvas, 0, 0);
-
-        const img = new Image();
-        img.src = canvas.toDataURL();
-        this.getShift();
-
-        img.onload = async () => {
-            const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth;
-            const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
-            this.startSizeW = widthImagePage;
-            this.startSizeH = heightImagePage;
-            const scaleFactorX = img.width / widthImagePage;
-            const scaleFactorY = img.height / heightImagePage;
-
-            const allElements = [];
-
-            // Прямоугольники
-            this.rectangles.forEach(rectangle => {
-                allElements.push({
-                    type: 'rectangle',
-                    zIndex: rectangle.zIndex || 800,
-                    draw: () => {
-                        return new Promise(resolve => {
-                            ctx.save();
-                            ctx.fillStyle = rectangle.color;
-                            ctx.globalAlpha = rectangle.opacity;
-
-                            const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX;
-                            const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY;
-                            const scaledWidth = rectangle.width * scaleFactorX;
-                            const scaledHeight = rectangle.height * scaleFactorY;
-
-                            ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
-                            ctx.restore();
-                            resolve();
-                        });
-                    }
-                });
-            });
-
-            // Изображения
-            for (const image of this.images) {
-                allElements.push({
-                    type: 'image',
-                    zIndex: image.zIndex || 1,
-                    draw: () => {
-                        return new Promise((resolve, reject) => {
-                            const overlayImg = new Image();
-                            overlayImg.crossOrigin = 'anonymous';
-                            overlayImg.src = image.src;
-
-                            overlayImg.onload = () => {
-                                const scaledLeft = (image.left - this.shiftX) * scaleFactorX;
-                                const scaledTop = (image.top - this.shiftY) * scaleFactorY;
-                                const baseWidth = image.width * scaleFactorX;
-                                const baseHeight = image.height * scaleFactorY;
-
-                                const scale = image.scale || 1;
-
-                                ctx.filter = image.filter ? `blur(${image.filter * 2}px)` : 'none';
-
-                                ctx.save();
-                                ctx.translate(scaledLeft + baseWidth / 2, scaledTop + baseHeight / 2);
-                                ctx.scale(scale, scale);
-                                ctx.drawImage(overlayImg, -baseWidth / 2, -baseHeight / 2, baseWidth, baseHeight);
-                                ctx.restore();
-                                ctx.filter = 'none';
-
-                                resolve();
-                            };
-
-                            overlayImg.onerror = () => {
-                                reject(new Error(`Failed to load image: ${image.src}`));
-                            };
-                        });
-                    }
-                });
-            }
-
-            // Текстовые блоки
-            this.textBlocks.forEach(block => {
-                allElements.push({
-                    type: 'text',
-                    zIndex: block.zIndex || 900,
-                    draw: () => {
-                        return new Promise(resolve => {
-                            ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY}px ${block.fontFamily}`;
-                            ctx.fillStyle = block.color;
-
-                            let scaledLeft = (block.left - this.shiftX) * scaleFactorX;
-                            const scaledTop = (block.top - this.shiftY) * scaleFactorY + block.fontSize * scaleFactorY * 1.2;
-
-                            const lines = this.splitTextIntoLines(block.text);
-                            const lineHeight = block.fontSize * scaleFactorY;
-
-                            const textMetrics = ctx.measureText(lines[0]);
-                            const textWidth = textMetrics.width;
-
-                            if (block.textAlign === 'center') {
-                                scaledLeft += textWidth / 2;
-                                ctx.textAlign = 'center';
-                            } else if (block.textAlign === 'right') {
-                                scaledLeft += textWidth;
-                                ctx.textAlign = 'right';
-                            } else {
-                                ctx.textAlign = 'left';
-                            }
-
-                            lines.forEach((line, index) => {
-                                ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
-                            });
-
-                            resolve();
-                        });
-                    }
-                });
-            });
-
-            allElements.sort((a, b) => a.zIndex - b.zIndex);
-
-            try {
-                for (const element of allElements) {
-                    await element.draw();
+                const { coordinates, canvas } = this.$refs.cropper.getResult();
+                if (!canvas) {
+                    console.error('Canvas is not available');
+                    return Promise.reject('Canvas not available');
                 }
-                this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
-                resolve();
-            } catch (error) {
-                console.error('Ошибка отрисовки:', error);
-                reject(error);
-            }
-        };
 
-        img.onerror = () => {
-            reject(new Error('Image failed to load'));
-        };
-    });
-},
+                // 💬 Функция авто-переноса текста
+                const autoLineBreak = (text, maxWidth, ctx) => {
+                    const words = text.split(' ');
+                    let line = '';
+                    const lines = [];
+
+                    for (let n = 0; n < words.length; n++) {
+                        const testLine = line + words[n] + ' ';
+                        const testWidth = ctx.measureText(testLine).width;
+                        if (testWidth > maxWidth && n > 0) {
+                            lines.push(line.trim());
+                            line = words[n] + ' ';
+                        } else {
+                            line = testLine;
+                        }
+                    }
+                    lines.push(line.trim());
+                    return lines;
+                };
+
+                return new Promise((resolve, reject) => {
+                    const finalCanvas = document.createElement('canvas');
+                    const ctx = finalCanvas.getContext('2d');
+                    finalCanvas.width = canvas.width;
+                    finalCanvas.height = canvas.height;
+                    ctx.drawImage(canvas, 0, 0);
+
+                    const img = new Image();
+                    img.src = canvas.toDataURL();
+                    this.getShift();
+
+                    img.onload = async () => {
+                        const widthImagePage = document.querySelector('.vue-preview__wrapper').offsetWidth;
+                        const heightImagePage = document.querySelector('.vue-preview__wrapper').offsetHeight;
+                        this.startSizeW = widthImagePage;
+                        this.startSizeH = heightImagePage;
+                        const scaleFactorX = img.width / widthImagePage;
+                        const scaleFactorY = img.height / heightImagePage;
+
+                        const allElements = [];
+
+                        // Прямоугольники
+                        this.rectangles.forEach(rectangle => {
+                            allElements.push({
+                                type: 'rectangle',
+                                zIndex: rectangle.zIndex || 800,
+                                draw: () => {
+                                    return new Promise(resolve => {
+                                        ctx.save();
+                                        ctx.fillStyle = rectangle.color;
+                                        ctx.globalAlpha = rectangle.opacity;
+
+                                        const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX;
+                                        const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY;
+                                        const scaledWidth = rectangle.width * scaleFactorX;
+                                        const scaledHeight = rectangle.height * scaleFactorY;
+
+                                        ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                        ctx.restore();
+                                        resolve();
+                                    });
+                                }
+                            });
+                        });
+
+                        // Изображения
+                        for (const image of this.images) {
+                            allElements.push({
+                                type: 'image',
+                                zIndex: image.zIndex || 1,
+                                draw: () => {
+                                    return new Promise((resolve, reject) => {
+                                        const overlayImg = new Image();
+                                        overlayImg.crossOrigin = 'anonymous';
+                                        overlayImg.src = image.src;
+
+                                        overlayImg.onload = () => {
+                                            const scaledLeft = (image.left - this.shiftX) * scaleFactorX;
+                                            const scaledTop = (image.top - this.shiftY) * scaleFactorY;
+                                            const baseWidth = image.width * scaleFactorX;
+                                            const baseHeight = image.height * scaleFactorY;
+
+                                            const scale = image.scale || 1;
+
+                                            ctx.filter = image.filter ? `blur(${image.filter * 2}px)` : 'none';
+
+                                            ctx.save();
+                                            ctx.translate(scaledLeft + baseWidth / 2, scaledTop + baseHeight / 2);
+                                            ctx.scale(scale, scale);
+                                            ctx.drawImage(overlayImg, -baseWidth / 2, -baseHeight / 2, baseWidth, baseHeight);
+                                            ctx.restore();
+                                            ctx.filter = 'none';
+
+                                            resolve();
+                                        };
+
+                                        overlayImg.onerror = () => {
+                                            reject(new Error(`Failed to load image: ${image.src}`));
+                                        };
+                                    });
+                                }
+                            });
+                        }
+
+                        // Текстовые блоки
+                        this.textBlocks.forEach(block => {
+                            allElements.push({
+                                type: 'text',
+                                zIndex: block.zIndex || 900,
+                                draw: () => {
+                                    return new Promise(resolve => {
+                                        ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY}px ${block.fontFamily}`;
+                                        ctx.fillStyle = block.color;
+
+                                        let scaledLeft = (block.left - this.shiftX) * scaleFactorX;
+                                        const scaledTop = (block.top - this.shiftY) * scaleFactorY + block.fontSize * scaleFactorY * 1.2;
+                                        const scaledWidth = block.width * scaleFactorX;
+
+                                        const lineHeight = block.fontSize * scaleFactorY;
+
+                                        const lines = autoLineBreak(block.text, scaledWidth, ctx);
+
+                                        if (block.textAlign === 'center') {
+                                            ctx.textAlign = 'center';
+                                            scaledLeft += scaledWidth / 2;
+                                        } else if (block.textAlign === 'right') {
+                                            ctx.textAlign = 'right';
+                                            scaledLeft += scaledWidth;
+                                        } else {
+                                            ctx.textAlign = 'left';
+                                        }
+
+                                        lines.forEach((line, index) => {
+                                            ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+                                        });
+
+                                        resolve();
+                                    });
+                                }
+                            });
+                        });
+
+                        allElements.sort((a, b) => a.zIndex - b.zIndex);
+
+                        try {
+                            for (const element of allElements) {
+                                await element.draw();
+                            }
+                            this.croppedImage = finalCanvas.toDataURL(`image/${this.fileExtension}`);
+                            resolve();
+                        } catch (error) {
+                            console.error('Ошибка отрисовки:', error);
+                            reject(error);
+                        }
+                    };
+
+                    img.onerror = () => {
+                        reject(new Error('Image failed to load'));
+                    };
+                });
+            },
+
 
 
             // Скачивание обрезанного изображения
@@ -3275,8 +3346,8 @@
     /* ============================================== */
     .cropper-container {
         position: relative;
-        max-width: 100%;
-        max-height: 500px;
+        max-width: 511px;
+        max-height: 511px;
         overflow: hidden;
         position: relative;
         @media (max-width: 900px) {
