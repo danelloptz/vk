@@ -426,8 +426,8 @@
                         @blur="disableEditing(block.id)"
                         :style="{
                             whiteSpace: 'pre-wrap', // Сохраняем переносы строк
-                            wordWrap: 'break-word', // Переносим длинные слова
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            maxHeight: '100%'
                         }"
                         >
                         {{ block.text }}
@@ -982,7 +982,7 @@
 
                 // затемнение снизу
                 let newImage = {
-                    id: 7,
+                    id: 1,
                     top: bounds.top + 718 * scaleY,
                     left: bounds.left + (-308) * scaleX,
                     width: bounds.width * 1.4359375,
@@ -997,7 +997,7 @@
 
                 // затемнение сверху
                 newImage = {
-                    id: 6,
+                    id: 2,
                     top: bounds.top + (-50) * scaleY,
                     left: bounds.left + (-164) * scaleX,
                     width: bounds.width * 1.2390625,
@@ -1014,7 +1014,7 @@
 
                 // логотип
                 newImage = {
-                    id: 1,
+                    id: 3,
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
@@ -1044,7 +1044,7 @@
 
                 // текст к логотипу
                 let newBlock = {
-                    id: 2,
+                    id: 5,
                     text: 'INTELEKTAZ',
                     top: bounds.top + 73 * scaleY,
                     left: bounds.left + 553 * scaleX,
@@ -1061,13 +1061,10 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 // текст белым снизу
                 newBlock = {
-                    id: 3,
+                    id: 6,
                     text: 'Перестань выживать — начни доминировать!',
                     top: bounds.top + 839 * scaleY,
                     left: bounds.left + 74 * scaleX,
@@ -1084,14 +1081,11 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 
                 // большой текст на красном фоне
                 newBlock = {
-                    id: 5,
+                    id: 7,
                     text: 'ИИ ПРЕВРАЩАЕТ СОЦСЕТИ \nВ ЗОЛОТУЮ ЖИЛУ!',
                     top: bounds.top + 960 * scaleY,
                     left: bounds.left + 51 * scaleX,
@@ -1108,9 +1102,6 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
                 
 
                 selectedLayTemplate = newImage.id;
@@ -1137,7 +1128,7 @@
                 
                 // затемнение снизу
                 newImage = {
-                    id: 7,
+                    id: 8,
                     top: bounds.top + 718 * scaleY,
                     left: bounds.left + (-308) * scaleX,
                     width: bounds.width * 1.4359375,
@@ -1152,7 +1143,7 @@
 
                 // затемнение сверху
                 newImage = {
-                    id: 6,
+                    id: 9,
                     top: bounds.top + (-50) * scaleY,
                     left: bounds.left + (-164) * scaleX,
                     width: bounds.width * 1.2390625,
@@ -1169,7 +1160,7 @@
 
                 // логотип
                 newImage = {
-                    id: 1,
+                    id: 10,
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
@@ -1184,7 +1175,7 @@
 
                 // текст к логотипу
                 newBlock = {
-                    id: 2,
+                    id: 11,
                     text: 'INTELEKTAZ',
                     top: bounds.top + 73 * scaleY,
                     left: bounds.left + 553 * scaleX,
@@ -1201,13 +1192,10 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 // текст белым снизу
                 newBlock = {
-                    id: 3,
+                    id: 12,
                     text: 'ТВОЙ БИЗНЕС ЗАХЛЕБЫВАЕТСЯ',
                     top: bounds.top + 802 * scaleY,
                     left: bounds.left + 60 * scaleX,
@@ -1224,14 +1212,11 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 
                 // большой текст на красном фоне
                 newBlock = {
-                    id: 5,
+                    id: 13,
                     text: 'В РУТИНЕ?',
                     top: bounds.top + 870 * scaleY,
                     left: bounds.left + 60 * scaleX,
@@ -1248,13 +1233,10 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 // большой текст на красном фоне
                 newBlock = {
-                    id: 10,
+                    id: 14,
                     text: 'Выпусти на свободу ИИ и получи взрывной рост продаж!',
                     top: bounds.top + 1136 * scaleY,
                     left: bounds.left + 98 * scaleX,
@@ -1271,9 +1253,6 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
                 
 
                 selectedLayTemplate = newImage.id;
@@ -1300,7 +1279,7 @@
                 
                 // затемнение снизу
                 newImage = {
-                    id: 7,
+                    id: 15,
                     top: bounds.top + 718 * scaleY,
                     left: bounds.left + (-308) * scaleX,
                     width: bounds.width * 1.4359375,
@@ -1316,7 +1295,7 @@
 
                 // логотип
                 newImage = {
-                    id: 1,
+                    id: 16,
                     top: bounds.top + 53 * scaleY,
                     left: bounds.left + 436 * scaleX,
                     width: bounds.width * 0.0765625,
@@ -1331,7 +1310,7 @@
 
                 // логотип
                 newImage = {
-                    id: 12,
+                    id: 17,
                     top: bounds.top + 1090 * scaleY,
                     left: bounds.left + 99 * scaleX,
                     width: bounds.width * 0.84453125,
@@ -1346,7 +1325,7 @@
 
                 // текст к логотипу
                 newBlock = {
-                    id: 2,
+                    id: 18,
                     text: 'INTELEKTAZ',
                     top: bounds.top + 73 * scaleY,
                     left: bounds.left + 553 * scaleX,
@@ -1363,13 +1342,10 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 // текст красным
                 newBlock = {
-                    id: 3,
+                    id: 19,
                     text: 'СЕКРЕТНЫЙ',
                     top: bounds.top + 176 * scaleY,
                     left: bounds.left + 141 * scaleX,
@@ -1386,14 +1362,11 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 
                 // большой текст на красном фоне
                 newBlock = {
-                    id: 5,
+                    id: 20,
                     text: 'ИНГРЕДИЕНТ УСПЕХА:',
                     top: bounds.top + 376 * scaleY,
                     left: bounds.left + 141 * scaleX,
@@ -1410,13 +1383,10 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
 
                 // большой текст на красном фоне
                 newBlock = {
-                    id: 10,
+                    id: 21,
                     text: 'ИИ, который привлекает клиентов 24/7',
                     top: bounds.top + 1121 * scaleY,
                     left: bounds.left + 139 * scaleX + 10,
@@ -1433,9 +1403,6 @@
                 };
                 textBlocksTemplate.push(newBlock);
                 layersTemplate.unshift({ name: newBlock.text, id: newBlock.id, type: "text" });
-                this.$nextTick(() => {
-                    this.initResizeObserver(newBlock.id);
-                });
                 
 
                 selectedLayTemplate = newImage.id;
@@ -1699,6 +1666,12 @@
                 this.layers = JSON.parse(JSON.stringify(state.layers));
                 this.selectedLay = state.selectedLay;
                 this.selectedTemplate = state.selectedTemplate;
+
+                this.$nextTick(() => {
+                    for (const block of this.textBlocks) {
+                        this.initResizeObserver(block.id);
+                    }
+                })
 
                 console.log(this.images);
             },
@@ -2101,7 +2074,6 @@
 
                 const range = selection.getRangeAt(0); // Текущий диапазон выделения
                 const currentCursorPosition = range.startOffset; // Позиция курсора
-                console.log(this.cursor_pos);
                 // Важно: Используем $nextTick, чтобы дождаться обновления DOM
                 this.$nextTick(() => {
                     const contentEditableElement = event.target;
@@ -2570,23 +2542,40 @@
 
                 // 💬 Функция авто-переноса текста
                 const autoLineBreak = (text, maxWidth, ctx) => {
-                    const words = text.split(' ');
-                    let line = '';
-                    const lines = [];
+                    const resultLines = [];
 
-                    for (let n = 0; n < words.length; n++) {
-                        const testLine = line + words[n] + ' ';
-                        const testWidth = ctx.measureText(testLine).width;
-                        if (testWidth > maxWidth && n > 0) {
-                            lines.push(line.trim());
-                            line = words[n] + ' ';
-                        } else {
-                            line = testLine;
+                    // Сначала разбиваем текст по \n — пользовательские переносы
+                    const paragraphs = text.split(/\r?\n/);
+                    console.log(paragraphs);
+
+                    for (const paragraph of paragraphs) {
+                        const words = paragraph.split(' ');
+                        console.log(words);
+                        let currentLine = '';
+
+                        for (let i = 0; i < words.length; i++) {
+                            const word = words[i];
+                            const testLine = currentLine + word;
+                            const testWidth = ctx.measureText(testLine).width;
+
+                            console.log(word, "|", testLine);
+
+                            if (testWidth > maxWidth + 1 && currentLine !== '') {
+                                console.log(currentLine, word, testWidth, maxWidth);
+                                resultLines.push(currentLine.trim());
+                                currentLine = word + ' ';
+                            } else {
+                                currentLine = testLine + ' ';
+                            }
                         }
+
+                        resultLines.push(currentLine.trim());
                     }
-                    lines.push(line.trim());
-                    return lines;
+
+                    return resultLines;
                 };
+
+
 
                 return new Promise((resolve, reject) => {
                     const finalCanvas = document.createElement('canvas');
@@ -2687,6 +2676,8 @@
                                         const scaledWidth = block.width * scaleFactorX;
 
                                         const lineHeight = block.fontSize * scaleFactorY;
+
+                                        console.log('CROP: ', scaledWidth, block.width, scaleFactorX);
 
                                         const lines = autoLineBreak(block.text, scaledWidth, ctx);
 
