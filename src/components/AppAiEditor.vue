@@ -976,6 +976,8 @@
                 const bounds = this.getCropperBounds();
                 console.log(bounds);
 
+                this.cropperWidth = bounds.width;
+
                 // масштаб
                 const scaleX = bounds.width / 1280;
                 const scaleY = bounds.height / 1280;
@@ -1031,7 +1033,7 @@
                 let newRectangle = {
                     id: 4,
                     top: bounds.top + 950 * scaleY,
-                    left: 0,
+                    left: bounds.left,
                     width: bounds.width,
                     height: 260 * scaleY,
                     color: '#DE5386',
@@ -2571,8 +2573,8 @@
 
                         resultLines.push(currentLine.trim());
                     }
-
-                    return resultLines;
+                    console.log(resultLines);
+                    return resultLines.filter(item => item != '');
                 };
 
 
@@ -3342,7 +3344,7 @@
         overflow: hidden;
         position: relative;
         @media (max-width: 900px) {
-            max-height: 300px;
+            max-height: 400px;
         }
         /* margin: 20px auto; */
     }
