@@ -424,6 +424,7 @@
                     this.isModal = true;
                     return;
                 }
+                if (!resp) return;
                 this.generatedImage = resp;
                 if (this.variants.length < 5) {
                     this.variants.push({

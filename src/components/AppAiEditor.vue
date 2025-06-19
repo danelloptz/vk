@@ -2551,7 +2551,7 @@
                     console.log(paragraphs);
 
                     for (const paragraph of paragraphs) {
-                        const words = paragraph.split(' ');
+                        const words = paragraph.trim().split(' ');
                         console.log(words);
                         let currentLine = '';
 
@@ -2574,7 +2574,8 @@
                         resultLines.push(currentLine.trim());
                     }
                     console.log(resultLines);
-                    return resultLines.filter(item => item != '');
+                    return resultLines;
+                    // return resultLines.filter(item => item != '');
                 };
 
 
