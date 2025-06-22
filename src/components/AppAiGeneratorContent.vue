@@ -24,7 +24,7 @@
         @bad_payment="badPayment"
     />
     <div class="modal_wrapper" v-if="isBanner">
-        <div class="modal" :style="{ position: isChangePosition ? 'static' : 'relative' }">
+        <div class="modal" :style="{ position: isChangePosition ? 'relative' : 'static' }">
             <img src="@/assets/images/close.png" class="close" @click="closeBanner">
             <AppAiBanner 
                 :userData="userData" 
@@ -199,7 +199,7 @@
                             <div class="plan_item_variants" v-if="!(isLoading && step == 0) && step >= 3">
                                 <AppGoodButton 
                                     :text="user_photo"
-                                    v-if="step >= 3 && !isLoading"
+                                    v-if="step >= 2 && !isLoading"
                                     class="not_active variant_btn"
                                     @click="getUserImage(item, index)"
                                 />
@@ -230,12 +230,12 @@
                                 />
                                 <!-- <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" /> -->
                             </div>
-                            <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3 && userData?.packages.find(p => p.id === 6)">
-                                <div class="editor" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                            <div class="banner_tools">
+                                <div class="editor" v-if="!(isLoading && step == 0) && (step >= 3 || item?.custom_image_url !== '') && userData?.packages.find(p => p.id === 6)" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                     <img src="@/assets/images/pen.png" />
                                     <span>Редактор</span>
                                 </div>
-                                <div class="bannerAi" @click="openBanner(index)">
+                                <div class="bannerAi" v-if="!(isLoading && step == 0) && step >= 2 && userData?.packages.find(p => p.id === 6)" @click="openBanner(index)">
                                     <img src="@/assets/images/banner.png" />
                                     <span>ИИ Баннер</span>
                                 </div>
@@ -296,7 +296,7 @@
                                     <!-- <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" /> -->
                                     <AppGoodButton 
                                         :text="user_photo"
-                                        v-if="step >= 3 && !isLoading"
+                                        v-if="step >= 2 && !isLoading"
                                         class="not_active variant_btn"
                                         @click="getUserImage(item, index)"
                                     />
@@ -326,12 +326,12 @@
                                         style="display: none;"
                                     />
                                 </div>
-                                <div class="banner_tools" v-if="!(isLoading && step == 0) && step >= 3 && userData?.packages.find(p => p.id === 6)">
-                                    <div class="editor" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                                <div class="banner_tools">
+                                    <div class="editor" v-if="!(isLoading && step == 0) && (step >= 3 || item?.custom_image_url !== '') && userData?.packages.find(p => p.id === 6)" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
                                     </div>
-                                    <div class="bannerAi" @click="openBanner(index)">
+                                    <div class="bannerAi" v-if="!(isLoading && step == 0) && step >= 2 && userData?.packages.find(p => p.id === 6)" @click="openBanner(index)">
                                         <img src="@/assets/images/banner.png" />
                                         <span>ИИ Баннер</span>
                                     </div>
@@ -605,7 +605,7 @@
                 isReg: false,
                 isBanner: false,
                 bannerIndex: null,
-                isChangePosition: false
+                isChangePosition: true
             }
         },
         watch: {
@@ -707,6 +707,7 @@
                 this.isCustomEdit = true;
                 await this.updateImage(link);
                 await updateContentPlan(this.plan, localStorage.getItem("token"));
+                this.step = this.getStep();
             },
             openBanner(index) {
                 this.isBanner = true;
@@ -747,6 +748,7 @@
                 if (this.isCustomEdit) {
                     console.log("я тут3");
                     this.plan[this.indexEdit].custom_image_url = link;
+                    // this.plan[this.indexEdit].chose_image_index = 3;
                     const resp = await uploadUserImage(this.plan[this.indexEdit].topic_id, file, localStorage.getItem("token"));
                     this.plan = resp;
                 } else {
@@ -879,8 +881,10 @@
                                 item.chose_post_index = 0;
                             });
                             await updateContentPlan(this.plan, localStorage.getItem("token"));
+                            this.step = this.getStep();
                         } catch(err) {
                             console.error(err);
+                            window.location.reload();
                         }
                     } else if (this.step == 2) {
                         try {
@@ -907,6 +911,8 @@
                                 await writeOffGenerations(this.userData.vk_id, this.plan.length);
                                 const gener = await getGenerations(this.userData.id);
                                 this.generations = gener;
+                            } else {
+                                window.location.reload();
                             }
                             this.plan = resp;
                             this.plan.forEach(item => {
@@ -916,6 +922,7 @@
                             this.step = this.getStep();
                         } catch(err) {
                             console.error(err);
+                            window.location.reload();
                         }
                     } else if (this.step > 2) {
                         try {
@@ -954,7 +961,9 @@
                         await writeOffGenerations(this.userData.vk_id, this.checkedPlan.length);
                         const gener = await getGenerations(this.userData.id);
                         this.generations = gener;
-                    } 
+                    } else {
+                        window.location.reload();
+                    }
                     this.plan = topics;
                     this.currBanner++;
                 } else {
@@ -964,6 +973,8 @@
                         await writeOffGenerations(this.userData.vk_id, this.plan.length);
                         const gener = await getGenerations(this.userData.id);
                         this.generations = gener;
+                    } else {
+                        window.location.reload();
                     }
                     this.plan = resp;
                     this.plan.forEach(item => {
@@ -1061,13 +1072,14 @@
 
             },
             async generateThemes() {
-                if (this.isBlockGenerate) return;
+                // if (this.isBlockGenerate) return;
                 this.step = 0;
                 this.saveSettings();
                 this.isLoading = true;
                 this.Timer(this.plan.length, 20000);
 
                 const topics = await generateTopics(localStorage.getItem("token"));
+                if (!topics) window.location.reload();
                 this.plan = topics;
                 // this.step++;
 
@@ -1156,6 +1168,7 @@
                         this.plan = topics;
                     } catch(err) {
                         console.error(err);
+                        window.location.reload();
                     }
                 } 
                 if (this.step == 2 && max_text < 3) {
@@ -1164,10 +1177,12 @@
                             item.chose_post_index++;
                         });
                         const topics = await regeneratePosts(checked_plan, localStorage.getItem("token"));
+                        if (!topics) window.location.reload();
                         this.plan = topics;
                         this.currText++;
                     } catch(err) {
                         console.error(err);
+                        window.location.reload();
                     }
                 } 
                 if (this.step == 3 && max_banners < 3) {
@@ -1191,7 +1206,9 @@
                             await writeOffGenerations(this.userData.vk_id, checked_plan.length);
                             const gener = await getGenerations(this.userData.id);
                             this.generations = gener;
-                        } 
+                        } else {
+                            window.location.reload();
+                        }
                         this.plan = topics;
                         this.currBanner++;
                     } catch(err) {
@@ -1207,11 +1224,14 @@
                 const notEmptyThemes = this.plan.filter(item => item.topic_name != "");
                 const notEmptyPosts = this.plan.filter(item => item.post_text.length > 0);
                 const notEmptyImages = this.plan.filter(item => item.image_links.length > 0);
+                const notEmptyCustomImages = this.plan.filter(item => item.custom_image_url != "");
+                const filtered = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
                 console.log("Непустые тема: ", notEmptyThemes);
                 console.log("Непустые посты: ", notEmptyPosts);
                 console.log("Непустые картинки: ", notEmptyImages);
                 if (notEmptyThemes.length == 0) return 0;
                 if (notEmptyPosts.length == 0) return 1;
+                if (notEmptyCustomImages.length > 0 && filtered.length == notEmptyCustomImages.length) return 3;
                 if (notEmptyImages.length == 0) return 2;
                 return 3;
             },

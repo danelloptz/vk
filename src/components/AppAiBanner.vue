@@ -296,7 +296,7 @@
                 isEditor: false,
                 variants: [],
                 selectedVariant: null,
-                generations: null
+                generations: null,
             }
         },
         computed: {
@@ -400,6 +400,7 @@
                 this.selectedAspect = index;
             },
             async generate() {
+                if (this.isLoading) return;
                 if (this.generations.free.remains + this.generations.paid.remains <= 0) return;
                 this.isLoading = true;
                 this.Timer(1, 20000);
@@ -420,7 +421,6 @@
                             this.msg = "Произошла непридвиденная ошибка. Перезагрузите страницу. Если проблема останется, то обратитесь в техническую поддержку.";
                             break;
                     }
-                    this.$emit('changePosition');
                     this.isModal = true;
                     return;
                 }
@@ -439,6 +439,7 @@
                 const gener = await getGenerations(this.userData.id);
                 this.generations = gener;
 
+                this.$emit('changePosition');
                 this.isModal = true;
                 this.title = "УСПЕШНО!";
                 this.msg = "Картинка сохранена на ваше устройство.";

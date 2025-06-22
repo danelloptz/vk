@@ -799,6 +799,7 @@
             }
         },
         mounted() {
+            window.addEventListener('pointerdown', this.handleClickOutside, true);
             document.addEventListener('keydown', this.handleKeyDown);
             document.addEventListener('keyup', this.handleKeyUp);
             document.addEventListener("click", this.handleClickOutside);
@@ -936,13 +937,17 @@
                 this.isSaveTemplate = true;
             },
             handleClickOutside(event) {
+                console.log('click');
+                const isInside = event.target.closest('.text-block');
+                if (!isInside) {
+                    this.editingBlockId = null;
+                }
+
                 const panelRef = this.windowWidth > 900 ? this.$refs.emojiPanel : this.$refs.emojiPanel2;
                 const buttonRef = this.windowWidth > 900 ? this.$refs.emojiButton : this.$refs.emojiButton2;
 
                 const panel = panelRef?.$el || panelRef;
                 const button = buttonRef?.$el || buttonRef;
-
-                console.log(panel, button);
 
                 if (
                     panel &&
@@ -1521,6 +1526,7 @@
             },
             resetSelect() {
                 this.selectedLay = null;
+                console.log('resetSelect');
             },
             isOnlyZIndexChanged(newArray, oldArray) {
                 console.log(newArray, oldArray);
@@ -2053,10 +2059,16 @@
 
                 const bounds = this.getCropperBounds();
                 const bottom = bounds.top + bounds.height;
-                if (block.top + block.height > bottom) {
-                    block.top = bounds.top + bounds.height - block.height;
-                    return;
+                console.log('enter');
+                if (block.width + block.left + 30 > bounds.width + bounds.left) {
+                    block.left = 0;
+                    console.log('right border');
                 }
+                if (block.top + block.height + block.fontSize * 2 > bottom) {
+                    block.top = bounds.top + bounds.height - block.height;
+                    console.log('enter border');
+                }
+                
 
                 // Получаем текущее значение из contenteditable элемента
                 const newText = event.target.innerText;
@@ -2099,6 +2111,15 @@
             },
             handleEnterDown(event) {
                 if (event.key === 'Enter') {
+                    const block = this.textBlocks.find((b) => b.id === this.selectedLay);
+                    if (!block) return;
+
+                    const bounds = this.getCropperBounds();
+                    console.log(block.top + block.height, bounds.height + bounds.top);
+                    if (block.top + block.height + block.fontSize * 2 >= bounds.height + bounds.top) {
+                        block.top = bounds.top + bounds.height - block.height - block.fontSize * 2;
+                        console.log('enter border');
+                    }
                     const selection = window.getSelection();
                     const range = selection.getRangeAt(0); // Текущий диапазон выделения
                     const currentCursorPosition = range.startOffset; // Позиция курсора
@@ -2562,7 +2583,7 @@
 
                             console.log(word, "|", testLine);
 
-                            if (testWidth > maxWidth + 1 && currentLine !== '') {
+                            if (Math.floor(testWidth) > Math.floor(maxWidth) + 1 && currentLine !== '') {
                                 console.log(currentLine, word, testWidth, maxWidth);
                                 resultLines.push(currentLine.trim());
                                 currentLine = word + ' ';
@@ -2675,7 +2696,7 @@
                                         ctx.fillStyle = block.color;
 
                                         let scaledLeft = (block.left - this.shiftX) * scaleFactorX;
-                                        const scaledTop = (block.top - this.shiftY) * scaleFactorY + block.fontSize * scaleFactorY * 1.2;
+                                        const scaledTop = (block.top - this.shiftY) * scaleFactorY + block.fontSize * scaleFactorY;
                                         const scaledWidth = block.width * scaleFactorX;
 
                                         const lineHeight = block.fontSize * scaleFactorY;
@@ -3344,6 +3365,7 @@
         max-height: 511px;
         overflow: hidden;
         position: relative;
+        display: flex;
         @media (max-width: 900px) {
             max-height: 400px;
         }
@@ -3358,11 +3380,12 @@
         position: absolute;
         font-family: Arial, sans-serif;
         white-space: pre-wrap; /* Сохраняет переносы строк */
-        word-wrap: break-word; 
+        /* word-wrap: break-word;  */
         pointer-events: auto;
-        line-height: normal;
+        line-height: 1;
         display: inline-block;
         cursor: pointer;
+        max-width: 100%;
     }
 
     .text-block:hover {
