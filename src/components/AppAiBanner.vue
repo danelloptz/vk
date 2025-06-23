@@ -13,6 +13,23 @@
         @update:visibility1="isEditor = $event"
         @update:save="updateImage"
     />
+    <AppModalGenerator 
+        v-if="isModalGenerator" 
+        :userData="userData"
+        :isSecond="isSecond"
+        :visibility1="isModalGenerator"
+        @update:visibility1="isModalGenerator = $event"
+    />
+    <AppModalGeneratorPayment 
+        v-if="isModalGeneratorPayment" 
+        :userData="userData"
+        :visibility1="isModalGeneratorPayment"
+        :bannerAmount="diff"
+        :payment="payment"
+        @update:visibility1="isModalGeneratorPayment = $event"
+        @success_payment="successPayment"
+        @bad_payment="badPayment"
+    />
     <section class="banner">
         <h1 :style="{ alignSelf: isBanner ? 'center' : 'start' }">{{ isBanner ? 'ИИ баннер' : 'Создайте уникальный баннер c Intelektaz' }}</h1>
         <div class="generations_wrapper">
@@ -196,14 +213,17 @@
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppAiEditor from '@/components/AppAiEditor.vue';
     import AppModal from '@/components/AppModal.vue';
+    import AppModalGenerator from '@/components/AppModalGenerator.vue';
+    import AppModalGeneratorPayment from '@/components/AppModalGeneratorPayment.vue';
     import { generateCustomImage, getGenerations } from '@/services/ai';
+    import { getConfig } from '@/services/config';
 
     export default {
         props: {
             userData: Object,
             isBanner: Boolean
         },
-        components: { AppGoodButton, AppModal, AppAiEditor, AppBadButton },
+        components: { AppGoodButton, AppModal, AppAiEditor, AppBadButton, AppModalGenerator, AppModalGeneratorPayment },
         data() {
             return {
                 descr: "",
@@ -297,6 +317,13 @@
                 variants: [],
                 selectedVariant: null,
                 generations: null,
+                isModalGenerator: false,
+                isModalGeneratorPayment: false,
+                isSecond: false,
+                diff: null,
+                payment: null,
+                prices: null,
+                isSuccessPayment: false
             }
         },
         computed: {
@@ -314,8 +341,26 @@
         async created() {
             const gener = await getGenerations(this.userData.id);
             this.generations = gener;
+
+            const prices = await getConfig('generation_cost', localStorage.getItem('token'));
+            this.prices = prices;
         },
         methods: {
+            async successPayment() {
+                this.isModalGeneratorPayment = false;
+                this.isSuccessPayment = true;
+                const gener = await getGenerations(this.userData.id);
+                this.generations = gener;
+
+                await this.generate();
+            },
+            badPayment() {
+                this.isModalGeneratorPayment = false;
+            },
+            openGeneratorModal(flag) {
+                this.isSecond = flag;
+                this.isModalGenerator = true;
+            },
             uploadUserPhoto() {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -401,7 +446,13 @@
             },
             async generate() {
                 if (this.isLoading) return;
-                if (this.generations.free.remains + this.generations.paid.remains <= 0) return;
+                if (this.generations.free.remains + this.generations.paid.remains <= 0 && !this.isSuccessPayment) {
+                    this.isLoading = false;
+                    this.diff = 1;
+                    this.payment = this.prices.one_post;
+                    this.isModalGeneratorPayment = true;
+                    return;
+                }
                 this.isLoading = true;
                 this.Timer(1, 20000);
                 const aspect = this.aspects_choices[this.selectedAspect] == "1:1 (квадратная)" ? "1x1" : this.aspects_choices[this.selectedAspect].replace(":", "x");

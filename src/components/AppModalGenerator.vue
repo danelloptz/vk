@@ -11,9 +11,9 @@
             <img src="@/assets/images/close.png" class="close" @click="cancel">
             <span v-if="isSecond" style="margin-bottom: 10px;">Если вам нужно больше генераций, вы можете покупать их штучно по мере необходимости или купить пакет генераций оптом по выгодной цене.</span>
             <span v-else style="margin-bottom: 10px;">В ваш пакет входит 30 генераций ежемесячно, эта цифра будет возобновляться каждый месяц до окончания срока действия вашего пакета. Если вам нужно больше генераций, вы можете покупать их штучно по мере необходимости или купить пакет генераций оптом по выгодной цене.</span>
-            <span><strong>Генерация 1 баннера</strong> = 0.6 USDT</span>
-            <span><strong>Пакет Генераций 100</strong> - цена 50 USDT, цена 1 баннера = 0.5 USDT</span>
-            <span><strong>Пакет Генераций 500</strong> - цена 200 USDT, цена 1 баннера = 0.4 USDT</span>
+            <span><strong>Генерация 1 баннера</strong> = {{ prices?.one_post }} USDT</span>
+            <span><strong>Пакет Генераций 100</strong> - цена {{ prices?.pack_100_posts }} USDT, цена 1 баннера = {{ prices?.pack_100_posts / 100 }} USDT</span>
+            <span><strong>Пакет Генераций 500</strong> - цена {{ prices?.pack_500_posts }} USDT, цена 1 баннера = {{ prices?.pack_500_posts / 500 }} USDT</span>
             <div class="row">
                 <AppBadButton class="btn" :text="'КУПИТЬ 100'" @click="buy(100)" />
                 <AppBadButton class="btn" :text="'КУПИТЬ 500'" @click="buy(500)" />
@@ -26,6 +26,7 @@
 import AppBadButton from "@/components/AppBadButton.vue";
 import AppModal from "@/components/AppModal.vue";
 import { buyGenerations } from "@/services/ai";
+import { getConfig } from '@/services/config';
 
 export default {
     components: { AppBadButton, AppModal },
@@ -40,8 +41,13 @@ export default {
             text2: "НЕТ",
             title: "",
             msg: "",
-            isModal: false
+            isModal: false,
+            prices: null
         };
+    },
+    async created() {
+        const prices = await getConfig('generation_cost', localStorage.getItem('token'));
+        this.prices = prices;
     },
     methods: {
         confirm() {

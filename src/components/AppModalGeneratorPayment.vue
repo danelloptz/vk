@@ -10,11 +10,11 @@
         <section class="modal">
             <img src="@/assets/images/close.png" class="close" @click="close">
             <span><strong>Месячный лимит исчерпан, доступных генераций нет.</strong></span>
-            <span>Генерация 1 баннера сверх лимита стоит <strong>0,6 USDT</strong></span>
+            <span>Генерация 1 баннера сверх лимита стоит <strong>{{ prices?.one_post }} USDT</strong></span>
             <span style="margin-bottom: 10px;">Вы выбрали {{ bannerAmount }} баннеров. Вы подтверждаете списание с баланса {{ Math.ceil(payment * 100) / 100 }} USDT?</span>
             <span>Вы можете купить Пакет 100 или 500 генераций со скидкой:</span>
-            <span><strong>Пакет Генераций 100</strong> - цена 50 USDT, цена 1 баннера = 0.5 USDT</span>
-            <span><strong>Пакет Генераций 500</strong> - цена 200 USDT, цена 1 баннера = 0.4 USDT</span>
+            <span><strong>Пакет Генераций 100</strong> - цена {{ prices?.pack_100_posts }} USDT, цена 1 баннера = {{ prices?.pack_100_posts / 100 }} USDT</span>
+            <span><strong>Пакет Генераций 500</strong> - цена {{ prices?.pack_500_posts }} USDT, цена 1 баннера = {{ prices?.pack_500_posts / 500 }} USDT</span>
             <div class="row">
                 <AppBadButton class="btn" :text="'ОПЛАТИТЬ'" @click="buy(bannerAmount)" />
                 <AppBadButton class="btn" :text="'КУПИТЬ 100'" @click="buy(100)" />
@@ -29,6 +29,7 @@
 import AppBadButton from "@/components/AppBadButton.vue";
 import AppModal from "@/components/AppModal.vue";
 import { buyGenerations } from "@/services/ai";
+import { getConfig } from '@/services/config';
 
 export default {
     components: { AppBadButton, AppModal },
@@ -44,8 +45,13 @@ export default {
             text2: "НЕТ",
             title: "",
             msg: "",
-            isModal: false
+            isModal: false,
+            prices: null
         };
+    },
+    async created() {
+        const prices = await getConfig('generation_cost', localStorage.getItem('token'));
+        this.prices = prices;
     },
     methods: {
         confirm() {
@@ -55,8 +61,8 @@ export default {
             this.$emit("update:visibility1", false);
         },
         async buy(amount) {
-            const payment = amount == 100 ? 50 : amount == 500 ? 200 : amount;
-            if (( (payment == 50 || payment == 200) && this.userData.balance < payment) || (this.userData.balance < payment * 0.6)) {
+            const payment = amount == 100 ? this.prices.pack_100_posts : amount == 500 ? this.prices.pack_500_posts : amount;
+            if (( (payment == this.prices.pack_100_posts || payment == this.prices.pack_500_posts) && this.userData.balance < payment) || (this.userData.balance < payment * this.prices.one_post)) {
                 this.title = "ОШИБКА!";
                 this.msg = "Недостаточно средств. Пополните баланс.";
                 this.isModal = true;
