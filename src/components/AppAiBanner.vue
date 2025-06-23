@@ -348,7 +348,6 @@
         methods: {
             async successPayment() {
                 this.isModalGeneratorPayment = false;
-                this.isSuccessPayment = true;
                 const gener = await getGenerations(this.userData.id);
                 this.generations = gener;
 
@@ -446,7 +445,7 @@
             },
             async generate() {
                 if (this.isLoading) return;
-                if (this.generations.free.remains + this.generations.paid.remains <= 0 && !this.isSuccessPayment) {
+                if (this.generations.free.remains + this.generations.paid.remains <= 0) {
                     this.isLoading = false;
                     this.diff = 1;
                     this.payment = this.prices.one_post;
