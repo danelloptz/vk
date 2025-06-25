@@ -19,6 +19,7 @@
         :isSecond="isSecond"
         :visibility1="isModalGenerator"
         @update:visibility1="isModalGenerator = $event"
+        @cancel="closeModalGenerator"
     />
     <AppModalGeneratorPayment 
         v-if="isModalGeneratorPayment" 
@@ -346,7 +347,11 @@
             this.prices = prices;
         },
         methods: {
+            closeModalGenerator() {
+                this.$emit('changePosition');
+            },
             async successPayment() {
+                this.$emit('changePosition');
                 this.isModalGeneratorPayment = false;
                 const gener = await getGenerations(this.userData.id);
                 this.generations = gener;
@@ -355,10 +360,12 @@
             },
             badPayment() {
                 this.isModalGeneratorPayment = false;
+                this.$emit('changePosition');
             },
             openGeneratorModal(flag) {
                 this.isSecond = flag;
                 this.isModalGenerator = true;
+                this.$emit('changePosition');
             },
             uploadUserPhoto() {
                 const input = document.createElement('input');
@@ -450,6 +457,7 @@
                     this.diff = 1;
                     this.payment = this.prices.one_post;
                     this.isModalGeneratorPayment = true;
+                    this.$emit('changePosition');
                     return;
                 }
                 this.isLoading = true;
@@ -472,6 +480,7 @@
                             break;
                     }
                     this.isModal = true;
+                    this.$emit('changePosition');
                     return;
                 }
                 if (!resp) return;
@@ -489,8 +498,8 @@
                 const gener = await getGenerations(this.userData.id);
                 this.generations = gener;
 
-                this.$emit('changePosition');
                 this.isModal = true;
+                this.$emit('changePosition');
                 this.title = "УСПЕШНО!";
                 this.msg = "Картинка сохранена на ваше устройство.";
             },

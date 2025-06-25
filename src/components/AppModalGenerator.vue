@@ -57,6 +57,7 @@ export default {
         cancel() {
             this.$emit("update:checkboxState", true); // Оставляем чекбокс включенным
             this.$emit("update:visibility1", false); // Закрываем модалку
+            this.$emit('cancel');
         },
         async buy(amount) {
             const payment = amount == 100 ? 50 : 200;

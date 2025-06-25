@@ -162,7 +162,7 @@
                             @change="onCropChange"
                             :style="{
                                 maxWidth: windowWidth > 1000 ? '511px' : '400px',
-                                background: 'none'
+                                background: 'none',
                             }"
                             :default-size="defaultSize"
                             @click="resetSelect"
@@ -796,6 +796,8 @@
                 emojis: [],
                 showEmojiPanel: false,
                 isSaveTemplate: false,
+                startTop: null,
+                topDiff: null
             }
         },
         mounted() {
@@ -811,7 +813,6 @@
             },
             selectedBlock() {
                 let block = this.textBlocks.find((block) => block.id === this.selectedBlockId);
-                if (block) console.log(block.top, block.fontSize);
                 return block || {
                     id: Date.now(),
                     text: 'Новый текст',
@@ -1615,6 +1616,20 @@
                 let left = 0;
                 let top = 0;
 
+                console.log(this.startTop?.top, rect.top);
+                if (!this.startTop) {
+                    this.startTop = {
+                        top: rect.top,
+                        left: rect.left,
+                    };
+                    console.log('установили startTop: ', this.startTop);
+                }
+                if (this.startTop && this.startTop.top != rect.top) {
+                    this.topDiff = Math.abs(rect.top - this.startTop.top);
+                    this.startTop.top = rect.top;
+                    console.log('изменился top', this.topDiff, rect.top, this.startTop);
+                }
+
                 left = (cropperImageWrapper.offsetWidth - rect.width) / 2;
 
                 return {
@@ -2059,14 +2074,11 @@
 
                 const bounds = this.getCropperBounds();
                 const bottom = bounds.top + bounds.height;
-                console.log('enter');
                 if (block.width + block.left + 30 > bounds.width + bounds.left) {
                     block.left = 0;
-                    console.log('right border');
                 }
-                if (block.top + block.height + block.fontSize * 2 > bottom) {
-                    block.top = bounds.top + bounds.height - block.height;
-                    console.log('enter border');
+                if (block.top + block.height + block.fontSize > bottom) {
+                    block.top = block.top - block.fontSize;
                 }
                 
 
@@ -2624,30 +2636,33 @@
 
                         // Прямоугольники
                         this.rectangles.forEach(rectangle => {
-                            allElements.push({
-                                type: 'rectangle',
-                                zIndex: rectangle.zIndex || 800,
-                                draw: () => {
-                                    return new Promise(resolve => {
-                                        ctx.save();
-                                        ctx.fillStyle = rectangle.color;
-                                        ctx.globalAlpha = rectangle.opacity;
+                            if (rectangle.display != 'none') {
+                                allElements.push({
+                                    type: 'rectangle',
+                                    zIndex: rectangle.zIndex || 800,
+                                    draw: () => {
+                                        return new Promise(resolve => {
+                                            ctx.save();
+                                            ctx.fillStyle = rectangle.color;
+                                            ctx.globalAlpha = rectangle.opacity;
 
-                                        const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX;
-                                        const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY;
-                                        const scaledWidth = rectangle.width * scaleFactorX;
-                                        const scaledHeight = rectangle.height * scaleFactorY;
+                                            const scaledLeft = (rectangle.left - this.shiftX) * scaleFactorX;
+                                            const scaledTop = (rectangle.top - this.shiftY) * scaleFactorY;
+                                            const scaledWidth = rectangle.width * scaleFactorX;
+                                            const scaledHeight = rectangle.height * scaleFactorY;
 
-                                        ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
-                                        ctx.restore();
-                                        resolve();
-                                    });
-                                }
-                            });
+                                            ctx.fillRect(scaledLeft, scaledTop, scaledWidth, scaledHeight);
+                                            ctx.restore();
+                                            resolve();
+                                        });
+                                    }
+                                });
+                            }
                         });
 
                         // Изображения
                         for (const image of this.images) {
+                            if (image.display == 'none') continue;
                             allElements.push({
                                 type: 'image',
                                 zIndex: image.zIndex || 1,
@@ -2687,42 +2702,46 @@
 
                         // Текстовые блоки
                         this.textBlocks.forEach(block => {
-                            allElements.push({
-                                type: 'text',
-                                zIndex: block.zIndex || 900,
-                                draw: () => {
-                                    return new Promise(resolve => {
-                                        ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY}px ${block.fontFamily}`;
-                                        ctx.fillStyle = block.color;
+                            if (block.display != 'none') {
+                                allElements.push({
+                                    type: 'text',
+                                    zIndex: block.zIndex || 900,
+                                    draw: () => {
+                                        return new Promise(resolve => {
+                                            ctx.font = `${block.fontStyle} ${block.fontWeight} ${block.fontSize * scaleFactorY}px ${block.fontFamily}`;
+                                            ctx.fillStyle = block.color;
+                                            ctx.textBaseline = 'top';
 
-                                        let scaledLeft = (block.left - this.shiftX) * scaleFactorX;
-                                        const scaledTop = (block.top - this.shiftY) * scaleFactorY + block.fontSize * scaleFactorY;
-                                        const scaledWidth = block.width * scaleFactorX;
+                                            let scaledLeft = (block.left - this.shiftX) * scaleFactorX;
+                                            const topOffset = block.fontSize * scaleFactorY * 0.08;
+                                            const scaledTop = (block.top - this.shiftY) * scaleFactorY + topOffset;
+                                            const scaledWidth = block.width * scaleFactorX;
 
-                                        const lineHeight = block.fontSize * scaleFactorY;
+                                            const lineHeight = block.fontSize * scaleFactorY;
 
-                                        console.log('CROP: ', scaledWidth, block.width, scaleFactorX);
+                                            console.log('CROP: ', scaledTop, block.top, this.shiftY, scaleFactorY, block.fontSize, scaleFactorY);
 
-                                        const lines = autoLineBreak(block.text, scaledWidth, ctx);
+                                            const lines = autoLineBreak(block.text, scaledWidth, ctx);
 
-                                        if (block.textAlign === 'center') {
-                                            ctx.textAlign = 'center';
-                                            scaledLeft += scaledWidth / 2;
-                                        } else if (block.textAlign === 'right') {
-                                            ctx.textAlign = 'right';
-                                            scaledLeft += scaledWidth;
-                                        } else {
-                                            ctx.textAlign = 'left';
-                                        }
+                                            if (block.textAlign === 'center') {
+                                                ctx.textAlign = 'center';
+                                                scaledLeft += scaledWidth / 2;
+                                            } else if (block.textAlign === 'right') {
+                                                ctx.textAlign = 'right';
+                                                scaledLeft += scaledWidth;
+                                            } else {
+                                                ctx.textAlign = 'left';
+                                            }
 
-                                        lines.forEach((line, index) => {
-                                            ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+                                            lines.forEach((line, index) => {
+                                                ctx.fillText(line, scaledLeft, scaledTop + index * lineHeight);
+                                            });
+
+                                            resolve();
                                         });
-
-                                        resolve();
-                                    });
-                                }
-                            });
+                                    }
+                                });
+                            }
                         });
 
                         allElements.sort((a, b) => a.zIndex - b.zIndex);

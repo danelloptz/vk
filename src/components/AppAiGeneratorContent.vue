@@ -195,7 +195,7 @@
                             <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
                                 <div class="line"></div>
                             </div>
-                            <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
+                            <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] && item.custom_image_url != '' ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
                             <div class="plan_item_variants" v-if="!(isLoading && step == 0) && step >= 3">
                                 <AppGoodButton 
                                     :text="user_photo"
@@ -291,7 +291,7 @@
                                 <div class="line_wrapper" v-if="(isLoading && step == 2 && !isRegenerate) || (isRegenerate && step > 2)">
                                     <div class="line"></div>
                                 </div>
-                                <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
+                                <img v-if="!(isLoading && step == 0)" :src="flagsImages[index] && item.custom_image_url != '' ? item.custom_image_url : item?.image_links[item.chose_image_index || 0]" class="banner" />
                                 <div class="plan_item_variants" v-if="!(isLoading && step == 0)">
                                     <!-- <img src="@/assets/images/addPlus.png" v-if="step >= 2 && !isLoading" class="addImageBtn" @click="getUserImage(item, index)" /> -->
                                     <AppGoodButton 
@@ -513,6 +513,7 @@
         getGenerations,
         writeOffGenerations
     } from "@/services/ai";
+    import { loadImage } from '@/services/other';
     import { sendPosting } from "@/services/user";
     import AppModalGenerator from "@/components/AppModalGenerator.vue";
     import AppModalGeneratorPayment from "@/components/AppModalGeneratorPayment.vue";
@@ -704,7 +705,12 @@
             async confirmImage(link) {
                 this.closeBanner();
                 this.indexEdit = this.bannerIndex;
-                this.isCustomEdit = true;
+                // this.isCustomEdit = true;
+                if (!this.plan[this.indexEdit].chose_image_index && this.plan[this.indexEdit].chose_image_index != 0) this.plan[this.indexEdit].chose_image_index = 0
+                else {
+                    this.plan[this.indexEdit].chose_image_index = this.plan[this.indexEdit].chose_image_index < 2 ? this.plan[this.indexEdit].chose_image_index + 1 : 2;
+                }
+                console.log('INDEX', this.plan[this.indexEdit].chose_image_index);
                 await this.updateImage(link);
                 await updateContentPlan(this.plan, localStorage.getItem("token"));
                 this.step = this.getStep();
@@ -746,24 +752,32 @@
 
                 // Теперь `file` гарантированно готов к использованию
                 if (this.isCustomEdit) {
+                    this.plan[this.indexEdit].chose_image_index = 3;
+                    this.flagsImages[this.indexEdit] = true;
+                    await updateContentPlan(this.plan, localStorage.getItem("token"));
                     console.log("я тут3");
                     this.plan[this.indexEdit].custom_image_url = link;
-                    // this.plan[this.indexEdit].chose_image_index = 3;
                     const resp = await uploadUserImage(this.plan[this.indexEdit].topic_id, file, localStorage.getItem("token"));
                     this.plan = resp;
                 } else {
                     console.log("я тут4");
-                    await updateContentPlan(this.plan, localStorage.getItem("token"));
-                    this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link;
-                    console.log(this.plan);
-                    const resp = await uploadUserImage(
-                        this.plan[this.indexEdit].topic_id,
-                        file,
-                        localStorage.getItem("token"),
-                        this.plan[this.indexEdit].chose_image_index || 0
-                    );
-                    this.plan = resp;
-                    console.log(this.plan);
+                    if (this.plan[this.indexEdit].chose_image_index >= this.plan[this.indexEdit].image_links.length) {
+                        const link_img = await loadImage(file);
+                        this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link_img.image_id;
+                        await updateContentPlan(this.plan, localStorage.getItem("token"));
+                    } else {
+                        // this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link;
+                        await updateContentPlan(this.plan, localStorage.getItem("token"));
+                        console.log(this.plan);
+                        const resp = await uploadUserImage(
+                            this.plan[this.indexEdit].topic_id,
+                            file,
+                            localStorage.getItem("token"),
+                            this.plan[this.indexEdit].chose_image_index || 0
+                        );
+                        this.plan = resp;
+                        console.log(this.plan);
+                    }
                 }
             },
 
