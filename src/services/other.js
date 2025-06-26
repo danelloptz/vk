@@ -41,3 +41,20 @@ export async function loadImage(file) {
         return false; 
     }
 }
+
+export async function getImage(image_id) {
+    try {
+        const response = await axios.get(`https://web.intelektaz.com/api/v2/others/proxy/${image_id}`,
+        {
+            params: {
+                image_id: image_id
+            },
+            responseType: 'blob',
+        });
+        
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении изображения", error);
+        return false; 
+    }
+}

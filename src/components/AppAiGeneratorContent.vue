@@ -706,10 +706,11 @@
                 this.closeBanner();
                 this.indexEdit = this.bannerIndex;
                 // this.isCustomEdit = true;
-                if (!this.plan[this.indexEdit].chose_image_index && this.plan[this.indexEdit].chose_image_index != 0) this.plan[this.indexEdit].chose_image_index = 0
-                else {
-                    this.plan[this.indexEdit].chose_image_index = this.plan[this.indexEdit].chose_image_index < 2 ? this.plan[this.indexEdit].chose_image_index + 1 : 2;
-                }
+                // if (!this.plan[this.indexEdit].chose_image_index && this.plan[this.indexEdit].chose_image_index != 0) this.plan[this.indexEdit].chose_image_index = 0
+                // else {
+                //     this.plan[this.indexEdit].chose_image_index = this.plan[this.indexEdit].chose_image_index < 2 ? this.plan[this.indexEdit].chose_image_index + 1 : 2;
+                // }
+                this.plan[this.indexEdit].chose_image_index = this.plan[this.indexEdit].image_links.length <= 2 ? this.plan[this.indexEdit].image_links.length : 2;
                 console.log('INDEX', this.plan[this.indexEdit].chose_image_index);
                 await this.updateImage(link);
                 await updateContentPlan(this.plan, localStorage.getItem("token"));
@@ -764,6 +765,7 @@
                     if (this.plan[this.indexEdit].chose_image_index >= this.plan[this.indexEdit].image_links.length) {
                         const link_img = await loadImage(file);
                         this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link_img.image_id;
+                        this.flagsImages[this.indexEdit] = false;
                         await updateContentPlan(this.plan, localStorage.getItem("token"));
                     } else {
                         // this.plan[this.indexEdit].image_links[this.plan[this.indexEdit].chose_image_index || 0] = link;

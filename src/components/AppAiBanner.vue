@@ -174,7 +174,6 @@
             <div class="line"></div>
         </div>
         <img 
-            v-if="generatedImage"
             :src="generatedImage"
             class="generated_image"
         />
@@ -426,10 +425,15 @@
                         return response.blob();
                     })
                     .then(blob => {
-                        const url = window.URL.createObjectURL(blob);
+                        // Убедись, что blob имеет правильный MIME
+                        const fixedBlob = blob.type === 'image/png' 
+                            ? blob 
+                            : new Blob([blob], { type: 'image/png' });
+
+                        const url = window.URL.createObjectURL(fixedBlob);
 
                         link.href = url;
-                        link.download = `generated-image.png`;
+                        link.download = 'generated-image.png'; // <-- это имя сохраняемого файла
 
                         document.body.appendChild(link);
                         link.click();
@@ -437,6 +441,7 @@
                         window.URL.revokeObjectURL(url);
                         document.body.removeChild(link);
                     })
+
                     .catch(error => {
                         console.error('Ошибка при скачивании изображения:', error);
                     });
@@ -452,6 +457,7 @@
             },
             async generate() {
                 if (this.isLoading) return;
+
                 if (this.generations.free.remains + this.generations.paid.remains <= 0) {
                     this.isLoading = false;
                     this.diff = 1;
@@ -460,49 +466,85 @@
                     this.$emit('changePosition');
                     return;
                 }
+
                 this.isLoading = true;
                 this.Timer(1, 20000);
-                const aspect = this.aspects_choices[this.selectedAspect] == "1:1 (квадратная)" ? "1x1" : this.aspects_choices[this.selectedAspect].replace(":", "x");
-                const resp = await generateCustomImage(this.descr, aspect, this.colors_choices[this.selectedColors].tag, this.icons[this.active_style].tag, this.userData.id);
+
+                const aspect = this.aspects_choices[this.selectedAspect] == "1:1 (квадратная)"
+                    ? "1x1"
+                    : this.aspects_choices[this.selectedAspect].replace(":", "x");
+
+                const resp = await generateCustomImage(
+                    this.descr,
+                    aspect,
+                    this.colors_choices[this.selectedColors].tag,
+                    this.icons[this.active_style].tag,
+                    this.userData.id
+                );
+
                 this.isLoading = false;
+
                 if (resp.isError) {
                     console.log("Код ошибки: ", resp.code);
                     this.title = "ОШИБКА!";
                     switch (resp.code) {
                         case 505:
-                            this.msg = "Обратитесь, пожалуйста, в техническую поддержку сервиса, чтобы получить лимиты на генерацию изображений."
+                            this.msg = "Обратитесь, пожалуйста, в техническую поддержку сервиса, чтобы получить лимиты на генерацию изображений.";
                             break;
                         case 402:
-                            this.msg = "У вас закончился месячный лимит на генерацию изображений. Чтобы продолжить пользоваться этим инстурментом в этом месяце, купите дополнительные лимиты."
+                            this.msg = "У вас закончился месячный лимит на генерацию изображений. Чтобы продолжить пользоваться этим инструментом в этом месяце, купите дополнительные лимиты.";
                             break;
                         default:
-                            this.msg = "Произошла непридвиденная ошибка. Перезагрузите страницу. Если проблема останется, то обратитесь в техническую поддержку.";
+                            this.msg = "Произошла непредвиденная ошибка. Перезагрузите страницу. Если проблема останется, обратитесь в техническую поддержку.";
                             break;
                     }
                     this.isModal = true;
                     this.$emit('changePosition');
                     return;
                 }
-                if (!resp) return;
-                this.generatedImage = resp;
-                if (this.variants.length < 5) {
-                    this.variants.push({
-                        id: this.variants.length + 1,
-                        src: resp
-                    });
-                } else {
-                    this.variants[this.variants.length - 1].src = resp;
-                }
-                this.selectedVariant = this.variants.length - 1;
-                this.download();
-                const gener = await getGenerations(this.userData.id);
-                this.generations = gener;
 
-                this.isModal = true;
-                this.$emit('changePosition');
-                this.title = "УСПЕШНО!";
-                this.msg = "Картинка сохранена на ваше устройство.";
+                if (!resp) return;
+
+                // Дождаться полной загрузки изображения
+                const imageUrl = `${resp}?t=${Date.now()}`;
+                const img = new Image();
+
+                img.onload = async () => {
+                    this.generatedImage = imageUrl;
+
+                    if (this.variants.length < 5) {
+                        this.variants.push({
+                            id: this.variants.length + 1,
+                            src: imageUrl
+                        });
+                    } else {
+                        this.variants[this.variants.length - 1].src = imageUrl;
+                    }
+
+                    this.selectedVariant = this.variants.length - 1;
+
+                    this.download(); // только теперь
+
+                    const gener = await getGenerations(this.userData.id);
+                    this.generations = gener;
+
+                    this.isModal = true;
+                    this.$emit('changePosition');
+                    this.title = "УСПЕШНО!";
+                    this.msg = "Картинка сохранена на ваше устройство.";
+                };
+
+                img.onerror = () => {
+                    console.error("Ошибка загрузки изображения:", imageUrl);
+                    this.title = "ОШИБКА!";
+                    this.msg = "Не удалось загрузить изображение. Попробуйте ещё раз позже.";
+                    this.isModal = true;
+                    this.$emit('changePosition');
+                };
+
+                img.src = imageUrl;
             },
+
             Timer(countOfPosts, time) {
                 let initialLineWidth = 0; // Начальная ширина полосы загрузки (в пикселях)
                 let maxLineWidth = 233; // Максимальная ширина полосы загрузки (в пикселях)
