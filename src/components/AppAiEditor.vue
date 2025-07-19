@@ -171,6 +171,7 @@
                     <div class="crop_msg" v-if="isCroped">
                         <span>Обрезать?</span>
                         <AppGoodButton :text="text7" @click="resize" class="crop" /> 
+                        <AppGoodButton :text="'НЕТ'" @click="changeCrop" class="crop not_active" /> 
                     </div>
                     <div class="row row_templates">
                         <span>Шаблон: </span>
@@ -533,6 +534,7 @@
                 <div class="crop_msg" v-if="isCroped">
                     <span>Обрезать?</span>
                     <AppGoodButton :text="text7" @click="resize" class="crop" /> 
+                    <AppGoodButton :text="'НЕТ'" @click="changeCrop" class="crop not_active" /> 
                 </div>
                 <div class="row row_templates">
                     <span>Шаблон: </span>
@@ -1648,6 +1650,7 @@
                     this.history.shift(); // Удаляем самое старое действие при превышении лимита
                 }
                 this.future = []; // При новом действии очищаем стек "вперёд"
+                console.log(this.history);
             },
             // Метод для создания снимка текущего состояния
             captureState() {
@@ -1660,10 +1663,21 @@
                     selectedTemplate: this.selectedTemplate
                 };
                 this.addHistory(state);
+                console.log(state);
             },
             undo() {
-                if (this.history.length == 1) return; // Нечего отменять
-                
+                if (this.history.length == 0) return; // Нечего отменять
+                if (this.history.length == 1) {
+                    this.images = [];
+                    this.rectangles = [];
+                    this.textBlocks = [];
+                    this.layers = [];
+                    this.selectedLay = null;
+                    this.selectedTemplate = null;
+                    this.history = [];
+                    return;
+                }
+                console.log(this.history);
                 const currentState = this.history.pop(); // Текущее состояние
                 this.future.push(currentState); // Перемещаем текущее состояние в будущее
                 
@@ -1682,7 +1696,7 @@
                 this.restoreState(nextState);
             },
             restoreState(state) {
-                console.log(state);
+                if (!state) return;
                 this.textBlocks = JSON.parse(JSON.stringify(state.textBlocks));
                 this.rectangles = JSON.parse(JSON.stringify(state.rectangles));
                 this.images = JSON.parse(JSON.stringify(state.images));
@@ -2166,6 +2180,7 @@
                 this.selectedRectangleId = newRectangle.id;
                 this.selectedLay = newRectangle.id;
                 this.captureState();
+                console.log(this.history);
             },
             deleteRectangle(id) {
                 console.log(id);

@@ -173,7 +173,8 @@
         <div class="line_wrapper" v-if="isLoading">
             <div class="line"></div>
         </div>
-        <img 
+        <img
+            v-if="generatedImage"
             :src="generatedImage"
             class="generated_image"
         />
@@ -398,7 +399,7 @@
                 input.click();
             },
             updateImage(link) {
-                this.generatedImage = link;
+                this.generatedImage = link ? link : this.generatedImage;
                 this.variants[this.selectedVariant] = link;
             },
             close() {
@@ -505,6 +506,7 @@
 
                 if (!resp) return;
 
+                this.generatedImage = null;
                 // Дождаться полной загрузки изображения
                 const imageUrl = `${resp}?t=${Date.now()}`;
                 const img = new Image();

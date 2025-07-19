@@ -231,11 +231,11 @@
                                 <!-- <img src="@/assets/images/addPlus.png" class="addImageBtn" @click="getUserImage(item, index)" /> -->
                             </div>
                             <div class="banner_tools">
-                                <div class="editor" v-if="!(isLoading && step == 0) && (step >= 3 || item?.custom_image_url !== '') && userData?.packages.find(p => p.id === 6)" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                                <div class="editor" v-if="!(isLoading && step == 0) && (step >= 3 || item?.custom_image_url !== '') && (userData?.packages.find(p => p.id === 6) || userData?.packages.find(p => p.id === 5))" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                     <img src="@/assets/images/pen.png" />
                                     <span>Редактор</span>
                                 </div>
-                                <div class="bannerAi" v-if="!(isLoading && step == 0) && step >= 2 && userData?.packages.find(p => p.id === 6)" @click="openBanner(index)">
+                                <div class="bannerAi" v-if="!(isLoading && step == 0) && step >= 2 && (userData?.packages.find(p => p.id === 6) || userData?.packages.find(p => p.id === 5))" @click="openBanner(index)">
                                     <img src="@/assets/images/banner.png" />
                                     <span>ИИ Баннер</span>
                                 </div>
@@ -327,11 +327,11 @@
                                     />
                                 </div>
                                 <div class="banner_tools">
-                                    <div class="editor" v-if="!(isLoading && step == 0) && (step >= 3 || item?.custom_image_url !== '') && userData?.packages.find(p => p.id === 6)" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
+                                    <div class="editor" v-if="!(isLoading && step == 0) && (step >= 3 || item?.custom_image_url !== '') && (userData?.packages.find(p => p.id === 6) || userData?.packages.find(p => p.id === 5))" @click="openEditor(flagsImages[index] ? item.custom_image_url : item?.image_links[item.chose_image_index || 0], flagsImages[index], index)">
                                         <img src="@/assets/images/pen.png" />
                                         <span>Редактор</span>
                                     </div>
-                                    <div class="bannerAi" v-if="!(isLoading && step == 0) && step >= 2 && userData?.packages.find(p => p.id === 6)" @click="openBanner(index)">
+                                    <div class="bannerAi" v-if="!(isLoading && step == 0) && step >= 2 && (userData?.packages.find(p => p.id === 6) || userData?.packages.find(p => p.id === 5))" @click="openBanner(index)">
                                         <img src="@/assets/images/banner.png" />
                                         <span>ИИ Баннер</span>
                                     </div>
