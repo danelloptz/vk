@@ -9,11 +9,11 @@
             class="switch" 
             v-if="windowWidth > 650"
             :style="{
-                gridTemplateColumns: userData?.packages.find(p => p.id === 6) ? 'repeat(6, 1fr)' : 'repeat(5, 1fr)'
+                gridTemplateColumns: userData?.packages.find(p => p.id === 6 || p.id === 5) ? 'repeat(6, 1fr)' : 'repeat(5, 1fr)'
             }"
         >
             <span
-                v-for="(item, index) in listSwtich.filter(item => item.index !== 1 || (item.index === 1 && userData?.packages.some(p => p.id === 6)))"
+                v-for="(item, index) in listSwtich.filter(item => item.index !== 1 || (item.index === 1 && userData?.packages.some(p => p.id === 6 || p.id === 5)))"
                 :key="index"
                 :class="{ active: activeIndex === item.index }" 
                 @click="setActive(item.index)"
