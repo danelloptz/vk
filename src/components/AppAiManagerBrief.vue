@@ -1,4 +1,11 @@
 <template>
+    <section class="instruc_modal_wrapper" v-if="isInstructModal">
+        <div class="instruct_modal">
+            <img src="@/assets/images/close.png" class="instruc_modal_close" @click="closeInstructModal">
+            <h2>Инструкция</h2>
+            <span>Для получения токена перейдите по ссылке в официальный бот Телеграм - @botfather и выполните там команду /newbot. Далее напишите имя бота, после чего напишите никнейм бота с окончанием "bot" и @botfather выдаст вам токен.</span>
+        </div>
+    </section>
     <section class="brief">
         <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
@@ -19,7 +26,7 @@
             <span>Токен бота:</span>
             <input v-model="token" class="token_input" />
             <AppGoodButton :text="'ПРИВЯЗАТЬ'" class="token_btn" />
-            <span style="text-decoration: underline;">Инструкция</span>
+            <span style="text-decoration: underline;" @click="openInstructModal">Инструкция</span>
         </div>
         <div class="link_row">
             <span>Ссылка:</span>
@@ -179,13 +186,25 @@
                     <div class="conv_style_row_row">
                         <div class="checkbox-wrapper-18">
                             <div class="round">
-                                <input type="checkbox" :id="`checkbox-${index}`" @click="setActiveConvStyle(item)" :checked="active_conv_style === item && active_conv_style !== ''" />
+                                <input type="checkbox" :id="`checkbox-${index}`" @click="setActiveConvStyle(item.type)" :checked="active_conv_style === item.type && active_conv_style !== ''" />
                                 <label :for="`checkbox-${index}`"></label>
                             </div>
                         </div>
-                        <span>{{ item }}</span>
+                        <span>{{ item.type }}</span>
                     </div>
-                    <div class="conv_style_faq">?</div>
+                    <div class="conv_style_faq" @click="setInfoShownIndex(index)">?</div>
+                    <div v-if="info_shown_index == index" class="conv_style_info_wrapper" :style="{top: `${(index) * 25 + (index) * 15 + 12.5}px`}">
+                        <div class="conv_style_info">
+                            <img src="@/assets/images/close.png" class="close" @click="closeStyleInfo">
+                            <span><strong>Стиль: </strong>{{ item.style }}</span>
+                            <span><strong>Тон: </strong>{{ item.tone }}</span>
+                            <span><strong>Язык: </strong>{{ item.lang }}</span>
+                            <span><strong>Персонализация: </strong>{{ item.person }}</span>
+                            <span><strong>Эмоциональная окраска: </strong>{{ item.emotions }}</span>
+                            <span><strong>Цель общения: </strong>{{ item.conv_goals }}</span>
+                            <span><strong>Подходит для: </strong>{{ item.specific }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -260,8 +279,41 @@
                         "isNew": false
                     }
                 ],
-                conv_styles: ["Эксперт", "Друг", "Профессионал"],
-                active_conv_style: ""
+                conv_styles: [
+                    {
+                        "type": "Эксперт",
+                        "style": "Формальный",
+                        "tone": "Уважительный",
+                        "lang": "Профессиональная терминология (умеренно)",
+                        "person": "Обращение на «Вы»",
+                        "emotions": "Нейтральный",
+                        "conv_goals": "Информационная, продающая (экспертная консультация)",
+                        "specific": "B2B, сложные продукты/услуги, где важна экспертность и доверие."
+                    },
+                    {
+                        "type": "Друг",
+                        "style": "Неформальный",
+                        "tone": "Поддерживающий",
+                        "lang": "Простой и понятный, с элементами разговорного",
+                        "person": "Обращение на «Ты» (если уместно)",
+                        "emotions": "Позитивный, эмпатичный",
+                        "conv_goals": "Поддержка, вовлечение, создание лояльности",
+                        "specific": "Молодежная аудитория, развлекательный контент, сервисы поддержки клиентов."
+                    },
+                    {
+                        "type": "Профессионал",
+                        "style": "Нейтральный",
+                        "tone": "Спокойный",
+                        "lang": "Стандартный, без сленга и терминов",
+                        "person": "Обращение на «Вы»",
+                        "emotions": "Безэмоциональный (факты, цифры)",
+                        "conv_goals": "Информационная, обработка заявок, решение проблем",
+                        "specific": "Широкая аудитория, где важна скорость и точность."
+                    }
+                ],
+                active_conv_style: "",
+                info_shown_index: null,
+                isInstructModal: false
             }
         },
         computed: {
@@ -270,6 +322,18 @@
             }
         },
         methods: {
+            openInstructModal() {
+                this.isInstructModal = true;
+            },
+            closeInstructModal() {
+                this.isInstructModal = false;
+            },
+            closeStyleInfo() {
+                this.info_shown_index = null;
+            },
+            setInfoShownIndex(index) {
+                this.info_shown_index = this.info_shown_index == index ? null : index;
+            },
             setActiveConvStyle(style) {
                 this.active_conv_style = style;
             },
@@ -747,4 +811,110 @@
         width: 250px;
         height: 51px;
     }
+    .conv_style_info_wrapper {
+        position: absolute;
+        right: -420px;
+        top: 0;
+    }
+    .conv_style_info {
+        position: relative;
+        background-color: #1b1e3c;
+        color: white;
+        padding: 13px 20px;
+        border-radius: 0 12px 12px 12px;
+        width: 370px;
+        font-family: 'OpenSans';
+        font-size: 12px;
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+    }
+    .close {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        right: 15px;
+        top: 15px;
+        cursor: pointer;
+    }
+
+    .conv_style_info::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 40px;
+        height: 40px;
+        background-color: #1b1e3c;
+        clip-path: polygon(0 0, 100% 100%, 0 100%);
+        transform: translate(-100%, 0) rotate(180deg);
+    }
+    .instruc_modal_wrapper {
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 900;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .instruct_modal {
+        width: 919px;
+        height: 250px;
+        border-radius: 10px;
+        position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 50px;
+        z-index: 2;
+        overflow-y: auto;
+        scrollbar-width: none;
+        /* row-gap: 20px; */
+        box-sizing: border-box;
+        margin-top: -50px;
+        align-self: center;
+        background: #1B1E3D;
+        border-radius: 10px;
+        row-gap: 20px;
+        @media (max-width: 1400px) {
+            width: 80vw;
+        }
+        @media (max-width: 650px) {
+            width: 90vw;
+            padding: 30px 15px;
+        }
+    }
+
+    .instruct_modal::-webkit-scrollbar {
+        width: 0;  
+        height: 0;
+    }
+
+    .instruct_modal::-webkit-scrollbar-thumb {
+        background: transparent;
+    }
+    .instruct_modal span, .instruct_modal h2 {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+
+    .instruc_modal_close {
+        position: absolute;
+        right: 50px;
+        top: 30px;
+        width: 21px;
+        height: 21px;
+        cursor: pointer;
+        @media (max-width: 450px) {
+            right: 20px;
+            top: 20px;
+        }
+    }
+
 </style>
