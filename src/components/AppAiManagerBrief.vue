@@ -136,6 +136,69 @@
                 </div>
             </div>
         </div>
+        <h2 class="m50">Какую реакцию вы хотите получить от вашей аудитории?</h2>
+        <div class="links">
+            <div v-for="(goal, index) in goals" :key="index" class="row">
+                <input 
+                    placeholder="Цель"
+                    v-model="goal.goal"
+                    class="links_link"
+                >
+                <input 
+                    placeholder="Описание"
+                    v-model="goal.descr"
+                    class="links_descr"
+                >
+                <div class="sub_row"  >
+                    <img 
+                        v-if="goal.isNew"
+                        src="@/assets/images/delete_ai.png" 
+                        @click="removeGoal(index)"
+                    >
+                    <img 
+                        v-if="index == goals.length - 1"
+                        src="@/assets/images/addPlus.png" 
+                        @click="addGoal(goal, index)"
+                    >   
+                </div>
+            </div>
+        </div>
+        <div class="btns_row">
+            <AppGoodButton :text="'СОХРАНИТЬ'" class="btn_long" />
+            <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="btn_long" />
+            <AppGoodButton :text="'УДАЛИТЬ БОТА'" class="btn_long" />
+        </div>
+        <div class="conv_style_wrapper m50">
+            <h2>Стиль общения: </h2>
+            <div class="conv_style">
+                <div 
+                    v-for="(item, index) in conv_styles"
+                    :key="index"
+                    class="conv_style_row"
+                >
+                    <div class="conv_style_row_row">
+                        <div class="checkbox-wrapper-18">
+                            <div class="round">
+                                <input type="checkbox" :id="`checkbox-${index}`" @click="setActiveConvStyle(item)" :checked="active_conv_style === item && active_conv_style !== ''" />
+                                <label :for="`checkbox-${index}`"></label>
+                            </div>
+                        </div>
+                        <span>{{ item }}</span>
+                    </div>
+                    <div class="conv_style_faq">?</div>
+                </div>
+            </div>
+        </div>
+    <div class="start_msg m50">
+        <h2>Приветственное сообщение</h2>
+        <span>Здравствуйте! Я Intelektaz, ИИ-менеджер {{ fio }}...</span>
+        <AppGoodButton :text="'СГЕНЕРИРОВАТЬ'" class="generate_msg_btn"/>
+        <textarea class="start_msg_text"></textarea>
+        <div class="start_msg_row_btns">
+            <AppGoodButton :text="'СОХРАНИТЬ'" class="start_msg_row_btn_sm" />
+            <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="start_msg_row_btn_bg" />
+        </div>
+    </div>
     </section>
 </template>
 
@@ -189,7 +252,16 @@
                         "descr": "Какое-то описание",
                         "isNew": false
                     }
-                ]
+                ],
+                goals: [
+                    {
+                        "goal": "Цель 1",
+                        "descr": "Какое-то описание",
+                        "isNew": false
+                    }
+                ],
+                conv_styles: ["Эксперт", "Друг", "Профессионал"],
+                active_conv_style: ""
             }
         },
         computed: {
@@ -198,11 +270,21 @@
             }
         },
         methods: {
+            setActiveConvStyle(style) {
+                this.active_conv_style = style;
+            },
             addLink(link, index) {
                 this.links.splice(index + 1, 0, { type: link.type, link: "", isNew: true });
             },
             removeLink(index) {
                 this.links.splice(index, 1);
+                this.saveSocial();
+            },
+            addGoal(goal, index) {
+                this.goals.splice(index + 1, 0, { type: goal.type, goal: "", isNew: true });
+            },
+            removeGoal(index) {
+                this.goals.splice(index, 1);
                 this.saveSocial();
             },
             setActive(index) {
@@ -382,35 +464,6 @@
         width: 100%
     }
 
-    input[type="checkbox"] {
-        width: 24px;
-        height: 24px;
-        appearance: none; /* Убираем стандартный стиль */
-        border: 2px solid #333;
-        border-radius: 4px;
-        background-color: white;
-        cursor: pointer;
-        padding: 0;
-        margin-top: 8px;
-        @media (max-width: 650px) {
-            margin-top: 0px;
-        }
-    }
-
-    input[type="checkbox"]:checked {
-        background-color: #4CAF50; /* Цвет при активации */
-        border-color: #4CAF50;
-        position: relative;
-    }
-
-    input[type="checkbox"]:checked::after {
-        font-size: 18px;
-        color: white;
-        position: absolute;
-        top: 1px;
-        left: 4px;
-    }
-
     input {
         width: 100%;
         height: 60px;
@@ -529,6 +582,7 @@
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+        margin-top: 20px;
     }
     .row {
         display: flex;
@@ -549,14 +603,148 @@
         }
     }
     .sub_row img {
-        width: 60px;
-        height: 62px;
-        object-fit: cover;
-        object-position: center;
+        width: 45px;
+        object-fit: contain;
         cursor: pointer;
         @media (max-width: 650px) {
             width: 39px;
             height: auto;
         }
+    }
+    .btns_row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 50px;
+    }
+    .btn_long {
+        width: 260px;
+        height: 51px;
+    }
+    .checkbox-wrapper-18 .round {
+        position: relative;
+    }
+
+    .checkbox-wrapper-18 .round label {
+        background-color: none;
+        border: 1px solid white;
+        cursor: pointer;
+        height: 23px;
+        width: 23px;
+        display: block;
+    }
+
+    .checkbox-wrapper-18 .round label:after {
+        border: 3px solid #66bb6a;
+        border-top: none;
+        border-right: none;
+        content: "";
+        height: 6px;
+        left: 5px;
+        opacity: 0;
+        position: absolute;
+        top: 3px;
+        transform: rotate(-45deg);
+        width: 18px;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"] {
+        visibility: hidden;
+        display: none;
+        opacity: 0;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label {
+        background-color: none;
+        border-color: white;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label:after {
+        opacity: 1;
+    }
+    .conv_style_wrapper {
+        display: flex;
+        column-gap: 30px;
+    }
+    .conv_style {
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+        position: relative;
+    }
+    .conv_style_row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 210px;
+    }
+    .conv_style_row_row {
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+    }
+    .conv_style_row_row span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .conv_style_faq {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #2F3251;
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .start_msg {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
+    }
+    .start_msg span {
+        color: white;
+        font-size: 18px;
+        font-family: 'OpenSans';
+    }
+    .generate_msg_btn {
+        width: 260px;
+        height: 51px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .start_msg_text {
+        width: 100%;
+        height: 210px;
+        padding: 20px;
+        box-sizing: border-box;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.5);
+        background: none;
+        border: 1px solid white;
+        border-radius: 10px;
+        font-family: 'OpenSans';
+        position: relative;
+        transition: .2s ease-in;
+        @media (max-width: 650px) {
+            height: 160px;
+            padding: 10px;
+        }
+    }
+    .start_msg_row_btns {
+        display: flex;
+        column-gap: 20px;
+        margin-top: 10px;
+    }
+    .start_msg_row_btn_sm {
+        width: 200px;
+        height: 51px;
+    }
+    .start_msg_row_btn_bg {
+        width: 250px;
+        height: 51px;
     }
 </style>
