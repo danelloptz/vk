@@ -15,14 +15,16 @@
             >{{ item.name }}</span>
         </div> 
         <AppAiManagerBrief v-if="activeIndex == 0" />
+        <AppAiManagerSends v-if="activeIndex == 1" />
     </section>
 </template>
 
 <script>
     import { getConfig } from '@/services/config';
     import AppAiManagerBrief from '@/components/AppAiManagerBrief.vue';
+    import AppAiManagerSends from '@/components/AppAiManagerSends.vue';
     export default {
-        components: { AppAiManagerBrief },
+        components: { AppAiManagerBrief, AppAiManagerSends },
         props: {
             userData: Object
         },

@@ -413,31 +413,31 @@ export default {
         flex-direction: column;
         row-gap: 30px;
     }
-    .switchs {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px;
-    gap: 10px;
-}
-.switchs img {
-    cursor: pointer;
-    width: 15px;
-    filter: invert(100%);
-    width: 15px;
-    height: 15px;
-}
-.switchs span {
-    cursor: pointer;
-    font-size: 16px;
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: white;
-}
-.switchs span.active {
-    background-color: #111433;
-    color: white;
-}
+        .switchs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+    .switchs img {
+        cursor: pointer;
+        width: 15px;
+        filter: invert(100%);
+        width: 15px;
+        height: 15px;
+    }
+    .switchs span {
+        cursor: pointer;
+        font-size: 16px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+    }
+    .switchs span.active {
+        background-color: #111433;
+        color: white;
+    }
 a {
     color: white;
     font-family: 'OpenSans';

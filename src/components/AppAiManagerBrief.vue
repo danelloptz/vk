@@ -218,16 +218,29 @@
             <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="start_msg_row_btn_bg" />
         </div>
     </div>
+    <h2 class="m50">Редактируемый текст для рассылки:</h2>
+    <Editor
+    v-model="richText"
+    :init="{
+        height: 300,
+        menubar: false,
+        plugins: 'lists link',
+        toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link',
+        content_style: 'body { font-family:Inter,sans-serif; font-size:15px; background-color:#1b1e3c; color:white; }'
+    }"
+    />
     </section>
 </template>
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import { Editor } from '@tinymce/tinymce-vue';
+
     export default {
         props: {
             userData: Object
         },
-        components: { AppGoodButton },
+        components: { AppGoodButton, Editor },
         data() {
             return {
                 activeIndex: 0,
@@ -313,7 +326,8 @@
                 ],
                 active_conv_style: "",
                 info_shown_index: null,
-                isInstructModal: false
+                isInstructModal: false,
+                richText: '<p>Начальный текст</p>',
             }
         },
         computed: {
