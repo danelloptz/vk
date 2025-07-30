@@ -1,5 +1,6 @@
 <template>
-    <section class="autosends">
+    <AppAiManagerNewSend v-if="isNewSend" />
+    <section class="autosends" v-if="!isNewSend">
         <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
@@ -17,7 +18,7 @@
         <div class="autosend">
             <div class="autosend_header">
                 <span class="autosend_header_title">Авторассылки</span>
-                <AppGoodButton :text="'+ СОЗДАТЬ'" class="create_btn" />
+                <AppGoodButton :text="'+ СОЗДАТЬ'" @click="openNewSend" class="create_btn" />
             </div>
             <div class="autosend_body">
                 <div class="autosend_body_row">
@@ -62,9 +63,10 @@
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppAiManagerNewSend from '@/components/AppAiManagerNewSend.vue';
 
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppAiManagerNewSend },
         data() {
             return {
                 listSwtich: [
@@ -134,9 +136,58 @@
                         "audience": 239,
                         "date": 1753787205862
                     },
+                    {
+                        "name": "Рассылка 9",
+                        "status": false,
+                        "audience": 29,
+                        "date": 1753787205862
+                    },
+                    {
+                        "name": "Рассылка 10",
+                        "status": false,
+                        "audience": 130,
+                        "date": 1753787205862
+                    },
+                    {
+                        "name": "Рассылка 11",
+                        "status": true,
+                        "audience": 15,
+                        "date": 1753787205862
+                    },
+                    {
+                        "name": "Рассылка 12",
+                        "status": false,
+                        "audience": 239,
+                        "date": 1753787205862
+                    },
+                    {
+                        "name": "Рассылка 13",
+                        "status": false,
+                        "audience": 239,
+                        "date": 1753787205862
+                    },
+                    {
+                        "name": "Рассылка 14",
+                        "status": true,
+                        "audience": 239,
+                        "date": 1753787205862
+                    },
+                    {
+                        "name": "Рассылка 15",
+                        "status": true,
+                        "audience": 239,
+                        "date": 1753787205862
+                    },
+                    {
+                        "name": "Рассылка 16",
+                        "status": false,
+                        "audience": 239,
+                        "date": 1753787205862
+                    },
                 ],
-                pageSize: 2,
-                currentPage: 1
+                pageSize: 9,
+                currentPage: 1,
+                isNewSend: false
             }
         },
         computed: {
@@ -161,6 +212,9 @@
             },
         },
         methods: {
+            openNewSend() {
+                this.isNewSend = true;
+            },
             prevPage() {
                 if (this.currentPage > 1) {
                     this.currentPage--;
