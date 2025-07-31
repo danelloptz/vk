@@ -1,6 +1,7 @@
 <template>
-    <AppAiManagerNewSend v-if="isNewSend" />
-    <section class="autosends" v-if="!isNewSend">
+    <AppAiManagerNewSend v-if="isNewSend && !isOpenSend" @isMaded="openSend" />
+    <AppAiSendInfo v-if="isOpenSend" :sendData="sendData" />
+    <section class="autosends" v-if="!isNewSend && !isOpenSend">
         <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
@@ -64,9 +65,10 @@
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppAiManagerNewSend from '@/components/AppAiManagerNewSend.vue';
+    import AppAiSendInfo from '@/components/AppAiSendInfo.vue';
 
     export default {
-        components: { AppGoodButton, AppAiManagerNewSend },
+        components: { AppGoodButton, AppAiManagerNewSend, AppAiSendInfo },
         data() {
             return {
                 listSwtich: [
@@ -187,7 +189,13 @@
                 ],
                 pageSize: 9,
                 currentPage: 1,
-                isNewSend: false
+                isNewSend: false,
+                sendData: {
+                    subs: 29,
+                    unsubs: 0,
+                    conv: 100
+                },
+                isOpenSend: false
             }
         },
         computed: {
@@ -212,6 +220,9 @@
             },
         },
         methods: {
+            openSend() {
+                this.isOpenSend = true;
+            },
             openNewSend() {
                 this.isNewSend = true;
             },

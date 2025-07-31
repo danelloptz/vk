@@ -114,7 +114,7 @@
             </div>
         </div>
         <div class="new_send_footer">
-            <AppGoodButton :text="'СОЗДАТЬ'" class="new_send_btn"/>
+            <AppGoodButton :text="'СОЗДАТЬ'" class="new_send_btn" @click="makeNew"/>
             <AppBadButton :text="'НАЗАД'" class="new_send_btn"/>
         </div>
         
@@ -181,6 +181,9 @@
             document.removeEventListener('click', this.handleClickOutside);
         },
         methods: {
+            makeNew() {
+                this.$emit('isMaded');
+            },
             handleClickOutside(event) {
                 const clickedEl = event.target;
                 if (!clickedEl.closest('.dropdown_tag_wrapper') && !clickedEl.closest('.add_tag_btn') && this.isNewTags != -1) {
