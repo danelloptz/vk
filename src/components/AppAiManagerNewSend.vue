@@ -37,11 +37,21 @@
                                     class="filter_item_tag"
                                 >
                                     {{ tag }}
-                                    <img src="@/assets/images/close.png" class="delete_tag" />
+                                    <img src="@/assets/images/close.png" class="delete_tag" @click="deleteTag(index, index_tag)"/>
                                 </div>
                             </div>
-                            <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" />
-                            <div class="dropdown" v-if="filter_connection.length > 0">
+                            <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" @click="openNewTags(index)"/>
+                            <div class="dropdown_tags" v-if="isNewTags == index">
+                                <div 
+                                    v-for="(tag, tag_index) in userTags.filter(tag => !item.tags.includes(tag))"
+                                    :key="tag_index"
+                                    class="dropdown_tag"
+                                    @click="addTag(index, tag)"
+                                >
+                                    {{ tag }}
+                                </div>
+                            </div>
+                            <div class="dropdown" v-if="filter_connection.length > 0 && filter_connection[index]">
                                 <input
                                     v-model="filter_connection[index]"
                                     type="text"
@@ -160,14 +170,42 @@
                 ],
                 isAddSubFilter: false,
                 dropdownLogic: -1,
+                userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
+                isNewTags: -1
             }
         },
+        mounted() {
+            document.addEventListener('click', this.handleClickOutside);
+        },
+        beforeUnmount() {
+            document.removeEventListener('click', this.handleClickOutside);
+        },
         methods: {
+            handleClickOutside(event) {
+                const clickedEl = event.target;
+                if (!clickedEl.closest('.dropdown_tag_wrapper') && !clickedEl.closest('.add_tag_btn') && this.isNewTags != -1) {
+                    this.closeNewTags();
+                }
+            },
+            deleteTag(index, tag_index) {
+                this.filters[index].tags.splice(tag_index, 1);
+            },
+            openNewTags(index) {
+                this.isNewTags = index;
+            }, 
+            closeNewTags() {
+                this.isNewTags = -1;
+            } ,
+            addTag(index, tag) {
+                this.filters[index].tags.push(tag);
+                this.closeNewTags();
+            },
             openSubFilters() {
                 this.isAddSubFilter = true;
             },
             selectFilterConnection(name, index) {
                 this.filter_connection[index] = name;
+                this.hideDropdownLogic();
             },
             hideDropdownLogic() {
                 this.dropdownLogic = -1;
@@ -413,6 +451,7 @@
         display: flex;
         flex-direction: column;
         row-gap: 14px;
+        position: relative;
     }
     .filters_item h3 {
         font-size: 16px;
@@ -422,6 +461,8 @@
     .filter_item_tags_row {
         display: flex;
         column-gap: 14px;
+        flex-wrap: wrap;
+        row-gap: 10px;
     }
     .filter_item_tag {
         font-size: 9.98px;
@@ -436,6 +477,7 @@
     .delete_tag {
         width: 9px;
         object-fit: contain;
+        cursor: pointer;
     }
     .add_tag_btn {
         width: 92px;
@@ -445,20 +487,25 @@
     }
     .dropdown {
         position: relative;
-        width: 360px;
+        width: 110px;
+        height: 32px;
         display: flex;
         align-items: center;
-        @media (max-width: 650px) {
-            width: 100%;
-            height: 50px;
-        }
+        margin-top: 10px;
+        font-size: 10px;
+    }
+    .dropdown input {
+        height: 32px !important;
+        font-size: 10px !important;
+        border: .62px solid white !important;
+        padding: 0 10px !important;
     }
     .arrow_down {
         position: absolute;
-        right: 23px;
+        right: 8px;
         transition: transform 0.3s ease;
-        width: 13px;
-        height: 13px;
+        width: 8px;
+        height: 8px;
     }
 
     .arrow_down.rotated {
@@ -469,7 +516,7 @@
         position: absolute;
         top: 100%;
         width: 100%;
-        border: 1px solid white;
+        border: .62px solid white;
         border-radius: 0px 0px 10px 10px;
         max-height: 200px;
         overflow-y: scroll;
@@ -478,7 +525,7 @@
         padding: 0;
         z-index: 1000;
         color: rgba(255, 255, 255, 0.5);
-        font-size: 20px;
+        font-size: 10px;
         font-weight: normal;
         letter-spacing: 1px;
         scrollbar-width: none;
@@ -494,14 +541,33 @@
     }
 
     .dropdown-menu li {
-        padding: 20px;
+        padding: 10px;
         cursor: pointer;
-        border-bottom: 1px solid white;
+        border-bottom: .62px solid white;
         background: #070a29;
         font-family: 'OpenSans'
     }
 
     .dropdown-menu li:hover {
         background: #0c103e;
+    }
+    .dropdown_tags {
+        position: absolute;
+        left: 110px;
+        top: 50px;
+        z-index: 999;
+        background: #434665;
+        padding: 10px 8px;
+        display: flex;
+        flex-direction: column;
+    }
+    .dropdown_tag {
+        font-size: 15px;
+        color: white;
+        font-family: 'OpenSans';
+        display: flex;
+        align-items: center;
+        padding: 8px 0px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 </style>
