@@ -1,6 +1,6 @@
 <template>
     <AppAiManagerNewSend v-if="isNewSend && !isOpenSend" @isMaded="openSend" />
-    <AppAiSendInfo v-if="isOpenSend" :sendData="sendData" />
+    <AppAiSendInfo v-if="isOpenSend" :sendData="sendData" @backup="isOpenSend = false"/>
     <section class="autosends" v-if="!isNewSend && !isOpenSend">
         <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>

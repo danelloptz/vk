@@ -1,5 +1,6 @@
 <template>
-    <section class="send_info">
+    <AppAiManagerNewStep v-if="isNewStep" />
+    <section class="send_info" v-if="!isNewStep">
         <h2>Информация о рассылке</h2>
         <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
@@ -41,13 +42,22 @@
                     <span>Аудитория {{ sendData.subs }}</span>
                 </div>
             </div>
+            <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" v-if="steps.length == 0" class="add_step" @click="openNewStep"/>
+        </div>
+        <div class="button_wrapper">
+            <AppBadButton :text="'НАЗАД'" class="backup_btn" @click="backup"/>
         </div>
     </section>
     
 </template>
 
 <script>
+    import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppBadButton from '@/components/AppBadButton.vue';
+    import AppAiManagerNewStep from '@/components/AppAiManagerNewStep.vue';
+
     export default {
+        components: { AppGoodButton, AppBadButton, AppAiManagerNewStep },
         props: {
             sendData: Object
         },
@@ -70,13 +80,40 @@
                         index: 4,
                     }, 
                 ],
-                activeIndex: 0
+                activeIndex: 0,
+                steps: [],
+                isNewStep: false
+            }
+        },
+        methods: {
+            openNewStep() {
+                this.isNewStep = true;
+            },
+            backup() {
+                this.$emit('backup');
             }
         }
     };
 </script>
 
 <style scoped>
+    .backup_btn {
+        width: 150px;
+        height: 51px;
+    }
+    .button_wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: end;
+        margin-top: 50px;
+    }
+    .add_step {
+        width: 166px;
+        height: 45px;
+        font-size: 14px;
+        align-self: center;
+        margin: 37px 0px;
+    }
     .menu_header_nav span {
         font-size: 16px;
         color: white;
