@@ -1,5 +1,11 @@
 <template>
-    <AppAiManagerNewStep v-if="isNewStep" />
+    <AppAiManagerNewStep 
+        v-if="isNewStep" 
+        :isFirstStep="steps.length == 0 || firstStep" 
+        :editData="editStep"
+        @backup="isNewStep = false"
+        @create_new_step="updateSteps"
+    />
     <section class="send_info" v-if="!isNewStep">
         <h2>Информация о рассылке</h2>
         <div class="managers_switch">
@@ -39,10 +45,41 @@
                 <div class="menu_header_nav">
                     <span>Настройки</span>
                     <span>Шаги</span>
-                    <span>Аудитория {{ sendData.subs }}</span>
+                    <span>Аудитория ({{ sendData.subs }})</span>
                 </div>
             </div>
             <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" v-if="steps.length == 0" class="add_step" @click="openNewStep"/>
+            <div class="steps" v-else>
+                <div class="steps_header">
+                    <span style="justify-self: center;">Имя</span>
+                    <span>Сценарий</span>
+                    <span>Задержка/Время</span>
+                    <span>Статистика</span>
+                </div>
+                <div 
+                    v-for="(step, index) in steps"
+                    :key="index"
+                    class="step"
+                >
+                    <div class="step_name">
+                        <img src="@/assets/images/squares.png" />
+                        <span>{{ step.name }}</span>
+                    </div>
+                    <span>{{ step.scene }}</span>
+                    <span>{{ step.time }}</span>
+                    <div class="step_end">
+                        <span>{{ step.stats.subs }} · {{ step.stats.unsubs }} · {{ step.stats.conv }}</span>
+                        <div class="step_icons">
+                            <img src="@/assets/images/manager_edit.png" @click="edit(step, index)"/>
+                            <img src="@/assets/images/trash.png" @click="deleteStep(index)"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="steps_btns">
+                    <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" class="startStep" />
+                </div>
+            </div>
         </div>
         <div class="button_wrapper">
             <AppBadButton :text="'НАЗАД'" class="backup_btn" @click="backup"/>
@@ -81,11 +118,51 @@
                     }, 
                 ],
                 activeIndex: 0,
-                steps: [],
-                isNewStep: false
+                steps: [
+                    {
+                        name: '111',
+                        title: 'Заголовок',
+                        text: 'Раз два три четыре пять',
+                        image: 'https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200',
+                        scene: 1,
+                        time: '31 июля 2025, 13:36',
+                        stats: {
+                            subs: 0,
+                            unsubs: 0,
+                            conv: 0
+                        }
+                    },
+                    {
+                        name: '22',
+                        title: 'Заголовок',
+                        text: 'Раз два три четыре пять',
+                        image: 'https://sun6-22.vkuserphoto.ru/s/v1/ig2/spP1ei8ErOIPpJ7MXBamz5tqj6q0DLTUu9Y4_YxoFjWgr_mDA7IshsqtNzfJRMHbLT6EEsiR-QHEVvx0cotvisze.jpg?quality=95&crop=107,110,857,857&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200',
+                        scene: 2,
+                        time: '1 день',
+                        stats: {
+                            subs: 0,
+                            unsubs: 0,
+                            conv: 0
+                        }
+                    },
+                ],
+                isNewStep: false,
+                editStep: null,
+                firstStep: false
             }
         },
         methods: {
+            updateSteps() {
+                this.isNewStep = false;
+            },
+            edit(step, index) {
+                this.editStep = step;
+                this.firstStep = index == 0;
+                this.isNewStep = true;
+            },
+            deleteStep(index) {
+                this.steps.splice(1, index);
+            },
             openNewStep() {
                 this.isNewStep = true;
             },
@@ -97,6 +174,81 @@
 </script>
 
 <style scoped>
+    .step_end {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    .startStep {
+        background: #16A253;
+    }
+    .addNextStep, .startStep {
+        width: 120px;
+        height: 35px;
+        font-size: 10px;
+        letter-spacing: 0px;
+        border-radius: 5px;
+    }
+    .steps_btns {
+        display: flex;
+        column-gap: 20px;
+        margin-top: 26px;
+        align-self: self-start;
+
+    }
+    .step_icons img {
+        width: 15px;
+        height: 15px;
+    }
+    .step_icons {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+        margin-right: 10px;
+    }
+    .step span {
+        font-size: 16px;
+        color: white;
+        font-family: 'OpenSans';
+        font-weight: 500;
+    }
+    .step_name img {
+        width: 8px;
+        height: 8px;
+    }
+    .step_name {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+        margin-left: 79px;
+    }
+    .step {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        padding: 10px 0px;
+    }
+    .steps_header span {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.5);
+        font-family: 'OpenSans';
+        font-weight: 500;
+    }
+    .steps_header {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .steps {
+        margin-top: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0px 30px 50px 30px;
+    }
     .backup_btn {
         width: 150px;
         height: 51px;

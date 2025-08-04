@@ -13,8 +13,8 @@
             <span>Текст</span>
             <AppAiTextEditor />
         </div>
-        <div class="row">
-            <span>Изображения</span>
+        <div class="row" v-if="previews.length == 0">
+            <span>Изображение</span>
             <!-- From Uiverse.io by csemszepp --> 
             <label 
                 for="file"
@@ -33,7 +33,6 @@
                 <input
                     id="file"
                     type="file"
-                    multiple
                     accept="image/*"
                     @change="onFileChange"
                     ref="fileInput"
@@ -46,8 +45,12 @@
             <div class="preview-item" v-for="(src, index) in previews" :key="index">
                 <img :src="src" alt="Preview" />
             </div>
+            <div class="preview_btns">
+                <AppBadButton :text="'ИЗМЕНИТЬ'" @click="deletePreview" class="preview_btn"/>
+                <AppBadButton :text="'УДАЛИТЬ'" @click="deletePreview" class="preview_btn" />
+            </div>
         </div>
-        <div class="row">
+        <div class="row" v-if="isFirstStep">
             <span>Отправить</span>
             <div class="row_sm">
                 <div class="dropdown">
@@ -86,9 +89,35 @@
                 </div>
             </div>
         </div>
+        <div class="row" v-if="!isFirstStep">
+            <span>Отправить через</span>
+            <div class="row_sm">
+                <input type="text" class="amountOfTime" v-model="amountOfTime" />
+                <div class="dropdown">
+                    <input
+                        v-model="timeRange"
+                        type="text"
+                        @focus="isTimeRangeVisible = true"
+                        @blur="closeTimeRange"
+                        readonly 
+                    />
+                    <img :class="{'rotated': isTimeRangeVisible}" src="@/assets/images/arrow_down.png" class="arrow_down">
+                    <ul v-if="isTimeRangeVisible" class="dropdown-menu">
+                        <li
+                            v-for="(item, index) in timeRanges"
+                            :key="index"
+                            @mousedown.prevent="selectTimeRange(item, index)"
+                            :class="{ bold: index == activeIndexTimeRange }"
+                        >
+                            {{ item }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
         <div class="new_send_footer">
-            <AppGoodButton :text="'СОЗДАТЬ'" class="new_send_btn"/>
-            <AppBadButton :text="'НАЗАД'" class="new_send_btn"/>
+            <AppGoodButton :text="'СОЗДАТЬ'" class="new_send_btn" @click="createNewStep"/>
+            <AppBadButton :text="'НАЗАД'" class="new_send_btn" @click="backup"/>
         </div>
     </div>
 </template>
@@ -100,6 +129,10 @@
 
     export default {
         components: { AppGoodButton, AppBadButton, AppAiTextEditor },
+        props: {
+            isFirstStep: Boolean,
+            editData: Object
+        },
         data() {
             return {
                 isDropdownVisible: false,
@@ -111,9 +144,45 @@
                 name: '',
                 title: '',
                 text: '',
+                amountOfTime: 1,
+                timeRanges: ['минута', 'час', 'день', 'месяц', ],
+                activeIndexTimeRange: 0,
+                timeRange: 'минута',
+                isTimeRangeVisible: false
+            }
+        },
+        watch: {
+            editData: {
+                handler(val) {
+                if (val) {
+                    this.name = val.name;
+                    this.title = val.title;
+                    this.text = val.text;
+                    this.previews = [];
+                    if (val.image) this.previews.push(val.image);
+                }
+                },
+                immediate: true,
             }
         },
         methods: {
+            backup() {
+                this.$emit('backup');
+            },
+            createNewStep() {
+                this.$emit('create_new_step');
+            },
+            closeTimeRange() {
+                this.isTimeRangeVisible = false;
+            },
+            selectTimeRange(item, index) {
+                this.timeRange = item;
+                this.activeIndexTimeRange = index;
+                this.closeTimeRange();
+            },
+            deletePreview() {
+                this.previews = [];
+            },
             openPicker() {
                 const input = this.$refs.datetimeInput;
                 if (input.showPicker) {
@@ -167,6 +236,18 @@
 </script>
 
 <style scoped>
+    .amountOfTime {
+        width: 80px !important;
+    }
+    .preview_btn {
+        width: 150px;
+        height: 51px;
+    }
+    .preview_btns {
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
+    }
     .ck-editor__editable {
         background-color: #1b1e3c;
         color: white;
@@ -213,16 +294,15 @@
     .preview-list {
         display: flex;
         gap: 10px;
-        margin-top: 10px;
+        margin-top: 47px;
         flex-wrap: wrap;
+        justify-content: space-between;
     }
 
     .preview-item img {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid #444;
+        max-width: 452px;
+        max-height: 252px;
+        object-fit: contain;
     }
     .custum-file-upload.dragover {
         border: 2px dashed #4a90e2;
@@ -299,6 +379,7 @@
         grid-template-columns: 155px 1fr;
         margin-top: 30px;
         align-items: center;
+        column-gap: 30px;
     }
     h2 {
         font-size: 24px;
