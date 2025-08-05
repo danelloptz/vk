@@ -115,7 +115,7 @@
         </div>
         <div class="new_send_footer">
             <AppGoodButton :text="'СОЗДАТЬ'" class="new_send_btn" @click="makeNew"/>
-            <AppBadButton :text="'НАЗАД'" class="new_send_btn"/>
+            <AppBadButton :text="'НАЗАД'" class="new_send_btn" @click="backup"/>
         </div>
         
     </section>
@@ -181,6 +181,10 @@
             document.removeEventListener('click', this.handleClickOutside);
         },
         methods: {
+            backup() {
+                this.$emit('backup');
+                console.log('назад');
+            },
             makeNew() {
                 this.$emit('isMaded');
             },

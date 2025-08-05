@@ -38,18 +38,18 @@
         </div>
         <div class="menu">
             <div class="menu_header">
-                <div class="menu_header_back">
+                <div class="menu_header_back" @click="backup">
                     <img src="@/assets/images/arrow.png" class="menu_header_back_arrow">
                     <span>Назад</span>
                 </div>
                 <div class="menu_header_nav">
-                    <span>Настройки</span>
-                    <span>Шаги</span>
-                    <span>Аудитория ({{ sendData.subs }})</span>
+                    <span :class="{ activeMenuHeader: menuHeaderIndex == 0 }" @click="menuHeaderSetter(0)">Настройки</span>
+                    <span :class="{ activeMenuHeader: menuHeaderIndex == 1 }" @click="menuHeaderSetter(1)">Шаги</span>
+                    <span :class="{ activeMenuHeader: menuHeaderIndex == 2 }" @click="menuHeaderSetter(2)">Аудитория ({{ sendData.subs }})</span>
                 </div>
             </div>
             <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" v-if="steps.length == 0" class="add_step" @click="openNewStep"/>
-            <div class="steps" v-else>
+            <div class="steps" v-if="menuHeaderIndex == 1 && steps.length > 0">
                 <div class="steps_header">
                     <span style="justify-self: center;">Имя</span>
                     <span>Сценарий</span>
@@ -77,7 +77,113 @@
                 </div>
                 <div class="steps_btns">
                     <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
-                    <AppGoodButton :text="'ЗАПУСТИТЬ'" class="startStep" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.status" class="startStep" />
+                    <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" />
+                </div>
+            </div>
+            <div class="settings" v-if="menuHeaderIndex == 0 && steps.length > 0">
+                <div class="settings_row">
+                    <span>Название рассылки:</span>
+                    <input v-model="name" />
+                </div>
+                <div class="new_send_row" style="align-items: self-start; margin-top: 30px;">
+                    <span class="new_send_row_filters">Фильтры</span>
+                    <div class="new_send_col">
+                        <div class="new_send_filter_settings" v-if="isAddFilter">
+                            <div class="filters">
+                                <div
+                                    v-for="(item, index) in filters" 
+                                    :key="index"
+                                    class="filters_item"
+                                >
+                                    <h3>{{ item.name }}</h3>
+                                    <div class="filter_item_tags_row">
+                                        <div 
+                                            v-for="(tag, index_tag) in item.tags"
+                                            :key="index_tag"
+                                            class="filter_item_tag"
+                                        >
+                                            {{ tag }}
+                                            <img src="@/assets/images/close.png" class="delete_tag" @click="deleteTag(index, index_tag)"/>
+                                        </div>
+                                    </div>
+                                    <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" @click="openNewTags(index)"/>
+                                    <div class="dropdown_tags" v-if="isNewTags == index">
+                                        <div 
+                                            v-for="(tag, tag_index) in userTags.filter(tag => !item.tags.includes(tag))"
+                                            :key="tag_index"
+                                            class="dropdown_tag"
+                                            @click="addTag(index, tag)"
+                                        >
+                                            {{ tag }}
+                                        </div>
+                                    </div>
+                                    <div class="dropdown" v-if="filter_connection.length > 0 && filter_connection[index]">
+                                        <input
+                                            v-model="filter_connection[index]"
+                                            type="text"
+                                            @focus="dropdownLogic = index"
+                                            @blur="hideDropdownLogic"
+                                            readonly 
+                                        />
+                                        <img :class="{'rotated': dropdownLogic == index}" src="@/assets/images/arrow_down.png" class="arrow_down">
+                                        <ul v-if="dropdownLogic == index" class="dropdown-menu">
+                                            <li
+                                                @mousedown.prevent="selectFilterConnection('И', index)"
+                                            >
+                                                {{ 'И' }}
+                                            </li>
+                                            <li
+                                                @mousedown.prevent="selectFilterConnection('ИЛИ', index)"
+                                            >
+                                                {{ 'ИЛИ' }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="new_send_filter_settings_row" v-if="isAddSubFilter" style="background: #1B1E3D;">
+                                <div class="filter_contain" @click="addFilter('Содержит теги')">Содержит теги</div>
+                                <div class="filter_notcontain" @click="addFilter('Не содержит теги')">Не содержит теги</div>
+                            </div>
+                            <div class="new_send_filter_settings_row">
+                                <AppBadButton :text="'+ ДОБАВИТЬ ПОДФИЛЬТР'" class="add_subfilter" @click="openSubFilters " />
+                            </div>
+                        </div>
+                        <AppBadButton :text="'+ ДОБАВИТЬ ФИЛЬТР'" class="add_filter" @click="changeIsAddFilter"/>
+                        <div class="new_send_row_sm">
+                            <div class="checkbox-wrapper-18">
+                                <div class="round">
+                                    <input type="checkbox" :id="`checkbox`" v-model="isAddInSends" />
+                                    <label :for="`checkbox`"></label>
+                                </div>
+                            </div>
+                            <span>Добавить в авторассылку текущие контакты</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings_row" style="margin-top: 48px;">
+                    <div class="new_send_col">
+                        <div 
+                            v-for="(item, index) in managers"
+                            :key="index"
+                            class="new_send_row_sm"
+                        >
+                            <div class="checkbox-wrapper-18">
+                                <div class="round">
+                                    <input type="checkbox" :id="`checkbox-${index}`" :checked="item"/>
+                                    <label :for="`checkbox-${index}`"></label>
+                                </div>
+                            </div>
+                            <span>{{ index + 1 }} ИИ менеджер</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="steps_btns" style="margin-top: 40px;">
+                    <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.status" class="startStep" />
+                    <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" />
+                    <AppGoodButton :text="'ПЕРЕЗАПУСТИТЬ'" class="stopStep" style="width: 135px;" />
                 </div>
             </div>
         </div>
@@ -148,10 +254,72 @@
                 ],
                 isNewStep: false,
                 editStep: null,
-                firstStep: false
+                firstStep: false,
+                menuHeaderIndex: 1,
+                isAddFilter: false,
+                isAddSubFilter: false,
+                filters: null,
+                isNewTags: -1,
+                userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
+                filter_connection: null,
+                dropdownLogic: -1,
+                isAddInSends: false,
+                managers: null
+            }
+        },
+        watch: {
+            sendData: {
+                handler(val) {
+                    if (val) {
+                        this.filters = val.filters;
+                        this.filter_connection = val.filter_connection;
+                        this.isAddFilter = val.filters.length > 0;
+                        this.isAddInSends = val.addInContact;
+                        this.managers = val.copyTo;
+                    }
+                },
+                immediate: true,
             }
         },
         methods: {
+            openSubFilters() {
+                this.isAddSubFilter = true;
+            },
+             addFilter(name) {
+                this.filters.push({
+                    name: name, 
+                    tags: []
+                });
+                if (this.filters.length > 1) this.filter_connection.push('И');
+                this.isAddSubFilter = false;
+            },
+            selectFilterConnection(name, index) {
+                this.filter_connection[index] = name;
+                this.hideDropdownLogic();
+            },
+            hideDropdownLogic() {
+                this.dropdownLogic = -1;
+            },
+            closeNewTags() {
+                this.isNewTags = -1;
+            } ,
+            addTag(index, tag) {
+                this.filters[index].tags.push(tag);
+                this.closeNewTags();
+            },
+            openNewTags(index) {
+                this.isNewTags = index;
+            }, 
+            deleteTag(index, tag_index) {
+                this.filters[index].tags.splice(tag_index, 1);
+            },
+            changeIsAddFilter() {
+                this.isAddFilter = !this.isAddFilter;
+                this.isAddSubFilter = !this.isAddSubFilter;
+            },
+            menuHeaderSetter(index) {
+                this.menuHeaderIndex = index;
+            },
             updateSteps() {
                 this.isNewStep = false;
             },
@@ -161,7 +329,7 @@
                 this.isNewStep = true;
             },
             deleteStep(index) {
-                this.steps.splice(1, index);
+                this.steps.splice(index, 1);
             },
             openNewStep() {
                 this.isNewStep = true;
@@ -174,6 +342,273 @@
 </script>
 
 <style scoped>
+     .add_filter {
+        width: 220px;
+        height: 51px;
+    }
+    .new_send_row_sm {
+        display: flex;
+        column-gap: 6.82px;
+        align-items: center;
+    }
+        .checkbox-wrapper-18 .round {
+        position: relative;
+    }
+
+    .checkbox-wrapper-18 .round label {
+        background-color: none;
+        border: 1px solid white;
+        cursor: pointer;
+        height: 23px;
+        width: 23px;
+        display: block;
+    }
+
+    .checkbox-wrapper-18 .round label:after {
+        border: 3px solid #66bb6a;
+        border-top: none;
+        border-right: none;
+        content: "";
+        height: 6px;
+        left: 5px;
+        opacity: 0;
+        position: absolute;
+        top: 3px;
+        transform: rotate(-45deg);
+        width: 18px;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"] {
+        visibility: hidden;
+        display: none;
+        opacity: 0;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label {
+        background-color: none;
+        border-color: white;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label:after {
+        opacity: 1;
+    }
+    .filter_contain {
+        width: 176px;
+        height: 35px;
+        background: #2F3251;
+        color: white;
+        font-size: 16px;
+        font-family: 'OpenSans';
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .filter_notcontain {
+        width: 205px;
+        height: 35px;
+        background: #2F3251;
+        color: white;
+        font-size: 16px;
+        font-family: 'OpenSans';
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .add_subfilter {
+        width: 155px;
+        height: 32px;
+        font-size: 9.88px;
+        cursor: pointer;
+        letter-spacing: 0px;
+    }
+    .filters {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
+        padding: 20px;
+    }
+    .filters_item {
+        display: flex;
+        flex-direction: column;
+        row-gap: 14px;
+        position: relative;
+    }
+    .filters_item h3 {
+        font-size: 16px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .filter_item_tags_row {
+        display: flex;
+        column-gap: 14px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+    }
+    .filter_item_tag {
+        font-size: 9.98px;
+        color: white;
+        font-family: 'OpenSans';
+        padding: 10px;
+        border: .62px solid white;
+        border-radius: 6.24px;
+        display: flex;
+        column-gap: 12px;
+    }
+    .delete_tag {
+        width: 9px;
+        object-fit: contain;
+        cursor: pointer;
+    }
+    .add_tag_btn {
+        width: 92px;
+        height: 32px;
+        font-size: 9.98px;
+        letter-spacing: 0px;
+    }
+    .dropdown {
+        position: relative;
+        width: 110px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        font-size: 10px;
+    }
+    .dropdown input {
+        height: 32px !important;
+        font-size: 10px !important;
+        border: .62px solid white !important;
+        padding: 0 10px !important;
+    }
+    .arrow_down {
+        position: absolute;
+        right: 8px;
+        transition: transform 0.3s ease;
+        width: 8px;
+        height: 8px;
+    }
+
+    .arrow_down.rotated {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        width: 100%;
+        border: .62px solid white;
+        border-radius: 0px 0px 10px 10px;
+        max-height: 200px;
+        overflow-y: scroll;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        z-index: 1000;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 10px;
+        font-weight: normal;
+        letter-spacing: 1px;
+        scrollbar-width: none;
+        z-index: 15;
+    }
+    .dropdown::-webkit-scrollbar {
+        width: 0;  
+        height: 0;
+    }
+
+    .dropdown::-webkit-scrollbar-thumb {
+        background: transparent;
+    }
+
+    .dropdown-menu li {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: .62px solid white;
+        background: #070a29;
+        font-family: 'OpenSans'
+    }
+
+    .dropdown-menu li:hover {
+        background: #0c103e;
+    }
+    .dropdown_tags {
+        position: absolute;
+        left: 110px;
+        top: 50px;
+        z-index: 999;
+        background: #434665;
+        padding: 10px 8px;
+        display: flex;
+        flex-direction: column;
+    }
+    .dropdown_tag {
+        font-size: 15px;
+        color: white;
+        font-family: 'OpenSans';
+        display: flex;
+        align-items: center;
+        padding: 8px 0px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .new_send_filter_settings {
+        width: 471px;
+        background: #111433;
+        border-radius: 10px;
+    }
+    .new_send_filter_settings_row {
+        width: 100%;
+        padding: 20px 30px 28px 30px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .new_send_col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 31px;
+    }
+    .new_send_row {
+        display: flex;
+        column-gap: 20px;
+        align-items: center;
+        width: 100%;
+    }
+    .new_send_row span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .settings_row input {
+        width: 535px;
+        height: 60px;
+        border-radius: 10px;
+        border: 1px solid white;
+        font-size: 16px;
+        color: white;
+        font-family: 'OpenSans';
+        padding-left: 30px;
+        background: none;
+    }
+    .settings_row span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .settings_row {
+        display: flex;
+        column-gap: 20px;
+        align-items: center;
+    }
+    .settings {
+        padding: 52px 50px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    .activeMenuHeader {
+        background: #393C5B;
+    }
     .step_end {
         display: flex;
         justify-content: space-between;
@@ -183,23 +618,32 @@
     .startStep {
         background: #16A253;
     }
-    .addNextStep, .startStep {
+    .stopStep {
+        background: #A21619;
+    }
+    .addNextStep, .startStep, .stopStep {
         width: 120px;
         height: 35px;
         font-size: 10px;
         letter-spacing: 0px;
         border-radius: 5px;
     }
+    .startStep:hover {
+        background: #25db74;
+    }
+    .stopStep:hover {
+        background: #ef2a2d;
+    }
     .steps_btns {
         display: flex;
         column-gap: 20px;
         margin-top: 26px;
         align-self: self-start;
-
     }
     .step_icons img {
         width: 15px;
         height: 15px;
+        cursor: pointer;
     }
     .step_icons {
         display: flex;
@@ -272,10 +716,10 @@
         font-family: 'OpenSans';
         font-weight: 500;
         cursor: pointer;
+        padding: 10px 18px;
     }
     .menu_header_nav {
         display: flex;
-        column-gap: 30px;
         align-items: center;
     }
     .menu_header_back span {
@@ -297,12 +741,13 @@
         display: flex;
         column-gap: 20px;
         align-items: center;
+        cursor: pointer;
     }
     .menu_header {
         position: relative;
         display: flex;
         justify-content: center;
-        padding: 20px 30px;
+        padding: 10px 30px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
     .menu {
