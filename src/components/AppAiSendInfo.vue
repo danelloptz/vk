@@ -163,6 +163,7 @@
                     </div>
                 </div>
                 <div class="settings_row" style="margin-top: 48px;">
+                    <span>Копировать рассылку в:</span>
                     <div class="new_send_col">
                         <div 
                             v-for="(item, index) in managers"
@@ -184,6 +185,51 @@
                     <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.status" class="startStep" />
                     <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" />
                     <AppGoodButton :text="'ПЕРЕЗАПУСТИТЬ'" class="stopStep" style="width: 135px;" />
+                </div>
+            </div>
+            <div class="audience" v-if="menuHeaderIndex == 2">
+                <div class="radios">
+                    <div class="radios_item"  
+                        v-for="(radio, index) in radios" 
+                        :key="index"
+                        @click="changeActiveRadio(index, radio)"
+                    >
+                        <div class="check" :class="{ activeBinar: radio_index == index  }"></div>
+                        <span>{{ radio }}</span>
+                    </div>
+                </div>
+                <div class="autosend_body">
+                    <div class="autosend_body_row nothover">
+                        <h3 class="op50">Имя</h3>
+                        <h3 class="op50">Шаг</h3>
+                        <h3 class="op50">Статус</h3>
+                        <h3 class="op50">Username</h3>
+                        <h3 class="op50">Добавлен</h3>
+                    </div>
+                    <div 
+                        v-for="(item, index) in paginatedData"
+                        :key="index"
+                        class="autosend_body_row"
+                        :style="index == paginatedData.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
+                    >
+                        <span>{{ item.name }}</span>
+                        <span>{{ formatedDateNoHours(item.step) }}</span>
+                        <span>{{ item.status }}</span>
+                        <span>{{ item.username }}</span>
+                        <span>{{ formatedDate(item.date) }}</span>
+                    </div>
+                </div>
+                <div class="switchs" v-if="totalPages > 1">
+                    <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
+
+                    <span v-for="page in visiblePages" :key="page" @click="goToPage(page)" 
+                        :class="{ active: page === currentPage }">
+                        {{ page }}
+                    </span>
+
+                    <span v-if="currentPage + 2 < totalPages">...</span>
+
+                    <img src="@/assets/images/arrow.svg" @click="nextPage" v-if="currentPage < totalPages" />
                 </div>
             </div>
         </div>
@@ -264,7 +310,85 @@
                 filter_connection: null,
                 dropdownLogic: -1,
                 isAddInSends: false,
-                managers: null
+                managers: null,
+                radio_index: 0,
+                currRadio: null,
+                radios: ["Все", "Активные", "Отписались"],
+                currentPage: 1,
+                pageSize: 7,
+                audience: [
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Петров Петр",
+                        step: 1754489038186,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Алексеев Алексей",
+                        step: 0,
+                        status: "Отписались",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Отписались",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                    {
+                        name: "Васильев Василий",
+                        step: 0,
+                        status: "Активный",
+                        username: "@vasilevvas",
+                        date: 1754489038186
+                    },
+                ],
+                filter: ""
             }
         },
         watch: {
@@ -281,7 +405,65 @@
                 immediate: true,
             }
         },
+        computed: {
+            totalPages() {
+                return Math.ceil(this.audience.filter(item => this.filter == "" || item.status == this.filter).length / this.pageSize);
+            },
+            visiblePages() {
+                const pages = [];
+                for (
+                    let i = Math.max(1, this.currentPage - 2);
+                    i <= Math.min(this.totalPages, this.currentPage + 2);
+                    i++
+                ) {
+                    pages.push(i);
+                }
+                return pages;
+            },
+            paginatedData() {
+                const start = (this.currentPage - 1) * this.pageSize;
+                const end = start + this.pageSize;
+                return this.audience.slice(start, end).filter(item => this.filter == "" || item.status == this.filter);
+            },
+        },
         methods: {
+            nextPage() {
+                if (this.currentPage < this.totalPages) {
+                    this.currentPage++;
+                }
+            },
+            goToPage(page) {
+                if (page >= 1 && page <= this.totalPages) {
+                    this.currentPage = page;
+                }
+            },
+            formatedDate(time) {
+                const date = new Date(time);
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${day}.${month}.${year} ${hours}:${minutes}`;
+            },
+            formatedDateNoHours(time) {
+                if (time == 0) return '—';
+                const date = new Date(time);
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+
+                return `${day}.${month}.${year}`;
+            },
+            changeActiveRadio(index, name) {
+                this.radio_index = index;
+                this.currRadio = name;
+                this.filter = name == 'Активные' ? 'Активный' : name == 'Все' ? '' : 'Отписались';
+                this.currentPage = 1;
+            },
             openSubFilters() {
                 this.isAddSubFilter = true;
             },
@@ -342,7 +524,142 @@
 </script>
 
 <style scoped>
-     .add_filter {
+    .op50 {
+        opacity: .5;
+    }
+    .autosend_body {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 20px;
+    }
+    .autosend_body_row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        width: 100%;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 20px 10px;
+        transition: .2s;
+        cursor: pointer;
+        column-gap: 50px;
+        padding-left: 80px;
+    }
+    .autosend_body_row:nth-child(2n + 1) {
+        background: #252847;
+    }
+    .autosend_body_row:nth-child(1) {
+        background: none !important;
+    }
+    /* .autosend_body_row:hover {
+        background: #252847;
+    } */
+    .nothover:hover {
+        background: none !important;
+    }
+    .autosend_body_row h3, .autosend_body_row span {
+        font-size: 16px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .worked {
+        color: #34C946 !important;
+    }
+    .stoped {
+        color: #E34447 !important;
+    }
+    .status {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
+    .status img {
+        width: 20px;
+        height: 20px;
+    }
+    .status span {
+        margin-top: -3px;
+    }
+    .autosend_body_row_icons {
+        display: flex;
+        align-items: center;
+        column-gap: 12px;
+        justify-self: end;
+    }
+    .manager_copy_icon {
+        width: 18px;
+        height: 18px;
+    }
+    .manager_edit_icon, .trash_icon {
+        width: 15px;
+        height: 15px;
+    }
+    .switchs {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+        padding: 0px 30px;
+        margin-top: 50px;
+        margin-bottom: 40px;
+        gap: 10px;
+    }
+    .switchs img {
+        cursor: pointer;
+        width: 15px;
+        filter: invert(100%);
+        width: 15px;
+        height: 15px;
+    }
+    .switchs span {
+        cursor: pointer;
+        font-size: 16px;
+        padding: 5px 10px;
+        color: white;
+        font-size: 20px;
+        font-family: 'OpenSans';
+    }
+    .switchs span.active {
+        background-color: #7023EC;
+        color: white;
+        font-weight: normal !important;
+    }
+    .radios_item {
+        display: flex;
+        align-items: center;
+        column-gap: 14px;
+    }
+    .check {
+        width: 18px;
+        height: 18px;
+        outline: 1px solid white;
+        outline-offset: 6px;
+        border-radius: 50%;
+        transition: .2s ease-in;
+        cursor: pointer;
+    }
+    .activeBinar {
+        background: white;
+    }
+    .radios_item span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
+    }
+    .radios {
+        display: flex;
+        align-items: center;
+        column-gap: 40px;
+        margin-left: 51px;
+    }
+    .audience {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 30px 0px;
+    }
+    .add_filter {
         width: 220px;
         height: 51px;
     }
