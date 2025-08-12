@@ -1,4 +1,10 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @update:visibility1="isModal = $event"
+    />
     <section class="instruc_modal_wrapper" v-if="isInstructModal">
         <div class="instruct_modal">
             <img src="@/assets/images/close.png" class="instruc_modal_close" @click="closeInstructModal">
@@ -7,25 +13,25 @@
         </div>
     </section>
     <section class="brief">
-        <div class="managers_switch">
+        <div class="managers_switch" v-if="managers.length > 0">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
                 class="switch" 
             >
                 <span
-                    v-for="(item, index) in listSwtich"
+                    v-for="(_, index) in managers"
                     :key="index"
                     class="switch_item"
-                    :class="{ active: activeIndex === item.index }" 
-                    @click="setActive(item.index)"
-                >{{ item.index + 1 }}</span>
+                    :class="{ active: activeIndex === index }" 
+                    @click="setActive(index)"
+                >{{ index + 1 }}</span>
             </div> 
         </div>
-        <h2 class="m50">Для создания ИИ менеджера необходимо привязть Telegram бот к сервису Intelektaz и заполнить бриф:</h2>
+        <h2 :class="{ m50: managers.length > 0 }">Для создания ИИ менеджера необходимо привязть Telegram бот к сервису Intelektaz и заполнить бриф:</h2>
         <div class="token_row">
             <span>Токен бота:</span>
             <input v-model="token" class="token_input" />
-            <AppGoodButton :text="'ПРИВЯЗАТЬ'" class="token_btn" />
+            <AppGoodButton :text="'ПРИВЯЗАТЬ'" class="token_btn" @click="bind"/>
             <span style="text-decoration: underline;" @click="openInstructModal">Инструкция</span>
         </div>
         <div class="link_row">
@@ -171,9 +177,9 @@
             </div>
         </div>
         <div class="btns_row">
-            <AppGoodButton :text="'СОХРАНИТЬ'" class="btn_long" />
+            <AppGoodButton :text="'СОХРАНИТЬ'" class="btn_long" @click="saveChanges"/>
             <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="btn_long" />
-            <AppGoodButton :text="'УДАЛИТЬ БОТА'" class="btn_long" />
+            <AppGoodButton :text="'УДАЛИТЬ БОТА'" class="btn_long" @click="deleteMngr" />
         </div>
         <div class="conv_style_wrapper m50">
             <h2>Стиль общения: </h2>
@@ -186,7 +192,7 @@
                     <div class="conv_style_row_row">
                         <div class="checkbox-wrapper-18">
                             <div class="round">
-                                <input type="checkbox" :id="`checkbox-${index}`" @click="setActiveConvStyle(item.type)" :checked="active_conv_style === item.type && active_conv_style !== ''" />
+                                <input type="checkbox" :id="`checkbox-${index}`" @click="setActiveConvStyle(index + 1)" :checked="active_conv_style == index + 1" />
                                 <label :for="`checkbox-${index}`"></label>
                             </div>
                         </div>
@@ -210,37 +216,38 @@
         </div>
     <div class="start_msg m50">
         <h2>Приветственное сообщение</h2>
-        <span>Здравствуйте! Я Intelektaz, ИИ-менеджер {{ fio }}...</span>
-        <AppGoodButton :text="'СГЕНЕРИРОВАТЬ'" class="generate_msg_btn"/>
-        <textarea class="start_msg_text"></textarea>
+        <div class="line_wrapper" v-if="isGenerated">
+            <div class="line"></div>
+        </div>
+        <span>{{ welcome_message }}</span>
+        <AppGoodButton :text="'СГЕНЕРИРОВАТЬ'" class="generate_msg_btn" @click="generateHelloMessage"/>
+        <textarea class="start_msg_text" v-model="welcome_message"></textarea>
         <div class="start_msg_row_btns">
-            <AppGoodButton :text="'СОХРАНИТЬ'" class="start_msg_row_btn_sm" />
-            <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="start_msg_row_btn_bg" />
+            <AppGoodButton :text="'СОХРАНИТЬ'" class="start_msg_row_btn_sm" @click="saveChanges"/>
+            <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="start_msg_row_btn_bg" @click="editMsg" />
         </div>
     </div>
-    <h2 class="m50">Редактируемый текст для рассылки:</h2>
-    <Editor
-    v-model="richText"
-    :init="{
-        height: 300,
-        menubar: false,
-        plugins: 'lists link',
-        toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link',
-        content_style: 'body { font-family:Inter,sans-serif; font-size:15px; background-color:#1b1e3c; color:white; }'
-    }"
-    />
     </section>
 </template>
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
-    import { Editor } from '@tinymce/tinymce-vue';
+    import AppModal from '@/components/AppModal.vue';
+    import { 
+        getManagers, 
+        bindBot, 
+        createManager, 
+        getManager, 
+        updateBrief, 
+        deleteManager, 
+        getHelloMessage 
+    } from '@/services/manager';
 
     export default {
         props: {
             userData: Object
         },
-        components: { AppGoodButton, Editor },
+        components: { AppGoodButton, AppModal },
         data() {
             return {
                 activeIndex: 0,
@@ -275,6 +282,7 @@
                 qu: "",
                 tg: "",
                 type: "",
+                welcome_message: "",
                 maxSymbols: 10000,
                 types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"],
                 isDropdownVisible: false,
@@ -324,10 +332,16 @@
                         "specific": "Широкая аудитория, где важна скорость и точность."
                     }
                 ],
-                active_conv_style: "",
+                active_conv_style: "1",
                 info_shown_index: null,
                 isInstructModal: false,
-                richText: '<p>Начальный текст</p>',
+                managers: null,
+                token: "",
+                currManager: null,
+                title: null,
+                msg: null,
+                isModal: false,
+                isGenerated: false
             }
         },
         computed: {
@@ -335,7 +349,132 @@
                 return this.year.length + this.label.length + this.description_company.length + this.pros.length + this.description_product.length + this.whats_solve.length + this.characteristics.length + this.price.length + this.audience.length + this.link.length + this.qu.length + this.tg.length;
             }
         },
+        async created() {
+            const managers = await getManagers(this.userData.id);
+            if (managers) {
+                this.managers = managers;
+            }
+            if (managers.length > 0) {
+                this.currManager = await getManager(this.managers[this.activeIndex].assistant.id);
+                this.token = this.currManager.bot_token;
+                this.setBriefFields();
+            }
+        },
         methods: {
+            editMsg() {
+                const textarea = document.querySelector('textarea.start_msg_text');
+                if (!textarea) return;
+                textarea.focus();
+            },
+            Timer(countOfPosts, time) {
+                let initialLineWidth = 0; // Начальная ширина полосы загрузки (в пикселях)
+                let maxLineWidth = 233; // Максимальная ширина полосы загрузки (в пикселях)
+                let totalDuration = time ? time : (Math.ceil(countOfPosts / 7)) * 60 * 1000; // Общее время анимации (3 секунды в миллисекундах)
+
+                let startTime = Date.now(); // Время начала анимации
+
+                function updateProgress() {
+                    let lines = document.querySelectorAll('.line');
+                    let elapsedTime = Date.now() - startTime;
+                    let progress = Math.min(elapsedTime / totalDuration, 1);
+
+                    let newLineWidth = initialLineWidth + (maxLineWidth - initialLineWidth) * progress;
+                    lines.forEach(line => line.style.width = `${newLineWidth}px`);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateProgress);
+                    }
+                }
+                // Запускаем анимацию
+                requestAnimationFrame(updateProgress);
+            },
+            async generateHelloMessage() {
+                this.isGenerated = true;
+                this.Timer(0, 3000);
+                const resp = await getHelloMessage(this.managers[this.activeIndex].assistant.id);
+                this.isGenerated = false;
+                if (resp) {
+                    this.welcome_message = resp.welcome_message;
+                } else {
+                    this.title = "ОШИБКА!";
+                    this.msg = "При генерации приветственного сообщения произошла ошибка.";
+                    this.isModal = true;
+                }
+            },
+            async deleteMngr() {
+                await deleteManager(this.managers[this.activeIndex].assistant.id);
+                this.title = "УСПЕШНО!";
+                this.msg = "Менеджер был успешно удалён.";
+                this.isModal = true;
+                setTimeout(() => location.reload(), 1000);
+            },
+            async saveChanges() {
+                this.title = "ОЖИДАНИЕ";
+                this.msg = "Подождите немного, пока сохраняются изменения.";
+                this.isModal = true;
+
+                if (this.managers.length == 0) {
+                    await createManager(this.userData.id, this.token, {}, this.active_conv_style, "");
+                    this.managers = await getManagers(this.userData.id);
+                }
+                const brief = this.getBrief();
+                await updateBrief(this.managers[this.activeIndex].assistant.id, brief, this.active_conv_style, this.welcome_message);
+                
+                this.isModal = true;
+                this.title = "УСПЕШНО";
+                this.msg = "Изменения были успешно внесены.";
+            },
+            getBrief() {
+                return {
+                    fio: this.fio,
+                    year: this.year,
+                    label: this.label,
+                    description_company: this.description_company,
+                    pros: this.pros,
+                    description_product: this.description_product,
+                    whats_solve: this.whats_solve,
+                    characteristics: this.characteristics,
+                    price: this.price,
+                    audience: this.audience,
+                    link: this.link,
+                    qu: this.qu,
+                    tg: this.tg,
+                    type: this.type
+                };
+            },
+            setBriefFields() {
+                this.fio = this.currManager.brief?.fio || "";
+                this.year = this.currManager.brief?.year || "";
+                this.label = this.currManager.brief?.label || "";
+                this.description_company = this.currManager.brief?.description_company || "";
+                this.pros = this.currManager.brief?.pros || "";
+                this.description_product = this.currManager.brief?.description_product || "";
+                this.whats_solve = this.currManager.brief?.whats_solve || "";
+                this.characteristics = this.currManager.brief?.characteristics || "";
+                this.price = this.currManager.brief?.price || "";
+                this.audience = this.currManager.brief?.audience || "";
+                this.link = this.currManager.brief?.link || "";
+                this.qu = this.currManager.brief?.qu || "";
+                this.tg = this.currManager.brief?.tg || "";
+                this.type = this.currManager.brief?.type || "";
+                this.welcome_message = this.managers[this.activeIndex]?.assistant?.assistant_config?.welcome_message || "";
+            },
+            async bind() {
+                this.title = "ОЖИДАНИЕ";
+                this.msg = "Подождите немного, пока идёт привязка телеграмм бота.";
+                this.isModal = true;
+
+                if (this.managers.length == 0) {
+                    await createManager(this.userData.id, this.token, {}, this.active_conv_style, "");
+                    this.managers = await getManagers(this.userData.id);
+                }
+                const status = await bindBot(this.token, this.managers[this.activeIndex].assistant.id, this.userData.id);
+                if (status) {
+                    this.title = "УСПЕШНО!";
+                    this.msg = "Телеграмм бот был успешно привязан к вашему менеджеру.";
+                    this.isModal = true;
+                }
+            },
             openInstructModal() {
                 this.isInstructModal = true;
             },
@@ -392,6 +531,27 @@
 </script>
 
 <style scoped>
+    .line_wrapper {
+        width: 233px;
+        height: 15px;
+        border: 1px solid white;
+        /* padding: 5px; */
+        border-radius: 7.5px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 2.68px;
+    }
+    .line {
+        width: 0px;
+        height: 9.64px;
+        background: #7023EC;
+        transition: .2s ease-in;
+        border-radius: 4.8px;   
+    }
+    .create_btn {
+        width: 220px;
+    }
     .m50 {
         margin-top: 50px;
     }

@@ -14,7 +14,7 @@
                 @click="setActive(item.index)"
             >{{ item.name }}</span>
         </div> 
-        <AppAiManagerBrief v-if="activeIndex == 0" />
+        <AppAiManagerBrief v-if="activeIndex == 0" :userData="userData"/>
         <AppAiManagerSends v-if="activeIndex == 1" />
     </section>
 </template>
