@@ -16,6 +16,7 @@
         </div> 
         <AppAiManagerBrief v-if="activeIndex == 0" :userData="userData"/>
         <AppAiManagerSends v-if="activeIndex == 1" />
+        <AppAiManagerDialog v-if="activeIndex == 2" />
     </section>
 </template>
 
@@ -23,8 +24,9 @@
     import { getConfig } from '@/services/config';
     import AppAiManagerBrief from '@/components/AppAiManagerBrief.vue';
     import AppAiManagerSends from '@/components/AppAiManagerSends.vue';
+    import AppAiManagerDialog from '@/components/AppAiManagerDialog.vue';
     export default {
-        components: { AppAiManagerBrief, AppAiManagerSends },
+        components: { AppAiManagerBrief, AppAiManagerSends, AppAiManagerDialog },
         props: {
             userData: Object
         },
