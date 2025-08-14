@@ -57,9 +57,15 @@ export default {
             this.msg = "";
 
             this.isWaiting = true;
+            if (this.messages.length > 50) {
+                this.messages = this.messages.slice(-50);
+            }
             const resp = await sendChatMessage(message, this.messages, this.data.thread_id, this.data.dialog_id);
             this.data = resp;
             this.messages = resp.messages;
+            if (this.messages.length > 50) {
+                this.messages = this.messages.slice(-50);
+            }
             this.isWaiting = false;
             this.scrollToBottom();
         },
@@ -109,6 +115,9 @@ export default {
         const resp = await getChat(this.userData.id);
         this.data = resp;
         this.messages = resp.messages;
+        if (this.messages.length > 50) {
+            this.messages = this.messages.slice(-50);
+        }
         this.scrollToBottom();
     }
 };

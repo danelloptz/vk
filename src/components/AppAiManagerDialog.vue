@@ -29,7 +29,35 @@
                     </div>
                 </div>
                 <div class="dialog_field_messages">
-
+                    <div 
+                        v-for="(msg, index) in activeMan.messages"
+                        :key="index"
+                        class="dialog_field_message"
+                    >
+                        <div class="dialog_field_message_header">
+                            <img :src="msg.author == 'user' ? activeMan.img : require('@/assets/images/intelektaz_logo.png')" />
+                            <span>{{ msg.author == 'user' ? activeMan.name : 'Intelektaz Bot' }}</span>
+                        </div>
+                        <div class="dialog_field_message_imgs">
+                            <img 
+                                v-for="(img, img_index) in msg.files.filter(t => t.type == 'img')"
+                                :key="img_index"
+                                class="dialog_field_message_img"
+                                :src="img.src"
+                            />
+                        </div>
+                        <div class="dialog_field_message_files">
+                            <div 
+                                v-for="(file, file_index) in msg.files.filter(t => t.type == 'other')"
+                                :key="file_index"
+                                class="dialog_field_message_file"
+                            >
+                                <img src="@/assets/images/upload.png" class="file_icon" />
+                                <span>{{ file.name }}</span>
+                            </div>
+                        </div>
+                        <span class="dialog_field_message_text">{{ msg.text }}</span>
+                    </div>
                 </div>
                 <div class="dialog_field_footer">
                     <img src="@/assets/images/upload_image.png" class="upload_image" />
@@ -164,6 +192,76 @@
                     last_active: 1755095394934,
                     tags: ["Работа"],
                     userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
+                    messages: [
+                        {
+                            author: "user",
+                            files: [
+                                {
+                                    type: "img",
+                                    src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
+                                },
+                                {
+                                    type: "img",
+                                    src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
+                                },
+                                {
+                                    type: "other",
+                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                                },
+                                {
+                                    type: "other",
+                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                                },
+                            ],
+                            text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
+                        },
+                        {
+                            author: "bot",
+                            files: [
+                                {
+                                    type: "none",
+                                    src: ""
+                                },
+                            ],
+                            text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
+                        },
+                        {
+                            author: "user",
+                            files: [
+                                {
+                                    type: "img",
+                                    src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
+                                },
+                                {
+                                    type: "img",
+                                    src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
+                                },
+                                {
+                                    type: "other",
+                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                                },
+                                {
+                                    type: "other",
+                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                                },
+                            ],
+                            text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
+                        },
+                        {
+                            author: "bot",
+                            files: [
+                                {
+                                    type: "none",
+                                    src: ""
+                                },
+                            ],
+                            text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
+                        },
+                    ]
                 },
                 isNewTags: false,
                 tagBuffer: []
@@ -227,7 +325,19 @@
     };
 </script>
 
-<style scoped>
+<style scoped>  
+    .dialog_field_message {
+        width: 60%;
+        padding: 20px;
+        color: white;
+        font-size: 16px;
+        font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            max-width: 200px;
+            padding: 10px;
+            font-size: 14px;
+        }
+    }
     .dropdown_tags {
         position: absolute;
         left: 110px;
