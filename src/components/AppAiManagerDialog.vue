@@ -10,6 +10,7 @@
                     v-for="(item, index) in people"
                     :key="index"
                     class="dialog_people_item"
+                    :class="{ active_man: item.id == activeMan.id }"
                 >
                     <img :src="item.img" />
                     <div class="dialog_people_item_col">
@@ -37,16 +38,25 @@
                         <div class="dialog_field_message_header">
                             <img :src="msg.author == 'user' ? activeMan.img : require('@/assets/images/intelektaz_logo.png')" />
                             <span>{{ msg.author == 'user' ? activeMan.name : 'Intelektaz Bot' }}</span>
+                            <span class="dialog_field_message_header_date">{{ formatedDate(msg.date) }}</span>
                         </div>
-                        <div class="dialog_field_message_imgs">
+                        <div 
+                            v-if="msg.files.filter(t => t.type == 'img').length > 0"
+                            class="dialog_field_message_imgs"
+                            :style="{ gridTemplateColumns: `repeat(${Math.min(msg.files.filter(t => t.type == 'img').length, 3)}, 1fr)` }"
+                        >
                             <img 
                                 v-for="(img, img_index) in msg.files.filter(t => t.type == 'img')"
                                 :key="img_index"
                                 class="dialog_field_message_img"
                                 :src="img.src"
+                                @click="downloadImage(img.src)"
                             />
                         </div>
-                        <div class="dialog_field_message_files">
+                        <div 
+                            v-if="msg.files.filter(t => t.type == 'other').length > 0"
+                            class="dialog_field_message_files"
+                        >
                             <div 
                                 v-for="(file, file_index) in msg.files.filter(t => t.type == 'other')"
                                 :key="file_index"
@@ -60,9 +70,52 @@
                     </div>
                 </div>
                 <div class="dialog_field_footer">
-                    <img src="@/assets/images/upload_image.png" class="upload_image" />
-                    <textarea class="dialog_field_footer_textarea" placeholder="Отправить сообщение"></textarea>
-                    <img src="@/assets/images/send_message.png" class="send_message" />
+                    <div class="dialog_field_footer_previews" v-if="previews.length > 0">
+                        <div 
+                            v-for="(preview, index) in previews"
+                            :key="index"
+                            class="dialog_field_footer_preview"
+                            @click="deletePreview(index)"
+                        >
+                            <img 
+                                src="@/assets/images/close.png"
+                                class="dialog_field_footer_preview_close"
+                            />
+                            <img 
+                                class="dialog_field_footer_preview_img"
+                                :src="preview"
+                            />
+                        </div>
+                    </div>
+                    <div class="dialog_field_footer_file_previews">
+                        <div 
+                            v-for="(file, index) in file_previews"
+                            :key="index"
+                            class="dialog_field_footer_file_preview"
+                            @click="deleteFilePreview(index)"
+                        >
+                            <img 
+                                class="dialog_field_footer_file_preview_icon"
+                                src="@/assets/images/upload.png"
+                            />
+                            <span>{{ file.name }}</span>
+                            <span>{{ formatFileSize(file.size) }}</span>
+                        </div>
+                    </div>
+                    <div class="dialog_field_footer_controls">
+                        <img src="@/assets/images/upload_image.png" class="upload_image" @click="uploadFiles"/>
+                        <input
+                            id="file"
+                            type="file"
+                            accept="image/*,text/*,.pdf,.doc,.docx"
+                            @change="onFileChange"
+                            ref="fileInput"
+                            hidden
+                            multiple
+                        />
+                        <textarea class="dialog_field_footer_textarea" placeholder="Отправить сообщение"></textarea>
+                        <img src="@/assets/images/send_message.png" class="send_message" />
+                    </div>
                 </div>
             </div>
             <div class="dialog_info">
@@ -141,42 +194,48 @@
                         img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
                         date: 1753787205862,
                         message: "Тут какое-то последнее сообщение",
-                        count: 1482
+                        count: 1482,
+                        id: 42423591,
                     },
                     {
                         name: "Иванов Иван",
                         img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
                         date: 1753787205862,
                         message: "Тут какое-то последнее сообщение",
-                        count: 1482
+                        count: 1482,
+                        id: 42423595,
                     },
                     {
                         name: "Иванов Иван",
                         img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
                         date: 1753787205862,
                         message: "Тут какое-то последнее сообщение",
-                        count: 1482
+                        count: 1482,
+                        id: 42423596,
                     },
                     {
                         name: "Иванов Иван",
                         img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
                         date: 1753787205862,
                         message: "Тут какое-то последнее сообщение",
-                        count: 1482
+                        count: 1482,
+                        id: 42423597,
                     },
                     {
                         name: "Иванов Иван",
                         img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
                         date: 1753787205862,
                         message: "Тут какое-то последнее сообщение",
-                        count: 1482
+                        count: 1482,
+                        id: 42423598,
                     },
                     {
                         name: "Иванов Иван",
                         img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
                         date: 1753787205862,
                         message: "Тут какое-то последнее сообщение",
-                        count: 1482
+                        count: 1482,
+                        id: 42423599,
                     },
                 ],
                 activeMan: {
@@ -184,7 +243,7 @@
                     img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
                     count: 1482,
                     username: "ivanovivan",
-                    id: 42423599,
+                    id: 42423591,
                     phone: "",
                     status: "Активный",
                     first_msg: "/start",
@@ -195,7 +254,16 @@
                     messages: [
                         {
                             author: "user",
+                            date: 1755095394934,
                             files: [
+                                {
+                                    type: "img",
+                                    src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
+                                },
+                                {
+                                    type: "img",
+                                    src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
+                                },
                                 {
                                     type: "img",
                                     src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
@@ -219,6 +287,7 @@
                         },
                         {
                             author: "bot",
+                            date: 1755095394934,
                             files: [
                                 {
                                     type: "none",
@@ -229,6 +298,7 @@
                         },
                         {
                             author: "user",
+                            date: 1755095394934,
                             files: [
                                 {
                                     type: "img",
@@ -253,6 +323,7 @@
                         },
                         {
                             author: "bot",
+                            date: 1755095394934,
                             files: [
                                 {
                                     type: "none",
@@ -264,13 +335,74 @@
                     ]
                 },
                 isNewTags: false,
-                tagBuffer: []
+                tagBuffer: [],
+                previews: [],
+                file_previews: []
             }
         },
         created() {
             document.addEventListener('click', this.handleClickOutside);
+            this.scrollToBottom();
         },
         methods: {
+            formatFileSize(bytes) {
+                if (bytes < 1024) {
+                    return `${bytes} B`;
+                } else if (bytes < 1024 * 1024) {
+                    return `${(bytes / 1024).toFixed(2)} KB`;
+                } else if (bytes < 1024 * 1024 * 1024) {
+                    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+                } else {
+                    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+                }
+            },
+            deleteFilePreview(index) {
+                this.file_previews.splice(index, 1);
+            },
+            deletePreview(index) {
+                this.previews.splice(index, 1);
+            },
+            uploadFiles() {
+                this.$refs.fileInput.click();
+            },
+            onFileChange(event) {
+                const files = Array.from(event.target.files);
+
+                this.previews = [];
+                this.file_previews = [];
+
+                files.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = e => {
+                            this.previews.push(e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        const fileUrl = URL.createObjectURL(file);
+                        this.file_previews.push({
+                            name: file.name,
+                            size: file.size,
+                            url: fileUrl,
+                        });
+                        console.log(this.file_previews);
+                    }
+                });
+            },
+            scrollToBottom() {
+                this.$nextTick(() => {
+                    const messagesContainer = this.$el.querySelector('.messages');
+                    if (messagesContainer) {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }
+                });
+            },
+            downloadImage(src) {
+                const link = document.createElement('a');
+                link.href = src;
+                link.download = `download_file.jpg`;
+                link.click();
+            },
             handleClickOutside(event) {
                 const clickedEl = event.target;
                 if (!clickedEl.closest('.dropdown_tags') && !clickedEl.closest('.add_tag_btn') && this.isNewTags != -1) {
@@ -325,18 +457,150 @@
     };
 </script>
 
-<style scoped>  
-    .dialog_field_message {
-        width: 60%;
-        padding: 20px;
+<style scoped> 
+    .dialog_field_footer_file_preview span {
+        font-size: 14px;
         color: white;
-        font-size: 16px;
         font-family: 'OpenSans';
-        @media (max-width: 650px) {
-            max-width: 200px;
-            padding: 10px;
-            font-size: 14px;
-        }
+    }
+    .dialog_field_footer_file_preview_icon {
+        width: 20px;
+        height: 20px;
+    }
+    .dialog_field_footer_file_preview {
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .dialog_field_footer_file_previews {
+        display: flex;
+        flex-direction: column;
+        row-gap: 5px;
+    }
+    .dialog_field_footer_previews {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 5px;
+        row-gap: 5px;
+    }
+    .dialog_field_footer_preview {
+        width: 60px;
+        height: 60px;
+        position: relative;
+    }
+    .dialog_field_footer_preview_img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+        transition: filter 0.2s ease-in;
+        z-index: 100;
+    }
+    .dialog_field_footer_preview_img:hover {
+        filter: brightness(0.5);
+    }
+    .dialog_field_footer_preview_close {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        top: 20px; 
+        left: 20px;
+        opacity: 0;
+        cursor: pointer;
+        transition: opacity 0.2s ease-in;
+        z-index: 900;
+        pointer-events: none;
+    }
+    .dialog_field_footer_preview:hover .dialog_field_footer_preview_close {
+        opacity: 1;
+    }
+    .dialog_field_footer {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        padding: 10px;
+    }
+    .dialog_field_message_text {
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .dialog_field_message_file span {
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .dialog_field_message_file img {
+        width: 20px;
+        height: 20px;
+    }
+    .dialog_field_message_file {
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .dialog_field_message_files {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        row-gap: 10px;
+    }
+    .dialog_field_message_imgs img:hover {
+        filter: brightness(1.2);
+    }
+    .dialog_field_message_imgs img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        object-position: center;
+        cursor: pointer;
+        transition: .1s ease-in;
+    }
+    .dialog_field_message_imgs {
+        display: grid;
+        width: 100%;
+    }
+    .dialog_field_message_header_date {
+        position: absolute;
+        right: 10px;
+        top: 15px;
+        color: rgba(255, 255, 255, 0.5) !important;
+        font-size: 10px !important;
+    }
+    .dialog_field_message_header span {
+        font-size: 14px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .dialog_field_message_header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+    .dialog_field_message_header {
+        display: flex;
+        column-gap: 20px;
+        align-items: center;
+        position: relative;
+    }
+    .dialog_field_message {
+        display: flex;
+        flex-direction: column;
+        row-gap: 20px;
+        width: 100%;
+        padding: 20px 15px;
+        background: #111433;
     }
     .dropdown_tags {
         position: absolute;
@@ -463,8 +727,9 @@
     .upload_image {
         width: 20px;
         height: 20px;
+        cursor: pointer;
     }
-    .dialog_field_footer {
+    .dialog_field_footer_controls {
         display: grid;
         grid-template-columns: 20px 1fr 15px;
         padding: 15px 20px;
@@ -478,6 +743,7 @@
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+        overflow-y: auto;
     }
     .dialog_people_item_date {
         position: absolute;
@@ -518,12 +784,20 @@
         height: 60px;
         border-radius: 50%;
     }
+    .dialog_people_item:hover {
+        background: #111433;
+    }
+    .active_man {
+        background: #111433;
+    }
     .dialog_people_item {
         position: relative;
         width: 100%;
         display: flex;
         column-gap: 10px;
         align-items: center;
+        cursor: pointer;
+        transition: .1s ease-in;
     }
     .dialog_people {
         border-right: 1px solid rgba(255, 255, 255, 0.5);
