@@ -15,7 +15,7 @@
             >{{ item.name }}</span>
         </div> 
         <AppAiManagerBrief v-if="activeIndex == 0" :userData="userData"/>
-        <AppAiManagerSends v-if="activeIndex == 1" />
+        <AppAiManagerSends v-if="activeIndex == 1" :userData="userData" />
         <AppAiManagerDialog v-if="activeIndex == 2" />
     </section>
 </template>

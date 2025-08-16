@@ -1,5 +1,12 @@
 <template>
-    <AppAiManagerNewSend v-if="isNewSend && !isOpenSend" @isMaded="openSend" @backup="newSendClose"/>
+    <AppAiManagerNewSend 
+        v-if="isNewSend && !isOpenSend" 
+        :manager_id="this.managers[this.activeIndex].id"
+        :user_id="userData.id"
+        :userTags="tags"
+        @isMaded="openSend" 
+        @backup="newSendClose"
+    />
     <AppAiSendInfo v-if="isOpenSend" :sendData="sendData" @backup="isOpenSend = false, isNewSend = false"/>
     <section class="autosends" v-if="!isNewSend && !isOpenSend">
         <div class="managers_switch">
@@ -8,12 +15,12 @@
                 class="switch" 
             >
                 <span
-                    v-for="(item, index) in listSwtich"
+                    v-for="(_, index) in managers"
                     :key="index"
                     class="switch_item"
-                    :class="{ active: activeIndex === item.index }" 
-                    @click="setActive(item.index)"
-                >{{ item.index + 1 }}</span>
+                    :class="{ active: activeIndex === index }" 
+                    @click="setActive(index)"
+                >{{ index + 1 }}</span>
             </div> 
         </div>
         <div class="autosend">
@@ -21,7 +28,7 @@
                 <span class="autosend_header_title">Авторассылки</span>
                 <AppGoodButton :text="'+ СОЗДАТЬ'" @click="openNewSend" class="create_btn" />
             </div>
-            <div class="autosend_body">
+            <div class="autosend_body" v-if="campaigns.length > 0">
                 <div class="autosend_body_row nothover">
                     <h3>Имя</h3>
                     <h3>Статус</h3>
@@ -37,9 +44,9 @@
                     @click="openSend(index)"
                 >
                     <span>{{ item.name }}</span>
-                    <div class="status"><img :src="item.status ? require('@/assets/images/play.png') : require('@/assets/images/pause.png')" /><span :class="item.status ? 'worked' : 'stoped'">{{ item.status ? "работает" : "остановлено" }}</span></div>
+                    <div class="status"><img :src="item.is_active ? require('@/assets/images/play.png') : require('@/assets/images/pause.png')" /><span :class="item.is_active ? 'worked' : 'stoped'">{{ item.is_active ? "работает" : "остановлено" }}</span></div>
                     <span>{{ item.audience }}</span>
-                    <span>{{ formatedDate(item.date) }}</span>
+                    <span>{{ formatedDate(item.created_at * 1000) }}</span>
                     <div class="autosend_body_row_icons">
                         <img src="@/assets/images/manager_copy.png" class="manager_copy_icon" />
                         <img src="@/assets/images/manager_edit.png" class="manager_edit_icon" />
@@ -47,7 +54,7 @@
                     </div>
                 </div>
             </div>
-            <div class="switchs" v-if="totalPages > 1">
+            <div class="switchs" v-if="totalPages > 1 && campaigns.length > 0">
                 <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
 
                 <span v-for="page in visiblePages" :key="page" @click="goToPage(page)" 
@@ -67,9 +74,16 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppAiManagerNewSend from '@/components/AppAiManagerNewSend.vue';
     import AppAiSendInfo from '@/components/AppAiSendInfo.vue';
+    import { 
+        getManagers,
+        getCompaigns
+    } from '@/services/manager';
 
     export default {
         components: { AppGoodButton, AppAiManagerNewSend, AppAiSendInfo },
+        props: {
+            userData: Object
+        },
         data() {
             return {
                 listSwtich: [
@@ -448,12 +462,18 @@
                 currentPage: 1,
                 isNewSend: false,
                 isOpenSend: false,
-                sendData: null
+                sendData: null,
+                managers: [],
+                campaigns: []
             }
         },
         computed: {
+            tags() {
+                if (!this.managers[this.activeIndex]?.assistant?.assistant_config?.user_filters) return [];
+                return JSON.parse(this.managers[this.activeIndex].assistant.assistant_config.user_filters)
+            },
             totalPages() {
-                return Math.ceil(this.autosends_data.length / this.pageSize);
+                return Math.ceil(this.campaigns.length / this.pageSize);
             },
             visiblePages() {
                 const pages = [];
@@ -469,20 +489,26 @@
             paginatedData() {
                 const start = (this.currentPage - 1) * this.pageSize;
                 const end = start + this.pageSize;
-                return this.autosends_data.slice(start, end);
+                return this.campaigns.slice(start, end);
             },
+        },
+        async created() {
+            const managers = await getManagers(this.userData.id);
+            this.managers = managers;
+            const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+            this.campaigns = campaigns.items;
         },
         methods: {
             deleteSend(index) {
                 const globalIndex = (this.currentPage - 1) * this.pageSize + index;
-                this.autosends_data.splice(globalIndex, 1);
+                this.campaigns.splice(globalIndex, 1);
             },
 
             newSendClose() {
                 this.isNewSend = false;
             },
             openSend(index) {
-                this.sendData = this.autosends_data[index];
+                this.sendData = this.campaigns[index];
                 this.isOpenSend = true;
             },
             openNewSend() {

@@ -1,7 +1,7 @@
 <template>
     <section class="new_send">
         <h2>Создать рассылку</h2>
-        <div class="managers_switch">
+        <!-- <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
                 class="switch" 
@@ -14,7 +14,7 @@
                     @click="setActive(item.index)"
                 >{{ item.index + 1 }}</span>
             </div> 
-        </div>
+        </div> -->
         <div class="new_send_row m34">
             <span class="send_name">Название рассылки:</span>
             <input v-model="send_name" class="send_name" placeholder="Моя рассылка" />
@@ -87,7 +87,7 @@
                 <div class="new_send_row_sm">
                     <div class="checkbox-wrapper-18">
                         <div class="round">
-                            <input type="checkbox" :id="`checkbox`" />
+                            <input type="checkbox" :id="`checkbox`" v-model="isAddContacts"/>
                             <label :for="`checkbox`"></label>
                         </div>
                     </div>
@@ -99,17 +99,22 @@
             <span class="new_send_row_copy"><strong>Копировать рассылку в:</strong></span>
             <div class="new_send_col">
                 <div 
-                    v-for="i in countOfManagers"
-                    :key="i"
+                    v-for="(item, index) in copyToManager"
+                    :key="index"
                     class="new_send_row_sm"
                 >
                     <div class="checkbox-wrapper-18">
                         <div class="round">
-                            <input type="checkbox" :id="`checkbox-${i}`" />
-                            <label :for="`checkbox-${i}`"></label>
+                            <input 
+                                type="checkbox" 
+                                :id="`checkbox-${index}`" 
+                                :checked="item" 
+                                @change="updateCopyToManager(index, $event.target.checked)"
+                            />
+                            <label :for="`checkbox-${index}`"></label>
                         </div>
                     </div>
-                    <span>{{ i }} ИИ менеджер</span>
+                    <span>{{ index }} ИИ менеджер</span>
                 </div>
             </div>
         </div>
@@ -124,9 +129,15 @@
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
+    import { createCampaign } from '@/services/manager';
 
     export default {
         components: { AppGoodButton, AppBadButton },
+        props: {
+            manager_id: String,
+            user_id: String,
+            userTags: Array
+        },
         data() {
             return {
                 listSwtich: [
@@ -147,7 +158,7 @@
                     }, 
                 ],
                 activeIndex: 0,
-                countOfManagers: 5,
+                copyToManager: [false, false, false, false, false],
                 isAddFilter: false,
                 filters: [
                     /*
@@ -170,9 +181,13 @@
                 ],
                 isAddSubFilter: false,
                 dropdownLogic: -1,
-                userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
-                isNewTags: -1
+                isNewTags: -1,
+                send_name: "", 
+                isAddContacts: false
             }
+        },
+        created() {
+            console.log(this.manager_id, this.user_id, this.userTags);
         },
         mounted() {
             document.addEventListener('click', this.handleClickOutside);
@@ -181,12 +196,17 @@
             document.removeEventListener('click', this.handleClickOutside);
         },
         methods: {
+            updateCopyToManager(index, isChecked) {
+                this.copyToManager[index] = isChecked;
+            },
             backup() {
                 this.$emit('backup');
                 console.log('назад');
             },
-            makeNew() {
-                this.$emit('isMaded');
+            async makeNew() {
+                // manager_id, user_id, name, filters, filter_connection, add_current_contacts, copy_to_managers, is_active
+                const resp = await createCampaign(this.manager_id, this.user_id, this.send_name, this.filters, this.filter_connection, this.isAddContacts, this.copyToManager, false);
+                if (resp) this.$emit('isMaded');
             },
             handleClickOutside(event) {
                 const clickedEl = event.target;

@@ -89,3 +89,44 @@ export async function getHelloMessage(manager_id) {
         return false; 
     }
 }
+
+export async function getCompaigns(manager_id, limit, offset) {
+    try {
+        const response = await axios.get(`https://web.intelektaz.com/manager-api/campaigns`, {
+            params: {
+                manager_id: manager_id,
+                limit: limit,
+                offset: offset
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении рассылок пользователя", error);
+        return false; 
+    }
+}
+
+export async function createCampaign(manager_id, user_id, name, filters, filter_connection, add_current_contacts, copy_to_managers, is_active) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/campaign`, 
+            {
+                "name": name,
+                "filters": filters,
+                "filter_connection": filter_connection,
+                "add_current_contacts": add_current_contacts,
+                "copy_to_managers": copy_to_managers,
+                "is_active": is_active
+            },
+            {
+                params: {
+                    manager_id: manager_id,
+                    user_id: user_id,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при создании рассылки", error);
+        return false; 
+    }
+}

@@ -288,15 +288,15 @@
                 isDropdownVisible: false,
                 links: [
                     {
-                        "link": "https://intelektaz.com/12345678",
-                        "descr": "Какое-то описание",
+                        "link": "",
+                        "descr": "",
                         "isNew": false
                     }
                 ],
                 goals: [
                     {
-                        "goal": "Цель 1",
-                        "descr": "Какое-то описание",
+                        "goal": "",
+                        "descr": "",
                         "isNew": false
                     }
                 ],
@@ -439,7 +439,10 @@
                     link: this.link,
                     qu: this.qu,
                     tg: this.tg,
-                    type: this.type
+                    type: this.type,
+                    links: JSON.stringify(this.links),
+                    goals: JSON.stringify(this.goals),
+                    user_filters: JSON.stringify(this.goals.map(item => item.goal))
                 };
             },
             setBriefFields() {
@@ -458,6 +461,8 @@
                 this.tg = this.currManager.brief?.tg || "";
                 this.type = this.currManager.brief?.type || "";
                 this.welcome_message = this.managers[this.activeIndex]?.assistant?.assistant_config?.welcome_message || "";
+                this.links = JSON.parse(this.currManager.brief?.links);
+                this.goals = JSON.parse(this.currManager.brief?.goals);
             },
             async bind() {
                 this.title = "ОЖИДАНИЕ";
