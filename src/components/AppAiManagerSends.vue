@@ -1,13 +1,21 @@
 <template>
     <AppAiManagerNewSend 
         v-if="isNewSend && !isOpenSend" 
-        :manager_id="this.managers[this.activeIndex].id"
+        :manager_id="managers[activeIndex].id"
         :user_id="userData.id"
         :userTags="tags"
-        @isMaded="openSend" 
+        :managers="managers"
+        @isMaded="openSend(0)" 
         @backup="newSendClose"
     />
-    <AppAiSendInfo v-if="isOpenSend" :sendData="sendData" @backup="isOpenSend = false, isNewSend = false"/>
+    <AppAiSendInfo 
+        v-if="isOpenSend" 
+        :campaignData="sendData" 
+        :managerData="managers[activeIndex]"
+        :userTags="tags"
+        :managers="managers"
+        @backup="isOpenSend = false, isNewSend = false"
+    />
     <section class="autosends" v-if="!isNewSend && !isOpenSend">
         <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
@@ -507,7 +515,9 @@
             newSendClose() {
                 this.isNewSend = false;
             },
-            openSend(index) {
+            async openSend(index) {
+                const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                this.campaigns = campaigns.items;
                 this.sendData = this.campaigns[index];
                 this.isOpenSend = true;
             },

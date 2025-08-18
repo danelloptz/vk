@@ -99,7 +99,7 @@
             <span class="new_send_row_copy"><strong>Копировать рассылку в:</strong></span>
             <div class="new_send_col">
                 <div 
-                    v-for="(item, index) in copyToManager"
+                    v-for="(item, index) in copyToManager.slice(0, managers.length)"
                     :key="index"
                     class="new_send_row_sm"
                 >
@@ -114,7 +114,7 @@
                             <label :for="`checkbox-${index}`"></label>
                         </div>
                     </div>
-                    <span>{{ index }} ИИ менеджер</span>
+                    <span>{{ index + 1 }} ИИ менеджер</span>
                 </div>
             </div>
         </div>
@@ -136,7 +136,8 @@
         props: {
             manager_id: String,
             user_id: String,
-            userTags: Array
+            userTags: Array,
+            managers: Array
         },
         data() {
             return {

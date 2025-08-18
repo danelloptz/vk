@@ -1,8 +1,9 @@
 <template>
     <AppAiManagerNewStep 
         v-if="isNewStep" 
-        :isFirstStep="steps.length == 0 || firstStep" 
+        :isFirstStep="sendData.steps.length == 0 || firstStep" 
         :editData="editStep"
+        :campaignData="campaignData"
         @backup="isNewStep = false"
         @create_new_step="updateSteps"
     />
@@ -25,15 +26,15 @@
         <div class="stats">
             <div class="stats_card">
                 <div class="stats_card_header">Подписчики</div>
-                <span class="stats_card_num">{{ sendData.subs }}</span>
+                <span class="stats_card_num">{{ sendData?.subscribers }}</span>
             </div>
             <div class="stats_card">
                 <div class="stats_card_header">Отписки</div>
-                <span class="stats_card_num">{{ sendData.unsubs }}</span>
+                <span class="stats_card_num">{{ sendData?.unsubscribes }}</span>
             </div>
             <div class="stats_card">
                 <div class="stats_card_header">Конверсия</div>
-                <span class="stats_card_num">{{ sendData.conv }}</span>
+                <span class="stats_card_num">{{ sendData?.conversion }}</span>
             </div>
         </div>
         <div class="menu">
@@ -45,11 +46,11 @@
                 <div class="menu_header_nav">
                     <span :class="{ activeMenuHeader: menuHeaderIndex == 0 }" @click="menuHeaderSetter(0)">Настройки</span>
                     <span :class="{ activeMenuHeader: menuHeaderIndex == 1 }" @click="menuHeaderSetter(1)">Шаги</span>
-                    <span :class="{ activeMenuHeader: menuHeaderIndex == 2 }" @click="menuHeaderSetter(2)">Аудитория ({{ sendData.subs }})</span>
+                    <span :class="{ activeMenuHeader: menuHeaderIndex == 2 }" @click="menuHeaderSetter(2)">Аудитория ({{ sendData?.subscribers }})</span>
                 </div>
             </div>
-            <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" v-if="steps.length == 0" class="add_step" @click="openNewStep"/>
-            <div class="steps" v-if="menuHeaderIndex == 1 && steps.length > 0">
+            <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" v-if="menuHeaderIndex == 1 && sendData?.steps.length == 0" class="add_step" @click="openNewStep"/>
+            <div class="steps" v-if="menuHeaderIndex == 1 && sendData.steps.length > 0">
                 <div class="steps_header">
                     <span style="justify-self: center;">Имя</span>
                     <span>Сценарий</span>
@@ -57,7 +58,7 @@
                     <span>Статистика</span>
                 </div>
                 <div 
-                    v-for="(step, index) in steps"
+                    v-for="(step, index) in sendData.steps"
                     :key="index"
                     class="step"
                 >
@@ -65,10 +66,10 @@
                         <img src="@/assets/images/squares.png" />
                         <span>{{ step.name }}</span>
                     </div>
-                    <span>{{ step.scene }}</span>
-                    <span>{{ step.time }}</span>
+                    <span>{{ step.order }}</span>
+                    <span>{{ step.delay.type }}</span>
                     <div class="step_end">
-                        <span>{{ step.stats.subs }} · {{ step.stats.unsubs }} · {{ step.stats.conv }}</span>
+                        <span>{{ sendData.stats.subscribers }} · {{ sendData.stats.unsubscribes }} · {{ sendData.stats.conversion }}</span>
                         <div class="step_icons">
                             <img src="@/assets/images/manager_edit.png" @click="edit(step, index)"/>
                             <img src="@/assets/images/trash.png" @click="deleteStep(index)"/>
@@ -77,11 +78,11 @@
                 </div>
                 <div class="steps_btns">
                     <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
-                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.status" class="startStep" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" class="startStep" />
                     <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" />
                 </div>
             </div>
-            <div class="settings" v-if="menuHeaderIndex == 0 && steps.length > 0">
+            <div class="settings" v-if="menuHeaderIndex == 0">
                 <div class="settings_row">
                     <span>Название рассылки:</span>
                     <input v-model="name" />
@@ -92,7 +93,7 @@
                         <div class="new_send_filter_settings" v-if="isAddFilter">
                             <div class="filters">
                                 <div
-                                    v-for="(item, index) in filters" 
+                                    v-for="(item, index) in sendData.filters.filters" 
                                     :key="index"
                                     class="filters_item"
                                 >
@@ -118,9 +119,9 @@
                                             {{ tag }}
                                         </div>
                                     </div>
-                                    <div class="dropdown" v-if="filter_connection.length > 0 && filter_connection[index]">
+                                    <div class="dropdown" v-if="sendData.filters.filter_connection.length > 0 && sendData.filters.filter_connection[index]">
                                         <input
-                                            v-model="filter_connection[index]"
+                                            v-model="sendData.filters.filter_connection[index]"
                                             type="text"
                                             @focus="dropdownLogic = index"
                                             @blur="hideDropdownLogic"
@@ -181,8 +182,9 @@
                     </div>
                 </div>
                 <div class="steps_btns" style="margin-top: 40px;">
+                    <AppGoodButton :text="'СОХРАНИТЬ'" class="addNextStep" @click="saveSettings" />
                     <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
-                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.status" class="startStep" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" class="startStep" />
                     <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" />
                     <AppGoodButton :text="'ПЕРЕЗАПУСТИТЬ'" class="stopStep" style="width: 135px;" />
                 </div>
@@ -244,11 +246,15 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppAiManagerNewStep from '@/components/AppAiManagerNewStep.vue';
+    import { getCompaign, saveCompaignSettings } from '@/services/manager';
 
     export default {
         components: { AppGoodButton, AppBadButton, AppAiManagerNewStep },
         props: {
-            sendData: Object
+            campaignData: Object,
+            managerData: Object,
+            userTags: Array,
+            managers: Array
         },
         data() {
             return {
@@ -306,11 +312,9 @@
                 isAddSubFilter: false,
                 filters: null,
                 isNewTags: -1,
-                userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
                 filter_connection: null,
                 dropdownLogic: -1,
                 isAddInSends: false,
-                managers: null,
                 radio_index: 0,
                 currRadio: null,
                 radios: ["Все", "Активные", "Отписались"],
@@ -388,22 +392,16 @@
                         date: 1754489038186
                     },
                 ],
-                filter: ""
+                filter: "",
+                sendData: null,
+                name: ""
             }
         },
-        watch: {
-            sendData: {
-                handler(val) {
-                    if (val) {
-                        this.filters = val.filters;
-                        this.filter_connection = val.filter_connection;
-                        this.isAddFilter = val.filters.length > 0;
-                        this.isAddInSends = val.addInContact;
-                        this.managers = val.copyTo;
-                    }
-                },
-                immediate: true,
-            }
+        async created() {
+            const resp = await getCompaign(this.managerData.id, this.campaignData.campaign_id);
+            this.sendData = resp;
+            this.name = this.sendData.name;
+            this.isAddFilter = this.sendData.filters.filters.length > 0 || false;
         },
         computed: {
             totalPages() {
@@ -423,10 +421,14 @@
             paginatedData() {
                 const start = (this.currentPage - 1) * this.pageSize;
                 const end = start + this.pageSize;
-                return this.audience.slice(start, end).filter(item => this.filter == "" || item.status == this.filter);
+                return this.sendData.users.slice(start, end).filter(item => this.filter == "" || item.status == this.filter);
             },
         },
         methods: {
+            async saveSettings() {
+                const resp = await saveCompaignSettings(this.managerData.id, this.campaignData.campaign_id, this.name, this.sendData.filters.filters, this.sendData.filters.filter_connection, this.sendData.add_current_contacts);
+                console.log(resp);
+            },
             nextPage() {
                 if (this.currentPage < this.totalPages) {
                     this.currentPage++;
@@ -468,15 +470,15 @@
                 this.isAddSubFilter = true;
             },
              addFilter(name) {
-                this.filters.push({
+                this.sendData.filters.filters.push({
                     name: name, 
                     tags: []
                 });
-                if (this.filters.length > 1) this.filter_connection.push('И');
+                if (this.sendData.filters.filters.length > 1) this.sendData.filters.filter_connection.push('И');
                 this.isAddSubFilter = false;
             },
             selectFilterConnection(name, index) {
-                this.filter_connection[index] = name;
+                this.sendData.filters.filter_connection[index] = name;
                 this.hideDropdownLogic();
             },
             hideDropdownLogic() {
@@ -486,14 +488,14 @@
                 this.isNewTags = -1;
             } ,
             addTag(index, tag) {
-                this.filters[index].tags.push(tag);
+                this.sendData.filters.filters[index].tags.push(tag);
                 this.closeNewTags();
             },
             openNewTags(index) {
                 this.isNewTags = index;
             }, 
             deleteTag(index, tag_index) {
-                this.filters[index].tags.splice(tag_index, 1);
+                this.sendData.filters.filters[index].tags.splice(tag_index, 1);
             },
             changeIsAddFilter() {
                 this.isAddFilter = !this.isAddFilter;
@@ -511,7 +513,7 @@
                 this.isNewStep = true;
             },
             deleteStep(index) {
-                this.steps.splice(index, 1);
+                this.sendData.steps.splice(index, 1);
             },
             openNewStep() {
                 this.isNewStep = true;

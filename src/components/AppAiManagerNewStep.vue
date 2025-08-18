@@ -11,7 +11,7 @@
         </div>
         <div class="row">
             <span>Текст</span>
-            <AppAiTextEditor />
+            <AppAiTextEditor @update="text = $event" :startText="text" />
         </div>
         <div class="row" v-if="previews.length == 0">
             <span>Изображение</span>
@@ -79,6 +79,7 @@
                         ref="datetimeInput"
                         v-model="date"
                         type="datetime-local"
+                        @input="onDateChange"
                         class="datetime"
                     />
                     <img
@@ -126,18 +127,21 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppAiTextEditor from '@/components/AppAiTextEditor.vue';
+    import { createCampaignStep } from '@/services/manager';
+    import { loadImage } from '@/services/other';
 
     export default {
         components: { AppGoodButton, AppBadButton, AppAiTextEditor },
         props: {
             isFirstStep: Boolean,
-            editData: Object
+            editData: Object,
+            campaignData: Object
         },
         data() {
             return {
                 isDropdownVisible: false,
                 type: null,
-                types: ["Немедленно", "Минута", "Час", "День", "В точное время", "В точное время на следующий день", "В точную дату", "По дням недели"],
+                types: ['немедленно', 'минута', 'час', 'день', 'в точное время', 'в точное время на следующий день', 'в точную дату'],
                 activeIndex: -1,
                 isDragging: false,
                 previews: [],
@@ -148,7 +152,9 @@
                 timeRanges: ['минута', 'час', 'день', 'месяц', ],
                 activeIndexTimeRange: 0,
                 timeRange: 'минута',
-                isTimeRangeVisible: false
+                isTimeRangeVisible: false,
+                date: '',
+                files: []
             }
         },
         watch: {
@@ -166,11 +172,35 @@
             }
         },
         methods: {
+            onDateChange() {
+                console.log(this.date);
+            },
             backup() {
                 this.$emit('backup');
             },
-            createNewStep() {
-                this.$emit('create_new_step');
+            async createNewStep() {
+                let send_time;
+                if (this.isFirstStep) {
+                    const dt = new Date(this.date);
+                    send_time = {
+                        "first": this.isFirstStep, 
+                        "first_type": this.type,
+                        "first_time": Math.ceil(dt.getTime() / 1000)
+                    };
+                } else {
+                    send_time = {
+                        "first": this.isFirstStep, 
+                        "second_type": this.timeRange,
+                        "second_time": this.amountOfTime
+                    };
+                }
+                let image_link = "";
+                if (this.files.length > 0) {
+                    const image = await loadImage(this.files[0]);
+                    image_link = image.image_id;
+                }
+                const resp = await createCampaignStep(this.campaignData.campaign_id, this.name, this.title, this.text, image_link, send_time);
+                if (resp) this.$emit('create_new_step');
             },
             closeTimeRange() {
                 this.isTimeRangeVisible = false;
@@ -182,6 +212,7 @@
             },
             deletePreview() {
                 this.previews = [];
+                this.files = [];
             },
             openPicker() {
                 const input = this.$refs.datetimeInput;
@@ -215,6 +246,7 @@
 
                 files.forEach(file => {
                 if (file.type.startsWith('image/')) {
+                    this.files.push(file);
                     const reader = new FileReader();
                     reader.onload = e => {
                     this.previews.push(e.target.result);
