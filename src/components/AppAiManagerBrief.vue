@@ -19,7 +19,7 @@
                 class="switch" 
             >
                 <span
-                    v-for="(_, index) in managers"
+                    v-for="(_, index) in 5"
                     :key="index"
                     class="switch_item"
                     :class="{ active: activeIndex === index }" 
@@ -27,206 +27,213 @@
                 >{{ index + 1 }}</span>
             </div> 
         </div>
-        <h2 :class="{ m50: managers.length > 0 }">Для создания ИИ менеджера необходимо привязть Telegram бот к сервису Intelektaz и заполнить бриф:</h2>
-        <div class="token_row">
-            <span>Токен бота:</span>
-            <input v-model="token" class="token_input" />
-            <AppGoodButton :text="'ПРИВЯЗАТЬ'" class="token_btn" @click="bind"/>
-            <span style="text-decoration: underline;" @click="openInstructModal">Инструкция</span>
+        <div class="no_package" v-if="noAccess">
+            <img src="@/assets/images/robot.png">
+            <h1>Чтобы увеличить количество менеджеров до 5, активируйте пакет Leader!</h1>
+            <AppGoodButton :text="'ВЫБРАТЬ ПАКЕТ'" style="width: 200px; margin-top: 40px;" @click="openTatiff" />
         </div>
-        <div class="link_row">
-            <span>Ссылка:</span>
-            <div class="link">
-               <span class="link_text">https://intelektaz.com/12345678</span> <img src="@/assets/images/copy.png" @click="copyLink('https://intelektaz.com/12345678')" /> <span class="green" v-if="isCopy">Скопировано!</span>
+        <div class="sub_brief" v-if="!noAccess">
+            <h2 :class="{ m50: managers.length > 0 }">Для создания ИИ менеджера необходимо привязть Telegram бот к сервису Intelektaz и заполнить бриф:</h2>
+            <div class="token_row">
+                <span>Токен бота:</span>
+                <input v-model="token" class="token_input" />
+                <AppGoodButton :text="'ПРИВЯЗАТЬ'" class="token_btn" @click="bind"/>
+                <span style="text-decoration: underline;" @click="openInstructModal">Инструкция</span>
             </div>
-        </div>
-        <h2 class="m30">Бриф:</h2>
-        <div class="container">
-            <div class="col">
-                <span class="counter">{{ allSymbols }}/{{ maxSymbols }}</span>
-                <h2>Название компании:</h2>
-                <input 
-                    type="text"
-                    v-model="label"
-                    placeholder="Название"
-                    @input="validateInput('label', $event)"
-                    :class="{ saved: isSaved }"
-                >
-                <h2>Год основания компании:</h2>
-                <input 
-                    type="text"
-                    v-model="year"
-                    placeholder="Год"
-                    @input="validateInput('year', $event)"
-                    :class="{ saved: isSaved }"
-                >
-                <h2 class="pros">Конкурентные преимущества:</h2>
-                <textarea class="h185" :class="{ saved: isSaved }" placeholder="Что выделяет компанию среди конкурентов?" v-model="pros" @input="validateInput('pros', $event)"></textarea>
-                <h2>Какие боли или проблемы решает ваш продукт?</h2>
-                <textarea class="h185" :class="{ saved: isSaved }" placeholder="Чем ваш продукт может помочь клиентам?" v-model="whats_solve" @input="validateInput('whats_solve', $event)"></textarea>
-                <h2>Цена и ценовая политика:</h2>
-                <input 
-                    type="text"
-                    v-model="price"
-                    placeholder="Цена"
-                    @input="validateInput('price', $event)"
-                    :class="{ saved: isSaved }"
-                >
-                <h2>Какой тип партнерской программы в компании?</h2>
-                <div class="dropdown">
-                    <input
-                        v-model="type"
+            <div class="link_row">
+                <span>Ссылка:</span>
+                <div class="link" @click="copyLink('https://intelektaz.com/12345678')">
+                    <span class="link_text">https://intelektaz.com/12345678</span> <img src="@/assets/images/copy.png" />
+                    <span class="green" v-if="isCopy">Скопировано!</span>
+                </div>
+            </div>
+            <h2 class="m30">Бриф:</h2>
+            <div class="container">
+                <div class="col">
+                    <span class="counter">{{ allSymbols }}/{{ maxSymbols }}</span>
+                    <h2>Название компании:</h2>
+                    <input 
                         type="text"
-                        placeholder="Тип программы"
+                        v-model="label"
+                        placeholder="Название"
+                        @input="validateInput('label', $event)"
                         :class="{ saved: isSaved }"
-                        @focus="isDropdownVisible = true"
-                        @blur="hideDropdown"
-                        readonly 
-                    />
-                    <img :class="{'rotated': isDropdownVisible}" src="@/assets/images/arrow_down.png" class="arrow_down">
-                    <ul v-if="isDropdownVisible" class="dropdown-menu">
-                        <li
-                            v-for="(item, index) in types"
-                            :key="index"
-                            @mousedown.prevent="selectType(item)"
+                    >
+                    <h2>Год основания компании:</h2>
+                    <input 
+                        type="text"
+                        v-model="year"
+                        placeholder="Год"
+                        @input="validateInput('year', $event)"
+                        :class="{ saved: isSaved }"
+                    >
+                    <h2 class="pros">Конкурентные преимущества:</h2>
+                    <textarea class="h185" :class="{ saved: isSaved }" placeholder="Что выделяет компанию среди конкурентов?" v-model="pros" @input="validateInput('pros', $event)"></textarea>
+                    <h2>Какие боли или проблемы решает ваш продукт?</h2>
+                    <textarea class="h185" :class="{ saved: isSaved }" placeholder="Чем ваш продукт может помочь клиентам?" v-model="whats_solve" @input="validateInput('whats_solve', $event)"></textarea>
+                    <h2>Цена и ценовая политика:</h2>
+                    <input 
+                        type="text"
+                        v-model="price"
+                        placeholder="Цена"
+                        @input="validateInput('price', $event)"
+                        :class="{ saved: isSaved }"
+                    >
+                    <h2>Какой тип партнерской программы в компании?</h2>
+                    <div class="dropdown">
+                        <input
+                            v-model="type"
+                            type="text"
+                            placeholder="Тип программы"
+                            :class="{ saved: isSaved }"
+                            @focus="isDropdownVisible = true"
+                            @blur="hideDropdown"
+                            readonly 
+                        />
+                        <img :class="{'rotated': isDropdownVisible}" src="@/assets/images/arrow_down.png" class="arrow_down">
+                        <ul v-if="isDropdownVisible" class="dropdown-menu">
+                            <li
+                                v-for="(item, index) in types"
+                                :key="index"
+                                @mousedown.prevent="selectType(item)"
+                            >
+                                {{ item }}
+                            </li>
+                        </ul>
+                    </div>
+                    <h2 class="tg">Телеграм для связи:</h2>
+                    <input 
+                        type="text"
+                        v-model="tg"
+                        placeholder="Телеграм (введите имя пользователя)"
+                        @input="validateInput('tg', $event)"
+                        :class="{ saved: isSaved }"
+                    >
+                </div>
+                <div class="col">
+                    <h2>Имя, Фамилия или Компания:</h2>
+                    <input 
+                        type="text"
+                        v-model="fio"
+                        placeholder="Данные, кого будет представлять бот"
+                        @input="validateInput('fio', $event)"
+                        :class="{ saved: isSaved }"
+                    >
+                    <h2 class="descr_comp">Описание компании:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Какие продукты или услуги предлагает компания?" v-model="description_company" @input="validateInput('description_company', $event)"></textarea>
+                    <h2>Описание продукта / услуги:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Подробное описание продуктов или услуг, которые необходимо продвигать" v-model="description_product" @input="validateInput('description_product', $event)"></textarea>
+                    <h2>Уникальные характеристики продукта:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="Что отличает ваш продукт от других на рынке?" v-model="characteristics"  @input="validateInput('characteristics', $event)"></textarea>
+                    <h2>Часто задаваемые вопросы:</h2>
+                    <textarea :class="{ saved: isSaved }" placeholder="В этом разделе укажите самые частые вопросы, которые задают ваши клиенты и ответы на них. Используте формат «Вопрос: [текст вопроса]. Ответ: [текст ответа]». Каждый вопрос с новой строки" v-model="qu" @input="validateInput('qu', $event)"></textarea>
+                </div>
+            </div>
+            <h2 class="m50">Ссылки и материалы:</h2>
+            <div class="links">
+                <div v-for="(link, index) in links" :key="index" class="row">
+                    <input 
+                        placeholder="Ссылка"
+                        v-model="link.link"
+                        class="links_link"
+                    >
+                    <input 
+                        placeholder="Описание"
+                        v-model="link.descr"
+                        class="links_descr"
+                    >
+                    <div class="sub_row"  >
+                        <img 
+                            v-if="link.isNew"
+                            src="@/assets/images/delete_ai.png" 
+                            @click="removeLink(index)"
                         >
-                            {{ item }}
-                        </li>
-                    </ul>
-                </div>
-                <h2 class="tg">Телеграм для связи:</h2>
-                <input 
-                    type="text"
-                    v-model="tg"
-                    placeholder="Телеграм (введите имя пользователя)"
-                    @input="validateInput('tg', $event)"
-                    :class="{ saved: isSaved }"
-                >
-            </div>
-            <div class="col">
-                <h2>Имя, Фамилия или Компания:</h2>
-                <input 
-                    type="text"
-                    v-model="fio"
-                    placeholder="Данные, кого будет представлять бот"
-                    @input="validateInput('fio', $event)"
-                    :class="{ saved: isSaved }"
-                >
-                <h2 class="descr_comp">Описание компании:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Какие продукты или услуги предлагает компания?" v-model="description_company" @input="validateInput('description_company', $event)"></textarea>
-                <h2>Описание продукта / услуги:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Подробное описание продуктов или услуг, которые необходимо продвигать" v-model="description_product" @input="validateInput('description_product', $event)"></textarea>
-                <h2>Уникальные характеристики продукта:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="Что отличает ваш продукт от других на рынке?" v-model="characteristics"  @input="validateInput('characteristics', $event)"></textarea>
-                <h2>Часто задаваемые вопросы:</h2>
-                <textarea :class="{ saved: isSaved }" placeholder="В этом разделе укажите самые частые вопросы, которые задают ваши клиенты и ответы на них. Используте формат «Вопрос: [текст вопроса]. Ответ: [текст ответа]». Каждый вопрос с новой строки" v-model="qu" @input="validateInput('qu', $event)"></textarea>
-            </div>
-        </div>
-        <h2 class="m50">Ссылки и материалы:</h2>
-        <div class="links">
-            <div v-for="(link, index) in links" :key="index" class="row">
-                <input 
-                    placeholder="Ссылка"
-                    v-model="link.link"
-                    class="links_link"
-                >
-                <input 
-                    placeholder="Описание"
-                    v-model="link.descr"
-                    class="links_descr"
-                >
-                <div class="sub_row"  >
-                    <img 
-                        v-if="link.isNew"
-                        src="@/assets/images/delete_ai.png" 
-                        @click="removeLink(index)"
-                    >
-                    <img 
-                        v-if="index == links.length - 1"
-                        src="@/assets/images/addPlus.png" 
-                        @click="addLink(link, index)"
-                    >
+                        <img 
+                            v-if="index == links.length - 1"
+                            src="@/assets/images/addPlus.png" 
+                            @click="addLink(link, index)"
+                        >
+                    </div>
                 </div>
             </div>
-        </div>
-        <h2 class="m50">Какую реакцию вы хотите получить от вашей аудитории?</h2>
-        <div class="links">
-            <div v-for="(goal, index) in goals" :key="index" class="row">
-                <input 
-                    placeholder="Цель"
-                    v-model="goal.goal"
-                    class="links_link"
-                >
-                <input 
-                    placeholder="Описание"
-                    v-model="goal.descr"
-                    class="links_descr"
-                >
-                <div class="sub_row"  >
-                    <img 
-                        v-if="goal.isNew"
-                        src="@/assets/images/delete_ai.png" 
-                        @click="removeGoal(index)"
+            <h2 class="m50">Какую реакцию вы хотите получить от вашей аудитории?</h2>
+            <div class="links">
+                <div v-for="(goal, index) in goals" :key="index" class="row">
+                    <input 
+                        placeholder="Цель"
+                        v-model="goal.goal"
+                        class="links_link"
                     >
-                    <img 
-                        v-if="index == goals.length - 1"
-                        src="@/assets/images/addPlus.png" 
-                        @click="addGoal(goal, index)"
-                    >   
+                    <input 
+                        placeholder="Описание"
+                        v-model="goal.descr"
+                        class="links_descr"
+                    >
+                    <div class="sub_row"  >
+                        <img 
+                            v-if="goal.isNew"
+                            src="@/assets/images/delete_ai.png" 
+                            @click="removeGoal(index)"
+                        >
+                        <img 
+                            v-if="index == goals.length - 1"
+                            src="@/assets/images/addPlus.png" 
+                            @click="addGoal(goal, index)"
+                        >   
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="btns_row">
-            <AppGoodButton :text="'СОХРАНИТЬ'" class="btn_long" @click="saveChanges"/>
-            <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="btn_long" />
-            <AppGoodButton :text="'УДАЛИТЬ БОТА'" class="btn_long" @click="deleteMngr" />
-        </div>
-        <div class="conv_style_wrapper m50">
-            <h2>Стиль общения: </h2>
-            <div class="conv_style">
-                <div 
-                    v-for="(item, index) in conv_styles"
-                    :key="index"
-                    class="conv_style_row"
-                >
-                    <div class="conv_style_row_row">
-                        <div class="checkbox-wrapper-18">
-                            <div class="round">
-                                <input type="checkbox" :id="`checkbox-${index}`" @click="setActiveConvStyle(index + 1)" :checked="active_conv_style == index + 1" />
-                                <label :for="`checkbox-${index}`"></label>
+            <div class="btns_row">
+                <AppGoodButton :text="'СОХРАНИТЬ'" class="btn_long" @click="saveChanges"/>
+                <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="btn_long" />
+                <AppGoodButton :text="'УДАЛИТЬ БОТА'" class="btn_long" @click="deleteMngr" />
+            </div>
+            <div class="conv_style_wrapper m50">
+                <h2>Стиль общения: </h2>
+                <div class="conv_style">
+                    <div 
+                        v-for="(item, index) in conv_styles"
+                        :key="index"
+                        class="conv_style_row"
+                    >
+                        <div class="conv_style_row_row">
+                            <div class="checkbox-wrapper-18">
+                                <div class="round">
+                                    <input type="checkbox" :id="`checkbox-${index}`" @click="setActiveConvStyle(index + 1)" :checked="active_conv_style == index + 1" />
+                                    <label :for="`checkbox-${index}`"></label>
+                                </div>
+                            </div>
+                            <span>{{ item.type }}</span>
+                        </div>
+                        <div class="conv_style_faq" @click="setInfoShownIndex(index)">?</div>
+                        <div v-if="info_shown_index == index" class="conv_style_info_wrapper" :style="{top: `${(index) * 25 + (index) * 15 + 12.5}px`}">
+                            <div class="conv_style_info">
+                                <img src="@/assets/images/close.png" class="close" @click="closeStyleInfo">
+                                <span><strong>Стиль: </strong>{{ item.style }}</span>
+                                <span><strong>Тон: </strong>{{ item.tone }}</span>
+                                <span><strong>Язык: </strong>{{ item.lang }}</span>
+                                <span><strong>Персонализация: </strong>{{ item.person }}</span>
+                                <span><strong>Эмоциональная окраска: </strong>{{ item.emotions }}</span>
+                                <span><strong>Цель общения: </strong>{{ item.conv_goals }}</span>
+                                <span><strong>Подходит для: </strong>{{ item.specific }}</span>
                             </div>
                         </div>
-                        <span>{{ item.type }}</span>
-                    </div>
-                    <div class="conv_style_faq" @click="setInfoShownIndex(index)">?</div>
-                    <div v-if="info_shown_index == index" class="conv_style_info_wrapper" :style="{top: `${(index) * 25 + (index) * 15 + 12.5}px`}">
-                        <div class="conv_style_info">
-                            <img src="@/assets/images/close.png" class="close" @click="closeStyleInfo">
-                            <span><strong>Стиль: </strong>{{ item.style }}</span>
-                            <span><strong>Тон: </strong>{{ item.tone }}</span>
-                            <span><strong>Язык: </strong>{{ item.lang }}</span>
-                            <span><strong>Персонализация: </strong>{{ item.person }}</span>
-                            <span><strong>Эмоциональная окраска: </strong>{{ item.emotions }}</span>
-                            <span><strong>Цель общения: </strong>{{ item.conv_goals }}</span>
-                            <span><strong>Подходит для: </strong>{{ item.specific }}</span>
-                        </div>
                     </div>
                 </div>
             </div>
+            <div class="start_msg m50">
+                <h2>Приветственное сообщение</h2>
+                <div class="line_wrapper" v-if="isGenerated">
+                    <div class="line"></div>
+                </div>
+                <AppGoodButton :text="'СГЕНЕРИРОВАТЬ'" class="generate_msg_btn" @click="generateHelloMessage"/>
+                <textarea class="start_msg_text" v-model="welcome_message"></textarea>
+                <div class="start_msg_row_btns">
+                    <AppGoodButton :text="'СОХРАНИТЬ'" class="start_msg_row_btn_sm" @click="saveChanges"/>
+                    <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="start_msg_row_btn_bg" @click="editMsg" />
+                </div>
+            </div>
         </div>
-    <div class="start_msg m50">
-        <h2>Приветственное сообщение</h2>
-        <div class="line_wrapper" v-if="isGenerated">
-            <div class="line"></div>
-        </div>
-        <span>{{ welcome_message }}</span>
-        <AppGoodButton :text="'СГЕНЕРИРОВАТЬ'" class="generate_msg_btn" @click="generateHelloMessage"/>
-        <textarea class="start_msg_text" v-model="welcome_message"></textarea>
-        <div class="start_msg_row_btns">
-            <AppGoodButton :text="'СОХРАНИТЬ'" class="start_msg_row_btn_sm" @click="saveChanges"/>
-            <AppGoodButton :text="'РЕДАКТИРОВАТЬ'" class="start_msg_row_btn_bg" @click="editMsg" />
-        </div>
-    </div>
     </section>
 </template>
 
@@ -341,7 +348,10 @@
                 title: null,
                 msg: null,
                 isModal: false,
-                isGenerated: false
+                isGenerated: false,
+                noAccess: false,
+                isLeader: false,
+                isCopy: false
             }
         },
         computed: {
@@ -350,6 +360,7 @@
             }
         },
         async created() {
+            this.isLeader = this.userData.packages.at(-1).package_name == 'Leader';
             const managers = await getManagers(this.userData.id);
             if (managers) {
                 this.managers = managers;
@@ -360,7 +371,25 @@
                 this.setBriefFields();
             }
         },
+        mounted() {
+            document.addEventListener('click', this.handleClickOutside);
+        },
         methods: {
+            async copyLink(link) {
+                this.isCopy = true;
+                console.log(true);
+                await navigator.clipboard.writeText(link);
+                setTimeout(() => { this.isCopy = false; }, 2000);
+            },
+            handleClickOutside(event) {
+                const clickedEl = event.target;
+                if (!clickedEl.closest('.conv_style_info_wrapper') && !clickedEl.closest('.conv_style_faq')) {
+                    this.closeStyleInfo();
+                }
+            },
+            openTatiff() {
+                this.$emit('openTariff');
+            },
             editMsg() {
                 const textarea = document.querySelector('textarea.start_msg_text');
                 if (!textarea) return;
@@ -463,6 +492,28 @@
                 this.welcome_message = this.managers[this.activeIndex]?.assistant?.assistant_config?.welcome_message || "";
                 this.links = JSON.parse(this.currManager.brief?.links);
                 this.goals = JSON.parse(this.currManager.brief?.goals);
+                this.active_conv_style = +this.currManager.brief?.communication_style || 0;
+            },
+            setBriefFieldsForSwitch() {
+                this.fio = this.managers[this.activeIndex]?.assistant.assistant_config?.fio || "";
+                this.year = this.managers[this.activeIndex]?.assistant.assistant_config?.year || "";
+                this.label = this.managers[this.activeIndex]?.assistant.assistant_config?.label || "";
+                this.description_company = this.managers[this.activeIndex]?.assistant.assistant_config?.description_company || "";
+                this.pros = this.managers[this.activeIndex]?.assistant.assistant_config?.pros || "";
+                this.description_product = this.managers[this.activeIndex]?.assistant.assistant_config?.description_product || "";
+                this.whats_solve = this.managers[this.activeIndex]?.assistant.assistant_config?.whats_solve || "";
+                this.characteristics = this.managers[this.activeIndex]?.assistant.assistant_config?.characteristics || "";
+                this.price = this.managers[this.activeIndex]?.assistant.assistant_config?.price || "";
+                this.audience = this.managers[this.activeIndex]?.assistant.assistant_config?.audience || "";
+                this.link = this.managers[this.activeIndex]?.assistant.assistant_config?.link || "";
+                this.qu = this.managers[this.activeIndex]?.assistant.assistant_config?.qu || "";
+                this.tg = this.managers[this.activeIndex]?.assistant.assistant_config?.tg || "";
+                this.type = this.managers[this.activeIndex]?.assistant.assistant_config?.type || "";
+                this.welcome_message = this.managers[this.activeIndex]?.assistant?.assistant_config?.welcome_message || "";
+                this.links = this.managers[this.activeIndex]?.assistant.assistant_config?.links ? JSON.parse(this.managers[this.activeIndex]?.assistant.assistant_config?.links) : [];
+                this.goals = this.managers[this.activeIndex]?.assistant.assistant_config?.goals ? JSON.parse(this.managers[this.activeIndex]?.assistant.assistant_config?.goals) : [];
+                this.token = this.managers[this.activeIndex]?.bot_token || "";
+                this.active_conv_style = +this.managers[this.activeIndex]?.assistant.assistant_config?.communication_style || 0;
             },
             async bind() {
                 this.title = "ОЖИДАНИЕ";
@@ -511,10 +562,12 @@
             },
             setActive(index) {
                 this.activeIndex = index;
-            },
-            async copyLink(link) {
-                await navigator.clipboard.writeText(link);
-                setTimeout(() => { this.isCopy = 0; console.log(this.isCopy);}, 2000);
+                if (!this.isLeader && index > 0) {
+                    this.noAccess = true;
+                    return;
+                }
+                this.noAccess = false;
+                this.setBriefFieldsForSwitch();
             },
             validateInput(field) {
                 const currentLength = this.allSymbols;
@@ -536,6 +589,22 @@
 </script>
 
 <style scoped>
+    .no_package {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .no_package img {
+        width: 379px;
+        height: 379px;
+    }
+    .no_package h1 {
+        font-family: 'OpenSans';
+        font-size: 24px;
+        color: #FF6666;
+        font-weight: bold;
+        text-align: center;
+    }
     .line_wrapper {
         width: 233px;
         height: 15px;
@@ -564,6 +633,11 @@
         margin-top: 30px;
     }
     .brief {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .sub_brief {
         width: 100%;
         display: flex;
         flex-direction: column;
@@ -661,22 +735,30 @@
         font-size: 18px !important;
         font-weight: bold;
         text-decoration: underline;
+        cursor: pointer;
     }
     .link {
         display: flex;
         column-gap: 10px;
+        align-items: center;
+        cursor: pointer;
     }
     .link img {
         width: 20px;
         height: 20px;
     }
     .green {
-        color: green;
+        color: green !important;
         animation: ShowEasy 2s ease-in;
         opacity: 0;
         @media (max-width: 650px) {
             display: none;
         }
+    }
+    @keyframes ShowEasy {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
     }
 
     .container {
@@ -846,7 +928,7 @@
         }
     }
     .sub_row img {
-        width: 45px;
+        width: 35px;
         object-fit: contain;
         cursor: pointer;
         @media (max-width: 650px) {

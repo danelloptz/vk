@@ -504,8 +504,11 @@
             menuHeaderSetter(index) {
                 this.menuHeaderIndex = index;
             },
-            updateSteps() {
+            async updateSteps() {
                 this.isNewStep = false;
+                const resp = await getCompaign(this.managerData.id, this.campaignData.campaign_id);
+                this.sendData = resp;
+                this.menuHeaderIndex = 1;
             },
             edit(step, index) {
                 this.editStep = step;

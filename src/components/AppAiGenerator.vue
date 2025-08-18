@@ -25,7 +25,7 @@
         <AppAiAnalytics v-if="activeIndex == 2" :windowWidth="windowWidth" />
         <AppAiScene v-if="activeIndex == 3" :userData="userData" />
         <AppAiChat v-if="activeIndex == 4" :userData="userData" />
-        <AppAiManager v-if="activeIndex == 5" :userData="userData" />
+        <AppAiManager v-if="activeIndex == 5" :userData="userData" @openTariff="openTatiff"/>
     </section>
 </template>
 

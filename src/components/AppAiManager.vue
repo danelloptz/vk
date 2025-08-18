@@ -14,7 +14,7 @@
                 @click="setActive(item.index)"
             >{{ item.name }}</span>
         </div> 
-        <AppAiManagerBrief v-if="activeIndex == 0" :userData="userData"/>
+        <AppAiManagerBrief v-if="activeIndex == 0" :userData="userData" @openTariff="openTariff"/>
         <AppAiManagerSends v-if="activeIndex == 1" :userData="userData" />
         <AppAiManagerDialog v-if="activeIndex == 2" />
     </section>
@@ -59,6 +59,9 @@
             console.log(this.testers, this.userData.vk_id);
         },
         methods: {
+            openTariff() {
+                this.$emit("openTariff");
+            },
             setActive(index) {
                 this.activeIndex = index;
             },
@@ -98,6 +101,7 @@
         width: 100%;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
+        column-gap: 30px;
     }
     span {
         width: 100%;
@@ -109,6 +113,7 @@
         text-align: center;
         align-content: center;
         transition: .1s ease-in;
+        border: 1px solid white;
         @media (max-width: 1300px) {
             font-size: 16px;
         }
@@ -130,5 +135,6 @@
     .active {
         background: #7023EC;
         font-weight: bold;
+        border: none !important;
     }
 </style>
