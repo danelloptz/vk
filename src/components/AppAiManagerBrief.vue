@@ -13,7 +13,7 @@
         </div>
     </section>
     <section class="brief">
-        <div class="managers_switch" v-if="managers.length > 0">
+        <!-- <div class="managers_switch" v-if="managers.length > 0">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
                 class="switch" 
@@ -26,14 +26,14 @@
                     @click="setActive(index)"
                 >{{ index + 1 }}</span>
             </div> 
-        </div>
-        <div class="no_package" v-if="noAccess">
+        </div> -->
+        <!-- <div class="no_package" v-if="noAccess">
             <img src="@/assets/images/robot.png">
             <h1>Чтобы увеличить количество менеджеров до 5, активируйте пакет Leader!</h1>
             <AppGoodButton :text="'ВЫБРАТЬ ПАКЕТ'" style="width: 200px; margin-top: 40px;" @click="openTatiff" />
-        </div>
+        </div> -->
         <div class="sub_brief" v-if="!noAccess">
-            <h2 :class="{ m50: managers.length > 0 }">Для создания ИИ менеджера необходимо привязть Telegram бот к сервису Intelektaz и заполнить бриф:</h2>
+            <h2>Для создания ИИ менеджера необходимо привязть Telegram бот к сервису Intelektaz и заполнить бриф:</h2>
             <div class="token_row">
                 <span>Токен бота:</span>
                 <input v-model="token" class="token_input" />
@@ -42,8 +42,8 @@
             </div>
             <div class="link_row">
                 <span>Ссылка:</span>
-                <div class="link" @click="copyLink('https://intelektaz.com/12345678')">
-                    <span class="link_text">https://intelektaz.com/12345678</span> <img src="@/assets/images/copy.png" />
+                <div class="link" v-if="tg_link.length > 0" @click="copyLink('https://intelektaz.com/12345678')">
+                    <span class="link_text">{{ tg_link }}</span> <img src="@/assets/images/copy.png" />
                     <span class="green" v-if="isCopy">Скопировано!</span>
                 </div>
             </div>
@@ -241,7 +241,6 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppModal from '@/components/AppModal.vue';
     import { 
-        getManagers, 
         bindBot, 
         createManager, 
         getManager, 
@@ -252,12 +251,13 @@
 
     export default {
         props: {
-            userData: Object
+            userData: Object,
+            managers: Array,
+            activeIndex: Number
         },
         components: { AppGoodButton, AppModal },
         data() {
             return {
-                activeIndex: 0,
                 listSwtich: [
                     {
                         index: 0,
@@ -342,7 +342,6 @@
                 active_conv_style: "1",
                 info_shown_index: null,
                 isInstructModal: false,
-                managers: null,
                 token: "",
                 currManager: null,
                 title: null,
@@ -351,7 +350,8 @@
                 isGenerated: false,
                 noAccess: false,
                 isLeader: false,
-                isCopy: false
+                isCopy: false,
+                tg_link: ""
             }
         },
         computed: {
@@ -359,16 +359,24 @@
                 return this.year.length + this.label.length + this.description_company.length + this.pros.length + this.description_product.length + this.whats_solve.length + this.characteristics.length + this.price.length + this.audience.length + this.link.length + this.qu.length + this.tg.length;
             }
         },
+        watch: {
+            activeIndex: {
+                handler() {
+                    this.setBriefFieldsForSwitch();
+                },
+                immediate: true,
+            }
+        },
         async created() {
             this.isLeader = this.userData.packages.at(-1).package_name == 'Leader';
-            const managers = await getManagers(this.userData.id);
-            if (managers) {
-                this.managers = managers;
-            }
-            if (managers.length > 0) {
+            // const managers = await getManagers(this.userData.id);
+            // if (managers) {
+            //     this.managers = managers;
+            // }
+            if (this.managers.length > 0) {
                 this.currManager = await getManager(this.managers[this.activeIndex].assistant.id);
                 this.token = this.currManager.bot_token;
-                this.setBriefFields();
+                this.setBriefFieldsForSwitch();
             }
         },
         mounted() {
@@ -431,7 +439,7 @@
                 }
             },
             async deleteMngr() {
-                await deleteManager(this.managers[this.activeIndex].assistant.id);
+                await deleteManager(this.managers[this.activeIndex].id);
                 this.title = "УСПЕШНО!";
                 this.msg = "Менеджер был успешно удалён.";
                 this.isModal = true;
@@ -444,11 +452,17 @@
 
                 if (this.managers.length == 0) {
                     await createManager(this.userData.id, this.token, {}, this.active_conv_style, "");
-                    this.managers = await getManagers(this.userData.id);
+                    // this.managers = await getManagers(this.userData.id);
+                    this.$emit('update_managers');
+                    this.isModal = true;
+                    this.title = "УСПЕШНО";
+                    this.msg = "Менеджер был создан и изменения сохранены.";
+                    return;
                 }
                 const brief = this.getBrief();
+                console.log(this.managers[this.activeIndex], this.activeIndex, this.managers);
                 await updateBrief(this.managers[this.activeIndex].assistant.id, brief, this.active_conv_style, this.welcome_message);
-                
+
                 this.isModal = true;
                 this.title = "УСПЕШНО";
                 this.msg = "Изменения были успешно внесены.";
@@ -510,10 +524,23 @@
                 this.tg = this.managers[this.activeIndex]?.assistant.assistant_config?.tg || "";
                 this.type = this.managers[this.activeIndex]?.assistant.assistant_config?.type || "";
                 this.welcome_message = this.managers[this.activeIndex]?.assistant?.assistant_config?.welcome_message || "";
-                this.links = this.managers[this.activeIndex]?.assistant.assistant_config?.links ? JSON.parse(this.managers[this.activeIndex]?.assistant.assistant_config?.links) : [];
-                this.goals = this.managers[this.activeIndex]?.assistant.assistant_config?.goals ? JSON.parse(this.managers[this.activeIndex]?.assistant.assistant_config?.goals) : [];
+                this.links = this.managers[this.activeIndex]?.assistant.assistant_config?.links ? JSON.parse(this.managers[this.activeIndex]?.assistant.assistant_config?.links) : [
+                    {
+                        "link": "",
+                        "descr": "",
+                        "isNew": false
+                    }
+                ];
+                this.goals = this.managers[this.activeIndex]?.assistant.assistant_config?.goals ? JSON.parse(this.managers[this.activeIndex]?.assistant.assistant_config?.goals) : [
+                    {
+                        "goal": "",
+                        "descr": "",
+                        "isNew": false
+                    }
+                ];
                 this.token = this.managers[this.activeIndex]?.bot_token || "";
-                this.active_conv_style = +this.managers[this.activeIndex]?.assistant.assistant_config?.communication_style || 0;
+                this.active_conv_style = +this.managers[this.activeIndex]?.assistant.assistant_config?.communication_style || 1;
+                this.tg_link = this.managers[this.activeIndex]?.tg_link || "";
             },
             async bind() {
                 this.title = "ОЖИДАНИЕ";
@@ -522,10 +549,17 @@
 
                 if (this.managers.length == 0) {
                     await createManager(this.userData.id, this.token, {}, this.active_conv_style, "");
-                    this.managers = await getManagers(this.userData.id);
+                    // this.managers = await getManagers(this.userData.id);
+                    this.$emit('update_managers');
+                    setTimeout(() => this.setBriefFieldsForSwitch(), 2000);
+                    this.title = "УСПЕШНО!";
+                    this.msg = "Телеграмм бот был успешно привязан к вашему менеджеру.";
+                    this.isModal = true;
+                    return;
                 }
                 const status = await bindBot(this.token, this.managers[this.activeIndex].assistant.id, this.userData.id);
                 if (status) {
+                    this.setBriefFieldsForSwitch();
                     this.title = "УСПЕШНО!";
                     this.msg = "Телеграмм бот был успешно привязан к вашему менеджеру.";
                     this.isModal = true;
@@ -560,15 +594,15 @@
                 this.goals.splice(index, 1);
                 this.saveSocial();
             },
-            setActive(index) {
-                this.activeIndex = index;
-                if (!this.isLeader && index > 0) {
-                    this.noAccess = true;
-                    return;
-                }
-                this.noAccess = false;
-                this.setBriefFieldsForSwitch();
-            },
+            // setActive(index) {
+            //     this.activeIndex = index;
+            //     if (!this.isLeader && index > 0) {
+            //         this.noAccess = true;
+            //         return;
+            //     }
+            //     this.noAccess = false;
+            //     this.setBriefFieldsForSwitch();
+            // },
             validateInput(field) {
                 const currentLength = this.allSymbols;
 

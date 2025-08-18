@@ -33,7 +33,7 @@ export async function createManager(client_id, telegram_token, brief, communicat
                 "client_id": client_id,
                 "telegram_token": telegram_token,
                 "brief": brief,
-                "communication_style": communication_style,
+                "communication_style": String(communication_style),
                 "welcome_message": welcome_message
             }
         );
