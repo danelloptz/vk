@@ -117,7 +117,8 @@
             </div>
         </div>
         <div class="new_send_footer">
-            <AppGoodButton :text="'СОЗДАТЬ'" class="new_send_btn" @click="createNewStep"/>
+            <AppGoodButton v-if="!editData"  :text="'СОЗДАТЬ'" class="new_send_btn" @click="createNewStep"/>
+            <AppGoodButton v-if="editData"  :text="'СОХРАНИТЬ'" class="new_send_btn" @click="saveStep"/>
             <AppBadButton :text="'НАЗАД'" class="new_send_btn" @click="backup"/>
         </div>
     </div>
@@ -129,7 +130,8 @@
     import AppAiTextEditor from '@/components/AppAiTextEditor.vue';
     import { 
         createCampaignStep, 
-        getCompaignStep 
+        getCompaignStep,
+        saveStepSettings
     } from '@/services/manager';
     import { loadImage } from '@/services/other';
 
@@ -150,7 +152,7 @@
                 previews: [],
                 name: '',
                 title: '',
-                text: '',
+                text: 'Ваш текст',
                 amountOfTime: 1,
                 timeRanges: ['минута', 'час', 'день', 'месяц', ],
                 activeIndexTimeRange: 0,
@@ -158,24 +160,70 @@
                 isTimeRangeVisible: false,
                 date: '',
                 files: [],
+                step_id: null
             }
         },
         watch: {
             editData: {
                 async handler(val) {
                 if (val) {
+                    this.step_id = val.step_id;
                     const resp = await getCompaignStep(val.step_id);
                     this.name = resp.name;
                     this.title = resp.title;
                     this.text = resp.text_html;
                     this.previews = [];
                     if (resp.image_url) this.previews.push(resp.image_url);
+                    if (resp.delay.time > 1000) {
+                        this.type = resp.delay.type;
+                        this.date = this.formatedDate(resp.delay.time * 1000);
+                    } else {
+                        this.timeRange = resp.delay.type;
+                        this.amountOfTime = resp.delay.time;
+                    }
                 }
                 },
                 immediate: true,
             }
         },
         methods: {
+            async saveStep() {
+                let send_time;
+                if (this.isFirstStep) {
+                    const dt = new Date(this.date);
+                    send_time = {
+                        "first": this.isFirstStep, 
+                        "first_type": this.type,
+                        "first_time": Math.ceil(dt.getTime() / 1000)
+                    };
+                } else {
+                    send_time = {
+                        "first": this.isFirstStep, 
+                        "second_type": this.timeRange,
+                        "second_time": this.amountOfTime
+                    };
+                }
+                let image_link = "";
+                if (this.files.length > 0) {
+                    const image = await loadImage(this.files[0]);
+                    image_link = image.image_id;
+                } else {
+                    image_link = this.previews[0] || "";
+                }
+                const resp = await saveStepSettings(this.step_id, this.name, this.title, this.text, image_link, send_time);
+                if (resp) this.$emit('create_new_step');
+            },
+            formatedDate(time) {
+                const date = new Date(time);
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            },
             onDateChange() {
                 console.log(this.date);
             },

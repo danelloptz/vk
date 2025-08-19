@@ -1,4 +1,10 @@
 <template>
+    <AppModal 
+        :title="title" 
+        :message="msg" 
+        :visibility1="isModal"
+        @update:visibility1="isModal = $event"
+    />
     <section class="new_send">
         <h2>Создать рассылку</h2>
         <!-- <div class="managers_switch">
@@ -129,10 +135,15 @@
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
-    import { createCampaign } from '@/services/manager';
+    import AppModal from '@/components/AppModal.vue';
+    import { 
+        createCampaign, 
+        copyCompaignTo, 
+        addContactsToCampaign 
+    } from '@/services/manager';
 
     export default {
-        components: { AppGoodButton, AppBadButton },
+        components: { AppGoodButton, AppBadButton, AppModal },
         props: {
             manager_id: String,
             user_id: String,
@@ -184,7 +195,10 @@
                 dropdownLogic: -1,
                 isNewTags: -1,
                 send_name: "", 
-                isAddContacts: false
+                isAddContacts: false,
+                title: "",
+                msg: "",
+                isModal: false
             }
         },
         created() {
@@ -205,9 +219,23 @@
                 console.log('назад');
             },
             async makeNew() {
-                // manager_id, user_id, name, filters, filter_connection, add_current_contacts, copy_to_managers, is_active
+                this.title = 'ОЖИДАНИЕ';
+                this.msg = 'Подождите, пока создается рассылка';
+                this.isModal = true;
                 const resp = await createCampaign(this.manager_id, this.user_id, this.send_name, this.filters, this.filter_connection, this.isAddContacts, this.copyToManager, false);
-                if (resp) this.$emit('isMaded');
+                if (resp) {
+                    const isCopy = await copyCompaignTo(this.manager_id, resp.campaign_id, this.copyToManager);
+                    const isContact = await addContactsToCampaign(this.manager_id, resp.campaign_id);
+                    if (isCopy && isContact) {
+                        this.title = 'ОЖИДАНИЕ';
+                        this.msg = 'Подождите, пока создается рассылка';
+                        this.isModal = true;
+                        setTimeout(() => this.$emit('isMaded'), 2000);
+                    } else {
+                        this.title = 'ОШИБКА';
+                        this.msg = 'При создании рассылки произошла ошибка. Попробуйте еще раз или обратитесь в техническую поддержку.';
+                    }
+                } 
             },
             handleClickOutside(event) {
                 const clickedEl = event.target;

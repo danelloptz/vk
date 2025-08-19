@@ -264,3 +264,60 @@ export async function getCompaignStep(step_id) {
         return false; 
     }
 }
+
+export async function saveStepSettings(step_id, name, title, text_html, image_url, send_time) {
+    try {
+        const response = await axios.patch(`https://web.intelektaz.com/manager-api/campaign/step`, {
+            "name": name,
+            "title": title,
+            "text_html": text_html,
+            "image_url": image_url,
+            "send_time": send_time
+        }, {
+            params: {
+                step_id: step_id,
+            }
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при обновлении данных о шаге рассылки", error);
+        return false; 
+    }
+}
+
+export async function copyCompaignTo(manager_id, campaign_id, copy_to) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/campaign/copy`, 
+            {
+                "copy_to": copy_to
+            },
+            {
+                params: {
+                    manager_id: manager_id,
+                    campaign_id: campaign_id,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при копировании рассылки в другой менеджер", error);
+        return false; 
+    }
+}
+
+export async function addContactsToCampaign(manager_id, campaign_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/campaign/add_existing_contacts`, {},
+            {
+                params: {
+                    manager_id: manager_id,
+                    campaign_id: campaign_id,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при добавлении текущих контактов в рассылку", error);
+        return false; 
+    }
+}

@@ -214,11 +214,11 @@
                         class="autosend_body_row"
                         :style="index == paginatedData.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
                     >
-                        <span>{{ item.name }}</span>
-                        <span>{{ formatedDateNoHours(item.step) }}</span>
-                        <span>{{ item.status }}</span>
-                        <span>{{ item.username }}</span>
-                        <span>{{ formatedDate(item.date) }}</span>
+                        <span>{{ item.full_name }}</span>
+                        <span>{{ formatedDateNoHours(item.next_step_ts * 1000) }}</span>
+                        <span>{{ item.status == 'active' ? 'Активный' : item.status }}</span>
+                        <span>@{{ item.username }}</span>
+                        <span>{{ formatedDate(item.added_at * 1000) }}</span>
                     </div>
                 </div>
                 <div class="switchs" v-if="totalPages > 1">
@@ -536,7 +536,7 @@
             },
             edit(step, index) {
                 this.editStep = step;
-                this.firstStep = index == 0;
+                this.firstStep = index == this.sendData.steps.length - 1;
                 this.isNewStep = true;
             },
             async deleteStep(index) {
@@ -546,6 +546,8 @@
             },
             openNewStep() {
                 this.isNewStep = true;
+                this.firstStep = false;
+                this.editStep = null;
             },
             backup() {
                 this.$emit('backup');
