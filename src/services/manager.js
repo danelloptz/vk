@@ -204,3 +204,63 @@ export async function deleteCampaign(campaign_id) {
         return false; 
     }
 }
+
+export async function deleteCampaignStep(step_id) {
+    try {
+        const response = await axios.delete(`https://web.intelektaz.com/manager-api/campaign/step`,
+            {
+                params: {
+                    step_id: step_id
+                }
+            }
+        );
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при удалении шага рассылки пользователя", error);
+        return false; 
+    }
+}
+
+export async function startCampaign(manager_id, campaign_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/campaign/start`, {},
+            {
+                params: {
+                    manager_id: manager_id,
+                    campaign_id: campaign_id,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при запуске рассылки", error);
+        return false; 
+    }
+}
+
+export async function stopCampaign(manager_id, campaign_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/campaign/stop`, {},
+            {
+                params: {
+                    manager_id: manager_id,
+                    campaign_id: campaign_id,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при остановке рассылки", error);
+        return false; 
+    }
+}
+
+export async function getCompaignStep(step_id) {
+    try {
+        const response = await axios.get(`https://web.intelektaz.com/manager-api/campaign/step/${step_id}`);
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении подробной информации по шаге рассылки", error);
+        return false; 
+    }
+}

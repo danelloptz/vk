@@ -62,7 +62,8 @@ export default {
         },
         async buy(amount) {
             const payment = amount == 100 ? this.prices.pack_100_posts : amount == 500 ? this.prices.pack_500_posts : amount;
-            if (( (payment == this.prices.pack_100_posts || payment == this.prices.pack_500_posts) && this.userData.balance < payment) || (this.userData.balance < payment * this.prices.one_post)) {
+            if (( (payment == this.prices.pack_100_posts || payment == this.prices.pack_500_posts) && this.userData.balance < payment * this.prices.one_post) || (this.userData.balance < payment * this.prices.one_post)) {
+                console.log(amount, payment, this.prices.pack_100_posts,  this.prices.pack_500_posts);
                 this.title = "ОШИБКА!";
                 this.msg = "Недостаточно средств. Пополните баланс.";
                 this.isModal = true;

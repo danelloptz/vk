@@ -78,8 +78,8 @@
                 </div>
                 <div class="steps_btns">
                     <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
-                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" class="startStep" />
-                    <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" @click="runCampaign" class="startStep" />
+                    <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" @click="disableCampaign" />
                 </div>
             </div>
             <div class="settings" v-if="menuHeaderIndex == 0">
@@ -184,9 +184,9 @@
                 <div class="steps_btns" style="margin-top: 40px;">
                     <AppGoodButton :text="'СОХРАНИТЬ'" class="addNextStep" @click="saveSettings" />
                     <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
-                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" class="startStep" />
-                    <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" />
-                    <AppGoodButton :text="'ПЕРЕЗАПУСТИТЬ'" class="stopStep" style="width: 135px;" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" @click="runCampaign" class="startStep" />
+                    <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" @click="disableCampaign" />
+                    <AppGoodButton :text="'ПЕРЕЗАПУСТИТЬ'" class="stopStep" style="width: 135px;" @click="restartCampaign" />
                 </div>
             </div>
             <div class="audience" v-if="menuHeaderIndex == 2">
@@ -246,7 +246,13 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppAiManagerNewStep from '@/components/AppAiManagerNewStep.vue';
-    import { getCompaign, saveCompaignSettings } from '@/services/manager';
+    import { 
+        getCompaign, 
+        saveCompaignSettings,
+        deleteCampaignStep,
+        startCampaign,
+        stopCampaign,
+    } from '@/services/manager';
 
     export default {
         components: { AppGoodButton, AppBadButton, AppAiManagerNewStep },
@@ -425,6 +431,24 @@
             },
         },
         methods: {
+            async restartCampaign() {
+                await this.disableCampaign();
+                await this.runCampaign();
+            },
+            async disableCampaign() {
+                const stop = await stopCampaign(this.managerData.id, this.campaignData.campaign_id);
+                if (stop.status) {
+                    const resp = await getCompaign(this.managerData.id, this.campaignData.campaign_id);
+                    this.sendData = resp;
+                }
+            },
+            async runCampaign() {
+                const run = await startCampaign(this.managerData.id, this.campaignData.campaign_id);
+                if (run.status) {
+                    const resp = await getCompaign(this.managerData.id, this.campaignData.campaign_id);
+                    this.sendData = resp;
+                }
+            },
             async saveSettings() {
                 const resp = await saveCompaignSettings(this.managerData.id, this.campaignData.campaign_id, this.name, this.sendData.filters.filters, this.sendData.filters.filter_connection, this.sendData.add_current_contacts);
                 console.log(resp);
@@ -515,8 +539,10 @@
                 this.firstStep = index == 0;
                 this.isNewStep = true;
             },
-            deleteStep(index) {
-                this.sendData.steps.splice(index, 1);
+            async deleteStep(index) {
+                await deleteCampaignStep(this.sendData.steps[index].step_id);
+                const resp = await getCompaign(this.managerData.id, this.campaignData.campaign_id);
+                this.sendData = resp;
             },
             openNewStep() {
                 this.isNewStep = true;

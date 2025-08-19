@@ -127,7 +127,10 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppAiTextEditor from '@/components/AppAiTextEditor.vue';
-    import { createCampaignStep } from '@/services/manager';
+    import { 
+        createCampaignStep, 
+        getCompaignStep 
+    } from '@/services/manager';
     import { loadImage } from '@/services/other';
 
     export default {
@@ -135,7 +138,7 @@
         props: {
             isFirstStep: Boolean,
             editData: Object,
-            campaignData: Object
+            campaignData: Object,
         },
         data() {
             return {
@@ -154,18 +157,19 @@
                 timeRange: 'минута',
                 isTimeRangeVisible: false,
                 date: '',
-                files: []
+                files: [],
             }
         },
         watch: {
             editData: {
-                handler(val) {
+                async handler(val) {
                 if (val) {
-                    this.name = val.name;
-                    this.title = val.title;
-                    this.text = val.text;
+                    const resp = await getCompaignStep(val.step_id);
+                    this.name = resp.name;
+                    this.title = resp.title;
+                    this.text = resp.text_html;
                     this.previews = [];
-                    if (val.image) this.previews.push(val.image);
+                    if (resp.image_url) this.previews.push(resp.image_url);
                 }
                 },
                 immediate: true,
