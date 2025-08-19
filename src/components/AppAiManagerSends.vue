@@ -17,7 +17,7 @@
         @backup="isOpenSend = false, isNewSend = false"
     />
     <section class="autosends" v-if="!isNewSend && !isOpenSend">
-        <div class="managers_switch">
+        <!-- <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
                 class="switch" 
@@ -30,7 +30,7 @@
                     @click="setActive(index)"
                 >{{ index + 1 }}</span>
             </div> 
-        </div>
+        </div> -->
         <div class="autosend">
             <div class="autosend_header">
                 <span class="autosend_header_title">Авторассылки</span>
@@ -84,7 +84,8 @@
     import AppAiSendInfo from '@/components/AppAiSendInfo.vue';
     import { 
         getManagers,
-        getCompaigns
+        getCompaigns,
+        deleteCampaign
     } from '@/services/manager';
 
     export default {
@@ -507,9 +508,10 @@
             this.campaigns = campaigns.items;
         },
         methods: {
-            deleteSend(index) {
-                const globalIndex = (this.currentPage - 1) * this.pageSize + index;
-                this.campaigns.splice(globalIndex, 1);
+            async deleteSend(index) {
+                await deleteCampaign(this.campaigns[index].campaign_id);
+                const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                this.campaigns = campaigns.items;
             },
 
             newSendClose() {
@@ -611,7 +613,6 @@
         background: #1B1E3D;
         border-radius: 10px;
         width: 100%;
-        margin-top: 38px;
     }
     .autosend_header {
         display: flex;

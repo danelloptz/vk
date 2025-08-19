@@ -188,3 +188,19 @@ export async function createCampaignStep(campaign_id, name, title, text_html, im
         return false; 
     }
 }
+
+export async function deleteCampaign(campaign_id) {
+    try {
+        const response = await axios.delete(`https://web.intelektaz.com/manager-api/campaign`,
+            {
+                params: {
+                    campaign_id: campaign_id
+                }
+            }
+        );
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при удалении рассылки пользователя", error);
+        return false; 
+    }
+}

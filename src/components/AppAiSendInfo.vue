@@ -9,7 +9,7 @@
     />
     <section class="send_info" v-if="!isNewStep">
         <h2>Информация о рассылке</h2>
-        <div class="managers_switch">
+        <!-- <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
                 class="switch" 
@@ -22,7 +22,7 @@
                     @click="setActive(item.index)"
                 >{{ item.index + 1 }}</span>
             </div> 
-        </div>
+        </div> -->
         <div class="stats">
             <div class="stats_card">
                 <div class="stats_card_header">Подписчики</div>
