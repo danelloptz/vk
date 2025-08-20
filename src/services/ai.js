@@ -16,7 +16,6 @@ export async function sendBrief(payload, token) {
 }
 
 export async function getBrief(token) {
-    console.log(token);
     try {
         const response = await axios.get('https://web.intelektaz.com/api/v1/brif', {
             headers: {

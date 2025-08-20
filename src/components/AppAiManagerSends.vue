@@ -91,7 +91,8 @@
     export default {
         components: { AppGoodButton, AppAiManagerNewSend, AppAiSendInfo },
         props: {
-            userData: Object
+            userData: Object,
+            activeIndex: Number
         },
         data() {
             return {
@@ -112,7 +113,6 @@
                         index: 4,
                     }, 
                 ],
-                activeIndex: 0,
                 autosends_data: [
                     {
                         "name": "Рассылка 1",
@@ -552,9 +552,9 @@
 
                 return `${day}.${month}.${year} ${hours}:${minutes}`;
             },
-            setActive(index) {
-                this.activeIndex = index;
-            },
+            // setActive(index) {
+            //     this.activeIndex = index;
+            // },
         }
     };
 </script>

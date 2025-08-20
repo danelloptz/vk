@@ -5,6 +5,13 @@
         :visibility1="isModal"
         @update:visibility1="isModal = $event"
     />
+    <AppAiManagerConfirmModal 
+        :message="msg" 
+        :visibility1="isConfirmModal"
+        @update:visibility1="isConfirmModal = $event"
+        @yes="isConfirmModal = false"
+        @no="cancelCopy"
+    />
     <section class="new_send">
         <h2>Создать рассылку</h2>
         <!-- <div class="managers_switch">
@@ -35,7 +42,10 @@
                             :key="index"
                             class="filters_item"
                         >
-                            <h3>{{ item.name }}</h3>
+                            <div class="filter_item_tags_row">
+                                <h3>{{ item.name }}</h3>
+                                <img src="@/assets/images/close.png" class="delete_tag" @click="deleteFilter(index)"/>
+                            </div>
                             <div class="filter_item_tags_row">
                                 <div 
                                     v-for="(tag, index_tag) in item.tags"
@@ -46,7 +56,17 @@
                                     <img src="@/assets/images/close.png" class="delete_tag" @click="deleteTag(index, index_tag)"/>
                                 </div>
                             </div>
-                            <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" @click="openNewTags(index)"/>
+                            <input 
+                                v-model="newTagValues[index]"
+                                @keydown.enter="handleEnter(index)" 
+                                class="tag_input"
+                            />
+                            <AppBadButton
+                                v-if="!(userTags.length == 1 && userTags[0] == '')"
+                                :text="'+ ДОБАВИТЬ'" 
+                                class="add_tag_btn" 
+                                @click="openNewTags(index)"
+                            />
                             <div class="dropdown_tags" v-if="isNewTags == index">
                                 <div 
                                     v-for="(tag, tag_index) in userTags.filter(tag => !item.tags.includes(tag))"
@@ -136,6 +156,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppModal from '@/components/AppModal.vue';
+    import AppAiManagerConfirmModal from '@/components/AppAiManagerConfirmModal.vue';
     import { 
         createCampaign, 
         copyCompaignTo, 
@@ -143,7 +164,7 @@
     } from '@/services/manager';
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppModal },
+        components: { AppGoodButton, AppBadButton, AppModal, AppAiManagerConfirmModal },
         props: {
             manager_id: String,
             user_id: String,
@@ -198,11 +219,11 @@
                 isAddContacts: false,
                 title: "",
                 msg: "",
-                isModal: false
+                isModal: false,
+                newTagValues: [],
+                isConfirmModal: false,
+                managerCopyId: null
             }
-        },
-        created() {
-            console.log(this.manager_id, this.user_id, this.userTags);
         },
         mounted() {
             document.addEventListener('click', this.handleClickOutside);
@@ -211,8 +232,41 @@
             document.removeEventListener('click', this.handleClickOutside);
         },
         methods: {
+            deleteFilter(index) {
+                this.filters.splice(index, 1);
+                if (this.filter_connection.length > 0) this.filter_connection.splice(Math.max(0, index - 1), 1);
+            },
+            cancelCopy() {
+                this.copyToManager[this.managerCopyId] = false;
+                this.isConfirmModal = false;
+            },
+            handleEnter(index) {
+                const value = this.newTagValues[index]?.trim();
+                console.log(this.newTagValues);
+                if (value) {
+                    // Инициализируем массив tags, если он не определён
+                    if (!Array.isArray(this.filters[index].tags)) {
+                        this.filters[index].tags = []; // Простая инициализация
+                    }
+
+                    // Добавляем значение в массив tags
+                    this.filters[index].tags.push(value);
+
+                    // Очищаем поле ввода
+                    this.newTagValues[index] = '';
+
+                    // Если нужно сохранять состояние или делать что-то еще
+                    // this.captureState(); // если у вас есть такой метод
+                }
+            },
             updateCopyToManager(index, isChecked) {
-                this.copyToManager[index] = isChecked;
+                this.isConfirmModal = true;
+                if (isChecked) {
+                    this.msg = "Вы подтверждаете копирование рассылки?";
+                    this.copyToManager[index] = isChecked;
+                    this.managerCopyId = index;
+                }
+                
             },
             backup() {
                 this.$emit('backup');
@@ -286,6 +340,10 @@
 </script>
 
 <style scoped>
+    .tag_input {
+        height: 32px;
+        width: 60%;
+    }
     .m34 {
         margin-top: 34px;
     }
@@ -529,6 +587,11 @@
         border-radius: 6.24px;
         display: flex;
         column-gap: 12px;
+    }
+    .delete_filter {
+        width: 20px;
+        object-fit: contain;
+        cursor: pointer;
     }
     .delete_tag {
         width: 9px;

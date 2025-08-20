@@ -67,7 +67,7 @@
                         <span>{{ step.name }}</span>
                     </div>
                     <span>{{ step.order }}</span>
-                    <span>{{ step.delay.type }}</span>
+                    <span v-html="formatedTableTime(step.delay)"></span>
                     <div class="step_end">
                         <span>{{ sendData.stats.subscribers }} · {{ sendData.stats.unsubscribes }} · {{ sendData.stats.conversion }}</span>
                         <div class="step_icons">
@@ -108,7 +108,17 @@
                                             <img src="@/assets/images/close.png" class="delete_tag" @click="deleteTag(index, index_tag)"/>
                                         </div>
                                     </div>
-                                    <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" @click="openNewTags(index)"/>
+                                    <input 
+                                        v-model="newTagValues[index]"
+                                        @keydown.enter="handleEnter(index)" 
+                                        class="tag_input"
+                                    />
+                                    <AppBadButton 
+                                        v-if="!(userTags.length == 1 && userTags[0] == '')"
+                                        :text="'+ ДОБАВИТЬ'" 
+                                        class="add_tag_btn" 
+                                        @click="openNewTags(index)"
+                                    />
                                     <div class="dropdown_tags" v-if="isNewTags == index">
                                         <div 
                                             v-for="(tag, tag_index) in userTags.filter(tag => !item.tags.includes(tag))"
@@ -400,7 +410,8 @@
                 ],
                 filter: "",
                 sendData: null,
-                name: ""
+                name: "",
+                newTagValues: [],
             }
         },
         async created() {
@@ -431,6 +442,29 @@
             },
         },
         methods: {
+            handleEnter(index) {
+                const value = this.newTagValues[index]?.trim();
+                console.log(this.newTagValues);
+                if (value) {
+                    // Инициализируем массив tags, если он не определён
+                    if (!Array.isArray(this.sendData.filters.filters[index].tags)) {
+                        this.sendData.filters.filters[index].tags = []; // Простая инициализация
+                    }
+
+                    // Добавляем значение в массив tags
+                    this.sendData.filters.filters[index].tags.push(value);
+
+                    // Очищаем поле ввода
+                    this.newTagValues[index] = '';
+
+                    // Если нужно сохранять состояние или делать что-то еще
+                    // this.captureState(); // если у вас есть такой метод
+                }
+            },
+            formatedTableTime(obj) {
+                if (obj.time > 1000) return `${obj.type} <br> ${this.formatedDate(obj.time * 1000)}`
+                else return `${obj.time} ${obj.type}`;
+            },
             async restartCampaign() {
                 await this.disableCampaign();
                 await this.runCampaign();
@@ -487,7 +521,7 @@
             changeActiveRadio(index, name) {
                 this.radio_index = index;
                 this.currRadio = name;
-                this.filter = name == 'Активные' ? 'Активный' : name == 'Все' ? '' : 'Отписались';
+                this.filter = name == 'Активные' ? 'active' : name == 'Все' ? '' : 'Отписались';
                 this.currentPage = 1;
             },
             openSubFilters() {
@@ -557,6 +591,10 @@
 </script>
 
 <style scoped>
+    .tag_input {
+        height: 32px;
+        width: 60%;
+    }
     .op50 {
         opacity: .5;
     }
@@ -1022,6 +1060,7 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         padding: 10px 0px;
+        align-items: center;
     }
     .steps_header span {
         font-size: 16px;

@@ -42,12 +42,15 @@
             </div>
             <div class="link_row">
                 <span>Ссылка:</span>
-                <div class="link" v-if="tg_link.length > 0" @click="copyLink('https://intelektaz.com/12345678')">
+                <div class="link" v-if="tg_link.length > 0" @click="copyLink(tg_link)">
                     <span class="link_text">{{ tg_link }}</span> <img src="@/assets/images/copy.png" />
                     <span class="green" v-if="isCopy">Скопировано!</span>
                 </div>
             </div>
-            <h2 class="m30">Бриф:</h2>
+            <div class="row_between">
+                <h2 class="m30">Бриф:</h2>
+                <AppGoodButton :text="'СКОПИРОВАТЬ С ИИ'" class="copy_from_ai" @click="copyFromBrief"/>
+            </div>
             <div class="container">
                 <div class="col">
                     <span class="counter">{{ allSymbols }}/{{ maxSymbols }}</span>
@@ -209,6 +212,7 @@
                         <div v-if="info_shown_index == index" class="conv_style_info_wrapper" :style="{top: `${(index) * 25 + (index) * 15 + 12.5}px`}">
                             <div class="conv_style_info">
                                 <img src="@/assets/images/close.png" class="close" @click="closeStyleInfo">
+                                <h2>{{ item.type }}</h2>
                                 <span><strong>Стиль: </strong>{{ item.style }}</span>
                                 <span><strong>Тон: </strong>{{ item.tone }}</span>
                                 <span><strong>Язык: </strong>{{ item.lang }}</span>
@@ -248,6 +252,7 @@
         deleteManager, 
         getHelloMessage 
     } from '@/services/manager';
+    import { getBrief } from '@/services/ai';
 
     export default {
         props: {
@@ -351,7 +356,7 @@
                 noAccess: false,
                 isLeader: false,
                 isCopy: false,
-                tg_link: ""
+                tg_link: "",
             }
         },
         computed: {
@@ -383,6 +388,27 @@
             document.addEventListener('click', this.handleClickOutside);
         },
         methods: {
+            async copyFromBrief() {
+                const brief = await getBrief(localStorage.getItem('token'));
+                this.pros = brief.competitive_advantages;
+                this.description_company = brief.description_company
+                this.description_product = brief.description_product;
+                this.links = [];
+                this.links.push(
+                    {
+                        "link": brief.link,
+                        "descr": "",
+                        "isNew": false
+                    }
+                );
+                this.label = brief.name_company;
+                this.price = brief.price_policy;
+                this.audience = brief.target_audience;
+                this.type = brief.type_loyalty_programm;
+                this.characteristics = brief.unique_characters_of_product;
+                this.whats_solve = brief.what_problems_solve;
+                this.year = brief.year_foundation_of_company;
+            },
             async copyLink(link) {
                 this.isCopy = true;
                 console.log(true);
@@ -450,7 +476,7 @@
                 this.msg = "Подождите немного, пока сохраняются изменения.";
                 this.isModal = true;
 
-                if (this.managers.length == 0) {
+                if (this.managers.length == 0 || this.activeIndex >= this.managers.length) {
                     await createManager(this.userData.id, this.token, {}, this.active_conv_style, "");
                     // this.managers = await getManagers(this.userData.id);
                     this.$emit('update_managers');
@@ -547,7 +573,7 @@
                 this.msg = "Подождите немного, пока идёт привязка телеграмм бота.";
                 this.isModal = true;
 
-                if (this.managers.length == 0) {
+                if (this.managers.length == 0 || this.activeIndex >= this.managers.length) {
                     await createManager(this.userData.id, this.token, {}, this.active_conv_style, "");
                     // this.managers = await getManagers(this.userData.id);
                     this.$emit('update_managers');
@@ -623,6 +649,12 @@
 </script>
 
 <style scoped>
+    .copy_from_ai {
+        width: 200px;
+        height: 40px;
+        font-size: 14px;
+        letter-spacing: 0px;
+    }
     .no_package {
         display: flex;
         flex-direction: column;
@@ -947,6 +979,12 @@
         display: flex;
         column-gap: 30px;
     }
+    .row_between {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+    }
     .links_link {
         width: 280px;
     }
@@ -1110,12 +1148,13 @@
         position: absolute;
         right: -420px;
         top: 0;
+        z-index: 890;
     }
     .conv_style_info {
         position: relative;
         background-color: #1b1e3c;
         color: white;
-        padding: 13px 20px;
+        padding: 19px 20px;
         border-radius: 0 12px 12px 12px;
         width: 370px;
         font-family: 'OpenSans';
@@ -1123,6 +1162,12 @@
         display: flex;
         flex-direction: column;
         row-gap: 5px;
+    }
+    .conv_style_info h2 {
+        font-size: 16px;
+        color: white;
+        font-family: 'OpenSans';
+        margin-bottom: 9px;
     }
     .close {
         position: absolute;
