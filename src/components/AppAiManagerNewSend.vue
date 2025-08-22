@@ -278,8 +278,11 @@
                 this.isModal = true;
                 const resp = await createCampaign(this.manager_id, this.user_id, this.send_name, this.filters, this.filter_connection, this.isAddContacts, this.copyToManager, false);
                 if (resp) {
-                    const isCopy = await copyCompaignTo(this.manager_id, resp.campaign_id, this.copyToManager);
-                    const isContact = await addContactsToCampaign(this.manager_id, resp.campaign_id);
+                    let isCopy = true, isContact = true;
+                    if (this.copyToManager.filter(item => item).length > 0) 
+                        isCopy = await copyCompaignTo(this.manager_id, resp.campaign_id, this.copyToManager);
+                    if (this.isAddContacts) 
+                        isContact = await addContactsToCampaign(this.manager_id, resp.campaign_id);
                     if (isCopy && isContact) {
                         this.title = 'ОЖИДАНИЕ';
                         this.msg = 'Подождите, пока создается рассылка';

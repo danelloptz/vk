@@ -165,7 +165,7 @@
                         <div class="new_send_row_sm">
                             <div class="checkbox-wrapper-18">
                                 <div class="round">
-                                    <input type="checkbox" :id="`checkbox`" v-model="isAddInSends" />
+                                    <input type="checkbox" :id="`checkbox`" v-model="isAddInSends" @click="isContactsChanged = !isContactsChanged" />
                                     <label :for="`checkbox`"></label>
                                 </div>
                             </div>
@@ -262,6 +262,7 @@
         deleteCampaignStep,
         startCampaign,
         stopCampaign,
+        addContactsToCampaign
     } from '@/services/manager';
 
     export default {
@@ -292,34 +293,6 @@
                     }, 
                 ],
                 activeIndex: 0,
-                steps: [
-                    {
-                        name: '111',
-                        title: 'Заголовок',
-                        text: 'Раз два три четыре пять',
-                        image: 'https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200',
-                        scene: 1,
-                        time: '31 июля 2025, 13:36',
-                        stats: {
-                            subs: 0,
-                            unsubs: 0,
-                            conv: 0
-                        }
-                    },
-                    {
-                        name: '22',
-                        title: 'Заголовок',
-                        text: 'Раз два три четыре пять',
-                        image: 'https://sun6-22.vkuserphoto.ru/s/v1/ig2/spP1ei8ErOIPpJ7MXBamz5tqj6q0DLTUu9Y4_YxoFjWgr_mDA7IshsqtNzfJRMHbLT6EEsiR-QHEVvx0cotvisze.jpg?quality=95&crop=107,110,857,857&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200',
-                        scene: 2,
-                        time: '1 день',
-                        stats: {
-                            subs: 0,
-                            unsubs: 0,
-                            conv: 0
-                        }
-                    },
-                ],
                 isNewStep: false,
                 editStep: null,
                 firstStep: false,
@@ -336,82 +309,11 @@
                 radios: ["Все", "Активные", "Отписались"],
                 currentPage: 1,
                 pageSize: 7,
-                audience: [
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Петров Петр",
-                        step: 1754489038186,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Алексеев Алексей",
-                        step: 0,
-                        status: "Отписались",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Отписались",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                    {
-                        name: "Васильев Василий",
-                        step: 0,
-                        status: "Активный",
-                        username: "@vasilevvas",
-                        date: 1754489038186
-                    },
-                ],
                 filter: "",
                 sendData: null,
                 name: "",
                 newTagValues: [],
+                isContactsChanged: false
             }
         },
         async created() {
@@ -419,10 +321,11 @@
             this.sendData = resp;
             this.name = this.sendData.name;
             this.isAddFilter = this.sendData.filters.filters.length > 0 || false;
+            this.isAddInSends = this.sendData?.add_current_contacts || false;
         },
         computed: {
             totalPages() {
-                return Math.ceil(this.audience.filter(item => this.filter == "" || item.status == this.filter).length / this.pageSize);
+                return Math.ceil(this.sendData.users.filter(item => this.filter == "" || item.status == this.filter).length / this.pageSize);
             },
             visiblePages() {
                 const pages = [];
@@ -484,8 +387,10 @@
                 }
             },
             async saveSettings() {
-                const resp = await saveCompaignSettings(this.managerData.id, this.campaignData.campaign_id, this.name, this.sendData.filters.filters, this.sendData.filters.filter_connection, this.sendData.add_current_contacts);
-                console.log(resp);
+                if (this.isContactsChanged && this.isAddInSends && !this.sendData.add_current_contacts) {
+                    await addContactsToCampaign(this.managerData.id, this.campaignData.campaign_id);
+                }
+                await saveCompaignSettings(this.managerData.id, this.campaignData.campaign_id, this.name, this.sendData.filters.filters, this.sendData.filters.filter_connection, this.isAddInSends);
             },
             nextPage() {
                 if (this.currentPage < this.totalPages) {

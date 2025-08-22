@@ -144,6 +144,9 @@
         color: white;
         font-size: 20px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .switch2 {
         width: 149px;
@@ -160,27 +163,12 @@
         text-align: center;
         align-content: center;
         transition: .1s ease-in;
-        @media (max-width: 1300px) {
-            font-size: 16px;
-        }
-        @media (max-width: 1100px) {
-            font-size: 14px;
-            height: 50px;
-            padding: 5px 10px;
-        }
-        @media (max-width: 700px) {
-            height: 50px;
-        }
-        @media (max-width: 500px) {
-            font-size: 12px;
-        }
-        @media (max-width: 360px) {
-            font-size: 10px;
+        @media (max-width: 650px) {
+            font-size: 20px;
         }
     }
     .active {
         background: #7023EC;
-        font-weight: bold;
     }
     h2 {
         color: white;
@@ -213,12 +201,20 @@
         flex-direction: column;
         row-gap: 50px;
         margin-top: -20px;
+        @media (max-width: 650px) {
+            row-gap: 30px;
+        }
     }
     .switch {
         width: 100%;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         column-gap: 30px;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
     .switch span {
         width: 100%;
@@ -231,27 +227,12 @@
         align-content: center;
         transition: .1s ease-in;
         border: 1px solid white;
-        @media (max-width: 1300px) {
+        @media (max-width: 650px) {
             font-size: 16px;
-        }
-        @media (max-width: 1100px) {
-            font-size: 14px;
-            height: 50px;
-            padding: 5px 10px;
-        }
-        @media (max-width: 700px) {
-            height: 50px;
-        }
-        @media (max-width: 500px) {
-            font-size: 12px;
-        }
-        @media (max-width: 360px) {
-            font-size: 10px;
         }
     }
     .active {
         background: #7023EC;
-        font-weight: bold;
         border: none !important;
     }
 </style>

@@ -47,9 +47,9 @@
                     <span class="green" v-if="isCopy">Скопировано!</span>
                 </div>
             </div>
-            <div class="row_between">
-                <h2 class="m30">Бриф:</h2>
-                <AppGoodButton :text="'СКОПИРОВАТЬ С ИИ'" class="copy_from_ai" @click="copyFromBrief"/>
+            <div class="row_between m30">
+                <h2>Бриф:</h2>
+                <AppGoodButton :text="'СКОПИРОВАТЬ С ИИ КОНТЕНТ'" class="copy_from_ai" @click="copyFromBrief"/>
             </div>
             <div class="container">
                 <div class="col">
@@ -132,7 +132,7 @@
                     <textarea :class="{ saved: isSaved }" placeholder="В этом разделе укажите самые частые вопросы, которые задают ваши клиенты и ответы на них. Используте формат «Вопрос: [текст вопроса]. Ответ: [текст ответа]». Каждый вопрос с новой строки" v-model="qu" @input="validateInput('qu', $event)"></textarea>
                 </div>
             </div>
-            <h2 class="m50">Ссылки и материалы:</h2>
+            <h2 class="m50 links_materials">Ссылки и материалы:</h2>
             <div class="links">
                 <div v-for="(link, index) in links" :key="index" class="row">
                     <input 
@@ -650,10 +650,13 @@
 
 <style scoped>
     .copy_from_ai {
-        width: 200px;
+        width: 260px;
         height: 40px;
         font-size: 14px;
         letter-spacing: 0px;
+        @media (max-width: 650px) {
+            width: 240px;
+        }
     }
     .no_package {
         display: flex;
@@ -759,6 +762,9 @@
         color: white;
         font-size: 20px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .token_row {
         display: flex;
@@ -766,11 +772,18 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 35px;
+        @media (max-width: 650px) {
+            flex-wrap: wrap;
+            row-gap: 10px;
+        }
     }
     .token_row span {
         color: white;
         font-size: 20px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .token_input {
         width: 444px;
@@ -784,42 +797,67 @@
     .token_btn {
         width: 150px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 140px;
+            height: 40px;
+            font-size: 14px;
+        }
     }
     .link_row {
         display: flex;
         align-items: center;
         column-gap: 57px;
         margin-top: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            align-items: start;
+            row-gap: 10px;
+        }
     }
     .link_row span {
         color: white;
         font-size: 20px;
         font-family: 'OpenSans';
         line-height: 1.5;
+        @media (max-width: 650px) {
+            font-size: 14px;
+            line-height: normal;
+        }
     }
     .link_text {
         font-size: 18px !important;
         font-weight: bold;
         text-decoration: underline;
         cursor: pointer;
+        @media (max-width: 650px) {
+            font-size: 14px !important;
+        }
     }
     .link {
         display: flex;
         column-gap: 10px;
         align-items: center;
         cursor: pointer;
+        @media (max-width: 650px) {
+            flex-wrap: wrap;
+            row-gap: 10px;
+        }
     }
     .link img {
         width: 20px;
         height: 20px;
+        @media (max-width: 650px) {
+            width: 16px;
+            height: 16px;
+        }
     }
     .green {
         color: green !important;
         animation: ShowEasy 2s ease-in;
         opacity: 0;
-        @media (max-width: 650px) {
+        /* @media (max-width: 650px) {
             display: none;
-        }
+        } */
     }
     @keyframes ShowEasy {
         0% { opacity: 0; }
@@ -833,8 +871,10 @@
         grid-template-columns: repeat(2, 1fr);
         column-gap: 50px;
         row-gap: 20px;
+        margin-top: 23px;
         @media (max-width: 650px) {
             grid-template-columns: 1fr;
+            margin-top: 30px;
         }
     }
     .col {
@@ -843,6 +883,9 @@
         row-gap: 20px;
         margin-top: 30px;
         position: relative;
+        @media (max-width: 650px) {
+            margin-top: 0px;
+        }
     }
     .item {
         display: flex;
@@ -959,15 +1002,26 @@
     }
     .descr_comp {
         margin-top: 35px !important;
+        @media (max-width: 650px) {
+            margin-top: 0px !important;
+        }
     }
     .pros {
         margin-top: 10px;
     }
     .tg {
         margin-top: 25px;
+        @media (max-width: 650px) {
+            margin-top: 0px;
+        }
     }
     .h185 {
         height: 185px !important;
+    }
+    .links_materials {
+        @media (max-width: 650px) {
+            margin-top: 0px !important;
+        }
     }
     .links {
         display: flex;
