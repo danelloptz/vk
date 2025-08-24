@@ -50,7 +50,7 @@
                 </div>
             </div>
             <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" v-if="menuHeaderIndex == 1 && sendData?.steps.length == 0" class="add_step" @click="openNewStep"/>
-            <div class="steps" v-if="menuHeaderIndex == 1 && sendData.steps.length > 0">
+            <div class="steps" v-if="menuHeaderIndex == 1 && sendData.steps.length > 0 && windowWidth > 650">
                 <div class="steps_header">
                     <span style="justify-self: center;">Имя</span>
                     <span>Сценарий</span>
@@ -74,6 +74,42 @@
                             <img src="@/assets/images/manager_edit.png" @click="edit(step, index)"/>
                             <img src="@/assets/images/trash.png" @click="deleteStep(index)"/>
                         </div>
+                    </div>
+                </div>
+                <div class="steps_btns">
+                    <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
+                    <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" @click="runCampaign" class="startStep" />
+                    <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" @click="disableCampaign" />
+                </div>
+            </div>
+            <div class="steps" v-if="menuHeaderIndex == 1 && sendData.steps.length > 0 && windowWidth <= 650">
+                <div 
+                    v-for="(step, index) in sendData.steps"
+                    :key="index"
+                    class="step"
+                >
+                    <div class="sm_row">
+                        <span><strong>Имя:</strong></span>
+                        <div class="step_name">
+                            <img src="@/assets/images/squares.png" />
+                            <span>{{ step.name }}</span>
+                        </div>
+                    </div>
+                    <div class="sm_row">
+                        <span><strong>Сценарий:</strong></span>
+                        <span>{{ step.order }}</span>
+                    </div>
+                    <div class="sm_row">
+                        <span><strong>Задержка/Время:</strong></span>
+                        <span v-html="formatedTableTime(step.delay)"></span>
+                    </div>
+                    <div class="sm_row">
+                        <span><strong>Статистика:</strong></span>
+                        <span>{{ sendData.stats.subscribers }} · {{ sendData.stats.unsubscribes }} · {{ sendData.stats.conversion }}</span>
+                    </div>
+                    <div class="step_icons">
+                        <img src="@/assets/images/manager_edit.png" @click="edit(step, index)"/>
+                        <img src="@/assets/images/trash.png" @click="deleteStep(index)"/>
                     </div>
                 </div>
                 <div class="steps_btns">
@@ -313,10 +349,15 @@
                 sendData: null,
                 name: "",
                 newTagValues: [],
-                isContactsChanged: false
+                isContactsChanged: false,
+                windowWidth: null
             }
         },
+        mounted() {
+            document.addEventListener('resize', this.handleWindowWidth)
+        },
         async created() {
+            this.handleWindowWidth();
             const resp = await getCompaign(this.managerData.id, this.campaignData.campaign_id);
             this.sendData = resp;
             this.name = this.sendData.name;
@@ -345,6 +386,9 @@
             },
         },
         methods: {
+            handleWindowWidth() {
+                this.windowWidth = window.innerWidth;
+            },
             handleEnter(index) {
                 const value = this.newTagValues[index]?.trim();
                 console.log(this.newTagValues);
@@ -365,6 +409,7 @@
                 }
             },
             formatedTableTime(obj) {
+                if (obj.type == 'немедленно') return this.formatedDate(obj.time * 1000);
                 if (obj.time > 1000) return `${obj.type} <br> ${this.formatedDate(obj.time * 1000)}`
                 else return `${obj.time} ${obj.type}`;
             },
@@ -496,6 +541,11 @@
 </script>
 
 <style scoped>
+    .sm_row {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
     .tag_input {
         height: 32px;
         width: 60%;
@@ -521,7 +571,7 @@
         padding-left: 80px;
     }
     .autosend_body_row:nth-child(2n + 1) {
-        background: #252847;
+        background: #393c5b3d;
     }
     .autosend_body_row:nth-child(1) {
         background: none !important;
@@ -932,6 +982,12 @@
         column-gap: 20px;
         margin-top: 26px;
         align-self: self-start;
+        @media (max-width: 650px) {
+            width: 100%;
+            background: #393c5b3d;
+            padding: 28px 21px 38px 21px;
+            justify-content: space-between;
+        }
     }
     .step_icons img {
         width: 15px;
@@ -943,6 +999,9 @@
         align-items: center;
         column-gap: 10px;
         margin-right: 10px;
+        @media (max-width: 650px) {
+            margin-top: 5px;
+        }
     }
     .step span {
         font-size: 16px;
@@ -959,6 +1018,9 @@
         align-items: center;
         column-gap: 10px;
         margin-left: 79px;
+        @media (max-width: 650px) {
+            margin-left: 0px;
+        }
     }
     .step {
         width: 100%;
@@ -966,6 +1028,16 @@
         grid-template-columns: repeat(4, 1fr);
         padding: 10px 0px;
         align-items: center;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+            padding: 20px;
+            align-items: start;
+        }
+    }
+    .step:nth-child(2n + 1) {
+        background: #393c5b3d;
     }
     .steps_header span {
         font-size: 16px;
@@ -986,16 +1058,28 @@
         flex-direction: column;
         align-items: center;
         padding: 0px 30px 50px 30px;
+        @media (max-width: 650px) {
+            margin-top: 0px;
+            padding: 0px;
+        }
     }
     .backup_btn {
         width: 150px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 40px;
+        }
     }
     .button_wrapper {
         width: 100%;
         display: flex;
         justify-content: end;
         margin-top: 50px;
+        @media (max-width: 650px) {
+            margin-top: 20px;
+            justify-content: center;
+        }
     }
     .add_step {
         width: 166px;
@@ -1011,6 +1095,9 @@
         font-weight: 500;
         cursor: pointer;
         padding: 10px 18px;
+        @media (max-width: 650px) {
+            padding: 8px 14px;
+        }
     }
     .menu_header_nav {
         display: flex;
@@ -1036,6 +1123,9 @@
         column-gap: 20px;
         align-items: center;
         cursor: pointer;
+        @media (max-width: 650px) {
+            display: none;
+        }
     }
     .menu_header {
         position: relative;
@@ -1043,6 +1133,9 @@
         justify-content: center;
         padding: 10px 30px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        @media (max-width: 650px) {
+            padding: 30px 6px 20px 6px;
+        }
     }
     .menu {
         margin-top: 25px;
@@ -1063,6 +1156,9 @@
         font-family: 'OpenSans';
         padding: 20px 20px 30px 22px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        @media (max-width: 650px) {
+            font-weight: bold;
+        }
     }
     .stats_card {
         display: flex;
@@ -1076,6 +1172,11 @@
         column-gap: 25px;
         width: 100%;
         margin-top: 50px;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 20px;
+        }
     }
     .send_info {
         width: 100%;

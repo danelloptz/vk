@@ -697,6 +697,9 @@
     }
     .m50 {
         margin-top: 50px;
+        @media (max-width: 650px) {
+            margin-top: 30px;
+        }
     }
     .m30 {
         margin-top: 30px;
@@ -913,6 +916,7 @@
         transition: .2s ease-in;
         @media (max-width: 650px) {
             height: 50px;
+            padding: 0 10px;
         }
     }
     textarea {
@@ -1020,7 +1024,7 @@
     }
     .links_materials {
         @media (max-width: 650px) {
-            margin-top: 0px !important;
+            margin-top: 30px !important;
         }
     }
     .links {
@@ -1032,6 +1036,11 @@
     .row {
         display: flex;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            column-gap: 15px;
+            flex-wrap: wrap;
+            row-gap: 10px;
+        }
     }
     .row_between {
         display: flex;
@@ -1041,9 +1050,15 @@
     }
     .links_link {
         width: 280px;
+        @media (max-width: 650px) {
+            width: 100%;
+        }
     }
     .links_descr {
         width: 518px;
+        @media (max-width: 650px) {
+            width: 280px;
+        }
     }
     .sub_row {
         display: flex;
@@ -1066,10 +1081,26 @@
         display: flex;
         justify-content: space-between;
         margin-top: 50px;
+        @media (max-width: 650px) {
+            flex-wrap: wrap;
+            column-gap: 10px;
+            row-gap: 10px;
+        }
     }
     .btn_long {
         width: 260px;
         height: 51px;
+        @media (max-width: 650px) {
+            flex: 1 1 calc(50% - 5px);
+            height: 40px;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
+    }
+    .btn_long:nth-child(3) {
+        @media (max-width: 650px) {
+            flex: 1 1 100%;
+        }
     }
     .checkbox-wrapper-18 .round {
         position: relative;
@@ -1115,6 +1146,10 @@
     .conv_style_wrapper {
         display: flex;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 20px;
+        }
     }
     .conv_style {
         display: flex;
@@ -1137,6 +1172,9 @@
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .conv_style_faq {
         width: 20px;
@@ -1155,6 +1193,9 @@
         display: flex;
         flex-direction: column;
         row-gap: 20px;
+        @media (max-width: 650px) {
+            row-gap: 10px;
+        }
     }
     .start_msg span {
         color: white;
@@ -1166,6 +1207,14 @@
         height: 51px;
         margin-top: 10px;
         margin-bottom: 10px;
+        @media (max-width: 650px) {
+            margin-top: 0px;
+            margin-bottom: 20px;
+            width: 180px;
+            height: 40px;
+            font-style: 14px;
+            letter-spacing: 0px;
+        }
     }
     .start_msg_text {
         width: 100%;
@@ -1181,28 +1230,47 @@
         position: relative;
         transition: .2s ease-in;
         @media (max-width: 650px) {
-            height: 160px;
-            padding: 10px;
+            height: 380px;
+            padding: 20px;
+
         }
     }
     .start_msg_row_btns {
         display: flex;
         column-gap: 20px;
         margin-top: 10px;
+        @media (max-width: 650px) {
+            column-gap: 10px;
+        }
     }
     .start_msg_row_btn_sm {
         width: 200px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 41px;
+            font-size: 14px;
+        }
     }
     .start_msg_row_btn_bg {
         width: 250px;
-        height: 51px;
+        height: 51px;   
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 41px;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
     }
     .conv_style_info_wrapper {
         position: absolute;
         right: -420px;
         top: 0;
         z-index: 890;
+        @media (max-width: 650px) {
+            right: auto;
+            left: 0;
+        }
     }
     .conv_style_info {
         position: relative;
@@ -1216,6 +1284,10 @@
         display: flex;
         flex-direction: column;
         row-gap: 5px;
+        @media (max-width: 650px) {
+            width: auto;
+            border-radius: 3px;
+        }
     }
     .conv_style_info h2 {
         font-size: 16px;
@@ -1242,6 +1314,9 @@
         background-color: #1b1e3c;
         clip-path: polygon(0 0, 100% 100%, 0 100%);
         transform: translate(-100%, 0) rotate(180deg);
+        @media (max-width: 650px) {
+            display: none;
+        }
     }
     .instruc_modal_wrapper {
         width: 100vw;
@@ -1280,7 +1355,8 @@
         }
         @media (max-width: 650px) {
             width: 90vw;
-            padding: 30px 15px;
+            padding: 38px 20px;
+            height: auto;
         }
     }
 
@@ -1293,7 +1369,7 @@
         background: transparent;
     }
     .instruct_modal span, .instruct_modal h2 {
-        font-size: 18px;
+        font-size: 16px;
         color: white;
         font-family: 'OpenSans';
     }
@@ -1305,9 +1381,11 @@
         width: 21px;
         height: 21px;
         cursor: pointer;
-        @media (max-width: 450px) {
+        @media (max-width: 650px) {
             right: 20px;
-            top: 20px;
+            top: 30px;
+            width: 18px;
+            height: 18px;
         }
     }
 

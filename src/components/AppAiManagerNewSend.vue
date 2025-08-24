@@ -7,9 +7,10 @@
     />
     <AppAiManagerConfirmModal 
         :message="msg" 
+        :isOptions="isOptions"
         :visibility1="isConfirmModal"
         @update:visibility1="isConfirmModal = $event"
-        @yes="isConfirmModal = false"
+        @yes="goodCopy"
         @no="cancelCopy"
     />
     <section class="new_send">
@@ -34,9 +35,9 @@
         </div>
         <div class="new_send_row m30">
             <span class="new_send_row_filters">Фильтры</span>
-            <div class="new_send_col">
+            <div class="new_send_col contacts_row">
                 <div class="new_send_filter_settings" v-if="isAddFilter">
-                    <div class="filters">
+                    <div class="filters" v-if="filters.length > 0">
                         <div
                             v-for="(item, index) in filters" 
                             :key="index"
@@ -46,7 +47,7 @@
                                 <h3>{{ item.name }}</h3>
                                 <img src="@/assets/images/close.png" class="delete_tag" @click="deleteFilter(index)"/>
                             </div>
-                            <div class="filter_item_tags_row">
+                            <div class="filter_item_tags_row" v-if="item.tags.length > 0">
                                 <div 
                                     v-for="(tag, index_tag) in item.tags"
                                     :key="index_tag"
@@ -65,7 +66,7 @@
                                 v-if="!(userTags.length == 1 && userTags[0] == '')"
                                 :text="'+ ДОБАВИТЬ'" 
                                 class="add_tag_btn" 
-                                @click="openNewTags(index)"
+                                @click="openNewTags(index, item)"
                             />
                             <div class="dropdown_tags" v-if="isNewTags == index">
                                 <div 
@@ -110,7 +111,7 @@
                     </div>
                 </div>
                 <AppBadButton :text="'+ ДОБАВИТЬ ФИЛЬТР'" class="add_filter" @click="changeIsAddFilter"/>
-                <div class="new_send_row_sm">
+                <div class="new_send_row_sm" v-if="windowWidth > 650">
                     <div class="checkbox-wrapper-18">
                         <div class="round">
                             <input type="checkbox" :id="`checkbox`" v-model="isAddContacts"/>
@@ -119,6 +120,15 @@
                     </div>
                     <span>Добавить в авторассылку текущие контакты</span>
                 </div>
+            </div>
+            <div class="new_send_row_sm" v-if="windowWidth <= 650" style="margin-top: 10px;">
+                <div class="checkbox-wrapper-18">
+                    <div class="round">
+                        <input type="checkbox" :id="`checkbox`" v-model="isAddContacts"/>
+                        <label :for="`checkbox`"></label>
+                    </div>
+                </div>
+                <span>Добавить в авторассылку текущие контакты</span>
             </div>
         </div>
         <div class="new_send_row m48">
@@ -222,16 +232,31 @@
                 isModal: false,
                 newTagValues: [],
                 isConfirmModal: false,
-                managerCopyId: null
+                managerCopyId: null,
+                windowWidth: null,
+                isOptions: null
             }
         },
         mounted() {
             document.addEventListener('click', this.handleClickOutside);
+            document.addEventListener('resize', this.handleResizeWindow);
         },
         beforeUnmount() {
             document.removeEventListener('click', this.handleClickOutside);
         },
+        created() {
+            this.windowWidth = window.innerWidth;
+        },
         methods: {
+            goodCopy() {
+                this.isConfirmModal = false;
+                this.msg = "Ваша рассылка скопирована, чтобы запустить или отредактировать ее перейдите в выбранный ИИ менеджер";
+                this.isOptions = false;
+                this.isConfirmModal = true;
+            },
+            handleResizeWindow() {
+                this.windowWidth = window.innerWidth;
+            },
             deleteFilter(index) {
                 this.filters.splice(index, 1);
                 if (this.filter_connection.length > 0) this.filter_connection.splice(Math.max(0, index - 1), 1);
@@ -260,9 +285,10 @@
                 }
             },
             updateCopyToManager(index, isChecked) {
-                this.isConfirmModal = true;
                 if (isChecked) {
+                    this.isConfirmModal = true;
                     this.msg = "Вы подтверждаете копирование рассылки?";
+                    this.isOptions = true;
                     this.copyToManager[index] = isChecked;
                     this.managerCopyId = index;
                 }
@@ -303,7 +329,8 @@
             deleteTag(index, tag_index) {
                 this.filters[index].tags.splice(tag_index, 1);
             },
-            openNewTags(index) {
+            openNewTags(index, item) {
+                if (this.userTags.filter(tag => !item.tags.includes(tag)).length == 0) return;
                 this.isNewTags = index;
             }, 
             closeNewTags() {
@@ -349,17 +376,30 @@
     }
     .m34 {
         margin-top: 34px;
+        @media (max-width: 650px) {
+            margin-top: 30px;
+        }
     }
     .m30 {
         margin-top: 30px;
+        @media (max-width: 650px) {
+            margin-top: 19px;
+        }
     }
     .m48 {
         margin-top: 48px;
+        @media (max-width: 650px) {
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
     }
     h2 {
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 18px;
+        }
     }
     .send_name {
         white-space: nowrap;
@@ -421,11 +461,19 @@
         column-gap: 20px;
         align-items: center;
         width: 100%;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+            align-items: start;
+        }
     }
     .new_send_row span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     input {
         width: 100%;
@@ -442,6 +490,7 @@
         transition: .2s ease-in;
         @media (max-width: 650px) {
             height: 50px;
+            padding: 0 10px;
         }
     }
     .new_send_col {
@@ -449,14 +498,33 @@
         flex-direction: column;
         row-gap: 31px;
     }
+    .contacts_row {
+        @media (max-width: 650px) {
+            flex-direction: row !important;
+            flex-wrap: wrap;
+        }
+    }
     .add_filter {
         width: 220px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 200px;
+            height: 40px;
+        }
     }
     .new_send_row_sm {
         display: flex;
         column-gap: 6.82px;
         align-items: center;
+        @media (max-width: 650px) {
+            align-items: start;
+            column-gap: 10px;
+        }
+    }
+    .new_send_row_sm span {
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
         .checkbox-wrapper-18 .round {
         position: relative;
@@ -505,27 +573,47 @@
     }
     .new_send_row_copy {
         align-self: start;
+        @media (max-width: 650px) {
+            margin-bottom: 10px;
+        }
     }
     .new_send_footer {
         display: flex;
         justify-content: space-between;
         width: 100%;
         margin-top: 50px;
+        @media (max-width: 650px) {
+            margin-top: 30px;
+        }
     }
     .new_send_btn {
         width: 150px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 40px;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
     }
     .new_send_filter_settings {
         width: 471px;
         background: #111433;
         border-radius: 10px;
+        @media (max-width: 650px) {
+            width: 100%;
+        }
     }
     .new_send_filter_settings_row {
         width: 100%;
         padding: 20px 30px 28px 30px;
         display: flex;
         justify-content: space-between;
+        @media (max-width: 650px) {
+            padding: 20px 10px;
+            justify-content: center;
+            column-gap: 28px;
+        }
     }
     .filter_contain {
         width: 176px;
@@ -538,6 +626,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        @media (max-width: 650px) {
+            font-size: 14px !important;
+            width: fit-content;
+            padding: 8px 15px;
+        }
     }
     .filter_notcontain {
         width: 205px;
@@ -550,6 +643,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        @media (max-width: 650px) {
+            font-size: 14px;
+            width: fit-content;
+            padding: 8px 15px;
+        }
     }
     .add_subfilter {
         width: 155px;
@@ -557,23 +655,33 @@
         font-size: 9.88px;
         cursor: pointer;
         letter-spacing: 0px;
+        @media (max-width: 650px) {
+            border-radius: 6.24px;
+        }
     }
     .filters {
         display: flex;
         flex-direction: column;
         row-gap: 20px;
         padding: 20px;
+        background: #1B1E3D;
     }
     .filters_item {
         display: flex;
         flex-direction: column;
         row-gap: 14px;
         position: relative;
+        @media (max-width: 650px) {
+            row-gap: 10px;
+        }
     }
     .filters_item h3 {
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .filter_item_tags_row {
         display: flex;

@@ -371,7 +371,7 @@
             padding: 0;
         }
         @media (max-width: 400px) {
-            padding: 0px 25px;
+            padding: 0px 15px;
         }
     }
     .content {

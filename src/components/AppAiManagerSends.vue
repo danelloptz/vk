@@ -32,11 +32,11 @@
             </div> 
         </div> -->
         <div class="autosend">
-            <div class="autosend_header">
+            <div class="autosend_header" :style="{ marginBottom: campaigns.length == 0 ? '70px' : '0px' }">
                 <span class="autosend_header_title">Авторассылки</span>
                 <AppGoodButton :text="'+ СОЗДАТЬ'" @click="openNewSend" class="create_btn" />
             </div>
-            <div class="autosend_body" v-if="campaigns.length > 0">
+            <div class="autosend_body" v-if="campaigns.length > 0 && windowWidth > 650">
                 <div class="autosend_body_row nothover">
                     <h3>Имя</h3>
                     <h3>Статус</h3>
@@ -55,6 +55,37 @@
                     <div class="status"><img :src="item.is_active ? require('@/assets/images/play.png') : require('@/assets/images/pause.png')" /><span :class="item.is_active ? 'worked' : 'stoped'">{{ item.is_active ? "работает" : "остановлено" }}</span></div>
                     <span>{{ item.audience }}</span>
                     <span>{{ formatedDate(item.created_at * 1000) }}</span>
+                    <div class="autosend_body_row_icons">
+                        <img src="@/assets/images/manager_copy.png" class="manager_copy_icon" />
+                        <img src="@/assets/images/manager_edit.png" class="manager_edit_icon" />
+                        <img src="@/assets/images/trash.png" class="trash_icon" @click.stop="deleteSend(index)" />
+                    </div>
+                </div>
+            </div>
+            <div class="autosend_body" v-if="campaigns.length > 0 && windowWidth <= 650">
+                <div 
+                    v-for="(item, index) in paginatedData"
+                    :key="index"
+                    class="autosend_body_row"
+                    :style="index == paginatedData.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
+                    @click="openSend(index)"
+                >
+                    <div class="sm_row">
+                        <span><strong>Имя:</strong></span>
+                        <span>{{ item.name }}</span>
+                    </div>
+                    <div class="sm_row">
+                        <span><strong>Статус:</strong></span>
+                        <div class="status"><img :src="item.is_active ? require('@/assets/images/play.png') : require('@/assets/images/pause.png')" /><span :class="item.is_active ? 'worked' : 'stoped'">{{ item.is_active ? "работает" : "остановлено" }}</span></div>
+                    </div>
+                    <div class="sm_row">
+                        <span><strong>Аудитория:</strong></span>
+                        <span>{{ item.audience }}</span>
+                    </div>
+                    <div class="sm_row">
+                        <span><strong>Дата создания:</strong></span>
+                        <span>{{ formatedDate(item.created_at * 1000) }}</span>
+                    </div>
                     <div class="autosend_body_row_icons">
                         <img src="@/assets/images/manager_copy.png" class="manager_copy_icon" />
                         <img src="@/assets/images/manager_edit.png" class="manager_edit_icon" />
@@ -113,368 +144,18 @@
                         index: 4,
                     }, 
                 ],
-                autosends_data: [
-                    {
-                        "name": "Рассылка 1",
-                        "status": false,
-                        "audience": 29,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 2",
-                        "status": false,
-                        "audience": 130,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 3",
-                        "status": true,
-                        "audience": 15,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 4",
-                        "status": false,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 5",
-                        "status": false,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 6",
-                        "status": true,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 7",
-                        "status": true,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 8",
-                        "status": false,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 9",
-                        "status": false,
-                        "audience": 29,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 10",
-                        "status": false,
-                        "audience": 130,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 11",
-                        "status": true,
-                        "audience": 15,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 12",
-                        "status": false,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 13",
-                        "status": false,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 14",
-                        "status": true,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 15",
-                        "status": true,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                    {
-                        "name": "Рассылка 16",
-                        "status": false,
-                        "audience": 239,
-                        "date": 1753787205862,
-                        "subs": 29,
-                        "unsubs": 0,
-                        "conv": 100,
-                        "filters": [
-                                {
-                                    name: "Содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                },
-                                {
-                                    name: "Не содержит теги",
-                                    tags: ["tag1", "tag2"]
-                                }
-                        ],
-                        "filter_connection": ["И"],
-                        "addInContact": true,
-                        "copyTo": [0, 1, 1, 0, 1]
-                    },
-                ],
                 pageSize: 9,
                 currentPage: 1,
                 isNewSend: false,
                 isOpenSend: false,
                 sendData: null,
                 managers: [],
-                campaigns: []
+                campaigns: [],
+                windowWidth: null
             }
+        },
+        mounted() {
+            document.addEventListener('resize', this.handleWindowResize);
         },
         computed: {
             tags() {
@@ -502,12 +183,16 @@
             },
         },
         async created() {
+            this.windowWidth = window.innerWidth;
             const managers = await getManagers(this.userData.id);
             this.managers = managers;
             const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
             this.campaigns = campaigns.items;
         },
         methods: {
+            handleWindowResize() {
+                this.windowWidth = window.innerWidth;
+            },
             async deleteSend(index) {
                 await deleteCampaign(this.campaigns[index].campaign_id);
                 const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
@@ -560,6 +245,11 @@
 </script>
 
 <style scoped>
+    .sm_row {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
     .managers_switch {
         display: flex;
         column-gap: 21px;
@@ -621,17 +311,29 @@
         align-items: center;
         padding: 28px 30px 30px 30px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        @media (max-width: 650px) {
+            padding: 20px;
+        }
     }
     .autosend_header_title {
         font-size: 20px;
         color: white;
         font-family: 'OpenSans';
         font-weight: bold;
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
     .create_btn {
         width: 150px;
         height: 51px;
         font-weight: bold;
+        @media (max-width: 650px) {
+            width: 130px;
+            height: 40px;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
     }
     .autosend_body {
         display: flex;
@@ -639,6 +341,10 @@
         width: 100%;
         padding: 0px 20px;
         margin-top: 20px;
+        @media (max-width: 650px) {
+            padding: 0;
+            margin-top: 0px;
+        }
     }
     .autosend_body_row {
         display: grid;
@@ -648,6 +354,12 @@
         padding: 20px 10px;
         transition: .2s;
         cursor: pointer;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+            padding: 20px;
+        }
     }
     .autosend_body_row:hover {
         background: #252847;
@@ -670,10 +382,17 @@
         display: flex;
         align-items: center;
         column-gap: 10px;
+        @media (max-width: 650px) {
+            column-gap: 5px;
+        }
     }
     .status img {
         width: 20px;
         height: 20px;
+        @media (max-width: 650px) {
+            width: 16px;
+            height: 16px;
+        }
     }
     .status span {
         margin-top: -3px;
@@ -683,6 +402,10 @@
         align-items: center;
         column-gap: 12px;
         justify-self: end;
+        @media (max-width: 650px) {
+            margin-top: 5px;
+            justify-self: start;
+        }
     }
     .manager_copy_icon {
         width: 18px;

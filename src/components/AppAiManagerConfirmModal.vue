@@ -3,7 +3,7 @@
         <section class="modal">
             <img src="@/assets/images/close.png" class="close" @click="close">
             <span>{{ message }}</span>
-            <div class="row">
+            <div class="row" v-if="isOptions">
                 <AppBadButton :text="'ДА'" class="btn" @click="yes" />
                 <AppBadButton :text="'ОТМЕНА'" class="btn" @click="no" />
             </div>
@@ -19,6 +19,7 @@
             title: String,
             message: String,
             visibility1: Boolean,
+            isOptions: Boolean
         },
         watch: {
             visibility1(newValue) {
@@ -57,10 +58,18 @@
         display: flex;
         column-gap: 30px;
         margin-top: 34px;
+        @media (max-width: 650px) {
+            margin-top: 29px;
+            column-gap: 10px;
+        }
     }
     .btn {
         width: 170px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 140px;
+            height: 40px;
+        }
     }
 
     h3 {
@@ -109,7 +118,7 @@
         }
         @media (max-width: 650px) {
             width: 90vw;
-            padding: 30px 15px;
+            padding: 31px 20px;
         }
     }
 
@@ -129,9 +138,11 @@
         width: 21px;
         height: 21px;
         cursor: pointer;
-        @media (max-width: 450px) {
+        @media (max-width: 650px) {
             right: 20px;
-            top: 20px;
+            top: 30px;
+            width: 18px;
+            height: 18px;
         }
     }
     .modal-background {
@@ -177,7 +188,8 @@
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 17px;
+            font-size: 16px;
+            text-align: start;
         }
     }
     .left_image {
