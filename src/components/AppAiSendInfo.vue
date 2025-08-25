@@ -58,7 +58,7 @@
                     <span>Статистика</span>
                 </div>
                 <div 
-                    v-for="(step, index) in sendData.steps"
+                    v-for="(step, index) in sendData.steps.sort((a, b) => b.order - a.order)"
                     :key="index"
                     class="step"
                 >
@@ -84,7 +84,7 @@
             </div>
             <div class="steps" v-if="menuHeaderIndex == 1 && sendData.steps.length > 0 && windowWidth <= 650">
                 <div 
-                    v-for="(step, index) in sendData.steps"
+                    v-for="(step, index) in sendData.steps.sort((a, b) => b.order - a.order)"
                     :key="index"
                     class="step"
                 >
@@ -123,7 +123,7 @@
                     <span>Название рассылки:</span>
                     <input v-model="name" />
                 </div>
-                <div class="new_send_row" style="align-items: self-start; margin-top: 30px;">
+                <div class="new_send_row" style="margin-top: 30px;">
                     <span class="new_send_row_filters">Фильтры</span>
                     <div class="new_send_col">
                         <div class="new_send_filter_settings" v-if="isAddFilter">
@@ -198,7 +198,7 @@
                             </div>
                         </div>
                         <AppBadButton :text="'+ ДОБАВИТЬ ФИЛЬТР'" class="add_filter" @click="changeIsAddFilter"/>
-                        <div class="new_send_row_sm">
+                        <div class="new_send_row_sm" v-if="windowWidth > 650">
                             <div class="checkbox-wrapper-18">
                                 <div class="round">
                                     <input type="checkbox" :id="`checkbox`" v-model="isAddInSends" @click="isContactsChanged = !isContactsChanged" />
@@ -207,6 +207,15 @@
                             </div>
                             <span>Добавить в авторассылку текущие контакты</span>
                         </div>
+                    </div>
+                    <div class="new_send_row_sm" v-if="windowWidth <= 650">
+                        <div class="checkbox-wrapper-18">
+                            <div class="round">
+                                <input type="checkbox" :id="`checkbox`" v-model="isAddInSends" @click="isContactsChanged = !isContactsChanged" />
+                                <label :for="`checkbox`"></label>
+                            </div>
+                        </div>
+                        <span>Добавить в авторассылку текущие контакты</span>
                     </div>
                 </div>
                 <div class="settings_row" style="margin-top: 48px;">
@@ -227,12 +236,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="steps_btns" style="margin-top: 40px;">
+                <div class="steps_btns steps_btns_settings" style="margin-top: 40px;">
                     <AppGoodButton :text="'СОХРАНИТЬ'" class="addNextStep" @click="saveSettings" />
                     <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" class="addNextStep" @click="openNewStep" />
                     <AppGoodButton :text="'ЗАПУСТИТЬ'" v-if="!sendData.is_active" @click="runCampaign" class="startStep" />
                     <AppGoodButton :text="'ОСТАНОВИТЬ'" v-else class="stopStep" @click="disableCampaign" />
-                    <AppGoodButton :text="'ПЕРЕЗАПУСТИТЬ'" class="stopStep" style="width: 135px;" @click="restartCampaign" />
+                    <AppGoodButton :text="'ПЕРЕЗАПУСТИТЬ'" class="stopStep" @click="restartCampaign" />
                 </div>
             </div>
             <div class="audience" v-if="menuHeaderIndex == 2">
@@ -260,11 +269,26 @@
                         class="autosend_body_row"
                         :style="index == paginatedData.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
                     >
-                        <span>{{ item.full_name }}</span>
-                        <span>{{ formatedDateNoHours(item.next_step_ts * 1000) }}</span>
-                        <span>{{ item.status == 'active' ? 'Активный' : item.status }}</span>
-                        <span>@{{ item.username }}</span>
-                        <span>{{ formatedDate(item.added_at * 1000) }}</span>
+                        <div class="sm_row">
+                            <span><strong>Имя:</strong></span>
+                            <span>{{ item.full_name }}</span>
+                        </div>
+                        <div class="sm_row">
+                            <span><strong>Шаг:</strong></span>
+                            <span>{{ formatedDateNoHours(item.next_step_ts * 1000) }}</span>
+                        </div>
+                        <div class="sm_row">
+                            <span><strong>Статус:</strong></span>
+                            <span>{{ item.status == 'active' ? 'Активный' : item.status }}</span>
+                        </div>
+                        <div class="sm_row">
+                            <span><strong>Username:</strong></span>
+                            <span>@{{ item.username }}</span>
+                        </div>
+                        <div class="sm_row">
+                            <span><strong>Добавлен:</strong></span>
+                            <span>{{ formatedDate(item.added_at * 1000) }}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="switchs" v-if="totalPages > 1">
@@ -409,9 +433,14 @@
                 }
             },
             formatedTableTime(obj) {
-                if (obj.type == 'немедленно') return this.formatedDate(obj.time * 1000);
-                if (obj.time > 1000) return `${obj.type} <br> ${this.formatedDate(obj.time * 1000)}`
+                if (obj.type == 'немедленно') return obj.type;
+                if (['в точное время', 'в точное время на следующий день', 'в точную дату'].indexOf(obj.type) != -1) 
+                    return this.formatedDate(obj.time * 1000)
+                else if (obj.time > 1000) return obj.type
                 else return `${obj.time} ${obj.type}`;
+                // if (obj.type == 'немедленно') return obj.type;
+                // if (obj.time > 1000) return `${obj.type} <br> ${this.formatedDate(obj.time * 1000)}`
+                // else return `${obj.time} ${obj.type}`;
             },
             async restartCampaign() {
                 await this.disableCampaign();
@@ -558,6 +587,9 @@
         flex-direction: column;
         width: 100%;
         margin-top: 20px;
+        @media (max-width: 650px) {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
     }
     .autosend_body_row {
         display: grid;
@@ -569,6 +601,12 @@
         cursor: pointer;
         column-gap: 50px;
         padding-left: 80px;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+            padding: 20px 10px !important;
+        }
     }
     .autosend_body_row:nth-child(2n + 1) {
         background: #393c5b3d;
@@ -581,11 +619,17 @@
     } */
     .nothover:hover {
         background: none !important;
+        @media (max-width: 650px) {
+            display: none;
+        }
     }
     .autosend_body_row h3, .autosend_body_row span {
         font-size: 16px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .worked {
         color: #34C946 !important;
@@ -652,6 +696,9 @@
         display: flex;
         align-items: center;
         column-gap: 14px;
+        @media (max-width: 650px) {
+            column-gap: 13px;
+        }
     }
     .check {
         width: 18px;
@@ -661,6 +708,11 @@
         border-radius: 50%;
         transition: .2s ease-in;
         cursor: pointer;
+        @media (max-width: 650px) {
+            outline-offset: 3px;
+            width: 10px;
+            height: 10px;
+        }
     }
     .activeBinar {
         background: white;
@@ -670,7 +722,7 @@
         color: white;
         font-family: 'OpenSans';
         @media (max-width: 650px) {
-            font-size: 16px;
+            font-size: 14px;
         }
     }
     .radios {
@@ -678,21 +730,37 @@
         align-items: center;
         column-gap: 40px;
         margin-left: 51px;
+        @media (max-width: 650px) {
+            padding: 0px 10px;
+            margin-left: 0px;
+            column-gap: 25px;
+            justify-content: center;
+        }
     }
     .audience {
         display: flex;
         flex-direction: column;
         width: 100%;
         padding: 30px 0px;
+        @media (max-width: 650px) {
+            padding: 18px 0px;
+        }
     }
     .add_filter {
         width: 220px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 200px;
+            height: 40px;
+        }
     }
     .new_send_row_sm {
         display: flex;
         column-gap: 6.82px;
         align-items: center;
+        @media (max-width: 650px) {
+            column-gap: 10px;
+        }
     }
         .checkbox-wrapper-18 .round {
         position: relative;
@@ -705,6 +773,10 @@
         height: 23px;
         width: 23px;
         display: block;
+        @media (max-width: 650px) {
+            width: 16px;
+            height: 16px;
+        }
     }
 
     .checkbox-wrapper-18 .round label:after {
@@ -719,6 +791,14 @@
         top: 3px;
         transform: rotate(-45deg);
         width: 18px;
+        @media (max-width: 650px) {
+            border: 2px solid #66bb6a;
+            border-top: none;
+            border-right: none;
+            top: 0;
+            left: 3px;
+            width: 16px;
+        }
     }
 
     .checkbox-wrapper-18 .round input[type="checkbox"] {
@@ -916,11 +996,21 @@
         column-gap: 20px;
         align-items: center;
         width: 100%;
+        align-items: self-start;
+        @media (max-width: 650px) {
+            flex-wrap: wrap;
+            column-gap: 10px;
+            align-items: center;
+            row-gap: 20px;
+        }
     }
     .new_send_row span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+         @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .settings_row input {
         width: 535px;
@@ -932,22 +1022,39 @@
         font-family: 'OpenSans';
         padding-left: 30px;
         background: none;
+         @media (max-width: 650px) {
+            width: 100%;
+            height: 50px;
+            padding: 15px 10px;
+            font-size: 14px;
+        }
     }
     .settings_row span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+         @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .settings_row {
         display: flex;
         column-gap: 20px;
         align-items: center;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+            align-items: start;
+        }
     }
     .settings {
         padding: 52px 50px;
         display: flex;
         flex-direction: column;
         width: 100%;
+        @media (max-width: 650px) {
+            padding: 40px 10px 30px 10px;
+        }
     }
     .activeMenuHeader {
         background: #393C5B;
@@ -986,7 +1093,17 @@
             width: 100%;
             background: #393c5b3d;
             padding: 28px 21px 38px 21px;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            justify-content: center;
+            row-gap: 20px;
+        }
+    }
+    .steps_btns_settings {
+        @media (max-width: 650px) {
+            padding: 0px !important;
+            align-items: center !important;
+            background: none !important;
+            margin-top: 20px !important;
         }
     }
     .step_icons img {

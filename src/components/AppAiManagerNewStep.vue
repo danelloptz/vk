@@ -11,7 +11,7 @@
         </div>
         <div class="row">
             <span>Текст</span>
-            <AppAiTextEditor @update="text = $event" :startText="text" />
+            <AppAiTextEditor class="editor" @update="text = $event" :startText="text" />
         </div>
         <div class="row" v-if="previews.length == 0">
             <span>Изображение</span>
@@ -52,7 +52,7 @@
         </div>
         <div class="row" v-if="isFirstStep">
             <span>Отправить</span>
-            <div class="row_sm">
+            <div class="row_sm types">
                 <div class="dropdown">
                     <input
                         v-model="type"
@@ -74,7 +74,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="datetime-wrapper">
+                <div class="datetime-wrapper" v-if="['в точное время', 'в точное время на следующий день', 'в точную дату'].indexOf(type) != -1">
                     <input
                         ref="datetimeInput"
                         v-model="date"
@@ -185,6 +185,17 @@
                 },
                 immediate: true,
             }
+        },
+        created() {
+            setTimeout(() => {
+                const el = document.querySelector('.ck-editor');
+                const el2 = document.querySelector('.ck-content');
+                if (el) el.style.width = '100%';
+                if (el2) {
+                    el2.style.height = '280px';
+                } 
+            }, 1000);
+            
         },
         methods: {
             async saveStep() {
@@ -320,8 +331,21 @@
 </script>
 
 <style scoped>
+    :root {
+        --ck-color-base-background: #434665;
+    }
+    .types {
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+        }
+    }
     .amountOfTime {
         width: 80px !important;
+        @media (max-width: 650px) {
+            width: 50px !important;
+            height: 50px;
+        }
     }
     .preview_btn {
         width: 150px;
@@ -331,6 +355,13 @@
         display: flex;
         flex-direction: column;
         row-gap: 30px;
+        @media (max-width: 650px) {
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            justify-content: space-between;
+            column-gap: 10px;
+        }
     }
     .ck-editor__editable {
         background-color: #1b1e3c;
@@ -343,6 +374,9 @@
         position: relative;
         display: inline-block;
         width: fit-content;
+        @media (max-width: 650px) {
+            width: 100%;
+        }
     }
 
     .datetime {
@@ -352,6 +386,9 @@
         border: 1px solid white;
         font-size: 18px;
         border-radius: 10px;
+        @media (max-width: 650px) {
+            font-size: 12px;
+        }
     }
 
     /* Убираем встроенную иконку календаря (в Chrome/Webkit) */
@@ -387,6 +424,9 @@
         max-width: 452px;
         max-height: 252px;
         object-fit: contain;
+        @media (max-width: 650px) {
+            width: 100%;
+        }
     }
     .custum-file-upload.dragover {
         border: 2px dashed #4a90e2;
@@ -407,6 +447,9 @@
         background-color: none;
         padding: 1.5rem;
         border-radius: 10px;
+        @media (max-width: 650px) {
+            height: 150px;
+        }
     }
 
     .custum-file-upload .icon {
@@ -434,6 +477,9 @@
         font-size: 18px;
         font-family: 'OpenSans';
         color: rgba(255, 255, 255, 0.3);
+        @media (max-width: 650px) {
+            font-size: 16px;
+        }
     }
 
     .custum-file-upload input {
@@ -444,19 +490,35 @@
         justify-content: space-between;
         width: 100%;
         margin-top: 50px;
+        @media (max-width: 650px) {
+            margin-top: 20px;
+        }
     }
     .new_send_btn {
         width: 150px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 40px;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
     }
     .row_sm {
         display: flex;
         column-gap: 20px;
+        @media (max-width: 650px) {
+            width: 100%;
+            column-gap: 10px;
+        }
     }
     .row span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .row {
         display: grid;
@@ -464,11 +526,22 @@
         margin-top: 30px;
         align-items: center;
         column-gap: 30px;
+        @media (max-width: 650px) {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+            margin-top: 20px;
+            align-items: start;
+        }
     }
     h2 {
         font-size: 24px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 18px;
+        }
     }
     .new_step {
         display: flex;
@@ -497,6 +570,7 @@
         transition: .2s ease-in;
         @media (max-width: 650px) {
             height: 50px;
+            font-size: 12px !important;
         }
     }
     textarea {
@@ -549,7 +623,7 @@
         z-index: 15;
         padding: 0px 20px;
         @media (max-width: 650px) {
-            font-size: 16px;
+            font-size: 12px;
         }
     }
     .dropdown::-webkit-scrollbar {
