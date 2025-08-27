@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^41.4.2",
+    "@ckeditor/ckeditor5-core": "^46.0.2",
+    "@ckeditor/ckeditor5-ui": "^46.0.2",
     "@ckeditor/ckeditor5-vue": "^7.3.0",
     "@tinymce/tinymce-vue": "^6.2.0",
     "@vkid/sdk": "^2.4.1",
@@ -21,7 +23,9 @@
     "vue": "^3.2.13",
     "vue-advanced-cropper": "^2.8.9",
     "vue-router": "^4.5.0",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "@ckeditor/ckeditor5-inspector": "^4.1.0",
+    "ckeditor5": "latest"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

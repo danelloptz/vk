@@ -11,6 +11,7 @@
 <script>
 import { ref, computed, watch, onMounted } from 'vue';
 import { Ckeditor, useCKEditorCloud } from '@ckeditor/ckeditor5-vue';
+// import Spoiler from '../spoiler/spoiler';
 
 export default {
     name: 'CkEditorComponent',
@@ -48,11 +49,11 @@ export default {
                 return null;
             }
 
-            const { Essentials, Paragraph, Bold, Italic, Strikethrough } = cloud.data.value.CKEditor;
+            const { Essentials, Paragraph, Bold, Italic, Strikethrough, AutoLink, Link } = cloud.data.value.CKEditor;
 
             return {
                 licenseKey: 'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3ODU3MTUxOTksImp0aSI6IjhjMDBiODA4LTBkYTctNDYwZC04ZmNkLTVmM2FkODVhZGM0NiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiXSwiZmVhdHVyZXMiOlsiRFJVUCIsIkUyUCIsIkUyVyJdLCJ2YyI6IjdiMTNhMThhIn0.FGhvY1tti0n0LJ-u4oG8jXBaEMgbbYxC3-ThxuresQP4GxzGADxB0QS76gt-f33lhE0EtN2tinTezpRt8yy3KQ',
-                plugins: [Essentials, Paragraph, Bold, Italic, Strikethrough],
+                plugins: [Essentials, Paragraph, Bold, Italic, Strikethrough, AutoLink, Link],
                 fontFamily: {
                     options: [
                         'default',
@@ -63,8 +64,11 @@ export default {
                 table: {
                     contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
                 },
+                link: {
+                    toolbar: [ 'linkPreview', '|', 'editLink', 'linkProperties', 'unlink' ]
+                },
                 toolbar: [
-                    'undo', 'redo', 'bold', 'italic', 'underline', 'strikethrough'
+                    'undo', 'redo', 'bold', 'italic', 'underline', 'strikethrough', 'link'
                 ]
             };
         });
@@ -84,3 +88,9 @@ export default {
     }
 };
 </script>
+
+<style>
+    .spoiler-text {
+        color: red;
+    }
+</style>

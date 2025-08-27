@@ -10,38 +10,39 @@
                     v-for="(item, index) in people"
                     :key="index"
                     class="dialog_people_item"
-                    :class="{ active_man: item.id == activeMan.id }"
+                    :class="{ active_man: item.telegram_id == activeMan?.telegram_id }"
+                    @click="setActiveMan(index)"
                 >
-                    <img :src="item.img" />
+                    <img :src="item.avatar" />
                     <div class="dialog_people_item_col">
-                        <h2>{{ item.name }}</h2>
-                        <span class="dialog_people_item_message">{{ item.message.slice(0, 21) }}</span>
-                        <span class="dialog_people_item_count">{{ item.count }}</span>
+                        <h2>{{ item.full_name }}</h2>
+                        <span class="dialog_people_item_message">{{ item.last_message_text.slice(0, 16) + '...' }}</span>
+                        <span class="dialog_people_item_count">{{ item.total_messages }}</span>
                     </div>
-                    <span class="dialog_people_item_date">{{ formatedDate(item.date) }}</span>
+                    <span class="dialog_people_item_date">{{ formatedDate(+item.last_message_ts * 1000) }}</span>
                 </div>
             </div>
-            <div class="dialog_field">
+            <div class="dialog_field" v-if="activeMan">
                 <div class="dialog_field_header">
-                    <img :src="activeMan.img" />
+                    <img :src="activeMan.avatar" />
                     <div class="dialog_field_header_col">
-                        <h2>{{ activeMan.name }}</h2>
-                        <span>@{{ activeMan.username }}</span>
+                        <h2>{{ activeMan.full_name }}</h2>
+                        <span>@{{ activeMan?.username }}</span>
                     </div>
                 </div>
                 <div class="dialog_field_messages">
                     <div 
-                        v-for="(msg, index) in activeMan.messages"
+                        v-for="(msg, index) in messages"
                         :key="index"
                         class="dialog_field_message"
                     >
                         <div class="dialog_field_message_header">
-                            <img :src="msg.author == 'user' ? activeMan.img : require('@/assets/images/intelektaz_logo.png')" />
-                            <span>{{ msg.author == 'user' ? activeMan.name : 'Intelektaz Bot' }}</span>
-                            <span class="dialog_field_message_header_date">{{ formatedDate(msg.date) }}</span>
+                            <img :src="msg.author == 'user' ? activeMan.avatar : require('@/assets/images/intelektaz_logo.png')" />
+                            <span>{{ msg.author == 'user' ? activeMan.full_name : 'Intelektaz Bot' }}</span>
+                            <span class="dialog_field_message_header_date">{{ formatedDate(+msg.date * 1000) }}</span>
                         </div>
                         <div 
-                            v-if="msg.files.filter(t => t.type == 'img').length > 0"
+                            v-if="msg?.files && msg?.files.filter(t => t.type == 'img').length > 0"
                             class="dialog_field_message_imgs"
                             :style="{ gridTemplateColumns: `repeat(${Math.min(msg.files.filter(t => t.type == 'img').length, 3)}, 1fr)` }"
                         >
@@ -54,7 +55,7 @@
                             />
                         </div>
                         <div 
-                            v-if="msg.files.filter(t => t.type == 'other').length > 0"
+                            v-if="msg?.files && msg?.files.filter(t => t.type == 'other').length > 0"
                             class="dialog_field_message_files"
                         >
                             <div 
@@ -113,46 +114,46 @@
                             hidden
                             multiple
                         />
-                        <textarea class="dialog_field_footer_textarea" placeholder="Отправить сообщение"></textarea>
-                        <img src="@/assets/images/send_message.png" class="send_message" />
+                        <textarea class="dialog_field_footer_textarea" v-model="currentMsg" placeholder="Отправить сообщение"></textarea>
+                        <img src="@/assets/images/send_message.png" class="send_message" @click="sendMessage" />
                     </div>
                 </div>
             </div>
-            <div class="dialog_info">
+            <div class="dialog_info" v-if="activeMan">
                 <div class="dialog_info_item" style="align-self: center; align-items: center;">
-                    <img :src="activeMan.img" class="dialog_info_item_img"/>
-                    <h2>{{ activeMan.name }}</h2>
+                    <img :src="activeMan.avatar" class="dialog_info_item_img"/>
+                    <h2>{{ activeMan.full_name }}</h2>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">ID</span>
-                    <span>{{ activeMan.id }}</span>
+                    <span>{{ activeMan.telegram_id }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Телефон</span>
-                    <span>{{ activeMan.phone != "" ? activeMan.phone : '-' }}</span>
+                    <span>{{ activeMan?.phone != "" ? activeMan.phone : '-' }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Username</span>
-                    <span>{{ activeMan.username }}</span>
+                    <span>{{ activeMan?.username }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Статус</span>
-                    <span>{{ activeMan.status }}</span>
+                    <span>{{ activeMan?.status }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Первое сообщение</span>
-                    <span>{{ activeMan.first_msg }}</span>
+                    <span>{{ activeMan?.first_msg }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Первая активность</span>
-                    <span>{{ formatedFullDate(activeMan.fisrt_active) }}</span>
+                    <span>{{ formatedFullDate(activeMan?.fisrt_active) }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Последняя активность</span>
-                    <span>{{ formatedFullDate(activeMan.last_active) }}</span>
+                    <span>{{ formatedFullDate(+activeMan.last_message_ts * 1000) }}</span>
                 </div>
                 <AppBadButton :text="'+ ДОБАВИТЬ ПОЛЕ'" class="add_field_btn" />
-                <div class="dialog_info_item">
+                <div class="dialog_info_item" v-if="activeMan.tags">
                     <span class="mute">Теги</span>
                     <span
                         v-for="(item, index) in activeMan.tags"
@@ -165,7 +166,7 @@
                     <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" @click="openNewTags" />
                     <div class="dropdown_tags" v-if="isNewTags">
                         <div 
-                            v-for="(tag, tag_index) in activeMan.userTags.filter(tag => !activeMan.tags.includes(tag))"
+                            v-for="(tag, tag_index) in activeMan?.userTags.filter(tag => !activeMan.tags.includes(tag))"
                             :key="tag_index"
                             class="dropdown_tag"
                             @click="addTag(tag)"
@@ -184,167 +185,207 @@
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
+    import { 
+        getAllDialogs,
+        getDialog 
+    } from '@/services/manager';
+
     export default {
         components: { AppGoodButton, AppBadButton },
+        props: {
+            bot_id: String
+        },
         data() {
             return {
-                people: [
-                    {
-                        name: "Иванов Иван",
-                        img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                        date: 1753787205862,
-                        message: "Тут какое-то последнее сообщение",
-                        count: 1482,
-                        id: 42423591,
-                    },
-                    {
-                        name: "Иванов Иван",
-                        img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                        date: 1753787205862,
-                        message: "Тут какое-то последнее сообщение",
-                        count: 1482,
-                        id: 42423595,
-                    },
-                    {
-                        name: "Иванов Иван",
-                        img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                        date: 1753787205862,
-                        message: "Тут какое-то последнее сообщение",
-                        count: 1482,
-                        id: 42423596,
-                    },
-                    {
-                        name: "Иванов Иван",
-                        img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                        date: 1753787205862,
-                        message: "Тут какое-то последнее сообщение",
-                        count: 1482,
-                        id: 42423597,
-                    },
-                    {
-                        name: "Иванов Иван",
-                        img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                        date: 1753787205862,
-                        message: "Тут какое-то последнее сообщение",
-                        count: 1482,
-                        id: 42423598,
-                    },
-                    {
-                        name: "Иванов Иван",
-                        img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                        date: 1753787205862,
-                        message: "Тут какое-то последнее сообщение",
-                        count: 1482,
-                        id: 42423599,
-                    },
-                ],
-                activeMan: {
-                    name: "Иванов Иван",
-                    img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                    count: 1482,
-                    username: "ivanovivan",
-                    id: 42423591,
-                    phone: "",
-                    status: "Активный",
-                    first_msg: "/start",
-                    fisrt_active: 1753787205862, 
-                    last_active: 1755095394934,
-                    tags: ["Работа"],
-                    userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
-                    messages: [
-                        {
-                            author: "user",
-                            date: 1755095394934,
-                            files: [
-                                {
-                                    type: "img",
-                                    src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
-                                },
-                                {
-                                    type: "img",
-                                    src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
-                                },
-                                {
-                                    type: "img",
-                                    src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
-                                },
-                                {
-                                    type: "img",
-                                    src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
-                                },
-                                {
-                                    type: "other",
-                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                                },
-                                {
-                                    type: "other",
-                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                                },
-                            ],
-                            text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
-                        },
-                        {
-                            author: "bot",
-                            date: 1755095394934,
-                            files: [
-                                {
-                                    type: "none",
-                                    src: ""
-                                },
-                            ],
-                            text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
-                        },
-                        {
-                            author: "user",
-                            date: 1755095394934,
-                            files: [
-                                {
-                                    type: "img",
-                                    src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
-                                },
-                                {
-                                    type: "img",
-                                    src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
-                                },
-                                {
-                                    type: "other",
-                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                                },
-                                {
-                                    type: "other",
-                                    name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                                    src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                                },
-                            ],
-                            text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
-                        },
-                        {
-                            author: "bot",
-                            date: 1755095394934,
-                            files: [
-                                {
-                                    type: "none",
-                                    src: ""
-                                },
-                            ],
-                            text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
-                        },
-                    ]
-                },
+                people: null,
+                // activeMan: {
+                //     name: "Иванов Иван",
+                //     img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
+                //     count: 1482,
+                //     username: "ivanovivan",
+                //     id: 42423591,
+                //     phone: "",
+                //     status: "Активный",
+                //     first_msg: "/start",
+                //     fisrt_active: 1753787205862, 
+                //     last_active: 1755095394934,
+                //     tags: ["Работа"],
+                //     userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
+                //     messages: [
+                //         {
+                //             author: "user",
+                //             date: 1755095394934,
+                //             files: [
+                //                 {
+                //                     type: "img",
+                //                     src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
+                //                 },
+                //                 {
+                //                     type: "img",
+                //                     src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
+                //                 },
+                //                 {
+                //                     type: "img",
+                //                     src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
+                //                 },
+                //                 {
+                //                     type: "img",
+                //                     src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
+                //                 },
+                //                 {
+                //                     type: "other",
+                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                //                 },
+                //                 {
+                //                     type: "other",
+                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                //                 },
+                //             ],
+                //             text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
+                //         },
+                //         {
+                //             author: "bot",
+                //             date: 1755095394934,
+                //             files: [
+                //                 {
+                //                     type: "none",
+                //                     src: ""
+                //                 },
+                //             ],
+                //             text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
+                //         },
+                //         {
+                //             author: "user",
+                //             date: 1755095394934,
+                //             files: [
+                //                 {
+                //                     type: "img",
+                //                     src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
+                //                 },
+                //                 {
+                //                     type: "img",
+                //                     src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
+                //                 },
+                //                 {
+                //                     type: "other",
+                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                //                 },
+                //                 {
+                //                     type: "other",
+                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
+                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
+                //                 },
+                //             ],
+                //             text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
+                //         },
+                //         {
+                //             author: "bot",
+                //             date: 1755095394934,
+                //             files: [
+                //                 {
+                //                     type: "none",
+                //                     src: ""
+                //                 },
+                //             ],
+                //             text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
+                //         },
+                //     ]
+                // },
+                messages: null,
+                activeMan: null,
                 isNewTags: false,
                 tagBuffer: [],
                 previews: [],
-                file_previews: []
+                file_previews: [],
+                currentMsg: ""
             }
         },
-        created() {
+        unmounted() { // Для Vue 3
+            this.close();
+        },
+        async created() {
+            const user_dialogs = await getAllDialogs(this.bot_id);
+            this.people = user_dialogs;
+            // {
+            //     name: "Иванов Иван",
+            //     img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
+            //     date: 1753787205862,
+            //     message: "Тут какое-то последнее сообщение",
+            //     count: 1482,
+            //     id: 42423591,
+            // },
+
             document.addEventListener('click', this.handleClickOutside);
             this.scrollToBottom();
         },
         methods: {
+            close() {
+                if (this.socket) {
+                    this.socket.close(); // Close WebSocket connection when leaving
+                }
+            },
+            sendMessage() {
+                if (this.currentMsg.trim() === '') return;
+
+                // Prepare message object
+                const message = {
+                    author: 'client',
+                    files: this.file_previews,
+                    text: this.currentMsg,
+                    date: Date.now() / 1000,
+                };
+
+                // Send message via WebSocket
+                this.socket.send(JSON.stringify(message));
+
+                // Add sent message to the list
+                this.messages.push(message);
+
+                // Clear input field
+                this.currentMsg = '';
+
+                // Scroll to the bottom of the messages container
+                this.scrollToBottom();
+            },
+            connectWebSocket() {
+                // Construct WebSocket URL
+                const wsUrl = `wss://web.intelektaz.com/manager-api/ws/dialog/${this.activeMan.telegram_id}_${this.bot_id}`;
+
+                // Initialize WebSocket connection
+                this.socket = new WebSocket(wsUrl);
+
+                // WebSocket event listeners
+                this.socket.onopen = () => {
+                    console.log('WebSocket connection established.');
+                };
+
+                this.socket.onmessage = (event) => {
+                    const message = JSON.parse(event.data.payload);
+                    console.log(event.data.payload);
+                    this.messages.push(message); // Add received message to the list
+                    this.scrollToBottom(); // Scroll to the bottom of the messages container
+                };
+
+                this.socket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+
+                this.socket.onclose = () => {
+                    console.log('WebSocket connection closed.');
+                };
+            },
+            async setActiveMan(index) {
+                this.close();
+                this.activeMan = this.people[index]
+                const resp = await getDialog(this.bot_id, this.activeMan.dialog_id, this.activeMan.telegram_id);
+                if (resp) {
+                    this.messages = resp;
+                }
+                this.connectWebSocket();
+            },
             formatFileSize(bytes) {
                 if (bytes < 1024) {
                     return `${bytes} B`;
@@ -600,7 +641,7 @@
         row-gap: 20px;
         width: 100%;
         padding: 20px 15px;
-        background: #111433;
+        /* background: #111433; */
     }
     .dropdown_tags {
         position: absolute;
@@ -798,6 +839,7 @@
         align-items: center;
         cursor: pointer;
         transition: .1s ease-in;
+        padding: 10px;
     }
     .dialog_people {
         border-right: 1px solid rgba(255, 255, 255, 0.5);

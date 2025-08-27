@@ -42,7 +42,7 @@
             @update_managers="updateManagers"
         />
         <AppAiManagerSends v-if="activeIndex == 1 && !noAccess" :userData="userData" :activeIndex="activeIndex2" />
-        <AppAiManagerDialog v-if="activeIndex == 2 && !noAccess" />
+        <AppAiManagerDialog v-if="activeIndex == 2 && !noAccess" :bot_id="managers[activeIndex2].id" />
     </section>
 </template>
 

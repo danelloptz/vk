@@ -321,3 +321,23 @@ export async function addContactsToCampaign(manager_id, campaign_id) {
         return false; 
     }
 }
+
+export async function getAllDialogs(bot_id) {
+    try {
+        const response = await axios.get(`https://web.intelektaz.com/manager-api/get-dialogs/${bot_id}`);
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении всех пользователей в переписке", error);
+        return false; 
+    }
+}
+
+export async function getDialog(bot_id, dialog_id, user_telegram_id) {
+    try {
+        const response = await axios.get(`https://web.intelektaz.com/manager-api/get-dialog/${bot_id}/${dialog_id}/${user_telegram_id}`);
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении переписки с конкретным пользователем", error);
+        return false; 
+    }
+}

@@ -74,6 +74,7 @@
                         </li>
                     </ul>
                 </div>
+                <input type="text" v-if="['минута', 'час', 'день'].indexOf(type) != -1" class="amountOfTime" v-model="amountOfTime" />
                 <div class="datetime-wrapper" v-if="['в точное время', 'в точное время на следующий день', 'в точную дату'].indexOf(type) != -1">
                     <input
                         ref="datetimeInput"
@@ -250,6 +251,7 @@
                         "first_type": this.type,
                         "first_time": Math.ceil(dt.getTime() / 1000)
                     };
+                    if (['минута', 'час', 'день'].indexOf(this.type) != -1) send_time.first_time = this.amountOfTime;
                 } else {
                     send_time = {
                         "first": this.isFirstStep, 
