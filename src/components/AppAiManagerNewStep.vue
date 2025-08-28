@@ -24,6 +24,7 @@
                     @update="text = $event" 
                     :startText="text" 
                 />
+                <AppGoodButton :text="'ИМЯ'" @click="addName"/>
                 <span v-if="sizeToDecrease > 0" class="red">Уменьшите текст на {{ sizeToDecrease }} символов. </span>
             </div>
             
@@ -218,6 +219,9 @@
             
         },
         methods: {
+            addName() {
+                this.text = this.text + '{{ name }}';
+            },
             handleSizeText(obj) {
                 const textWithTags = obj.textWithTags;
                 const max_size = this.files.length > 0 ? 1020 : 4090;
