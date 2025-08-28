@@ -206,102 +206,6 @@
         data() {
             return {
                 people: null,
-                // activeMan: {
-                //     name: "Иванов Иван",
-                //     img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-                //     count: 1482,
-                //     username: "ivanovivan",
-                //     id: 42423591,
-                //     phone: "",
-                //     status: "Активный",
-                //     first_msg: "/start",
-                //     fisrt_active: 1753787205862, 
-                //     last_active: 1755095394934,
-                //     tags: ["Работа"],
-                //     userTags: ["Книги", "Спорт", "Работа", "Продвижение", "Искусство"],
-                //     messages: [
-                //         {
-                //             author: "user",
-                //             date: 1755095394934,
-                //             files: [
-                //                 {
-                //                     type: "img",
-                //                     src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
-                //                 },
-                //                 {
-                //                     type: "img",
-                //                     src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
-                //                 },
-                //                 {
-                //                     type: "img",
-                //                     src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
-                //                 },
-                //                 {
-                //                     type: "img",
-                //                     src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
-                //                 },
-                //                 {
-                //                     type: "other",
-                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                //                 },
-                //                 {
-                //                     type: "other",
-                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                //                 },
-                //             ],
-                //             text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
-                //         },
-                //         {
-                //             author: "bot",
-                //             date: 1755095394934,
-                //             files: [
-                //                 {
-                //                     type: "none",
-                //                     src: ""
-                //                 },
-                //             ],
-                //             text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
-                //         },
-                //         {
-                //             author: "user",
-                //             date: 1755095394934,
-                //             files: [
-                //                 {
-                //                     type: "img",
-                //                     src: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200"
-                //                 },
-                //                 {
-                //                     type: "img",
-                //                     src: "https://sun6-21.vkuserphoto.ru/s/v1/ig2/FAt8r8EAkWLeRrtk0S2TimvC0eigIrH08jSRjF0VccX1b-PHw9QdRO-3RQGvlVWdY0ZXfCy5bR8HtS0bRkvf1DbG.jpg?quality=95&crop=339,132,1065,1065&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=240x240"
-                //                 },
-                //                 {
-                //                     type: "other",
-                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                //                 },
-                //                 {
-                //                     type: "other",
-                //                     name: "ЦЕНТРАЛЬНЫЕ ПРОЦЕССОРЫ ПЕРСОНАЛЬНЫХ ЭВМ",
-                //                     src: "https://edu.petrsu.ru/files/upload/2124_1427288068.pdf"
-                //                 },
-                //             ],
-                //             text: "Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения. Текст сообщения."
-                //         },
-                //         {
-                //             author: "bot",
-                //             date: 1755095394934,
-                //             files: [
-                //                 {
-                //                     type: "none",
-                //                     src: ""
-                //                 },
-                //             ],
-                //             text: "Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. Ответ бота. "
-                //         },
-                //     ]
-                // },
                 messages: null,
                 activeMan: null,
                 isNewTags: false,
@@ -313,27 +217,26 @@
                 isConfirmModal: false
             }
         },
-        unmounted() { // Для Vue 3
+        unmounted() {
             this.close();
         },
         async created() {
             const user_dialogs = await getAllDialogs(this.bot_id);
             this.people = user_dialogs;
-            // {
-            //     name: "Иванов Иван",
-            //     img: "https://sun6-22.vkuserphoto.ru/s/v1/ig2/LgVFW7BY5QJDAfIMu6FxBZ65WkxQIPs9-YVYQVGqdims6hVhlyD1HjUqSQFvUYDSXpid2Rgxm-PQLsAzYIlH2yiP.jpg?quality=95&crop=192,130,768,768&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720&ava=1&cs=200x200",
-            //     date: 1753787205862,
-            //     message: "Тут какое-то последнее сообщение",
-            //     count: 1482,
-            //     id: 42423591,
-            // },
-
             document.addEventListener('click', this.handleClickOutside);
+        },
+        watch: {
+            userTags(val) {
+                console.log('userTags: ', val);
+            }
         },
         methods: {
             close() {
-                if (this.socket) {
-                    this.socket.close();
+                if (this.soket_dialog) {
+                    this.soket_dialog.close();
+                }
+                if (this.soket_users) {
+                    this.soket_users.close();
                 }
             },
             sendMessage() {
@@ -346,7 +249,7 @@
                     date: Date.now() / 1000,
                 };
 
-                this.socket.send(JSON.stringify(message));
+                this.soket_dialog.send(JSON.stringify(message));
 
                 // this.messages.push(message);
 
@@ -355,15 +258,17 @@
                 this.scrollToBottom();
             },
             connectWebSocket() {
-                const wsUrl = `wss://web.intelektaz.com/manager-api/ws/dialog/${this.activeMan.telegram_id}_${this.bot_id}`;
+                const wsDialogUrl = `wss://web.intelektaz.com/manager-api/ws/dialog/${this.activeMan.telegram_id}_${this.bot_id}`;
+                const wsUsersUl = `wss://web.intelektaz.com/manager-api/ws/dialogs_list/${this.bot_id}`;
 
-                this.socket = new WebSocket(wsUrl);
+                this.soket_dialog = new WebSocket(wsDialogUrl);
+                this.soket_users = new WebSocket(wsUsersUl);
 
-                this.socket.onopen = () => {
-                    console.log('WebSocket connection established.');
+                this.soket_dialog.onopen = () => {
+                    console.log('Сокент на диалоги открыт');
                 };
 
-                this.socket.onmessage = (event) => {
+                this.soket_dialog.onmessage = (event) => {
                     console.log(event);
                     const message = JSON.parse(event.data).payload;
                     console.log(event.data.payload);
@@ -371,12 +276,28 @@
                     this.scrollToBottom();
                 };
 
-                this.socket.onerror = (error) => {
-                    console.error('WebSocket error:', error);
+                this.soket_dialog.onerror = (error) => {
+                    console.error('Ошибка на сокете диалогов:', error);
                 };
 
-                this.socket.onclose = () => {
-                    console.log('WebSocket connection closed.');
+                this.soket_dialog.onclose = () => {
+                    console.log('Соединение с сокетом на диалоги закрыто. ');
+                };
+
+                this.soket_users.onopen = () => {
+                    console.log('Сокет на информацию о пользователях открыт. ');
+                };
+
+                this.soket_users.onmessage = (event) => {
+                    console.log(event);
+                };
+
+                this.soket_users.onerror = (error) => {
+                    console.error('Ошибка на сокете информации пользователей', error);
+                };
+
+                this.soket_users.onclose = () => {
+                    console.log('Соединение с сокетом информации о пользователях закрыто. ');
                 };
             },
             async setActiveMan(index) {
@@ -859,6 +780,7 @@
         width: 100%;
         border: 1px solid rgba(255, 255, 255, 0.5);
         margin-top: 38px;
+        height: 1050px;
     }
     .search_btn {
         width: 150px;

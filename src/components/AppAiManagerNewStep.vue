@@ -24,7 +24,6 @@
                     @update="text = $event" 
                     :startText="text" 
                 />
-                <AppGoodButton :text="'ИМЯ'" @click="addName"/>
                 <span v-if="sizeToDecrease > 0" class="red">Уменьшите текст на {{ sizeToDecrease }} символов. </span>
             </div>
             
@@ -210,22 +209,18 @@
         created() {
             setTimeout(() => {
                 const el = document.querySelector('.ck-editor');
-                const el2 = document.querySelector('.ck-content');
+                // const el2 = document.querySelector('.ck-content');
                 if (el) el.style.width = '100%';
-                if (el2) {
-                    el2.style.height = '280px';
-                } 
+                // if (el2) {
+                //     el2.style.height = '280px';
+                // } 
             }, 1000);
             
         },
         methods: {
-            addName() {
-                this.text = this.text + '{{ name }}';
-            },
-            handleSizeText(obj) {
-                const textWithTags = obj.textWithTags;
+            handleSizeText(size) {
                 const max_size = this.files.length > 0 ? 1020 : 4090;
-                if (textWithTags > max_size) this.sizeToDecrease = textWithTags - 1024
+                if (size > max_size) this.sizeToDecrease = size - max_size
                 else this.sizeToDecrease = 0;
             },
             async saveStep() {
@@ -350,10 +345,17 @@
 
                 files.forEach(file => {
                 if (file.type.startsWith('image/')) {
+                    console.log(file.size);
+                    if (file.size > 300 * 1024 ) {
+                        this.msg = "Размер загружаемого файла не должен превышать 300КБ!";
+                        this.isConfirmModal = true;
+                        return;
+                    }
                     this.files.push(file);
                     const reader = new FileReader();
                     reader.onload = e => {
-                    this.previews.push(e.target.result);
+                        this.previews.push(e.target.result);
+                        this.handleSizeText(this.text.length);
                     };
                     reader.readAsDataURL(file);
                 }
