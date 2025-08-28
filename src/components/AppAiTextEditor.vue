@@ -5,6 +5,7 @@
         :editor="editor"
         :config="config"
         style="width: 100% !important;"
+        ref="ed"
     />
 </template>
 
@@ -20,6 +21,11 @@ export default {
         startText: {
             type: String,
             default: ''
+        }
+    },
+    data() {
+        return {
+            charactersCount: 0
         }
     },
     emits: ['update'],
@@ -44,16 +50,18 @@ export default {
             return cloud.data.value.CKEditor.ClassicEditor;
         });
 
+        let wordsCount;
+
         const config = computed(() => {
             if (!cloud.data.value) {
                 return null;
             }
 
-            const { Essentials, Paragraph, Bold, Italic, Strikethrough, AutoLink, Link } = cloud.data.value.CKEditor;
+            const { Essentials, Paragraph, Bold, Italic, Strikethrough, AutoLink, Link, WordCount } = cloud.data.value.CKEditor;
 
             return {
                 licenseKey: 'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3ODU3MTUxOTksImp0aSI6IjhjMDBiODA4LTBkYTctNDYwZC04ZmNkLTVmM2FkODVhZGM0NiIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiXSwiZmVhdHVyZXMiOlsiRFJVUCIsIkUyUCIsIkUyVyJdLCJ2YyI6IjdiMTNhMThhIn0.FGhvY1tti0n0LJ-u4oG8jXBaEMgbbYxC3-ThxuresQP4GxzGADxB0QS76gt-f33lhE0EtN2tinTezpRt8yy3KQ',
-                plugins: [Essentials, Paragraph, Bold, Italic, Strikethrough, AutoLink, Link],
+                plugins: [Essentials, Paragraph, Bold, Italic, Strikethrough, AutoLink, Link, WordCount],
                 fontFamily: {
                     options: [
                         'default',
@@ -69,14 +77,25 @@ export default {
                 },
                 toolbar: [
                     'undo', 'redo', 'bold', 'italic', 'underline', 'strikethrough', 'link'
-                ]
+                ],
+                wordCount: {
+                    onUpdate: stats => {
+                        // Prints the current content statistics.
+                        wordsCount = stats.characters; 
+                        console.log( `Characters: ${ stats.characters }\nWords: ${ stats.words }` );
+                    }
+                }
             };
         });
 
-        // Наблюдаем за изменениями в редакторе и эмитим событие
         onMounted(() => {
             watch(editorData, (newValue) => {
-                emit('update', newValue);
+                // Эмитим событие с обновлённым значением
+                emit('update', editorData.value);
+                emit("count", {
+                    text: wordsCount,
+                    textWithTags: newValue.length
+                });
             });
         });
 
@@ -90,7 +109,8 @@ export default {
 </script>
 
 <style>
-    .spoiler-text {
+    .count__words {
         color: red;
+        font-size: 20px;
     }
 </style>

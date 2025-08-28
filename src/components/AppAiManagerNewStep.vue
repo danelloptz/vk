@@ -1,4 +1,10 @@
 <template>
+    <AppAiManagerConfirmModal 
+        :message="msg" 
+        :isOptions="false"
+        :visibility1="isConfirmModal"
+        @update:visibility1="isConfirmModal = $event"
+    />
     <div class="new_step">
         <h2>Создание шага</h2>
         <div class="row">
@@ -11,7 +17,16 @@
         </div>
         <div class="row">
             <span>Текст</span>
-            <AppAiTextEditor class="editor" @update="text = $event" :startText="text" />
+            <div class="editor_col">
+                <AppAiTextEditor 
+                    class="editor" 
+                    @count="handleSizeText"
+                    @update="text = $event" 
+                    :startText="text" 
+                />
+                <span v-if="sizeToDecrease > 0" class="red">Уменьшите текст на {{ sizeToDecrease }} символов. </span>
+            </div>
+            
         </div>
         <div class="row" v-if="previews.length == 0">
             <span>Изображение</span>
@@ -129,6 +144,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppBadButton from '@/components/AppBadButton.vue';
     import AppAiTextEditor from '@/components/AppAiTextEditor.vue';
+    import AppAiManagerConfirmModal from '@/components//AppAiManagerConfirmModal.vue';
     import { 
         createCampaignStep, 
         getCompaignStep,
@@ -137,7 +153,7 @@
     import { loadImage } from '@/services/other';
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppAiTextEditor },
+        components: { AppGoodButton, AppBadButton, AppAiTextEditor, AppAiManagerConfirmModal },
         props: {
             isFirstStep: Boolean,
             editData: Object,
@@ -161,7 +177,10 @@
                 isTimeRangeVisible: false,
                 date: '',
                 files: [],
-                step_id: null
+                step_id: null,
+                sizeToDecrease: 0,
+                msg: "",
+                isConfirmModal: false
             }
         },
         watch: {
@@ -199,7 +218,18 @@
             
         },
         methods: {
+            handleSizeText(obj) {
+                const textWithTags = obj.textWithTags;
+                const max_size = this.files.length > 0 ? 1020 : 4090;
+                if (textWithTags > max_size) this.sizeToDecrease = textWithTags - 1024
+                else this.sizeToDecrease = 0;
+            },
             async saveStep() {
+                 if (this.sizeToDecrease > 0) {
+                    this.msg = `Уменьшите размер текста на ${this.sizeToDecrease} символов!`;
+                    this.isConfirmModal = true;
+                    return;
+                }
                 let send_time;
                 if (this.isFirstStep) {
                     const dt = new Date(this.date);
@@ -243,6 +273,11 @@
                 this.$emit('backup');
             },
             async createNewStep() {
+                if (this.sizeToDecrease > 0) {
+                    this.msg = `Уменьшите размер текста на ${this.sizeToDecrease} символов!`;
+                    this.isConfirmModal = true;
+                    return;
+                }
                 let send_time;
                 if (this.isFirstStep) {
                     const dt = new Date(this.date);
@@ -521,6 +556,16 @@
         @media (max-width: 650px) {
             font-size: 14px;
         }
+    }
+    .editor_col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+    }
+    .red {
+        font-family: 'OpenSans';
+        color: red !important;
+        font-size: 20px;
     }
     .row {
         display: grid;

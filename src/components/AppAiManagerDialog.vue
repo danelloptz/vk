@@ -1,4 +1,10 @@
 <template>
+    <AppAiManagerConfirmModal 
+        :message="msg" 
+        :isOptions="false"
+        :visibility1="isConfirmModal"
+        @update:visibility1="isConfirmModal = $event"
+    />
     <section class="dialogs">
         <div class="search">
             <input class="search_field" v-model="search" placeholder="Поиск" />
@@ -115,7 +121,7 @@
                             multiple
                         />
                         <textarea class="dialog_field_footer_textarea" v-model="currentMsg" placeholder="Отправить сообщение"></textarea>
-                        <img src="@/assets/images/send_message.png" class="send_message" @click="sendMessage" />
+                        <AppGoodButton :text="'ОТПРАВИТЬ'" class="send_message" @click="sendMessage" />
                     </div>
                 </div>
             </div>
@@ -130,7 +136,7 @@
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Телефон</span>
-                    <span>{{ activeMan?.phone != "" ? activeMan.phone : '-' }}</span>
+                    <span>{{ activeMan?.phone && activeMan?.phone != "" ? activeMan.phone : '-' }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Username</span>
@@ -142,11 +148,11 @@
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Первое сообщение</span>
-                    <span>{{ activeMan?.first_msg }}</span>
+                    <span>{{ activeMan?.first_message_text }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Первая активность</span>
-                    <span>{{ formatedFullDate(activeMan?.fisrt_active) }}</span>
+                    <span>{{ formatedFullDate(+activeMan?.first_message_ts * 1000) }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Последняя активность</span>
@@ -166,7 +172,7 @@
                     <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" @click="openNewTags" />
                     <div class="dropdown_tags" v-if="isNewTags">
                         <div 
-                            v-for="(tag, tag_index) in activeMan?.userTags.filter(tag => !activeMan.tags.includes(tag))"
+                            v-for="(tag, tag_index) in userTags.filter(tag => !activeMan.tags.includes(tag))"
                             :key="tag_index"
                             class="dropdown_tag"
                             @click="addTag(tag)"
@@ -189,11 +195,13 @@
         getAllDialogs,
         getDialog 
     } from '@/services/manager';
+    import AppAiManagerConfirmModal from '@/components/AppAiManagerConfirmModal.vue';
 
     export default {
-        components: { AppGoodButton, AppBadButton },
+        components: { AppGoodButton, AppBadButton, AppAiManagerConfirmModal },
         props: {
-            bot_id: String
+            bot_id: String,
+            userTags: Array
         },
         data() {
             return {
@@ -300,7 +308,9 @@
                 tagBuffer: [],
                 previews: [],
                 file_previews: [],
-                currentMsg: ""
+                currentMsg: "",
+                msg: "",
+                isConfirmModal: false
             }
         },
         unmounted() { // Для Vue 3
@@ -319,18 +329,16 @@
             // },
 
             document.addEventListener('click', this.handleClickOutside);
-            this.scrollToBottom();
         },
         methods: {
             close() {
                 if (this.socket) {
-                    this.socket.close(); // Close WebSocket connection when leaving
+                    this.socket.close();
                 }
             },
             sendMessage() {
                 if (this.currentMsg.trim() === '') return;
 
-                // Prepare message object
                 const message = {
                     author: 'client',
                     files: this.file_previews,
@@ -338,35 +346,29 @@
                     date: Date.now() / 1000,
                 };
 
-                // Send message via WebSocket
                 this.socket.send(JSON.stringify(message));
 
-                // Add sent message to the list
-                this.messages.push(message);
+                // this.messages.push(message);
 
-                // Clear input field
                 this.currentMsg = '';
 
-                // Scroll to the bottom of the messages container
                 this.scrollToBottom();
             },
             connectWebSocket() {
-                // Construct WebSocket URL
                 const wsUrl = `wss://web.intelektaz.com/manager-api/ws/dialog/${this.activeMan.telegram_id}_${this.bot_id}`;
 
-                // Initialize WebSocket connection
                 this.socket = new WebSocket(wsUrl);
 
-                // WebSocket event listeners
                 this.socket.onopen = () => {
                     console.log('WebSocket connection established.');
                 };
 
                 this.socket.onmessage = (event) => {
-                    const message = JSON.parse(event.data.payload);
+                    console.log(event);
+                    const message = JSON.parse(event.data).payload;
                     console.log(event.data.payload);
-                    this.messages.push(message); // Add received message to the list
-                    this.scrollToBottom(); // Scroll to the bottom of the messages container
+                    this.messages.push(message);
+                    this.scrollToBottom();
                 };
 
                 this.socket.onerror = (error) => {
@@ -385,6 +387,7 @@
                     this.messages = resp;
                 }
                 this.connectWebSocket();
+                this.scrollToBottom();
             },
             formatFileSize(bytes) {
                 if (bytes < 1024) {
@@ -432,7 +435,7 @@
             },
             scrollToBottom() {
                 this.$nextTick(() => {
-                    const messagesContainer = this.$el.querySelector('.messages');
+                    const messagesContainer = document.querySelector('.dialog_field_messages');
                     if (messagesContainer) {
                         messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     }
@@ -640,7 +643,7 @@
         flex-direction: column;
         row-gap: 20px;
         width: 100%;
-        padding: 20px 15px;
+        padding: 0px 10px;
         /* background: #111433; */
     }
     .dropdown_tags {
@@ -750,8 +753,10 @@
         border-right: 1px solid rgba(255, 255, 255, 0.5);
     }
     .send_message {
-        width: 15px;
-        height: 15px;
+        width: 90px;
+        height: 29px;
+        font-size: 10px;
+        letter-spacing: 0px;
     }
     .dialog_field_footer_textarea {
         min-height: 70px;
@@ -772,18 +777,18 @@
     }
     .dialog_field_footer_controls {
         display: grid;
-        grid-template-columns: 20px 1fr 15px;
-        padding: 15px 20px;
+        grid-template-columns: 20px 1fr 90px;
+        padding: 10px 20px;
         column-gap: 10px;
         border-top: 1px solid rgba(255, 255, 255, 0.5);
     }
     .dialog_field_messages {
-        height: 700px;
+        height: 864px; /* 86 80 */
         border-top: 1px solid rgba(255, 255, 255, 0.5);
         padding: 30px 10px;
         display: flex;
         flex-direction: column;
-        row-gap: 30px;
+        row-gap: 20px;
         overflow-y: auto;
     }
     .dialog_people_item_date {

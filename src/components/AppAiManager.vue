@@ -42,7 +42,11 @@
             @update_managers="updateManagers"
         />
         <AppAiManagerSends v-if="activeIndex == 1 && !noAccess" :userData="userData" :activeIndex="activeIndex2" />
-        <AppAiManagerDialog v-if="activeIndex == 2 && !noAccess" :bot_id="managers[activeIndex2].id" />
+        <AppAiManagerDialog 
+            v-if="activeIndex == 2 && !noAccess" 
+            :bot_id="managers[activeIndex2].id" 
+            :userTags="userTags"
+        />
     </section>
 </template>
 
@@ -84,7 +88,8 @@
                 managers: null,
                 noAccess: false,
                 isLeader: false,
-                activeIndex2: 0
+                activeIndex2: 0,
+                userTags: null
             }
         },
         async created() {
@@ -97,6 +102,7 @@
                 const managers = await getManagers(this.userData.id);
                 if (managers) {
                     this.managers = managers;
+                    this.userTags = this.managers[this.activeIndex2].assistant.assistant_config.user_filters;
                 }
             },
             setActive2(index) {

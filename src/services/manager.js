@@ -334,7 +334,11 @@ export async function getAllDialogs(bot_id) {
 
 export async function getDialog(bot_id, dialog_id, user_telegram_id) {
     try {
-        const response = await axios.get(`https://web.intelektaz.com/manager-api/get-dialog/${bot_id}/${dialog_id}/${user_telegram_id}`);
+        const response = await axios.get(`https://web.intelektaz.com/manager-api/get-dialog/${bot_id}/${dialog_id}/${user_telegram_id}`, {
+            params: {
+                limit: 100
+            }
+        });
         return response.data;
     } catch(error) {
         console.error("Ошибка при получении переписки с конкретным пользователем", error);
