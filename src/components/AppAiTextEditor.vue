@@ -104,7 +104,7 @@
           button.on('execute', () => {
             editorInstance.model.change(writer => {
               const insertPosition = editorInstance.model.document.selection.getFirstPosition();
-              writer.insertText('{{ full_name }}', insertPosition);
+              writer.insertText('{{name}}', insertPosition);
             });
           });
           return button;
@@ -120,7 +120,7 @@
           button.on('execute', () => {
             editorInstance.model.change(writer => {
               const insertPosition = editorInstance.model.document.selection.getFirstPosition();
-              writer.insertText('{{ fio }}', insertPosition);
+              writer.insertText('{{full_name}}', insertPosition);
             });
           });
           return button;
@@ -136,7 +136,7 @@
           button.on('execute', () => {
             editorInstance.model.change(writer => {
               const insertPosition = editorInstance.model.document.selection.getFirstPosition();
-              writer.insertText('{{ username }}', insertPosition);
+              writer.insertText('{{username}}', insertPosition);
             });
           });
           return button;
