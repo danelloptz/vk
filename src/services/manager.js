@@ -345,3 +345,15 @@ export async function getDialog(bot_id, dialog_id, user_telegram_id) {
         return false; 
     }
 }
+
+export async function changeDialog(dialog_id, data) {
+    try {
+        const response = await axios.patch(`https://web.intelektaz.com/manager-api/get-dialog/${dialog_id}`, {
+            "data": data,
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при обновлении данных о беседе с пользователем", error);
+        return false; 
+    }
+}

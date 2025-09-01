@@ -73,7 +73,7 @@
                                 <span>{{ file.name }}</span>
                             </div>
                         </div>
-                        <span class="dialog_field_message_text">{{ msg.text }}</span>
+                        <span class="dialog_field_message_text" v-html="msg.text"></span>
                     </div>
                 </div>
                 <div class="dialog_field_footer">
@@ -120,7 +120,12 @@
                             hidden
                             multiple
                         />
-                        <textarea class="dialog_field_footer_textarea" v-model="currentMsg" placeholder="Отправить сообщение"></textarea>
+                        <textarea 
+                            class="dialog_field_footer_textarea"  
+                            v-model="currentMsg" 
+                            placeholder="Отправить сообщение"
+                            @keydown="handleKeyDown"
+                        ></textarea>
                         <AppGoodButton :text="'ОТПРАВИТЬ'" class="send_message" @click="sendMessage" />
                     </div>
                 </div>
@@ -158,7 +163,6 @@
                     <span class="mute">Последняя активность</span>
                     <span>{{ formatedFullDate(+activeMan.last_message_ts * 1000) }}</span>
                 </div>
-                <AppBadButton :text="'+ ДОБАВИТЬ ПОЛЕ'" class="add_field_btn" />
                 <div class="dialog_info_item" v-if="activeMan.tags">
                     <span class="mute">Теги</span>
                     <span
@@ -193,7 +197,8 @@
     import AppBadButton from '@/components/AppBadButton.vue';
     import { 
         getAllDialogs,
-        getDialog 
+        getDialog,
+        changeDialog
     } from '@/services/manager';
     import AppAiManagerConfirmModal from '@/components/AppAiManagerConfirmModal.vue';
 
@@ -225,12 +230,18 @@
             this.people = user_dialogs;
             document.addEventListener('click', this.handleClickOutside);
         },
-        watch: {
-            userTags(val) {
-                console.log('userTags: ', val);
-            }
-        },
         methods: {
+            async handleKeyDown(event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    await this.sendMessage();
+                }
+
+                if (event.key === "Enter" && event.shiftKey) {
+                    event.preventDefault();
+                    this.currentMsg += "\n";
+                }
+            },
             close() {
                 if (this.soket_dialog) {
                     this.soket_dialog.close();
@@ -239,7 +250,7 @@
                     this.soket_users.close();
                 }
             },
-            sendMessage() {
+            async sendMessage() {
                 if (this.currentMsg.trim() === '') return;
 
                 const message = {
@@ -248,6 +259,9 @@
                     text: this.currentMsg,
                     date: Date.now() / 1000,
                 };
+
+                if (this.activeMan.bot_active) 
+                    await changeDialog(this.activeMan.dialog_id, { "bot_active": false });
 
                 this.soket_dialog.send(JSON.stringify(message));
 
@@ -290,6 +304,12 @@
 
                 this.soket_users.onmessage = (event) => {
                     console.log(event);
+                    const data = JSON.parse(event.data);
+                    if (!data.payload) return;
+                    const index = this.people.findIndex(x => x.telegram_id == data.payload.telegram_id);
+                    console.log(index, this.people);
+                    this.people.splice(index, 1);
+                    this.people.unshift(data.payload);
                 };
 
                 this.soket_users.onerror = (error) => {
@@ -374,9 +394,12 @@
                     this.closeNewTags();
                 }
             },
-            saveTags() {
-                this.tagBuffer = [];
-                this.closeNewTags();
+            async saveTags() {
+                const resp = await changeDialog(this.activeMan.dialog_id, {"tags": this.tagBuffer});
+                if (resp) {
+                    this.tagBuffer = [];
+                    this.closeNewTags();
+                }
             },
             openNewTags() {
                 this.isNewTags = true;

@@ -102,7 +102,8 @@
                 const managers = await getManagers(this.userData.id);
                 if (managers) {
                     this.managers = managers;
-                    this.userTags = this.managers[this.activeIndex2].assistant.assistant_config.user_filters;
+                    this.userTags = JSON.parse(this.managers[this.activeIndex2].assistant.assistant_config.user_filters);
+                    console.log("useTags в родителе", this.userTags)
                 }
             },
             setActive2(index) {
