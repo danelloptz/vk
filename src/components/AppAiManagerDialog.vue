@@ -34,7 +34,6 @@
                     v-for="(item, index) in people"
                     :key="index"
                     class="dialog_people_item"
-                    :class="{ active_man: item.telegram_id == activeMan?.telegram_id }"
                     @click="setActiveMan(item.telegram_id)"
                 >
                     <img :src="item.avatar" />
@@ -61,8 +60,8 @@
                         class="dialog_field_message"
                     >
                         <div class="dialog_field_message_header">
-                            <img :src="msg.author == 'user' ? activeMan.avatar : require('@/assets/images/intelektaz_logo.png')" />
-                            <span>{{ msg.author == 'user' ? activeMan.full_name : 'Intelektaz Bot' }}</span>
+                            <img :src="msg.author == 'user' ? activeMan.avatar : msg.author == 'client' ? userData.avatar_url : require('@/assets/images/intelektaz_logo.png')" />
+                            <span>{{ msg.author == 'user' ? activeMan.full_name : msg.author == 'client' ? userData.name : 'Intelektaz Bot' }}</span>
                             <span class="dialog_field_message_header_date">{{ formatedDate(+msg.date * 1000) }}</span>
                         </div>
                         <div 
@@ -132,12 +131,12 @@
                         <input
                             id="file"
                             type="file"
-                            accept="image/*,text/*,.pdf,.doc,.docx"
+                            accept="image/*,text/*,.pdf,.doc,.docx,video/*,.mp4,.avi,.mov,.mkv,.webm"
                             @change="onFileChange"
                             ref="fileInput"
                             hidden
                             multiple
-                        />
+                            />
                         <textarea 
                             class="dialog_field_footer_textarea"  
                             v-model="currentMsg" 
@@ -220,13 +219,15 @@
         changeUser
     } from '@/services/manager';
     import AppAiManagerConfirmModal from '@/components/AppAiManagerConfirmModal.vue';
+    import { loadImage } from '@/services/other';
 
     export default {
         components: { AppGoodButton, AppBadButton, AppAiManagerConfirmModal },
         props: {
             bot_id: String,
             userTags: Array,
-            isLeader: Boolean
+            isLeader: Boolean,
+            userData: Object
         },
         data() {
             return {
@@ -234,6 +235,7 @@
                 messages: null,
                 activeMan: null,
                 isNewTags: false,
+                files_to_send: [],
                 tagBuffer: [],
                 previews: [],
                 file_previews: [],
@@ -281,24 +283,48 @@
             async sendMessage() {
                 if (this.currentMsg.trim() === '') return;
 
+                let files = [];
+
+                // ждём загрузку всех картинок
+                for (const link of this.files_to_send) {
+                    const image = await loadImage(link);
+                    files.push({
+                        type: "img",
+                        src: image.image_id
+                    });
+                }
+
+                // добавляем другие файлы
+                for (const file of this.file_previews) {
+                    files.push({
+                        type: "other",
+                        name: file.name,
+                        src: file.url
+                    });
+                }
+
+                console.log('ПЕРЕД ОТПРАВКОЙ', files);
+
                 const message = {
                     author: 'client',
-                    files: this.file_previews,
+                    files: files,
                     text: this.currentMsg,
                     date: Date.now() / 1000,
                 };
 
-                if (this.activeMan.bot_active) 
-                    await changeDialog(this.activeMan.dialog_id, { "bot_active": false, "time": 15 });
+                if (this.activeMan.bot_active) {
+                    await changeDialog(this.activeMan.dialog_id, { bot_active: false, time: 15 });
+                }
 
                 this.soket_dialog.send(JSON.stringify(message));
 
-                // this.messages.push(message);
-
                 this.currentMsg = '';
-
+                this.file_previews = [];
+                this.previews = [];
+                this.files_to_send = [];
                 this.scrollToBottom();
             },
+
             connectWebSocket() {
                 const wsDialogUrl = `wss://web.intelektaz.com/manager-api/ws/dialog/${this.activeMan.telegram_id}_${this.bot_id}`;
                 const wsUsersUl = `wss://web.intelektaz.com/manager-api/ws/dialogs_list/${this.bot_id}`;
@@ -311,7 +337,6 @@
                 };
 
                 this.soket_dialog.onmessage = (event) => {
-                    console.log(event);
                     const message = JSON.parse(event.data).payload;
                     console.log(event.data.payload);
                     this.messages.push(message);
@@ -385,6 +410,7 @@
                 this.$refs.fileInput.click();
             },
             onFileChange(event) {
+                console.log(event);
                 const files = Array.from(event.target.files);
 
                 this.previews = [];
@@ -392,6 +418,12 @@
 
                 files.forEach(file => {
                     if (file.type.startsWith('image/')) {
+                        if (file.size > 300 * 1024 ) {
+                            this.msg = "Размер загружаемого файла не должен превышать 300КБ!";
+                            this.isConfirmModal = true;
+                            return;
+                        }
+                        this.files_to_send.push(file);
                         const reader = new FileReader();
                         reader.onload = e => {
                             this.previews.push(e.target.result);
@@ -407,6 +439,7 @@
                         console.log(this.file_previews);
                     }
                 });
+                this.$refs.fileInput.value = '';
             },
             scrollToBottom() {
                 this.$nextTick(() => {
@@ -761,6 +794,7 @@
         display: grid;
         grid-template-columns: 20px 1fr 90px;
         padding: 15px 20px;
+        padding-bottom: 0px;
         column-gap: 10px;
         border-top: 1px solid rgba(255, 255, 255, 0.5);
     }
@@ -770,7 +804,7 @@
         padding: 30px 10px;
         display: flex;
         flex-direction: column;
-        justify-content: end;
+        /* justify-content: end; */
         row-gap: 20px;
         overflow-y: auto;
     }
@@ -842,7 +876,7 @@
         width: 100%;
         border: 1px solid rgba(255, 255, 255, 0.5);
         margin-top: 38px;
-        height: 1050px;
+        min-height: 1050px;
     }
     .search_btn {
         width: 150px;
@@ -882,6 +916,7 @@
         background: #111433;
         max-height: 300px;
         overflow-y: auto;
+        z-index: 910;
     }
     .filtered_user {
         display: flex;

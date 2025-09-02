@@ -47,6 +47,7 @@
             :bot_id="managers[activeIndex2].id" 
             :userTags="userTags"
             :isLeader="isLeader"
+            :userData="userData"
         />
     </section>
 </template>
