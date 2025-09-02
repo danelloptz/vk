@@ -29,7 +29,7 @@
             <span>Для просмотра истории переписки повысьте тариф до уровня Leader</span>
         </div>
         <div class="dialog">
-            <div class="dialog_people">
+            <div class="dialog_people" v-if="windowWidth > 650 || windowWidth <= 650 && !activeMan && !isActiveUserInfo">
                 <div 
                     v-for="(item, index) in people"
                     :key="index"
@@ -39,13 +39,18 @@
                     <img :src="item.avatar" />
                     <div class="dialog_people_item_col">
                         <h2>{{ item.full_name }}</h2>
-                        <span class="dialog_people_item_message">{{ item.last_message_text.slice(0, 16) + '...' }}</span>
+                        <span class="dialog_people_item_message">{{ item.last_message_text.length > 16 ? item.last_message_text.slice(0, 16) + '...' : item.last_message_text }}</span>
                         <span class="dialog_people_item_count">{{ item.total_messages }}</span>
                     </div>
+                    <div class="dialog_people_item_col_mobile">
+                        <h2>{{ item.full_name }}</h2>
+                        <span class="dialog_people_item_message">{{ item.last_message_text.length > 16 ? item.last_message_text.slice(0, 16) + '...' : item.last_message_text }}</span>
+                    </div>
+                    <span class="dialog_people_item_count_mobile">{{ item.total_messages }}</span>
                     <span class="dialog_people_item_date">{{ formatedDate(+item.last_message_ts * 1000) }}</span>
                 </div>
             </div>
-            <div class="dialog_field" v-if="activeMan">
+            <div class="dialog_field" v-if="activeMan && windowWidth > 650 || activeMan && windowWidth <= 650 && !isActiveUserInfo">
                 <div class="dialog_field_header">
                     <img :src="activeMan.avatar" />
                     <div class="dialog_field_header_col">
@@ -73,8 +78,8 @@
                                 v-for="(img, img_index) in msg.files.filter(t => t.type == 'img')"
                                 :key="img_index"
                                 class="dialog_field_message_img"
-                                :src="img.src"
-                                @click="downloadImage(img.src)"
+                                :src="img.url"
+                                @click="downloadImage(img.url)"
                             />
                         </div>
                         <div 
@@ -147,7 +152,7 @@
                     </div>
                 </div>
             </div>
-            <div class="dialog_info" v-if="activeMan">
+            <div class="dialog_info" v-if="activeMan && windowWidth > 650 || activeMan && isActiveUserInfo && windowWidth <= 650">
                 <div class="dialog_info_item" style="align-self: center; align-items: center;">
                     <img :src="activeMan.avatar" class="dialog_info_item_img"/>
                     <h2>{{ activeMan.full_name }}</h2>
@@ -242,7 +247,9 @@
                 currentMsg: "",
                 msg: "",
                 isConfirmModal: false,
-                search: ""
+                search: "",
+                windowWidth: null,
+                isActiveUserInfo: false
             }
         },
         unmounted() {
@@ -251,7 +258,9 @@
         async created() {
             const user_dialogs = await getAllDialogs(this.bot_id);
             this.people = user_dialogs;
+            this.windowWidth = window.innerWidth;
             document.addEventListener('click', this.handleClickOutside);
+            document.addEventListener('resize', this.handleResize);
         },
         computed: {
             searchUser() {
@@ -261,6 +270,9 @@
             },
         },
         methods: {
+            handleResize() {
+                this.windowWidth = window.innerWidth;
+            },
             async handleKeyDown(event) {
                 if (event.key === "Enter" && !event.shiftKey) {
                     event.preventDefault();
@@ -290,16 +302,18 @@
                     const image = await loadImage(link);
                     files.push({
                         type: "img",
-                        src: image.image_id
+                        url: image.image_id
                     });
                 }
 
                 // добавляем другие файлы
                 for (const file of this.file_previews) {
+                    const link = await loadImage(file.link);
+                    const type = file.type.startsWith('video/') ? 'video' : 'other';
                     files.push({
-                        type: "other",
+                        type: type,
                         name: file.name,
-                        src: file.url
+                        url: link.image_id
                     });
                 }
 
@@ -435,6 +449,8 @@
                             name: file.name,
                             size: file.size,
                             url: fileUrl,
+                            link: file,
+                            type: file.type
                         });
                         console.log(this.file_previews);
                     }
@@ -826,12 +842,26 @@
         margin-top: 10px;
         width: fit-content;
     }
+    .dialog_people_item_count_mobile {
+        color: white;
+        font-size: 8px;
+        font-family: 'OpenSans';
+        border-radius: 10px;
+        padding: 1px 5px;
+        background: #1CA2EA;
+        margin-top: 10px;
+        width: fit-content;
+        display: none;
+        @media (max-width: 650px) {
+            
+        }
+    }
     .dialog_people_item_message {
         color: rgba(255, 255, 255, 0.5);
         font-family: 'OpenSans';
         font-size: 12px;
     }
-    .dialog_people_item_col h2 {
+    .dialog_people_item_col h2, .dialog_people_item_col_mobile h2 {
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
@@ -841,6 +871,16 @@
     .dialog_people_item_col {
         display: flex;
         flex-direction: column;
+        @media (max-width: 650px) {
+            display: none;
+        }
+    }
+    .dialog_people_item_col_mobile {
+        flex-direction: column;
+        display: none;
+        @media (max-width: 650px) {
+            display: flex;
+        }
     }
     .dialog_people_item img {
         width: 60px;
@@ -877,6 +917,12 @@
         border: 1px solid rgba(255, 255, 255, 0.5);
         margin-top: 38px;
         min-height: 1050px;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            border: none;
+            min-height: auto;
+        }
     }
     .search_btn {
         width: 150px;
