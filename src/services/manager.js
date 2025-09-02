@@ -357,3 +357,15 @@ export async function changeDialog(dialog_id, data) {
         return false; 
     }
 }
+
+export async function changeUser(user_id, data) {
+    try {
+        const response = await axios.patch(`https://web.intelektaz.com/manager-api/get-user/${user_id}`, {
+            "data": data,
+        });
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при обновлении данных о пользователе", error);
+        return false; 
+    }
+}

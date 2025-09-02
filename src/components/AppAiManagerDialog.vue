@@ -8,7 +8,25 @@
     <section class="dialogs">
         <div class="search">
             <input class="search_field" v-model="search" placeholder="Поиск" />
-            <AppGoodButton :text="'ПОИСК'" class="search_btn" />
+            <AppGoodButton :text="'ПОИСК'" class="search_btn" @click="searchUser" />
+            <div class="filtered_users" v-if="search != ''">
+                <div 
+                    v-for="(man, index) in searchUser"
+                    :key="index"
+                    class="filtered_user"
+                    @click="setActiveMan(man.telegram_id)"
+                >
+                    <img :src="man.avatar" />
+                    <div class="col">
+                        <span>{{ man.full_name }}</span>
+                        <span class="mute_2">@{{ man.username }}</span>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="noLeader_field" v-if="!isLeader">
+            <span>Для просмотра истории переписки повысьте тариф до уровня Leader</span>
         </div>
         <div class="dialog">
             <div class="dialog_people">
@@ -17,7 +35,7 @@
                     :key="index"
                     class="dialog_people_item"
                     :class="{ active_man: item.telegram_id == activeMan?.telegram_id }"
-                    @click="setActiveMan(index)"
+                    @click="setActiveMan(item.telegram_id)"
                 >
                     <img :src="item.avatar" />
                     <div class="dialog_people_item_col">
@@ -198,7 +216,8 @@
     import { 
         getAllDialogs,
         getDialog,
-        changeDialog
+        changeDialog,
+        changeUser
     } from '@/services/manager';
     import AppAiManagerConfirmModal from '@/components/AppAiManagerConfirmModal.vue';
 
@@ -206,7 +225,8 @@
         components: { AppGoodButton, AppBadButton, AppAiManagerConfirmModal },
         props: {
             bot_id: String,
-            userTags: Array
+            userTags: Array,
+            isLeader: Boolean
         },
         data() {
             return {
@@ -219,7 +239,8 @@
                 file_previews: [],
                 currentMsg: "",
                 msg: "",
-                isConfirmModal: false
+                isConfirmModal: false,
+                search: ""
             }
         },
         unmounted() {
@@ -229,6 +250,13 @@
             const user_dialogs = await getAllDialogs(this.bot_id);
             this.people = user_dialogs;
             document.addEventListener('click', this.handleClickOutside);
+        },
+        computed: {
+            searchUser() {
+                const new_people = this.people.filter(man => man.username.toLowerCase().includes(this.search) || man.full_name.toLowerCase().includes(this.search));
+                console.log(new_people);
+                return new_people;
+            },
         },
         methods: {
             async handleKeyDown(event) {
@@ -261,7 +289,7 @@
                 };
 
                 if (this.activeMan.bot_active) 
-                    await changeDialog(this.activeMan.dialog_id, { "bot_active": false });
+                    await changeDialog(this.activeMan.dialog_id, { "bot_active": false, "time": 15 });
 
                 this.soket_dialog.send(JSON.stringify(message));
 
@@ -320,13 +348,19 @@
                     console.log('Соединение с сокетом информации о пользователях закрыто. ');
                 };
             },
-            async setActiveMan(index) {
+            async setActiveMan(telegram_id) {
+                this.search = "";
                 this.close();
-                this.activeMan = this.people[index]
-                const resp = await getDialog(this.bot_id, this.activeMan.dialog_id, this.activeMan.telegram_id);
-                if (resp) {
-                    this.messages = resp;
+                this.activeMan = this.people.find(man => man.telegram_id == telegram_id);
+                if (this.isLeader) {
+                    const resp = await getDialog(this.bot_id, this.activeMan.dialog_id, this.activeMan.telegram_id);
+                    if (resp) {
+                        this.messages = resp;
+                    }
+                } else {
+                    this.messages = [];
                 }
+                
                 this.connectWebSocket();
                 this.scrollToBottom();
             },
@@ -395,7 +429,7 @@
                 }
             },
             async saveTags() {
-                const resp = await changeDialog(this.activeMan.dialog_id, {"tags": this.tagBuffer});
+                const resp = await changeUser(this.activeMan.telegram_id, {"tags": this.tagBuffer});
                 if (resp) {
                     this.tagBuffer = [];
                     this.closeNewTags();
@@ -641,6 +675,10 @@
     .mute {
         color: rgba(255, 255, 255, 0.5) !important;
     }
+    .mute_2 {
+        color: rgba(255, 255, 255, 0.5) !important;
+        font-size: 14px !important;
+    }
     .dialog_info_item h2, .dialog_info_item span {
         font-size: 14px;
         color: white;
@@ -701,6 +739,7 @@
         height: 29px;
         font-size: 10px;
         letter-spacing: 0px;
+        border-radius: 5px;
     }
     .dialog_field_footer_textarea {
         min-height: 70px;
@@ -715,14 +754,13 @@
         padding: 10px;
     }
     .upload_image {
-        width: 20px;
-        height: 20px;
+        width: 22px;
         cursor: pointer;
     }
     .dialog_field_footer_controls {
         display: grid;
         grid-template-columns: 20px 1fr 90px;
-        padding: 10px 20px;
+        padding: 15px 20px;
         column-gap: 10px;
         border-top: 1px solid rgba(255, 255, 255, 0.5);
     }
@@ -732,6 +770,7 @@
         padding: 30px 10px;
         display: flex;
         flex-direction: column;
+        justify-content: end;
         row-gap: 20px;
         overflow-y: auto;
     }
@@ -825,10 +864,55 @@
         width: 100%;
         display: flex;
         column-gap: 20px;
+        position: relative;
     }
     .dialogs {
         width: 100%;
         display: flex;
         flex-direction: column;
+    }
+    .filtered_users {
+        position: absolute;
+        left: 0;
+        top: 45px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        background: #111433;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .filtered_user {
+        display: flex;
+        column-gap: 20px;
+        padding: 10px;
+        align-items: center;
+        cursor: pointer;
+    }
+    .filtered_user img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+    }
+    .filtered_user span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
+    }
+    .col {
+        display: flex;
+        flex-direction: column;
+    }
+    .noLeader_field {
+        padding: 17px 20px;
+        background: #BC2929;
+        width: 100%;
+        margin-top: 30px;
+    }
+    .noLeader_field span {
+        font-size: 18px;
+        color: white;
+        font-family: 'OpenSans';
     }
 </style>

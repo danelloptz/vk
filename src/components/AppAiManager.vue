@@ -46,6 +46,7 @@
             v-if="activeIndex == 2 && !noAccess" 
             :bot_id="managers[activeIndex2].id" 
             :userTags="userTags"
+            :isLeader="isLeader"
         />
     </section>
 </template>
