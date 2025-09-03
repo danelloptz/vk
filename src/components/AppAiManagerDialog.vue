@@ -23,6 +23,9 @@
                     </div>
                     
                 </div>
+                <div class="filtered_user" v-if="searchUser.length == 0">
+                    <span>Не найдено!</span>
+                </div>
             </div>
         </div>
         <div class="noLeader_field" v-if="!isLeader">
@@ -51,23 +54,27 @@
                 </div>
             </div>
             <div class="dialog_field" v-if="activeMan && windowWidth > 650 || activeMan && windowWidth <= 650 && !isActiveUserInfo">
-                <div class="dialog_field_header">
+                <div class="dialog_field_header" @click="openUserInfo">
                     <img :src="activeMan.avatar" />
                     <div class="dialog_field_header_col">
                         <h2>{{ activeMan.full_name }}</h2>
                         <span>@{{ activeMan?.username }}</span>
                     </div>
+                    <div class="empty_block"></div>
                 </div>
                 <div class="dialog_field_messages">
                     <div 
                         v-for="(msg, index) in messages"
                         :key="index"
                         class="dialog_field_message"
+                        :style="{
+                            alignSelf: windowWidth <= 650 && (msg.author == 'client' || msg.author == 'bot') ? 'end' : 'start'  
+                        }"
                     >
                         <div class="dialog_field_message_header">
                             <img :src="msg.author == 'user' ? activeMan.avatar : msg.author == 'client' ? userData.avatar_url : require('@/assets/images/intelektaz_logo.png')" />
                             <span>{{ msg.author == 'user' ? activeMan.full_name : msg.author == 'client' ? userData.name : 'Intelektaz Bot' }}</span>
-                            <span class="dialog_field_message_header_date">{{ formatedDate(+msg.date * 1000) }}</span>
+                            <span class="dialog_field_message_header_date">{{ formatedFullDate(+msg.date * 1000) }}</span>
                         </div>
                         <div 
                             v-if="msg?.files && msg?.files.filter(t => t.type == 'img').length > 0"
@@ -90,12 +97,14 @@
                                 v-for="(file, file_index) in msg.files.filter(t => t.type == 'other')"
                                 :key="file_index"
                                 class="dialog_field_message_file"
+                                @click="downloadFile(file.url)"
                             >
                                 <img src="@/assets/images/upload.png" class="file_icon" />
                                 <span>{{ file.name }}</span>
                             </div>
                         </div>
                         <span class="dialog_field_message_text" v-html="msg.text"></span>
+                        <span class="dialog_field_message_header_date" v-if="windowWidth <= 650">{{ getMessageDate(msg.date, index) }}</span>
                     </div>
                 </div>
                 <div class="dialog_field_footer">
@@ -151,6 +160,7 @@
                         <AppGoodButton :text="'ОТПРАВИТЬ'" class="send_message" @click="sendMessage" />
                     </div>
                 </div>
+                <AppBadButton :text="'НАЗАД'" class="backup_mob_btn" @click="closeActiveMan" />
             </div>
             <div class="dialog_info" v-if="activeMan && windowWidth > 650 || activeMan && isActiveUserInfo && windowWidth <= 650">
                 <div class="dialog_info_item" style="align-self: center; align-items: center;">
@@ -171,7 +181,7 @@
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Статус</span>
-                    <span>{{ activeMan?.status }}</span>
+                    <span>{{ formatedStatus(activeMan?.user_status) }}</span>
                 </div>
                 <div class="dialog_info_item">
                     <span class="mute">Первое сообщение</span>
@@ -208,6 +218,7 @@
                     </div>
                     <AppGoodButton :text="'СОХРАНИТЬ'" v-if="tagBuffer.length > 0" @click="saveTags" class="save_tags" />
                 </div>
+                <AppBadButton :text="'НАЗАД'" class="backup_mob_btn" @click="closeUserInfo" />
             </div>
         </div>
     </section>
@@ -264,12 +275,59 @@
         },
         computed: {
             searchUser() {
-                const new_people = this.people.filter(man => man.username.toLowerCase().includes(this.search) || man.full_name.toLowerCase().includes(this.search));
-                console.log(new_people);
+                const new_people = this.people.filter(man => man.username.trim().toLowerCase().includes(this.search.trim().toLowerCase()) || man.full_name.trim().toLowerCase().includes(this.search.trim().toLowerCase()));
                 return new_people;
             },
         },
         methods: {
+            getMessageDate(ts, index) {
+                const date = new Date(Number(ts) * 1000); // ts точно число в секундах
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                // Первое сообщение всегда с датой
+                if (index === 0) {
+                    return `${day}.${month}.${year} ${hours}:${minutes}`;
+                }
+
+                const prevMsg = this.messages[index - 1];
+                console.log('предыдущее сообщение: ', prevMsg);
+                if (!prevMsg) {
+                    return `${day}.${month}.${year} ${hours}:${minutes}`;
+                }
+
+                const prevDate = new Date(Number(prevMsg.date) * 1000);
+                console.log(date.getDate(), prevDate.getDate(), date.getMonth(), prevDate.getMonth(), date.getFullYear(), prevDate.getFullYear());
+
+                const isSameDay =
+                    date.getDate() === prevDate.getDate() &&
+                    date.getMonth() === prevDate.getMonth() &&
+                    date.getFullYear() === prevDate.getFullYear();
+
+                return isSameDay
+                    ? `${hours}:${minutes}`
+                    : `${day}.${month}.${year} ${hours}:${minutes}`;
+            },
+
+            formatedStatus(status) {
+                if (!status) return;
+                if (status == 'active') return 'Активный';
+                if (status == 'blocked') return 'Заблокированый'
+                else return 'Вышел из бота';
+            },
+            closeUserInfo() {
+                this.isActiveUserInfo = false;
+            },
+            openUserInfo() {
+                this.isActiveUserInfo = true;
+            },
+            closeActiveMan() {
+                this.activeMan = null;
+            },
             handleResize() {
                 this.windowWidth = window.innerWidth;
             },
@@ -327,6 +385,8 @@
                 };
 
                 if (this.activeMan.bot_active) {
+                    this.msg = 'Бот не будет отвечать 15 минут, чтобы пользователь мог с вами общаться.';
+                    this.isConfirmModal = true;
                     await changeDialog(this.activeMan.dialog_id, { bot_active: false, time: 15 });
                 }
 
@@ -471,6 +531,14 @@
                 link.download = `download_file.jpg`;
                 link.click();
             },
+            downloadFile(src) {
+                const link = document.createElement('a');
+                link.href = src;
+                link.download = '';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
             handleClickOutside(event) {
                 const clickedEl = event.target;
                 if (!clickedEl.closest('.dropdown_tags') && !clickedEl.closest('.add_tag_btn') && this.isNewTags != -1) {
@@ -478,7 +546,7 @@
                 }
             },
             async saveTags() {
-                const resp = await changeUser(this.activeMan.telegram_id, {"tags": this.tagBuffer});
+                const resp = await changeUser(this.activeMan.telegram_id, {"tags": this.activeMan.tags});
                 if (resp) {
                     this.tagBuffer = [];
                     this.closeNewTags();
@@ -533,6 +601,10 @@
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            word-wrap: break-word;
+            word-break: break-all;
+        }
     }
     .dialog_field_footer_file_preview_icon {
         width: 20px;
@@ -598,15 +670,30 @@
         row-gap: 10px;
         padding: 10px;
     }
+    .backup_mob_btn {
+        display: none;
+        width: 160px;
+        height: 40px;
+        margin-top: 20px;
+        margin: auto;
+        @media (max-width: 650px) {
+            display: block;
+        }
+    }
     .dialog_field_message_text {
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
+        word-break: break-word;
     }
     .dialog_field_message_file span {
         font-size: 14px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            word-wrap: break-word;
+            word-break: break-all;
+        }
     }
     .dialog_field_message_file img {
         width: 20px;
@@ -631,12 +718,16 @@
         filter: brightness(1.2);
     }
     .dialog_field_message_imgs img {
-        width: 100%;
         max-height: 200px;
-        object-fit: cover;
+        object-fit: contain;
         object-position: center;
         cursor: pointer;
         transition: .1s ease-in;
+        @media (max-width: 650px) {
+            max-height: 100px;
+            object-fit: contain;
+            width: auto;
+        }
     }
     .dialog_field_message_imgs {
         display: grid;
@@ -647,7 +738,13 @@
         right: 10px;
         top: 15px;
         color: rgba(255, 255, 255, 0.5) !important;
+        font-family: 'OpenSans';
         font-size: 10px !important;
+        @media (max-width: 650px) {
+            right: 6px;
+            bottom: 6px;
+            top: auto;
+        }
     }
     .dialog_field_message_header span {
         font-size: 14px;
@@ -664,6 +761,9 @@
         column-gap: 20px;
         align-items: center;
         position: relative;
+        @media (max-width: 650px) {
+            display: none;
+        }
     }
     .dialog_field_message {
         display: flex;
@@ -671,6 +771,16 @@
         row-gap: 20px;
         width: 100%;
         padding: 0px 10px;
+        @media (max-width: 650px) {
+            background: #1B1E3D;
+            padding: 8px 10px;
+            border-radius: 10px;
+            width: fit-content;
+            max-width: 245px;
+            padding-bottom: 20px;
+            position: relative;
+            min-width: 115px;
+        }
         /* background: #111433; */
     }
     .dropdown_tags {
@@ -714,6 +824,12 @@
         height: 32px;
         font-size: 9.98px;
         letter-spacing: 0px;
+        @media (max-width: 650px) {
+            width: 127px;
+            height: 43px;
+            font-size: 13.41px;
+            margin-top: 4px;
+        }
     }
     .add_field_btn, .save_tags {
         width: 130px;
@@ -776,12 +892,31 @@
         display: flex;
         column-gap: 20px;
         align-items: center;
+        @media (max-width: 650px) {
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            justify-content: space-between;
+            flex-direction: row-reverse;
+            padding: 10px 15px;
+        }
+    }
+    .empty_block {
+        display: none;
+        width: 10px;
+        height: 10px;
+        opacity: 0;
+        @media (max-width: 650px) {
+            display: block;
+        }
     }
     .dialog_field {
         width: 100%;
         display: flex;
         flex-direction: column;
         border-right: 1px solid rgba(255, 255, 255, 0.5);
+        @media (max-width: 650px) {
+            border-right: none;
+        }
     }
     .send_message {
         width: 90px;
@@ -801,6 +936,11 @@
         font-family: 'OpenSans';
         margin-top: -5px;
         padding: 10px;
+        @media (max-width: 650px) {
+            font-size: 12px;
+            padding: 0;
+            min-height: 15px;
+        }
     }
     .upload_image {
         width: 22px;
@@ -813,6 +953,12 @@
         padding-bottom: 0px;
         column-gap: 10px;
         border-top: 1px solid rgba(255, 255, 255, 0.5);
+        @media (max-width: 650px) {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            padding-bottom: 25px;
+            padding: 25px 10px;
+            margin-bottom: 10px;
+        }
     }
     .dialog_field_messages {
         height: 864px; /* 86 80 */
@@ -823,6 +969,9 @@
         /* justify-content: end; */
         row-gap: 20px;
         overflow-y: auto;
+        @media (max-width: 650px) {
+            border-top: none;
+        }
     }
     .dialog_people_item_date {
         position: absolute;
@@ -909,6 +1058,9 @@
         display: flex;
         flex-direction: column;
         row-gap: 20px;
+        @media (max-width: 650px) {
+            border-right: none;
+        }
     }
     .dialog {
         display: grid;
@@ -928,6 +1080,11 @@
         width: 150px;
         height: 40px;
         font-size: 16px;
+        @media (max-width: 650px) {
+            width: 100%;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
     }
     .search_field {
         width: 100%;
@@ -945,6 +1102,10 @@
         display: flex;
         column-gap: 20px;
         position: relative;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
     .dialogs {
         width: 100%;
@@ -990,10 +1151,16 @@
         background: #BC2929;
         width: 100%;
         margin-top: 30px;
+        @media (max-width: 650px) {
+            padding: 11px 15px;
+        }
     }
     .noLeader_field span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
 </style>
