@@ -44,10 +44,17 @@
         <AppAiManagerSends v-if="activeIndex == 1 && !noAccess" :userData="userData" :activeIndex="activeIndex2" />
         <AppAiManagerDialog 
             v-if="activeIndex == 2 && !noAccess" 
-            :bot_id="managers[activeIndex2].id" 
+            :bot_id="managers[activeIndex2]?.id" 
             :userTags="userTags"
             :isLeader="isLeader"
             :userData="userData"
+            :telegram_id="telegram_id"
+        />
+        <AppAiManagerContacts
+            v-if="activeIndex == 3 && !noAccess"
+            :bot_id="managers[activeIndex2]?.id" 
+            :userTags="userTags"
+            @openMsg="openMsg"
         />
     </section>
 </template>
@@ -60,8 +67,9 @@
     import AppAiManagerBrief from '@/components/AppAiManagerBrief.vue';
     import AppAiManagerSends from '@/components/AppAiManagerSends.vue';
     import AppAiManagerDialog from '@/components/AppAiManagerDialog.vue';
+    import AppAiManagerContacts from '@/components/AppAiManagerContacts.vue';
     export default {
-        components: { AppAiManagerBrief, AppAiManagerSends, AppAiManagerDialog },
+        components: { AppAiManagerBrief, AppAiManagerSends, AppAiManagerDialog, AppAiManagerContacts },
         props: {
             userData: Object
         },
@@ -91,7 +99,8 @@
                 noAccess: false,
                 isLeader: false,
                 activeIndex2: 0,
-                userTags: null
+                userTags: null,
+                telegram_id: null
             }
         },
         async created() {
@@ -100,6 +109,10 @@
             await this.updateManagers();
         },
         methods: {
+            openMsg(telegram_id) {
+                this.telegram_id = telegram_id;
+                this.activeIndex = 2;
+            },
             async updateManagers() {
                 const managers = await getManagers(this.userData.id);
                 if (managers) {

@@ -16,7 +16,7 @@
                     class="filtered_user"
                     @click="setActiveMan(man.telegram_id)"
                 >
-                    <img :src="man.avatar" />
+                    <img :src="man.avatar != '' ? man.avatar : require('@/assets/images/empty.png')" />
                     <div class="col">
                         <span>{{ man.full_name }}</span>
                         <span class="mute_2">@{{ man.username }}</span>
@@ -39,7 +39,7 @@
                     class="dialog_people_item"
                     @click="setActiveMan(item.telegram_id)"
                 >
-                    <img :src="item.avatar" />
+                    <img :src="item.avatar != '' ? item.avatar : require('@/assets/images/empty.png')" />
                     <div class="dialog_people_item_col">
                         <h2>{{ item.full_name }}</h2>
                         <span class="dialog_people_item_message">{{ item.last_message_text.length > 16 ? item.last_message_text.slice(0, 16) + '...' : item.last_message_text }}</span>
@@ -55,7 +55,7 @@
             </div>
             <div class="dialog_field" v-if="activeMan && windowWidth > 650 || activeMan && windowWidth <= 650 && !isActiveUserInfo">
                 <div class="dialog_field_header" @click="openUserInfo">
-                    <img :src="activeMan.avatar" />
+                    <img :src="activeMan.avatar != '' ? activeMan.avatar : require('@/assets/images/empty.png')" />
                     <div class="dialog_field_header_col">
                         <h2>{{ activeMan.full_name }}</h2>
                         <span>@{{ activeMan?.username }}</span>
@@ -72,7 +72,7 @@
                         }"
                     >
                         <div class="dialog_field_message_header">
-                            <img :src="msg.author == 'user' ? activeMan.avatar : msg.author == 'client' ? userData.avatar_url : require('@/assets/images/intelektaz_logo.png')" />
+                            <img :src="(msg.author == 'user' && activeMan.avatar != '') ? activeMan.avatar : (msg.author == 'user' && activeMan.avatar == '') ? require('@/assets/images/empty.png') : msg.author == 'client' ? userData.avatar_url : require('@/assets/images/intelektaz_logo.png')" />
                             <span>{{ msg.author == 'user' ? activeMan.full_name : msg.author == 'client' ? userData.name : 'Intelektaz Bot' }}</span>
                             <span class="dialog_field_message_header_date">{{ formatedFullDate(+msg.date * 1000) }}</span>
                         </div>
@@ -164,7 +164,7 @@
             </div>
             <div class="dialog_info" v-if="activeMan && windowWidth > 650 || activeMan && isActiveUserInfo && windowWidth <= 650">
                 <div class="dialog_info_item" style="align-self: center; align-items: center;">
-                    <img :src="activeMan.avatar" class="dialog_info_item_img"/>
+                    <img :src="activeMan.avatar != '' ? activeMan.avatar : require('@/assets/images/empty.png')" class="dialog_info_item_img"/>
                     <h2>{{ activeMan.full_name }}</h2>
                 </div>
                 <div class="dialog_info_item">
@@ -243,7 +243,8 @@
             bot_id: String,
             userTags: Array,
             isLeader: Boolean,
-            userData: Object
+            userData: Object,
+            telegram_id: String
         },
         data() {
             return {
@@ -272,6 +273,10 @@
             this.windowWidth = window.innerWidth;
             document.addEventListener('click', this.handleClickOutside);
             document.addEventListener('resize', this.handleResize);
+
+            if (this.telegram_id) {
+                await this.setActiveMan(this.telegram_id);
+            }
         },
         computed: {
             searchUser() {

@@ -270,23 +270,23 @@
                         :style="index == paginatedData.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
                     >
                         <div class="sm_row">
-                            <span><strong>Имя:</strong></span>
+                            <span v-if="windowWidth <= 650"><strong>Имя:</strong></span>
                             <span>{{ item.full_name }}</span>
                         </div>
                         <div class="sm_row">
-                            <span><strong>Шаг:</strong></span>
+                            <span v-if="windowWidth <= 650"><strong>Шаг:</strong></span>
                             <span>{{ formatedDateNoHours(item.next_step_ts * 1000) }}</span>
                         </div>
                         <div class="sm_row">
-                            <span><strong>Статус:</strong></span>
+                            <span v-if="windowWidth <= 650"><strong>Статус:</strong></span>
                             <span>{{ item.status == 'active' ? 'Активный' : item.status }}</span>
                         </div>
                         <div class="sm_row">
-                            <span><strong>Username:</strong></span>
+                            <span v-if="windowWidth <= 650"><strong>Username:</strong></span>
                             <span>@{{ item.username }}</span>
                         </div>
                         <div class="sm_row">
-                            <span><strong>Добавлен:</strong></span>
+                            <span v-if="windowWidth <= 650"><strong>Добавлен:</strong></span>
                             <span>{{ formatedDate(item.added_at * 1000) }}</span>
                         </div>
                     </div>
@@ -469,6 +469,11 @@
             nextPage() {
                 if (this.currentPage < this.totalPages) {
                     this.currentPage++;
+                }
+            },
+            prevPage() {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
                 }
             },
             goToPage(page) {

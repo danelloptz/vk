@@ -369,3 +369,13 @@ export async function changeUser(user_id, data) {
         return false; 
     }
 }
+
+export async function deleteUser(dialog_id) {
+    try {
+        const response = await axios.delete(`https://web.intelektaz.com/manager-api/get-dialog/${dialog_id}`);
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при удалении пользователя из бота", error);
+        return false; 
+    }
+}
