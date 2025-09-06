@@ -39,7 +39,7 @@
             </div>
         </div>
         <div class="table">
-            <div class="table_header">
+            <div class="table_header" v-if="windowWidth > 650">
                 <input 
                     v-model="allUsers" 
                     type="checkbox" 
@@ -54,6 +54,14 @@
                     {{ item }}
                 </span>
             </div>
+            <div class="table_header" v-if="windowWidth <= 650">
+                <input 
+                    v-model="allUsers" 
+                    type="checkbox" 
+                    class="input_square" 
+                    @change="handleMainCheckbox"
+                />
+            </div>
             <div 
                 class="table_row"
                 v-for="(user, index) in paginatedData"
@@ -66,44 +74,59 @@
                     class="input_square" 
                     @click.stop
                 />
-                <span>{{ user.telegram_id }}</span>
-                <span>{{ user.full_name }}</span>
-                <span>{{ user.username }}</span>
-                <div class="tags">
-                    <div class="filter_item_tags_row">
-                        <div 
-                            v-for="(tag, index_tag) in user.tags"
-                            :key="index_tag"
-                            class="filter_item_tag"
-                        >
-                            {{ tag }}
-                            <img src="@/assets/images/close.png" class="delete_tag" @click.stop="deleteTag(index, index_tag, tag)"/>
-                        </div>
-                    </div>
-                    <div class="dropdown_tags" v-if="isNewTags == index">
-                        <div 
-                            v-for="(tag, tag_index) in userTags.filter(tag => !user.tags.includes(tag))"
-                            :key="tag_index"
-                            class="dropdown_tag"
-                            @click.stop="addTag(index, tag)"
-                        >
-                            {{ tag }}
-                        </div>
-                    </div>
-                    <AppBadButton 
-                        v-if="!(userTags.length == 1 && userTags[0] == '')"
-                        :text="'+ ДОБАВИТЬ'" 
-                        class="add_tag_btn" 
-                        @click.stop="openNewTags(index)"
-                    />
-                    <AppGoodButton 
-                        v-if="tagBuffer.length > 0"
-                        class="save_tags"
-                        @click.stop="saveTags(index)"
-                        :text="'СОХРАНИТЬ'"
-                    />
+                <div class="sm_row">
+                    <span v-if="windowWidth <= 650" class="bold">ID:</span>
+                    <span>{{ user.telegram_id }}</span>
                 </div>
-                <span>{{ formatedFullDate(+user.first_message_ts * 1000) }}</span>
+                <div class="sm_row">
+                    <span v-if="windowWidth <= 650" class="bold">Имя:</span>
+                    <span>{{ user.full_name }}</span>
+                </div>
+                <div class="sm_row">
+                    <span v-if="windowWidth <= 650" class="bold">Username:</span>
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="sm_row">
+                    <span v-if="windowWidth <= 650" class="bold">Теги:</span>
+                    <div class="tags">
+                        <div class="filter_item_tags_row">
+                            <div 
+                                v-for="(tag, index_tag) in user.tags"
+                                :key="index_tag"
+                                class="filter_item_tag"
+                            >
+                                {{ tag }}
+                                <img src="@/assets/images/close.png" class="delete_tag" @click.stop="deleteTag(index, index_tag, tag)"/>
+                            </div>
+                        </div>
+                        <div class="dropdown_tags" v-if="isNewTags == index">
+                            <div 
+                                v-for="(tag, tag_index) in userTags.filter(tag => !user.tags.includes(tag))"
+                                :key="tag_index"
+                                class="dropdown_tag"
+                                @click.stop="addTag(index, tag)"
+                            >
+                                {{ tag }}
+                            </div>
+                        </div>
+                        <AppBadButton 
+                            v-if="!(userTags.length == 1 && userTags[0] == '')"
+                            :text="'+ ДОБАВИТЬ'" 
+                            class="add_tag_btn" 
+                            @click.stop="openNewTags(index)"
+                        />
+                        <AppGoodButton 
+                            v-if="tagBuffer.length > 0"
+                            class="save_tags"
+                            @click.stop="saveTags(index)"
+                            :text="'СОХРАНИТЬ'"
+                        />
+                    </div>
+                </div>
+                <div class="sm_row">
+                    <span v-if="windowWidth <= 650" class="bold">Первая активность:</span>
+                    <span>{{ formatedFullDate(+user.first_message_ts * 1000) }}</span>
+                </div>
             </div>
             <div class="switchs" v-if="totalPages > 1">
                 <img src="@/assets/images/arrow.svg" @click="prevPage" style="transform: rotate(180deg);" v-if="currentPage > 1" />
@@ -155,7 +178,8 @@
                 msg: "",
                 isConfirmModal: false,
                 activeMan: null,
-                openPerson: false
+                openPerson: false,
+                windowWidth: null
             }
         },
         computed: {
@@ -188,8 +212,13 @@
             this.users = resp;
             this.selectedIndexes = Array.from({ length: this.users.length }, () => 0);
             document.addEventListener('click', this.handleClickOutside);
+            document.addEventListener('resize', this.handleResize);
+            this.handleResize();
         },
         methods: {
+            handleResize() {
+                this.windowWidth = window.innerWidth;
+            },
             handleMainCheckbox(event) {
                 this.selectedIndexes = Array.from({ length: this.users.length }, () => event.target.checked);
             },
@@ -283,6 +312,9 @@
 </script>
 
 <style scoped>
+    .bold {
+        font-weight: bold;
+    }
     .switchs {
         display: flex;
         align-items: center;
@@ -291,6 +323,10 @@
         margin-top: 50px;
         margin-bottom: 40px;
         gap: 10px;
+        @media (max-width: 650px) {
+            padding: 0px;
+            margin-top: 40px;
+        }
     }
     .switchs img {
         cursor: pointer;
@@ -306,6 +342,9 @@
         color: white;
         font-size: 20px;
         font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            line-height: 1;
+        }
     }
     .switchs span.active {
         background-color: #7023EC;
@@ -320,10 +359,20 @@
     .delete {
         width: 150px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 40px;
+            font-size: 14px;
+        }
     }
     .download {
         width: 166px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 40px;
+            font-size: 14px;
+        }
     }
     .btn_row {
         display: flex;
@@ -336,6 +385,10 @@
         row-gap: 10px;
         position: relative;
     }
+    .sm_row {
+        display: flex;
+        column-gap: 10px;
+    }
     .table_row span {
         font-size: 14px;
         color: white;
@@ -347,6 +400,15 @@
         grid-template-columns: 1fr 2fr 2fr 2fr 3fr 3fr;
         column-gap: 35px;
         padding: 20px;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 13px;
+            padding: 20px 15px;
+        }
+    }
+    .table_row:nth-child(2n) {
+        background: #393c5b3d;
     }
     .header_text {
         font-size: 16px;
@@ -381,6 +443,12 @@
         padding: 20px;
         border-top: 1px solid rgba(255, 255, 255, 0.5);
         border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        @media (max-width: 650px) {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            border-bottom: none;
+        }
     }
     .table {
         width: 100%;

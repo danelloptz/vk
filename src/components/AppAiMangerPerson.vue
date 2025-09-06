@@ -15,7 +15,7 @@
             </div>
             <div class="row">
                 <span class="mute">Статус:</span>
-                <span>{{ user.user_status }}</span>
+                <span>{{ formatedStatus(user.user_status) }}</span>
             </div>
             <div class="row">
                 <span class="mute">Теги:</span>
@@ -98,6 +98,12 @@
             this.person = this.user;
         },
         methods: {
+            formatedStatus(status) {
+                if (!status) return;
+                if (status == 'active') return 'Активный';
+                if (status == 'blocked') return 'Заблокированый'
+                else return 'Вышел из бота';
+            },
             async saveTags() {
                 const resp = await changeUser(this.person.telegram_id, {"tags": this.person.tags});
                 if (resp) {
@@ -142,15 +148,32 @@
     .backup_btn {
         width: 150px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 160px;
+            height: 40px;
+            letter-spacing: 0px;
+        }
     }
     .delete_btn {
         width: 189px;
         height: 51px;
         background: #A21619;
+        @media (max-width: 650px) {
+            width: 136px;
+            height: 39px;
+            font-size: 12px;
+            letter-spacing: 0px;
+        }
     }
     .send_btn {
         width: 240px;
         height: 51px;
+        @media (max-width: 650px) {
+            width: 177px;
+            height: 39px;
+            font-size: 12px;
+            letter-spacing: 0px;
+        }
     }
     .sm_row {
         display: flex;
@@ -163,19 +186,36 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 50px;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 20px;
+            justify-content: start;
+            column-gap: 17px;
+        }
     }
     .mute {
         opacity: .5;
+        @media (max-width: 650px) {
+            opacity: 1;
+            font-weight: bold;
+        }
+
     }
     .row span {
         font-family: 'OpenSans';
         font-size: 18px;
         color: white;
+        @media (max-width: 650px) {
+            font-size: 14px;
+        }
     }
     .row {
         display: flex;
         column-gap: 10px;
         align-items: center;
+        @media (max-width: 650px) {
+            align-items: start;
+        }
     }
     .params {
         display: flex;
@@ -183,6 +223,11 @@
         row-gap: 20px;
         margin-left: 36px;
         margin-top: 36px;
+        @media (max-width: 650px) {
+            margin-left: 0px;
+            margin-top: 20px;
+            row-gap: 10px;
+        }
     }
     .header h2 {
         font-size: 18px;
@@ -193,6 +238,10 @@
         width: 80px;
         height: 80px;
         border-radius: 50%;
+        @media (max-width: 650px) {
+            width: 60px;
+            height: 60px;
+        }
     }
     .header {
         display: flex;
@@ -260,5 +309,9 @@
         /* flex-direction: column; */
         column-gap: 10px;
         position: relative;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
 </style>

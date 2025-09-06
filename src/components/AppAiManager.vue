@@ -12,7 +12,7 @@
                 :key="index"
                 :class="{ active: activeIndex === item.index }" 
                 @click="setActive(item.index)"
-            >{{ item.name }}</span>
+            >{{ index == 3? item.name + ` (${audience.length || 0})` : item.name }}</span>
         </div> 
         <div class="managers_switch" v-if="managers.length > 0">
             <span class="managers_switch_title">ИИ менеджер: </span>
@@ -63,6 +63,7 @@
     import { getConfig } from '@/services/config';
     import { 
         getManagers, 
+        getAllDialogs
     } from '@/services/manager';
     import AppAiManagerBrief from '@/components/AppAiManagerBrief.vue';
     import AppAiManagerSends from '@/components/AppAiManagerSends.vue';
@@ -100,13 +101,15 @@
                 isLeader: false,
                 activeIndex2: 0,
                 userTags: null,
-                telegram_id: null
+                telegram_id: null,
+                audience: null
             }
         },
         async created() {
             this.testers = await getConfig('manager_testers', localStorage.getItem('token'));
             this.isLeader = this.userData.packages.at(-1).package_name == 'Leader';
             await this.updateManagers();
+            this.audience = await getAllDialogs(this.managers[this.activeIndex2].id);
         },
         methods: {
             openMsg(telegram_id) {

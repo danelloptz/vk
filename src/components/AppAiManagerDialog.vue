@@ -943,7 +943,7 @@
         padding: 10px;
         @media (max-width: 650px) {
             font-size: 12px;
-            padding: 0;
+            padding: 0px 5px;
             min-height: 15px;
         }
     }
@@ -976,6 +976,8 @@
         overflow-y: auto;
         @media (max-width: 650px) {
             border-top: none;
+            height: auto;
+            max-height: 864px;
         }
     }
     .dialog_people_item_date {
