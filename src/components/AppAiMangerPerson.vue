@@ -10,12 +10,24 @@
                 <span>{{ user.telegram_id }}</span>
             </div>
             <div class="row">
+                <span class="mute">Телефон:</span>
+                <span>{{ user.user_phone == '' ? '-' : user.user_phone }}</span>
+            </div>
+            <div class="row">
                 <span class="mute">Username:</span>
                 <span>{{ user.username }}</span>
             </div>
             <div class="row">
                 <span class="mute">Статус:</span>
                 <span>{{ formatedStatus(user.user_status) }}</span>
+            </div>
+             <div class="row">
+                <span class="mute">Первая активность:</span>
+                <span>{{ formatedFullDate(+user.first_message_ts * 1000) }}</span>
+            </div>
+             <div class="row">
+                <span class="mute">Последняя активность:</span>
+                <span>{{ formatedFullDate(+user.last_message_ts * 1000) }}</span>
             </div>
             <div class="row">
                 <span class="mute">Теги:</span>
@@ -98,6 +110,17 @@
             this.person = this.user;
         },
         methods: {
+            formatedFullDate(time) {
+                const date = new Date(time);
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${day}.${month}.${year} ${hours}:${minutes}`;
+            },
             formatedStatus(status) {
                 if (!status) return;
                 if (status == 'active') return 'Активный';

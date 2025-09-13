@@ -1,4 +1,19 @@
 <template>
+    <AppAiManagerLimitsModal 
+        :visibility1="isBuyModal"
+        :user_id="userData.id"
+        :balance="userData.balance"
+        :isMoreText="isMoreText"
+        @update:visibility1="isBuyModal = $event"
+        @good="openModal(true)"
+        @bad="openModal(false)"
+    />
+     <AppAiManagerConfirmModal 
+        :message="msg" 
+        :isOptions="false"
+        :visibility1="isConfirmModal"
+        @update:visibility1="isConfirmModal = $event"
+    />
     <section class="unworked" v-if="!testers.includes(userData?.vk_id)">
         <img src="@/assets/images/unworked.png">
         <h1>Раздел находится в разработке</h1>
@@ -28,6 +43,14 @@
                 >{{ index + 1 }}</span>
             </div> 
         </div>
+        <div class="generations_wrapper">
+            <span class="generations_item" @click="openGeneratorModal(false)">
+                Отправлено писем: {{ limits?.free.remains == -1 ? '∞' : limits?.free.remains }} / {{ limits?.free.remains == -1 ? '∞' : limits?.free.total }}
+            </span>
+            <span class="generations_item" @click="openGeneratorModal(true)">
+                Пакет писем: {{ limits?.paid.remains }} / {{ limits?.paid.total }}
+            </span>
+        </div>
         <div class="no_package" v-if="noAccess">
             <img src="@/assets/images/robot.png">
             <h1>Чтобы увеличить количество менеджеров до 5, активируйте пакет Leader!</h1>
@@ -41,7 +64,13 @@
             @openTariff="openTariff"
             @update_managers="updateManagers"
         />
-        <AppAiManagerSends v-if="activeIndex == 1 && !noAccess" :userData="userData" :activeIndex="activeIndex2" />
+        <AppAiManagerSends 
+            v-if="activeIndex == 1 && !noAccess" 
+            :manager_id="managers[activeIndex2]?.id"
+            :userData="userData" 
+            :activeIndex="activeIndex2" 
+            @openBrief="openBrief"
+        />
         <AppAiManagerDialog 
             v-if="activeIndex == 2 && !noAccess" 
             :bot_id="managers[activeIndex2]?.id" 
@@ -63,14 +92,17 @@
     import { getConfig } from '@/services/config';
     import { 
         getManagers, 
-        getAllDialogs
+        getAllDialogs,
+        getLimits
     } from '@/services/manager';
     import AppAiManagerBrief from '@/components/AppAiManagerBrief.vue';
     import AppAiManagerSends from '@/components/AppAiManagerSends.vue';
     import AppAiManagerDialog from '@/components/AppAiManagerDialog.vue';
     import AppAiManagerContacts from '@/components/AppAiManagerContacts.vue';
+    import AppAiManagerLimitsModal from '@/components/AppAiManagerLimitsModal.vue';
+    import AppAiManagerConfirmModal from '@/components/AppAiManagerConfirmModal.vue';
     export default {
-        components: { AppAiManagerBrief, AppAiManagerSends, AppAiManagerDialog, AppAiManagerContacts },
+        components: { AppAiManagerBrief, AppAiManagerSends, AppAiManagerDialog, AppAiManagerContacts, AppAiManagerLimitsModal, AppAiManagerConfirmModal },
         props: {
             userData: Object
         },
@@ -102,7 +134,12 @@
                 activeIndex2: 0,
                 userTags: null,
                 telegram_id: null,
-                audience: null
+                audience: null,
+                isBuyModal: false,
+                isConfirmModal: false,
+                msg: "",
+                limits: null,
+                isMoreText: false
             }
         },
         async created() {
@@ -110,8 +147,21 @@
             this.isLeader = this.userData.packages.at(-1).package_name == 'Leader';
             await this.updateManagers();
             this.audience = await getAllDialogs(this.managers[this.activeIndex2].id);
+            this.limits = await getLimits(this.userData.id);
         },
         methods: {
+            openGeneratorModal(flag) {
+                this.isMoreText = flag;
+                this.isBuyModal = true;
+            },
+            async openModal(status) {
+                this.msg = status ? 'Пакет писем успешно куплен.' : 'При покупке писем произошла ошибка.';
+                this.isConfirmModal = true;
+                if (status) this.limits = await getLimits(this.userData.id);
+            },
+            openBrief() {
+                this.activeIndex = 0;
+            },
             openMsg(telegram_id) {
                 this.telegram_id = telegram_id;
                 this.activeIndex = 2;
@@ -124,7 +174,7 @@
                     console.log("useTags в родителе", this.userTags)
                 }
             },
-            setActive2(index) {
+            async setActive2(index) {
                 this.activeIndex2 = index;
                 this.activeIndex = 0;
                 if (!this.isLeader && index > 0) {
@@ -132,6 +182,7 @@
                     return;
                 }
                 this.noAccess = false;
+                this.audience = this.managers[this.activeIndex2]?.id ? await getAllDialogs(this.managers[this.activeIndex2].id) : 0;
             },
             openTariff() {
                 this.$emit("openTariff");
@@ -144,6 +195,29 @@
 </script>
 
 <style scoped>
+    .generations_wrapper {
+        display: flex;
+        column-gap: 30px;
+        @media (max-width: 750px) {
+            flex-direction: column;
+        }
+    }
+    .generations_item {
+        padding: 10px 20px;
+        background: #111433;
+        border-radius: 10px;
+        color: white;
+        font-size: 20px;
+        font-family: 'OpenSans';
+        width: fit-content;
+        height: fit-content;
+        margin-bottom: 10px;
+        cursor: pointer;
+        @media (max-width: 750px) {
+            width: 100%;
+            font-size: 16px;
+        }
+    }
     .no_package {
         display: flex;
         flex-direction: column;

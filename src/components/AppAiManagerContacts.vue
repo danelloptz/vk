@@ -400,6 +400,8 @@
         grid-template-columns: 1fr 2fr 2fr 2fr 3fr 3fr;
         column-gap: 35px;
         padding: 20px;
+        transition: .2s ease-in;
+        cursor: pointer;
         @media (max-width: 650px) {
             display: flex;
             flex-direction: column;
@@ -409,6 +411,9 @@
     }
     .table_row:nth-child(2n) {
         background: #393c5b3d;
+    }
+    .table_row:hover {
+        transform: scale(1.05);
     }
     .header_text {
         font-size: 16px;

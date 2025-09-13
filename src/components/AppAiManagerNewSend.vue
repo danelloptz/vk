@@ -13,7 +13,7 @@
         @yes="goodCopy"
         @no="cancelCopy"
     />
-    <section class="new_send">
+    <section class="new_send" v-if="manager_id">
         <h2>Создать рассылку</h2>
         <!-- <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
@@ -369,7 +369,7 @@
     };
 </script>
 
-<style scoped>
+<style scoped> 
     .tag_input {
         height: 32px;
         width: 60%;

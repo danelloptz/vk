@@ -379,3 +379,30 @@ export async function deleteUser(dialog_id) {
         return false; 
     }
 }
+
+export async function buyLimits(user_id, count) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/buy-limits`, {},
+            {
+                params: {
+                    user_id: user_id,
+                    count: count,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при покупке лимитов", error);
+        return false; 
+    }
+}
+
+export async function getLimits(user_id) {
+    try {
+        const response = await axios.get(`https://web.intelektaz.com/manager-api/get-limits/${user_id}`);
+        return response.data;
+    } catch(error) {
+        console.error("Ошибка при получении лимитов в менеджере", error);
+        return false; 
+    }
+}

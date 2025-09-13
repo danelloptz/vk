@@ -1,7 +1,7 @@
 <template>
     <AppAiManagerNewSend 
         v-if="isNewSend && !isOpenSend" 
-        :manager_id="managers[activeIndex].id"
+        :manager_id="managers[activeIndex]?.id"
         :user_id="userData.id"
         :userTags="tags"
         :managers="managers"
@@ -16,7 +16,11 @@
         :managers="managers"
         @backup="isOpenSend = false, isNewSend = false"
     />
-    <section class="autosends" v-if="!isNewSend && !isOpenSend">
+    <section class="err" v-if="!manager_id">
+        <h2>Сначала нужно привязать бот к менеджеру</h2>
+        <AppGoodButton :text="'ПРИВЗЯЗАТЬ'" class="backup" @click="backup" />
+    </section>
+    <section class="autosends" v-if="!isNewSend && !isOpenSend && manager_id">
         <!-- <div class="managers_switch">
             <span class="managers_switch_title">ИИ менеджер: </span>
             <div 
@@ -123,7 +127,8 @@
         components: { AppGoodButton, AppAiManagerNewSend, AppAiSendInfo },
         props: {
             userData: Object,
-            activeIndex: Number
+            activeIndex: Number,
+            manager_id: String
         },
         data() {
             return {
@@ -190,6 +195,9 @@
             this.campaigns = campaigns.items;
         },
         methods: {
+            backup() {
+                this.$emit('openBrief');
+            },
             handleWindowResize() {
                 this.windowWidth = window.innerWidth;
             },
@@ -245,6 +253,27 @@
 </script>
 
 <style scoped>
+    h2 {
+        font-size: 24px;
+        color: white;
+        font-family: 'OpenSans';
+        @media (max-width: 650px) {
+            font-size: 18px;
+        }
+    }
+    .err {
+        display: flex;
+        column-gap: 20px;
+        align-items: center;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+        }
+    }
+    .backup {
+        width: 150px;
+        height: 51px;
+    }
     .sm_row {
         display: flex;
         align-items: center;
