@@ -382,7 +382,7 @@ export async function deleteUser(dialog_id) {
 
 export async function buyLimits(user_id, count) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/manager-api/buy-limits`, {},
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/buy-campaign-limits`, {},
             {
                 params: {
                     user_id: user_id,
@@ -399,10 +399,24 @@ export async function buyLimits(user_id, count) {
 
 export async function getLimits(user_id) {
     try {
-        const response = await axios.get(`https://web.intelektaz.com/manager-api/get-limits/${user_id}`);
+        const response = await axios.get(`https://web.intelektaz.com/manager-api/get-campaign-limits/${user_id}`);
         return response.data;
     } catch(error) {
         console.error("Ошибка при получении лимитов в менеджере", error);
+        return false; 
+    }
+}
+
+export async function uploadUsers(users_ids, bot_token, bot_id, user_id) {
+    try {
+        const response = await axios.post(`https://web.intelektaz.com/manager-api/add-users/${user_id}`, {
+            "users_ids": users_ids,
+            "bot_token": bot_token,
+            "bot_id": bot_id,
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при загрузке пользователей", error);
         return false; 
     }
 }

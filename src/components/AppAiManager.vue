@@ -27,7 +27,7 @@
                 :key="index"
                 :class="{ active: activeIndex === item.index }" 
                 @click="setActive(item.index)"
-            >{{ index == 3? item.name + ` (${audience.length || 0})` : item.name }}</span>
+            >{{ index == 3? item.name + ` (${audience?.length || 0})` : item.name }}</span>
         </div> 
         <div class="managers_switch" v-if="managers.length > 0">
             <span class="managers_switch_title">ИИ менеджер: </span>
@@ -45,10 +45,10 @@
         </div>
         <div class="generations_wrapper">
             <span class="generations_item" @click="openGeneratorModal(false)">
-                Отправлено писем: {{ limits?.free.remains == -1 ? '∞' : limits?.free.remains }} / {{ limits?.free.remains == -1 ? '∞' : limits?.free.total }}
+                Отправлено писем: {{ limits?.free.remains == -1 ? '∞' : formatNumber(limits.free.remains) }} / {{ limits?.free.remains == -1 ? '∞' : formatNumber(limits.free.total) }}
             </span>
             <span class="generations_item" @click="openGeneratorModal(true)">
-                Пакет писем: {{ limits?.paid.remains }} / {{ limits?.paid.total }}
+                Пакет писем: {{ formatNumber(limits.paid.remains) }} / {{ formatNumber(limits?.paid.total) }}
             </span>
         </div>
         <div class="no_package" v-if="noAccess">
@@ -82,6 +82,8 @@
         <AppAiManagerContacts
             v-if="activeIndex == 3 && !noAccess"
             :bot_id="managers[activeIndex2]?.id" 
+            :bot_token="managers[activeIndex2]?.bot_token" 
+            :user_id="userData?.id"
             :userTags="userTags"
             @openMsg="openMsg"
         />
@@ -146,10 +148,14 @@
             this.testers = await getConfig('manager_testers', localStorage.getItem('token'));
             this.isLeader = this.userData.packages.at(-1).package_name == 'Leader';
             await this.updateManagers();
-            this.audience = await getAllDialogs(this.managers[this.activeIndex2].id);
+            if (this.managers[this.activeIndex2]?.id)
+                this.audience = await getAllDialogs(this.managers[this.activeIndex2].id);
             this.limits = await getLimits(this.userData.id);
         },
         methods: {
+            formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            },
             openGeneratorModal(flag) {
                 this.isMoreText = flag;
                 this.isBuyModal = true;
@@ -170,8 +176,8 @@
                 const managers = await getManagers(this.userData.id);
                 if (managers) {
                     this.managers = managers;
-                    this.userTags = JSON.parse(this.managers[this.activeIndex2].assistant.assistant_config.user_filters);
-                    console.log("useTags в родителе", this.userTags)
+                    if (this.managers[this.activeIndex2]?.assistant.assistant_config.user_filters)
+                        this.userTags = JSON.parse(this.managers[this.activeIndex2]?.assistant.assistant_config.user_filters);
                 }
             },
             async setActive2(index) {
@@ -298,7 +304,7 @@
         width: 100%;
         display: flex;
         flex-direction: column;
-        row-gap: 50px;
+        row-gap: 40px;
         margin-top: -20px;
         @media (max-width: 650px) {
             row-gap: 30px;

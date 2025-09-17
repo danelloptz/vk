@@ -15,6 +15,13 @@
         @backup="openPerson = false"
         @deleteUser="setUserToDelete"
     />
+    <AppManagerModalUsers 
+        :visibility1="isImportModal"
+        :bot_id="bot_id"
+        :bot_token="bot_token"
+        :user_id="user_id"
+        @update:visibility1="isImportModal = $event"
+    />
     <section class="contacts" v-if="!openPerson">
         <div class="search">
             <input class="search_field" v-model="search" placeholder="Поиск" />
@@ -142,7 +149,7 @@
             </div>
         </div>
         <div class="btn_row">
-            <AppGoodButton :text="'ЗАГРУЗИТЬ'" class="download" />
+            <AppGoodButton :text="'ЗАГРУЗИТЬ'" class="download" @click="uploadUsers" />
             <AppBadButton :text="'УДАЛИТЬ'" class="delete" @click="openModal" />
         </div>
         
@@ -159,10 +166,13 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppAiManagerConfirmModal from '@/components/AppAiManagerConfirmModal.vue';
     import AppAiMangerPerson from '@/components/AppAiMangerPerson.vue';
+    import AppManagerModalUsers from '@/components/AppManagerModalUsers.vue';
     export default {
-        components: { AppBadButton, AppGoodButton, AppAiManagerConfirmModal, AppAiMangerPerson },
+        components: { AppBadButton, AppGoodButton, AppAiManagerConfirmModal, AppAiMangerPerson, AppManagerModalUsers },
         props: {
             bot_id: String,
+            bot_token: String, 
+            user_id: String,
             userTags: Array
         },
         data() {
@@ -179,7 +189,8 @@
                 isConfirmModal: false,
                 activeMan: null,
                 openPerson: false,
-                windowWidth: null
+                windowWidth: null,
+                isImportModal: false
             }
         },
         computed: {
@@ -216,6 +227,9 @@
             this.handleResize();
         },
         methods: {
+            uploadUsers() {
+                this.isImportModal = true;
+            },
             handleResize() {
                 this.windowWidth = window.innerWidth;
             },

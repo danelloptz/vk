@@ -2,68 +2,67 @@
     <div v-if="visibility1" class="modal_wrapper" id="modal_wrapper">
         <section class="modal">
             <img src="@/assets/images/close.png" class="close" @click="close">
-            <span v-if="isMoreText">Если вам нужно больше писем, вы можете купить Пакет писем по мере необходимости.</span>
-            <span v-else>В ваш пакет входит 30 000 писем ежемесячно, эта цифра будет возобновляться каждый месяц до окончания срока действия вашего пакета. Если вам нужно больше писем, вы можете купить Пакет писем по мере необходимости.</span>
-            <span class="mt"><strong>Пакет писем 10 000 - </strong>{{ prices.pack_10000_messages }} USDT</span>
-            <span><strong>Пакет писем 50 000 - </strong>{{ prices.pack_50000_messages }} USDT</span>
-            <div class="row">
-                <AppBadButton :text="'КУПИТЬ 10 000'" class="btn" @click="buy(10000, prices.pack_10000_messages)" />
-                <AppBadButton :text="'КУПИТЬ 50 000'" class="btn" @click="buy(50000, prices.pack_50000_messages)" />
-            </div>
-            <span class="err" v-if="isError">{{ msg }}</span>
+            <h1>Импорт пользователей</h1>
+            <span>Введите <strong>через запятую</strong> Telegram ID пользователей, которых хотите добавить. </span>
+            <textarea 
+                placeholder="Введите Telegram ID через запятую" 
+                v-model="data"
+            ></textarea>
+            <span v-if="isError" style="color: red;">{{ msg }}</span>
+            <AppGoodButton :text="'ЗАГРУЗИТЬ'" class="upload_btn" @click="upload" />
         </section>
     </div>
 </template>
 
 <script>
-    import AppBadButton from '@/components/AppBadButton.vue';
-    import { getConfig } from '@/services/config';
-    import { buyLimits } from '@/services/manager';
-    export default {
-        components: { AppBadButton },
-        props: {
-            visibility1: Boolean,
-            user_id: String,
-            balance: Number,
-            isMoreText: Boolean
-        },
-        data() {
-            return {
-                prices: null,
-                msg: "",
-                isError: false
-            }
-        },
-        async created() {
-            const data = await getConfig('campaign_limits_cost', localStorage.getItem('token'));
-            this.prices = data;
-        },
-        methods: {
-            async buy(amount, price) {
-                if (this.balance < price) {
-                    this.msg = 'Недостаточно средств на балансе';
-                    this.isError = true;
-                    return;
-                }
-                this.isError = false;
-                const status = await buyLimits(this.user_id, amount);
-                if (status) {
-                    this.$emit('good');
-                    this.close();
-                }
-                else {
-                    this.$emit('bad');
-                    this.close();
-                }
-            },
-            close() {
-                if (this.visibility1) {
-                    this.$emit('update:visibility1', false);
-                }
-                this.$emit('close'); 
-            }
+import AppGoodButton from '@/components/AppGoodButton.vue';
+import { uploadUsers } from '@/services/manager';
+export default {
+    components: { AppGoodButton },
+    props: {
+        visibility1: Boolean,
+        bot_id: String,
+        bot_token: String,
+        user_id: String
+    },
+    data() {
+        return {
+            data: "",
+            isError: false,
+            msg: ""
         }
-    };
+    },
+    methods: {
+        async upload() {
+            const users_ids = this.data.split(',');
+            if (!this.checkData(users_ids)) {
+                this.isError = true;
+                this.msg = 'Неправильно введённые данные!';
+                return;
+            }
+            this.isError = false;
+            const resp = await uploadUsers(users_ids, this.bot_token, this.bot_id, this.user_id);
+            if (resp) {
+                this.close();
+            } else {
+                this.isError = true;
+                this.msg = 'Произошла ошибка при добавлении пользователей';
+            }
+        },
+        checkData(arr) {
+            arr.forEach(el => {
+                if ( !(/^\d+$/.test(el)) ) return false;
+            });
+            return true;
+        },
+        close() {
+            if (this.visibility1) {
+                this.$emit('update:visibility1', false);
+            }
+            this.$emit('close'); 
+        }
+    }
+};
 </script>
 
 
@@ -77,27 +76,29 @@
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
     }
 
-    .mt {
-        margin-top: 16px;
-    }
-    .err {
-        color: red;
-    }
-    .row {
-        display: flex;
-        column-gap: 30px;
-        margin-top: 34px;
-        @media (max-width: 650px) {
-            margin-top: 29px;
-            column-gap: 10px;
-        }
-    }
-    .btn {
-        width: 190px;
+    .upload_btn {
+        width: 166px;
         height: 51px;
+        letter-spacing: 0px;
+        font-size: 16px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 300px;
+        padding: 20px;
+        box-sizing: border-box;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.5);
+        background: none;
+        border: 1px solid white;
+        border-radius: 10px;
+        font-family: 'OpenSans';
+        position: relative;
+        transition: .2s ease-in;
         @media (max-width: 650px) {
-            width: 140px;
-            height: 40px;
+            height: 160px;
+            padding: 10px;
         }
     }
 
@@ -124,8 +125,7 @@
     }
 
     .modal {
-        width: 919px;
-        height: 364px;
+        width: 760px;
         border-radius: 10px;
         position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
         display: flex;
@@ -135,7 +135,7 @@
         z-index: 2;
         overflow-y: auto;
         scrollbar-width: none;
-        row-gap: 10px;
+        row-gap: 20px;
         box-sizing: border-box;
         margin-top: -50px;
         align-self: center;
@@ -146,7 +146,7 @@
         }
         @media (max-width: 650px) {
             width: 90vw;
-            padding: 31px 20px;
+            padding: 30px 15px;
         }
     }
 
@@ -166,12 +166,9 @@
         width: 21px;
         height: 21px;
         cursor: pointer;
-        z-index: 900;
-        @media (max-width: 650px) {
+        @media (max-width: 450px) {
             right: 20px;
-            top: 30px;
-            width: 18px;
-            height: 18px;
+            top: 20px;
         }
     }
     .modal-background {
@@ -207,8 +204,10 @@
         }
     }
     span {
-        font-size: 18px;
+        font-size: 20px;
         font-family: 'OpenSans';
+        font-weight: 400;
+        line-height: 32.68px;
         color: white;
         text-wrap: wrap;
         font-family: 'OpenSans';
@@ -216,8 +215,7 @@
             font-size: 20px;
         }
         @media (max-width: 650px) {
-            font-size: 16px;
-            text-align: start;
+            font-size: 17px;
         }
     }
     .left_image {
