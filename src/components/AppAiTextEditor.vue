@@ -4,7 +4,6 @@
     v-model="editorData"
     :editor="editor"
     :config="config"
-    style="width: 100% !important;"
     ref="ed"
     @ready="onReady"
   />
@@ -132,7 +131,7 @@
         // --- Кнопка вставки паттерна {{ full_name }} ---
         editorInstance.ui.componentFactory.add('insertUserName', locale => {
           const button = new ButtonView(locale);
-          button.set({ label: 'Юзернейм', withText: true, tooltip: 'Переменная для вставки вашего ФИО' });
+          button.set({ label: 'Username', withText: true, tooltip: 'Переменная для вставки вашего ФИО' });
           button.on('execute', () => {
             editorInstance.model.change(writer => {
               const insertPosition = editorInstance.model.document.selection.getFirstPosition();

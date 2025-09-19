@@ -10,10 +10,6 @@
                 <span>{{ user.telegram_id }}</span>
             </div>
             <div class="row">
-                <span class="mute">Телефон:</span>
-                <span>{{ user.user_phone == '' ? '-' : user.user_phone }}</span>
-            </div>
-            <div class="row">
                 <span class="mute">Username:</span>
                 <span>{{ user.username }}</span>
             </div>

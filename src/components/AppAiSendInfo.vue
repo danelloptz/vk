@@ -26,15 +26,15 @@
         <div class="stats">
             <div class="stats_card">
                 <div class="stats_card_header">Подписчики</div>
-                <span class="stats_card_num">{{ sendData?.subscribers }}</span>
+                <span class="stats_card_num">{{ sendData?.stats.subscribers == '' ? 0 : sendData?.stats.subscribers }}</span>
             </div>
             <div class="stats_card">
                 <div class="stats_card_header">Отписки</div>
-                <span class="stats_card_num">{{ sendData?.unsubscribes }}</span>
+                <span class="stats_card_num">{{ sendData?.stats.unsubscribers == '' ? 0 : sendData?.stats.unsubscribersр }}</span>
             </div>
             <div class="stats_card">
                 <div class="stats_card_header">Конверсия</div>
-                <span class="stats_card_num">{{ sendData?.conversion }}</span>
+                <span class="stats_card_num">{{ sendData?.stats.conversion == '' ? 0: sendData?.stats.conversion }}%</span>
             </div>
         </div>
         <div class="menu">
@@ -69,7 +69,7 @@
                     <span>{{ step.order }}</span>
                     <span v-html="formatedTableTime(step.delay)"></span>
                     <div class="step_end">
-                        <span>{{ sendData.stats.subscribers }} · {{ sendData.stats.unsubscribes }} · {{ sendData.stats.conversion }}</span>
+                        <span>{{ step.stats.subscribers == '' ? 0 : step.stats.subscribers }} · {{ step.stats.unsubscribers == '' ? 0 : step.stats.unsubscribers }} · {{ step.stats.conversion == '' ? 0 : step.stats.conversion }}%</span>
                         <div class="step_icons">
                             <img src="@/assets/images/manager_edit.png" @click="edit(step, index)"/>
                             <img src="@/assets/images/trash.png" @click="deleteStep(index)"/>

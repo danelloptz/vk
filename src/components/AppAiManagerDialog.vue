@@ -172,10 +172,6 @@
                     <span>{{ activeMan.telegram_id }}</span>
                 </div>
                 <div class="dialog_info_item">
-                    <span class="mute">Телефон</span>
-                    <span>{{ activeMan?.phone && activeMan?.phone != "" ? activeMan.phone : '-' }}</span>
-                </div>
-                <div class="dialog_info_item">
                     <span class="mute">Username</span>
                     <span>{{ activeMan?.username }}</span>
                 </div>
@@ -724,6 +720,7 @@
     }
     .dialog_field_message_imgs img {
         max-height: 200px;
+        max-width: 300px;
         object-fit: contain;
         object-position: center;
         cursor: pointer;

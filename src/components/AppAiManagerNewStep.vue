@@ -57,10 +57,10 @@
                     hidden
                 />
             </label> -->
-            <div class="row_sm">
+            <div class="row_sm inputs">
                 <div class="file-input">
                     <label class="file-label">
-                    <img src="@/assets/images/image_icon_step.png" alt="icon"/>
+                    <img src="@/assets/images/image_icon_step.png" alt="icon" class="photo_image"/>
                     фото
                     <input 
                         class="photo_input"
@@ -72,7 +72,7 @@
                 </div>
                 <div class="file-input">
                     <label class="file-label">
-                    <img src="@/assets/images/video_icon_step.png" alt="icon"/>
+                    <img src="@/assets/images/video_icon_step.png" class="video_image" alt="icon"/>
                     видео
                     <input 
                         class="video_input"
@@ -84,19 +84,31 @@
                 </div>
                 <div class="file-input">
                     <label class="file-label">
-                    <img src="@/assets/images/video_icon_step.png" alt="icon"/>
-                    видеосообщение
+                    <img src="@/assets/images/file_icon_step.png" style="filter: invert(1) brightness(2);" class="photo_image" alt="icon"/>
+                    файл
                     <input 
-                        class="vide_msg_input"
+                        class="video_input"
                         type="file"
-                        accept="text/*,.pdf,.doc,.docx"
+                        accept="text/*,.pdf,.doc,.docx,.txt,.rtf,.xlsx,.pptx,.zip,.rar,"
                         @change="onFileChange"
                     />
                     </label>
                 </div>
                 <div class="file-input">
                     <label class="file-label">
-                    <img src="@/assets/images/mic_icon_step.png" alt="icon"/>
+                    <img src="@/assets/images/video_icon_step.png" class="video_image" alt="icon"/>
+                    видеосообщение
+                    <input 
+                        class="vide_msg_input"
+                        type="file"
+                        accept="video/*"
+                        @change="onFileChange"
+                    />
+                    </label>
+                </div>
+                <div class="file-input">
+                    <label class="file-label">
+                    <img src="@/assets/images/mic_icon_step.png" class="mic_image" alt="icon"/>
                     аудио
                     <input 
                         class="audio_input"
@@ -139,12 +151,14 @@
                 />
                 <span>{{ file.name }}</span>
                 <span>{{ formatFileSize(file.size) }}</span>
+                <img 
+                    src="@/assets/images/close.png"
+                    class="dialog_field_footer_preview_close"
+                />
             </div>
         </div>
         <div class="preview_btns" v-if="files_to_send.length > 0">
-            <AppBadButton :text="'ИЗМЕНИТЬ'" @click="deletePreview" class="preview_btn"/>
             <AppBadButton :text="'УДАЛИТЬ'" @click="deletePreview" class="preview_btn" />
-            <AppBadButton :text="'ОТПРАВИТЬ'" @click="readyToSend" class="preview_btn" />
         </div>
         <!-- <div class="preview-list" v-if="previews.length">
             <div class="preview-item" v-for="(src, index) in previews" :key="index">
@@ -298,17 +312,17 @@
                 immediate: true,
             }
         },
-        created() {
-            setTimeout(() => {
-                const el = document.querySelector('.ck-editor');
-                // const el2 = document.querySelector('.ck-content');
-                if (el) el.style.width = '100%';
-                // if (el2) {
-                //     el2.style.height = '280px';
-                // } 
-            }, 1000);
+        // created() {
+        //     setTimeout(() => {
+        //         const el = document.querySelector('.ck-editor');
+        //         // const el2 = document.querySelector('.ck-content');
+        //         if (el) el.style.width = '100%';
+        //         // if (el2) {
+        //         //     el2.style.height = '280px';
+        //         // } 
+        //     }, 1000);
             
-        },
+        // },
         methods: {
             deleteFilePreview(index) {
                 const id = this.file_previews[index].id;
@@ -343,7 +357,7 @@
                     });
                 }
 
-                console.log(files);
+                return files;
             },
             onFileChange(event) {
                 console.log(event);
@@ -472,12 +486,8 @@
                         "second_time": this.amountOfTime
                     };
                 }
-                let image_link = "";
-                if (this.files.length > 0) {
-                    const image = await loadImage(this.files[0]);
-                    image_link = image.image_id;
-                }
-                const resp = await createCampaignStep(this.campaignData.campaign_id, this.name, this.title, this.text, image_link, send_time);
+                const files = await this.readyToSend();
+                const resp = await createCampaignStep(this.campaignData.campaign_id, this.name, this.title, this.text, files, send_time);
                 if (resp) this.$emit('create_new_step');
             },
             closeTimeRange() {
@@ -548,9 +558,15 @@
       background: #232652;
     }
 
-    .file-label img {
-      width: 24px;
-      height: 24px;
+    .photo_image {
+        width: 15px;
+        height: 15px;
+    }
+    .video_image {
+        width: 15px;
+    }
+    .mic_image {
+        width: 8px;
     }
     /* .photo_input, .video_input, .vide_msg_input, .audio_input {
 
@@ -576,6 +592,7 @@
         padding: 10px;
         border-radius: 5px;
         cursor: pointer;
+        position: relative;
     }
     .dialog_field_footer_file_previews {
         display: flex;
@@ -610,12 +627,12 @@
         filter: brightness(0.5);
     }
     .dialog_field_footer_preview_close {
-        width: 20px;
-        height: 20px;
+        width: 15px;
+        height: 15px;
         position: absolute;
-        top: 20px; 
-        left: 20px;
-        opacity: 0;
+        top: 13px; 
+        right: 13px;
+        opacity: 1;
         cursor: pointer;
         transition: opacity 0.2s ease-in;
         z-index: 900;
@@ -806,6 +823,13 @@
             column-gap: 10px;
         }
     }
+    .inputs {
+        @media (max-width: 650px) {
+            flex-wrap: wrap;
+            row-gap: 7px;
+            column-gap: 7px;
+        }
+    }
     .sm_row {
         display: flex;
         column-gap: 10px;
@@ -831,6 +855,7 @@
         }
     }
     .editor_col {
+        width: 100%;
         display: flex;
         flex-direction: column;
         row-gap: 10px;

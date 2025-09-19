@@ -166,14 +166,14 @@ export async function saveCompaignSettings(manager_id, campaign_id, name, filter
     }
 }
 
-export async function createCampaignStep(campaign_id, name, title, text_html, image_url, send_time) {
+export async function createCampaignStep(campaign_id, name, title, text_html, files, send_time) {
     try {
         const response = await axios.post(`https://web.intelektaz.com/manager-api/campaign/step`, 
             {
                 "name": name,
                 "title": title,
                 "text_html": text_html,
-                "image_url": image_url,
+                "files": files,
                 "send_time": send_time,
             },
             {
