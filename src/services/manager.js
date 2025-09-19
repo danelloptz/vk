@@ -265,13 +265,14 @@ export async function getCompaignStep(step_id) {
     }
 }
 
-export async function saveStepSettings(step_id, name, title, text_html, image_url, send_time) {
+export async function saveStepSettings(step_id, name, title, text_html, files, send_time) {
     try {
         const response = await axios.patch(`https://web.intelektaz.com/manager-api/campaign/step`, {
             "name": name,
             "title": title,
             "text_html": text_html,
-            "image_url": image_url,
+            "image_url": "",
+            "files": files,
             "send_time": send_time
         }, {
             params: {

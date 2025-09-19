@@ -150,7 +150,7 @@
                     src="@/assets/images/upload.png"
                 />
                 <span>{{ file.name }}</span>
-                <span>{{ formatFileSize(file.size) }}</span>
+                <span>{{ file?.size ? formatFileSize(file.size) : "" }}</span>
                 <img 
                     src="@/assets/images/close.png"
                     class="dialog_field_footer_preview_close"
@@ -299,8 +299,36 @@
                     this.title = resp.title;
                     this.text = resp.text_html;
                     this.previews = [];
-                    if (resp.image_url) this.previews.push(resp.image_url);
-                    if (resp.delay.time > 1000) {
+                    if (resp.files) {
+                        resp.files.forEach(file => {
+                            if (file.type == 'img') {
+                                this.previews.push({
+                                    src: file.url,
+                                    id: Date.now()
+                                });
+                                this.files_to_send.push(
+                                    {
+                                        name: file.name,
+                                        url: file.url,
+                                        link: file.url,
+                                        type: file.type,
+                                        id: Date.now()
+                                    }
+                                );
+                            } 
+                            else {
+                                this.file_previews.push({
+                                    name: file.name,
+                                    url: file.url,
+                                    link: file.url,
+                                    type: file.type,
+                                    id: Date.now()
+                                });
+                                
+                            }
+                        });
+                    } 
+                    if (!resp.delay.time || resp.delay.time > 1000) {
                         this.type = resp.delay.type;
                         this.date = this.formatedDate(resp.delay.time * 1000);
                     } else {
@@ -338,23 +366,40 @@
                 let files = [];
 
                 // ждём загрузку всех картинок
+                console.log('!!!!!!!!!!!!!!!!!!!!!', this.files_to_send);
                 for (const link of this.files_to_send) {
-                    const image = await loadImage(link.file);
-                    files.push({
-                        type: "img",
-                        url: image.image_id
-                    });
+                    if (link?.file) {
+                        const image = await loadImage(link.file);
+                        files.push({
+                            type: "img",
+                            url: image.image_id
+                        });
+                    } else {
+                        files.push({
+                            type: "img",
+                            url: link.url
+                        });
+                    }
                 }
 
                 // добавляем другие файлы
                 for (const file of this.file_previews) {
-                    const link = await loadImage(file.link);
-                    const type = file.type.startsWith('video/') ? 'video' : 'other';
-                    files.push({
-                        type: type,
-                        name: file.name,
-                        url: link.image_id
-                    });
+                    if (file?.size) {
+                        const link = await loadImage(file.link);
+                        const type = file.type.startsWith('video/') ? 'video' : 'other';
+                        files.push({
+                            type: type,
+                            name: file.name,
+                            url: link.image_id
+                        });
+                    }
+                    else {
+                        files.push({
+                            type: file.type,
+                            name: file.name,
+                            url: file.url
+                        });
+                    }
                 }
 
                 return files;
@@ -437,14 +482,8 @@
                         "second_time": this.amountOfTime
                     };
                 }
-                let image_link = "";
-                if (this.files.length > 0) {
-                    const image = await loadImage(this.files[0]);
-                    image_link = image.image_id;
-                } else {
-                    image_link = this.previews[0] || "";
-                }
-                const resp = await saveStepSettings(this.step_id, this.name, this.title, this.text, image_link, send_time);
+                const files = await this.readyToSend();
+                const resp = await saveStepSettings(this.step_id, this.name, this.title, this.text, files, send_time);
                 if (resp) this.$emit('create_new_step');
             },
             formatedDate(time) {
