@@ -275,7 +275,7 @@
                         </div>
                         <div class="sm_row">
                             <span v-if="windowWidth <= 650"><strong>Шаг:</strong></span>
-                            <span>{{ formatedDateNoHours(item.next_step_ts * 1000) }}</span>
+                            <span>{{ item.next_step_ts != '' ? formatedDateNoHours(item.next_step_ts * 1000) : formatedDateNoHours(item.added_at * 1000) }}</span>
                         </div>
                         <div class="sm_row">
                             <span v-if="windowWidth <= 650"><strong>Статус:</strong></span>
@@ -406,8 +406,12 @@
             paginatedData() {
                 const start = (this.currentPage - 1) * this.pageSize;
                 const end = start + this.pageSize;
-                return this.sendData.users.slice(start, end).filter(item => this.filter == "" || item.status == this.filter);
-            },
+
+                return [...this.sendData.users]
+                    .reverse()
+                    .slice(start, end)
+                    .filter(item => this.filter === "" || item.status === this.filter);
+            }
         },
         methods: {
             handleWindowWidth() {

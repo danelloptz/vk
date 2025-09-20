@@ -45,7 +45,7 @@
         </div>
         <div class="generations_wrapper">
             <span class="generations_item" @click="openGeneratorModal(false)">
-                Отправлено писем: {{ limits?.free.remains == -1 ? '∞' : formatNumber(limits.free.remains) }} / {{ limits?.free.remains == -1 ? '∞' : formatNumber(limits.free.total) }}
+                Отправлено писем: {{ limits?.free.remains == -1 || isLeader ? '∞' : formatNumber(limits.free.remains) }} / {{ limits?.free.remains == -1 || isLeader ? '∞' : formatNumber(limits.free.total) }}
             </span>
             <span class="generations_item" @click="openGeneratorModal(true)">
                 Пакет писем: {{ formatNumber(limits.paid.remains) }} / {{ formatNumber(limits?.paid.total) }}

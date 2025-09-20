@@ -85,11 +85,11 @@
                 <div class="file-input">
                     <label class="file-label">
                     <img src="@/assets/images/file_icon_step.png" style="filter: invert(1) brightness(2);" class="photo_image" alt="icon"/>
-                    файл
+                    файл (только pdf или zip)
                     <input 
                         class="video_input"
                         type="file"
-                        accept="text/*,.pdf,.doc,.docx,.txt,.rtf,.xlsx,.pptx,.zip,.rar,"
+                        accept=".pdf,.zip"
                         @change="onFileChange"
                     />
                     </label>
@@ -211,7 +211,7 @@
             </div>
         </div>
         <div class="row" v-if="!isFirstStep">
-            <span>Отправить через</span>
+            <span>Отправить после предыдущего шага через</span>
             <div class="row_sm">
                 <input type="text" class="amountOfTime" v-model="amountOfTime" />
                 <div class="dropdown">
@@ -234,6 +234,13 @@
                         </li>
                     </ul>
                 </div>
+                <input 
+                    v-if="timeRange == 'в точное время на следующий день'"
+                    type="time" 
+                    v-model="fixedTimeNextDay"
+                    @change="console.log(fixedTimeNextDay)"
+                    class="fixedTimeNextDay"
+                />
             </div>
         </div>
         <div class="new_send_footer">
@@ -277,7 +284,7 @@
                 title: '',
                 text: 'Ваш текст',
                 amountOfTime: 1,
-                timeRanges: ['минута', 'час', 'день', 'месяц', ],
+                timeRanges: ['минута', 'час', 'день', 'месяц', 'в точное время на следующий день'],
                 activeIndexTimeRange: 0,
                 timeRange: 'минута',
                 isTimeRangeVisible: false,
@@ -286,7 +293,8 @@
                 step_id: null,
                 sizeToDecrease: 0,
                 msg: "",
-                isConfirmModal: false
+                isConfirmModal: false,
+                fixedTimeNextDay: null
             }
         },
         watch: {
@@ -413,12 +421,12 @@
                 // this.file_previews = [];
 
                 files.forEach(file => {
+                    if (file.size > 300 * 1024 ) {
+                        this.msg = "Размер загружаемого файла не должен превышать 300КБ! Файлы другого формата или размера добавляйте ссылкой.";
+                        this.isConfirmModal = true;
+                        return;
+                    }
                     if (file.type.startsWith('image/')) {
-                        if (file.size > 300 * 1024 ) {
-                            this.msg = "Размер загружаемого файла не должен превышать 300КБ!";
-                            this.isConfirmModal = true;
-                            return;
-                        }
                         this.files_to_send.push({
                             "file": file,
                             "id": id
@@ -564,6 +572,9 @@
 </script>
 
 <style scoped>
+    .fixedTimeNextDay {
+        width: 150px;
+    }
     .file-input {
       position: relative;
       display: inline-block;
@@ -863,14 +874,16 @@
         }
     }
     .inputs {
+        flex-wrap: wrap;
+        row-gap: 15px;
         @media (max-width: 650px) {
-            flex-wrap: wrap;
             row-gap: 7px;
             column-gap: 7px;
         }
     }
     .sm_row {
         display: flex;
+        align-items: center;
         column-gap: 10px;
     }
     .sm_row img {

@@ -226,7 +226,7 @@
                 dropdownLogic: -1,
                 isNewTags: -1,
                 send_name: "", 
-                isAddContacts: false,
+                isAddContacts: true,
                 title: "",
                 msg: "",
                 isModal: false,

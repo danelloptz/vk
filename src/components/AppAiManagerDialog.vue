@@ -201,6 +201,7 @@
                         {{ item }}
                         <img src="@/assets/images/close.png" class="delete_tag" @click="deleteTag(index, item)"/>
                     </span>
+                    <input class="add_tag_input" @keydown.enter="addTag(tag)" placeholder="Введите тег и нажмите enter" />
                     <AppBadButton :text="'+ ДОБАВИТЬ'" class="add_tag_btn" @click="openNewTags" />
                     <div class="dropdown_tags" v-if="isNewTags">
                         <div 
@@ -547,7 +548,7 @@
                 }
             },
             async saveTags() {
-                const resp = await changeUser(this.activeMan.telegram_id, {"tags": this.activeMan.tags});
+                const resp = await changeUser(this.activeMan.telegram_id, this.bot_id, {"tags": this.activeMan.tags});
                 if (resp) {
                     this.tagBuffer = [];
                     this.closeNewTags();
@@ -598,6 +599,16 @@
 </script>
 
 <style scoped> 
+    .add_tag_input {
+        background: none;
+        color: white;
+        border-radius: 5px;
+        border: 1px solid white;
+        height: 34px;
+        font-size: 10px;
+        padding-left: 7px;
+        min-width: 150px;
+    }
     .dialog_field_footer_file_preview span {
         font-size: 14px;
         color: white;
@@ -720,7 +731,7 @@
     }
     .dialog_field_message_imgs img {
         max-height: 200px;
-        max-width: 300px;
+        max-width: 200px;
         object-fit: contain;
         object-position: center;
         cursor: pointer;
@@ -734,6 +745,7 @@
     .dialog_field_message_imgs {
         display: grid;
         width: 100%;
+        column-gap: 15px;
     }
     .dialog_field_message_header_date {
         position: absolute;

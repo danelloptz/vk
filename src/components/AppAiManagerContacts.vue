@@ -116,6 +116,13 @@
                                 {{ tag }}
                             </div>
                         </div>
+                        <input 
+                            placeholder="Введите тег и нажмите enter"
+                            v-model="newTagValues[index]"
+                            @keydown.enter="addTag(index, newTagValues[index])"
+                            class="add_tag_input"  
+                            @click.stop
+                        />
                         <AppBadButton 
                             v-if="!(userTags.length == 1 && userTags[0] == '')"
                             :text="'+ ДОБАВИТЬ'" 
@@ -190,7 +197,8 @@
                 activeMan: null,
                 openPerson: false,
                 windowWidth: null,
-                isImportModal: false
+                isImportModal: false,
+                newTagValues: []
             }
         },
         computed: {
@@ -227,6 +235,25 @@
             this.handleResize();
         },
         methods: {
+            // handleEnter(index) {
+            //     const value = this.newTagValues[index]?.trim();
+            //     console.log(this.newTagValues);
+            //     if (value) {
+            //         // Инициализируем массив tags, если он не определён
+            //         if (!Array.isArray(this.users[index].tags)) {
+            //             this.users[index].tags = []; // Простая инициализация
+            //         }
+
+            //         // Добавляем значение в массив tags
+            //         this.users[index].tags.push(value);
+
+            //         // Очищаем поле ввода
+            //         this.newTagValues[index] = '';
+
+            //         // Если нужно сохранять состояние или делать что-то еще
+            //         // this.captureState(); // если у вас есть такой метод
+            //     }
+            // },
             uploadUsers() {
                 this.isImportModal = true;
             },
@@ -269,7 +296,7 @@
                 }
             },
             async saveTags(index) {
-                const resp = await changeUser(this.users[index].telegram_id, {"tags": this.users[index].tags});
+                const resp = await changeUser(this.users[index].telegram_id, this.bot_id, {"tags": this.users[index].tags});
                 if (resp) {
                     this.tagBuffer = [];
                     this.closeNewTags();
@@ -295,6 +322,7 @@
             } ,
             addTag(index, tag) {
                 this.users[index].tags.push(tag);
+                this.newTagValues[index] = '';
 
                 if (this.tagBuffer.indexOf(tag) == -1) this.tagBuffer.push(tag)
                 else this.tagBuffer = this.tagBuffer.filter(t => t != tag);
@@ -326,6 +354,16 @@
 </script>
 
 <style scoped>
+    .add_tag_input {
+        background: none;
+        color: white;
+        border-radius: 5px;
+        border: 1px solid white;
+        height: 34px;
+        font-size: 10px;
+        padding-left: 7px;
+        min-width: 150px;
+    }
     .bold {
         font-weight: bold;
     }

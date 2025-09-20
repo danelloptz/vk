@@ -359,9 +359,9 @@ export async function changeDialog(dialog_id, data) {
     }
 }
 
-export async function changeUser(user_id, data) {
+export async function changeUser(user_id, bot_id, data) {
     try {
-        const response = await axios.patch(`https://web.intelektaz.com/manager-api/get-user/${user_id}`, {
+        const response = await axios.patch(`https://web.intelektaz.com/manager-api/get-user/${user_id}/${bot_id}`, {
             "data": data,
         });
         return response.data;
