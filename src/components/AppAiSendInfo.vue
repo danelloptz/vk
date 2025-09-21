@@ -50,7 +50,7 @@
                 </div>
             </div>
             <AppGoodButton :text="'ДОБАВИТЬ ШАГ'" v-if="menuHeaderIndex == 1 && sendData?.steps.length == 0" class="add_step" @click="openNewStep"/>
-            <div class="steps" v-if="menuHeaderIndex == 1 && sendData.steps.length > 0 && windowWidth > 650">
+            <div class="steps" v-if="menuHeaderIndex == 1 && sendData?.steps.length > 0 && windowWidth > 650">
                 <div class="steps_header">
                     <span style="justify-self: center;">Имя</span>
                     <span>Сценарий</span>
@@ -438,6 +438,16 @@
             },
             formatedTableTime(obj) {
                 if (obj.type == 'немедленно') return obj.type;
+                if (obj.type == 'в точное время на следующий день') {
+                    return `в ${obj.fixed_time_next_day} на следующий день`;
+                }
+                if (obj.type == 'по дням недели') {
+                    const data = ["понедельникам", "вторникам", "средам", "четвергам", "пятницам", "субботам", "воскресеньям"];
+                    let days = "";
+                    obj.week_days.forEach(day => days += data[day] + ', ');
+                    days = days.slice(0, -2);
+                    return `по ${days} в ${obj.week_time}`;
+                }
                 if (['в точное время', 'в точное время на следующий день', 'в точную дату'].indexOf(obj.type) != -1) 
                     return this.formatedDate(obj.time * 1000)
                 else if (obj.time > 1000) return obj.type

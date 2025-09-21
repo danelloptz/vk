@@ -49,10 +49,10 @@
                     <h3></h3>
                 </div>
                 <div 
-                    v-for="(item, index) in paginatedData"
+                    v-for="(item, index) in campaigns"
                     :key="index"
                     class="autosend_body_row"
-                    :style="index == paginatedData.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
+                    :style="index == campaigns.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
                     @click="openSend(index)"
                 >
                     <span>{{ item.name }}</span>
@@ -68,10 +68,10 @@
             </div>
             <div class="autosend_body" v-if="campaigns.length > 0 && windowWidth <= 650">
                 <div 
-                    v-for="(item, index) in paginatedData"
+                    v-for="(item, index) in campaigns"
                     :key="index"
                     class="autosend_body_row"
-                    :style="index == paginatedData.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
+                    :style="index == campaigns.length - 1 ? 'border-bottom: none' : 'border-bottom: 1px solid rgba(255, 255, 255, 0.2)'"
                     @click="openSend(index)"
                 >
                     <div class="sm_row">
@@ -156,7 +156,9 @@
                 sendData: null,
                 managers: [],
                 campaigns: [],
-                windowWidth: null
+                windowWidth: null,
+                totalPages: 0,
+                totalCampaigns: null
             }
         },
         mounted() {
@@ -166,9 +168,6 @@
             tags() {
                 if (!this.managers[this.activeIndex]?.assistant?.assistant_config?.user_filters) return [];
                 return JSON.parse(this.managers[this.activeIndex].assistant.assistant_config.user_filters)
-            },
-            totalPages() {
-                return Math.ceil(this.campaigns.length / this.pageSize);
             },
             visiblePages() {
                 const pages = [];
@@ -193,8 +192,14 @@
             this.managers = managers;
             const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
             this.campaigns = campaigns.items;
+            this.totalCampaigns = campaigns.total;
+            await this.countTotalPages();
         },
         methods: {
+            async countTotalPages() {
+                this.totalPages = Math.ceil(this.totalCampaigns / this.pageSize);
+                console.log(this.totalPages);
+            },
             backup() {
                 this.$emit('openBrief');
             },
@@ -205,6 +210,8 @@
                 await deleteCampaign(this.campaigns[index].campaign_id);
                 const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
                 this.campaigns = campaigns.items;
+                this.totalCampaigns = campaigns.total;
+                await this.countTotalPages();
             },
 
             newSendClose() {
@@ -213,25 +220,39 @@
             async openSend(index) {
                 const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
                 this.campaigns = campaigns.items;
+                this.totalCampaigns = campaigns.total;
                 this.sendData = this.campaigns[index];
                 this.isOpenSend = true;
+                await this.countTotalPages();
             },
             openNewSend() {
                 this.isNewSend = true;
             },
-            prevPage() {
+            async prevPage() {
                 if (this.currentPage > 1) {
                     this.currentPage--;
+                    const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                    this.campaigns = campaigns.items;
+                    this.totalCampaigns = campaigns.total;
+                    await this.countTotalPages();
                 }
             },
-            nextPage() {
+            async nextPage() {
                 if (this.currentPage < this.totalPages) {
                     this.currentPage++;
+                    const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                    this.campaigns = campaigns.items;
+                    this.totalCampaigns = campaigns.total;
+                    await this.countTotalPages();
                 }
             },
-            goToPage(page) {
+            async goToPage(page) {
                 if (page >= 1 && page <= this.totalPages) {
                     this.currentPage = page;
+                    const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                    this.campaigns = campaigns.items;
+                    this.totalCampaigns = campaigns.total;
+                    await this.countTotalPages();
                 }
             },
             formatedDate(time) {

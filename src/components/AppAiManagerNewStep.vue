@@ -210,10 +210,15 @@
                 </div>
             </div>
         </div>
-        <div class="row" v-if="!isFirstStep">
+        <div class="col" v-if="!isFirstStep">
             <span>Отправить после предыдущего шага через</span>
             <div class="row_sm">
-                <input type="text" class="amountOfTime" v-model="amountOfTime" />
+                <input 
+                    v-if="timeRange != 'по дням недели'"
+                    type="text" 
+                    class="amountOfTime" 
+                    v-model="amountOfTime" 
+                />
                 <div class="dropdown">
                     <input
                         v-model="timeRange"
@@ -235,12 +240,27 @@
                     </ul>
                 </div>
                 <input 
-                    v-if="timeRange == 'в точное время на следующий день'"
+                    v-if="timeRange == 'в точное время на следующий день' || timeRange == 'по дням недели'"
                     type="time" 
                     v-model="fixedTimeNextDay"
                     @change="console.log(fixedTimeNextDay)"
                     class="fixedTimeNextDay"
                 />
+            </div>
+            <div class="week_days" v-if="timeRange == 'по дням недели'">
+                <div 
+                    class="day"
+                    v-for="(day, index) in days"
+                    :key="index"
+                >
+                    <div class="checkbox-wrapper-18">
+                        <div class="round">
+                            <input type="checkbox" :id="`checkbox${index}`" v-model="daysChecks[index]"/>
+                            <label :for="`checkbox${index}`"></label>
+                        </div>
+                    </div>
+                    <span>{{ day.day }}</span>
+                </div>
             </div>
         </div>
         <div class="new_send_footer">
@@ -284,7 +304,7 @@
                 title: '',
                 text: 'Ваш текст',
                 amountOfTime: 1,
-                timeRanges: ['минута', 'час', 'день', 'месяц', 'в точное время на следующий день'],
+                timeRanges: ['минута', 'час', 'день', 'месяц', 'в точное время на следующий день', 'по дням недели'],
                 activeIndexTimeRange: 0,
                 timeRange: 'минута',
                 isTimeRangeVisible: false,
@@ -294,7 +314,38 @@
                 sizeToDecrease: 0,
                 msg: "",
                 isConfirmModal: false,
-                fixedTimeNextDay: null
+                fixedTimeNextDay: null,
+                days: [
+                    {
+                        day: "Пн",
+                        val: 0
+                    },
+                    {
+                        day: "Вт",
+                        val: 1
+                    },
+                    {
+                        day: "Ср",
+                        val: 2
+                    },
+                    {
+                        day: "Чт",
+                        val: 3
+                    },
+                    {
+                        day: "Пт",
+                        val: 4
+                    },
+                    {
+                        day: "Сб",
+                        val: 5
+                    },
+                    {
+                        day: "Вс",
+                        val: 6
+                    },
+                ],
+                daysChecks: []
             }
         },
         watch: {
@@ -518,6 +569,8 @@
                     return;
                 }
                 let send_time;
+                let days_values = [];
+
                 if (this.isFirstStep) {
                     const dt = new Date(this.date);
                     send_time = {
@@ -532,6 +585,19 @@
                         "second_type": this.timeRange,
                         "second_time": this.amountOfTime
                     };
+                    if (this.timeRange == 'в точное время на следующий день') send_time.fixed_time_next_day = this.fixedTimeNextDay;
+                    if (this.timeRange == 'по дням недели') {
+                        send_time.week_time = this.fixedTimeNextDay;
+                        this.days.forEach((day, index) => {
+                            if (this.daysChecks[index]) days_values.push(day.val);
+                        });
+                        if (days_values.length == 0) {
+                            this.msg = 'Выберите дни недели!';
+                            this.isConfirmModal = true;
+                            return;
+                        }
+                        send_time.week_days = days_values;
+                    }
                 }
                 const files = await this.readyToSend();
                 const resp = await createCampaignStep(this.campaignData.campaign_id, this.name, this.title, this.text, files, send_time);
@@ -572,6 +638,71 @@
 </script>
 
 <style scoped>
+    .col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+        width: 100%;
+    }
+    .checkbox-wrapper-18 .round {
+        position: relative;
+    }
+
+    .checkbox-wrapper-18 .round label {
+        background-color: none;
+        border: 1px solid white;
+        cursor: pointer;
+        height: 23px;
+        width: 23px;
+        display: block;
+    }
+
+    .checkbox-wrapper-18 .round label:after {
+        border: 3px solid #66bb6a;
+        border-top: none;
+        border-right: none;
+        content: "";
+        height: 6px;
+        left: 5px;
+        opacity: 0;
+        position: absolute;
+        top: 3px;
+        transform: rotate(-45deg);
+        width: 18px;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"] {
+        visibility: hidden;
+        display: none;
+        opacity: 0;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label {
+        background-color: none;
+        border-color: white;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label:after {
+        opacity: 1;
+    }
+    .day span {
+        font-size: 14px;
+        font-family: 'OpenSans';
+        color: white;
+    }
+    .day {
+        display: flex;
+        align-items: center;
+        column-gap: 10px;
+    }
+    .week_days {
+        display: flex;
+        align-items: center;
+        column-gap: 30px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        row-gap: 15px;
+    }
     .fixedTimeNextDay {
         width: 150px;
     }
@@ -898,7 +1029,7 @@
             font-size: 14px;
         }
     }
-    .row span {
+    .row span, .col span {
         font-size: 18px;
         color: white;
         font-family: 'OpenSans';
@@ -923,6 +1054,7 @@
         margin-top: 30px;
         align-items: center;
         column-gap: 30px;
+        row-gap: 20px;
         @media (max-width: 650px) {
             width: 100%;
             display: flex;
