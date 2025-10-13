@@ -11,7 +11,7 @@ export async function checkUserAuthorization() {
 }
 
 export function getToken(code, state, code_verifier, device_id, redirect_uri) {
-    return axios.post('https://web.intelektaz.com/api/v1/auth/', {
+    return axios.post('https://web.intelektaz.com/api/beta/auth/', {
         code, 
         state,
         code_verifier,

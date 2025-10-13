@@ -149,7 +149,7 @@
                         index: 4,
                     }, 
                 ],
-                pageSize: 9,
+                pageSize: 20,
                 currentPage: 1,
                 isNewSend: false,
                 isOpenSend: false,
@@ -196,6 +196,19 @@
             await this.countTotalPages();
         },
         methods: {
+            calcLimit(offset) {
+                const baseLimit = this.pageSize;
+                const total = this.totalCampaigns;
+
+                let limit = total - (baseLimit * offset);
+                if (limit >= baseLimit) {
+                    limit = baseLimit;
+                } else if (limit < 0) {
+                    limit = 0; // защита, если offset слишком большой
+                }
+                return limit;
+            },
+
             async countTotalPages() {
                 this.totalPages = Math.ceil(this.totalCampaigns / this.pageSize);
                 console.log(this.totalPages);
@@ -208,7 +221,12 @@
             },
             async deleteSend(index) {
                 await deleteCampaign(this.campaigns[index].campaign_id);
-                const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                const limit = this.calcLimit(this.currentPage - 1);
+                const campaigns = await getCompaigns(
+                    this.managers[this.activeIndex].id,
+                    limit,
+                    this.currentPage - 1
+                );
                 this.campaigns = campaigns.items;
                 this.totalCampaigns = campaigns.total;
                 await this.countTotalPages();
@@ -218,7 +236,12 @@
                 this.isNewSend = false;
             },
             async openSend(index) {
-                const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                const limit = this.calcLimit(this.currentPage - 1);
+                const campaigns = await getCompaigns(
+                    this.managers[this.activeIndex].id,
+                    limit,
+                    this.currentPage - 1
+                );
                 this.campaigns = campaigns.items;
                 this.totalCampaigns = campaigns.total;
                 this.sendData = this.campaigns[index];
@@ -231,7 +254,12 @@
             async prevPage() {
                 if (this.currentPage > 1) {
                     this.currentPage--;
-                    const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                    const limit = this.calcLimit(this.currentPage - 1);
+                    const campaigns = await getCompaigns(
+                        this.managers[this.activeIndex].id,
+                        limit,
+                        this.currentPage - 1
+                    );
                     this.campaigns = campaigns.items;
                     this.totalCampaigns = campaigns.total;
                     await this.countTotalPages();
@@ -240,16 +268,27 @@
             async nextPage() {
                 if (this.currentPage < this.totalPages) {
                     this.currentPage++;
-                    const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                    const limit = this.calcLimit(this.currentPage - 1);
+                    const campaigns = await getCompaigns(
+                        this.managers[this.activeIndex].id,
+                        limit,
+                        this.currentPage - 1
+                    );
                     this.campaigns = campaigns.items;
                     this.totalCampaigns = campaigns.total;
                     await this.countTotalPages();
                 }
             },
+
             async goToPage(page) {
                 if (page >= 1 && page <= this.totalPages) {
                     this.currentPage = page;
-                    const campaigns = await getCompaigns(this.managers[this.activeIndex].id, this.pageSize, this.currentPage - 1);
+                    const limit = this.calcLimit(this.currentPage - 1);
+                    const campaigns = await getCompaigns(
+                        this.managers[this.activeIndex].id,
+                        limit,
+                        this.currentPage - 1
+                    );
                     this.campaigns = campaigns.items;
                     this.totalCampaigns = campaigns.total;
                     await this.countTotalPages();

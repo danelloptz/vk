@@ -12,7 +12,7 @@
                 <img v-if="userData" :src="userData.avatar_url" class="avatar">
                 <div class="user_info_text">
                     <h2 v-if="userData">{{ userData.name }}</h2>
-                    <span v-if="userData">ID: {{ userData.vk_id }}</span>
+                    <span v-if="userData">ID: {{ userData.vk_id || userData.tg_id }}</span>
                 </div>
             </div>
             <div class="inputs">
@@ -125,6 +125,7 @@
     // import { getUserInfo, getReferInfo } from '@/services/user';
     import { getUserInfo, getReferer } from '@/services/user';
     import { refreshToken } from '@/services/auth';
+    import { loadTgData } from '@/services/tg';
 
     export default {
         components: { AppGoodButton, AppGroupOrUser },
@@ -191,7 +192,7 @@
                 this.isDropdownVisibleGender = false;
                 this.isDropdownVisibleInterest = false;
             },
-            nextStep() {
+            async nextStep() {
                 this.isNotSelectCountry = !(this.searchQuery != "");
                 this.isNotSelectGender = !(this.selectedGender != "");
                 this.isNotSelectInterest = !(this.selectedInterests.length > 0);
@@ -201,6 +202,10 @@
                     localStorage.setItem("city", this.selectedCity);
                     localStorage.setItem("sex", this.selectedGender);
                     localStorage.setItem("interests", JSON.stringify(this.selectedInterests));
+
+                    if (this.userData?.tg_id) {
+                        await loadTgData(this.userData.tg_id, this.searchQuery, this.selectedCity, this.selectedGender, this.selectedInterests);
+                    }
                     
                     this.$router.push('/signup_2');
                 }

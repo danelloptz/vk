@@ -295,7 +295,7 @@
                 tg: "",
                 type: "",
                 welcome_message: "",
-                maxSymbols: 10000,
+                maxSymbols: 30000,
                 types: ["Нет", "Линейный маркетинг", "Бинарный маркетинг", "Гибридный маркетинг", "Матрица", "Шахматный маркетинг"],
                 isDropdownVisible: false,
                 links: [

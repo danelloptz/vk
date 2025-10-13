@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export async function getUserInfo(token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/v1/user/me', {
+        const response = await axios.get('https://web.intelektaz.com/api/beta/user/me', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'

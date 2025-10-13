@@ -31,7 +31,7 @@
         </div> -->
         <div class="new_send_row m34">
             <span class="send_name">Название рассылки:</span>
-            <input v-model="send_name" class="send_name" placeholder="Моя рассылка" />
+            <input v-model="send_name" class="send_name" placeholder="Моя рассылка" maxlength="20" />
         </div>
         <div class="new_send_row m30">
             <span class="new_send_row_filters">Фильтры</span>

@@ -52,6 +52,7 @@
     import { checkGroupSub, getGroups, subToGroup } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
     import { refreshToken, changeStatus } from '@/services/auth';
+    import { getSubTgChannels } from '@/services/tg';
     import AppModalMessage from '@/components/AppModalMessage.vue';
     import AppModal from '@/components/AppModal.vue';
 
@@ -119,7 +120,12 @@
                     this.$router.push("/signup_3");
                 }
             }
-            const groups = await getGroups(this.userInfo.vk_id);
+            let groups;
+            if (this.userInfo.tg_id) {
+                groups = await getSubTgChannels(this.userInfo.id);
+            } else {
+                groups = await getGroups(this.userInfo.vk_id);
+            }
             this.groupInfo = groups;
             console.log(this.groupInfo);
             this.updateGroupQueue();

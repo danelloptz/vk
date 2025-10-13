@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppStartModal from '@/views/AppStartModal'
+import AppStartModalTesters from '@/views/AppStartModalTesters'
 import AppRegistrationStepOne from '@/views/AppRegistrationStepOne'
 import AppRegistrationStepTwo from '@/views/AppRegistrationStepTwo'
 import AppRegistrationStepThree from '@/views/AppRegistrationStepThree'
@@ -7,6 +8,7 @@ import AppHome from '@/views/AppHome'
 
 const routes = [
     { path: '/', component: AppStartModal },
+    { path: '/login', component: AppStartModalTesters },
     { path: '/signup_1', component: AppRegistrationStepOne },
     { path: '/signup_2', component: AppRegistrationStepTwo },
     { path: '/signup_3', component: AppRegistrationStepThree },

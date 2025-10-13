@@ -9,7 +9,7 @@
         <h2>Создание шага</h2>
         <div class="row">
             <span>Имя</span>
-            <input v-model="name" type="text"/>
+            <input v-model="name" type="text" maxlength="20"/>
         </div>
         <div class="row">
             <span>Заголовок</span>
