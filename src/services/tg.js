@@ -23,7 +23,7 @@ export async function tgLogin(id, first_name, last_name, username, photo_url, au
             hash: hash,
         }
         payload["telegram_data"] = telegram_data;
-        console.log(sponsor_tg_id);
+        console.log(sponsor_tg_id, sponsor_platform);
         if (sponsor_tg_id && sponsor_tg_id != "" && sponsor_tg_id != 'null') {
             payload["sponsor_tg_id"] = sponsor_tg_id;
         }
@@ -38,15 +38,21 @@ export async function tgLogin(id, first_name, last_name, username, photo_url, au
     }
 }
 
-export async function loadTgData(tg_id, country, city, sex_db, interests) {
+export async function loadTgData(_, country, city, sex_db, interests, token) {
     try {
         const response = await axios.post('https://web.intelektaz.com/api/tg/login/load_user_data', {
-            "tg_id": tg_id,
             "country": country,
             "city": city,
             "sex_db": sex_db,
             "interests": interests
-        });
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
         return response.data;
     } catch (error) {
         console.error("Ошибка при сохранении информации о пользователе", error);
@@ -54,18 +60,73 @@ export async function loadTgData(tg_id, country, city, sex_db, interests) {
     }
 }
 
-export async function getSubTgChannels(owner_id) {
+export async function getSubTgChannels(_, token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/tg/login/get_registration_groups',
+        const response = await axios.get('https://web.intelektaz.com/api/tg/login/get_registration_groups', 
             {
-                params: {
-                    owner_id: owner_id
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             }
         );
         return response.data;
     } catch (error) {
         console.error("Ошибка при получении каналов для подписки при регистрации", error);
+        return false; 
+    }
+}
+
+export async function checkTgSub(_, channel_id, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/rotation/check_subscribe',
+            {
+                params: {
+                    channel_id: channel_id
+                },
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при проверки подписки на канал", error);
+        return false; 
+    }
+}
+
+export async function activateTgUser(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/login/activate', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при активации пользователя", error);
+        return false; 
+    }
+}
+
+export async function getTgReferer(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_referer',
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении реферера", error);
         return false; 
     }
 }

@@ -33,8 +33,9 @@
             <AppGroupOrUser style="width: 100%;" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
             <div class="groups_block_btns">
                 <AppGoodButton :text="text1" @click="subscribeGroup" />
-                <AppGoodButton class="big_btn" :text="text3" @click="checkSubscription(groupsQueue[currentGroupIndex]?.vk_id)" />
-                <AppBadButton :text="`${text2} (${skipCounts})`" @click="skipGroup" />
+                <AppGoodButton class="big_btn" :text="text3" @click="checkSubscription(groupsQueue[currentGroupIndex])" />
+                <AppBadButton v-if="skipCounts > 0" :text="`${text2} (${skipCounts})`" @click="skipGroup" />
+                <AppBadButton v-if="skipCounts == 0" :text="'НАЧАТЬ СНАЧАЛА'" @click="reset" />
                 <AppBadButton :text="text4" @click="openModal" />
                 <span class="error_message" v-if="noSkips">Не осталось пропусков!</span>
                 <span class="error_message" v-if="noSubscribe">Не подписались!</span>
@@ -52,7 +53,7 @@
     import { checkGroupSub, getGroups, subToGroup } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
     import { refreshToken, changeStatus } from '@/services/auth';
-    import { getSubTgChannels } from '@/services/tg';
+    import { getSubTgChannels, checkTgSub, activateTgUser } from '@/services/tg';
     import AppModalMessage from '@/components/AppModalMessage.vue';
     import AppModal from '@/components/AppModal.vue';
 
@@ -61,7 +62,7 @@
         data() {
             return {
                 addGroups: 0,
-                totalGroups: 25,
+                totalGroups: 2,
                 skipCounts: 10,
                 groupInfo: null,
                 userInfo: [],
@@ -114,15 +115,15 @@
             if (this.addGroups >= this.totalGroups) {
                 // this.watchVideo();
                 console.log("END");
-                const updateUser = await changeStatus(this.userInfo.vk_access_token);
-                if (updateUser.status) {
-                    localStorage.removeItem("addGroups");
-                    this.$router.push("/signup_3");
-                }
+                this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                // if (updateUser.status) {
+                localStorage.removeItem("addGroups");
+                this.$router.push("/signup_3");
+                // }
             }
             let groups;
             if (this.userInfo.tg_id) {
-                groups = await getSubTgChannels(this.userInfo.id);
+                groups = await getSubTgChannels(this.userInfo.id, localStorage.getItem('token'));
             } else {
                 groups = await getGroups(this.userInfo.vk_id);
             }
@@ -147,6 +148,10 @@
             });
         },
         methods: {
+            reset() {
+                localStorage.setItem('addGroups', 0);
+                location.reload();
+            },
             openModal() {
                 this.isModal = true;
             },
@@ -162,7 +167,7 @@
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
                     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                    if (isMobile) { 
+                    if (isMobile && !this.userInfo.tg_id) { 
                         const resp = await subToGroup(this.userInfo.vk_access_token, this.groupsQueue[this.currentGroupIndex].group_link);
                         if (!resp) location.reload();
                         if (resp.status) {
@@ -180,11 +185,11 @@
                             if (this.addGroups >= this.totalGroups) {
                                 // this.watchVideo();
                                 console.log("END");
-                                const updateUser = await changeStatus(this.userInfo.vk_access_token);
-                                if (updateUser.status) {
+                                this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                                // if (updateUser.status) {
                                     localStorage.removeItem("addGroups");
                                     this.$router.push("/signup_3");
-                                }
+                                // }
                             }
                             if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
                                 (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 
@@ -203,19 +208,22 @@
                 }
             },
             async checkSubscription(groupLink) {
-                if (!this.waitingForCheck) return;
+                // if (!this.waitingForCheck) return;
                 this.waitingForCheck = false;
                 let response;
                 try {
-                    response = await checkGroupSub(String(groupLink), this.userInfo.vk_id, "registration");
+                    console.log(groupLink);
+                    if (this.userInfo.tg_id) response = await checkTgSub(this.userInfo.tg_id, groupLink.tg_id, localStorage.getItem('token'))
+                    else response = await checkGroupSub(String(groupLink.vk_id), this.userInfo.vk_id, "registration");
                     if (!response) location.reload();
                 } catch(err) {
-                    location.reload();
+                    // location.reload();
+                    console.log(err);
                 }
                 
                 console.log(response);
 
-                if (response.status) {
+                if (response.status || response.subscribed) {
                     this.addGroups++;
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
@@ -225,11 +233,11 @@
 
                     if (this.addGroups === this.totalGroups) {
                         console.log("сработал changestatus", this.addGroups, this.totalGroups);
-                        const updateUser = await changeStatus(this.userInfo.vk_access_token);
-                        if (updateUser.status) {
+                        this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                        // if (updateUser.status) {
                             localStorage.removeItem("addGroups");
                             this.$router.push("/signup_3");
-                        }
+                        // }
                             
                     }
 
@@ -267,7 +275,7 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
+                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]);
                 }
             },
             handleFocus() {
@@ -275,7 +283,7 @@
                     const elapsed = Date.now() - this.blurTime;
                     if (elapsed > 1000) { // Например, если прошло более 5 секунд
                         this.tooFast = false;
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                         this.tooFast = true;

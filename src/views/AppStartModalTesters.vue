@@ -49,6 +49,8 @@
             script.setAttribute("data-size", "large");
             script.setAttribute("data-auth-url", "https://lk.intelektaz.com/login/");
             script.setAttribute("data-request-access", "write");
+            script.setAttribute("data-userpic", "false");
+            script.setAttribute("data-radius", "10");
 
             // Добавляем в контейнер, чтобы кнопка встроилась в нужное место
             this.$refs.tgButton.appendChild(script);
@@ -85,9 +87,11 @@
                 const addGroups = localStorage.getItem("addGroups");
                 const watchedVideos = localStorage.getItem("watchedVideos");
                 const addPosts = localStorage.getItem("addPosts");
+                const sponsor_platform = localStorage.getItem("sponsor_platform");
                 localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
                 const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
                 localStorage.setItem("referer", urlParams.get('ref') || referer);
+                localStorage.setItem("sponsor_platform", urlParams.get('platform') || sponsor_platform);
                 if (addGroups) localStorage.setItem("addGroups", addGroups);
                 if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
                 if (addPosts) localStorage.setItem("addPosts", addPosts);
@@ -190,7 +194,8 @@
                 const device_id = params.get("device_id");
                 const code_verifier = localStorage.getItem("code_verifier");
 
-                const sponsor_platform = decodeURIComponent(params.get("platform") || "");
+                const sponsor_platform = localStorage.getItem('sponsor_platform');
+                console.log(sponsor_platform);
                 const tg_id = decodeURIComponent(params.get("id") || "");
                 const first_name = decodeURIComponent(params.get("first_name") || "");
                 const last_name = decodeURIComponent(params.get("last_name") || "");
@@ -198,7 +203,7 @@
                 const photo_url = decodeURIComponent(params.get("photo_url") || "");
                 const auth_date = decodeURIComponent(params.get("auth_date") || "");
                 const hash = params.get("hash") || "";
-                const sponsor_id = localStorage.getItem("referer") || "";
+                const sponsor_id = localStorage.getItem('referer');
 
                 if (tg_id != "") {
                     const resp = await tgLogin(tg_id, first_name, last_name, username, photo_url, auth_date, hash, sponsor_id, sponsor_platform);
@@ -206,11 +211,11 @@
                     localStorage.setItem("token_refresh", resp.refresh_token);
                     localStorage.setItem("is_new_user", resp.is_new_user);
                     console.log(resp);
-                    // if (resp) {
-                    //     if (resp.is_new_user) this.$router.push('/signup_1')
-                    //     else this.$router.push('/home');
-                    // }
-                    this.$router.push('/signup_1');
+                    if (resp) {
+                        if (resp.is_new_user) this.$router.push('/signup_1')
+                        else this.$router.push('/home');
+                    }
+                    // this.$router.push('/signup_1');
                 }
 
                 if (code && state && device_id) {
@@ -499,6 +504,7 @@
     }
 
     .btn {
+        width: 280px;
         @media (max-width: 500px) {
             width: 170px !important;
             height: 51px !important;

@@ -125,7 +125,7 @@
     // import { getUserInfo, getReferInfo } from '@/services/user';
     import { getUserInfo, getReferer } from '@/services/user';
     import { refreshToken } from '@/services/auth';
-    import { loadTgData } from '@/services/tg';
+    import { loadTgData, getTgReferer } from '@/services/tg';
 
     export default {
         components: { AppGoodButton, AppGroupOrUser },
@@ -204,7 +204,7 @@
                     localStorage.setItem("interests", JSON.stringify(this.selectedInterests));
 
                     if (this.userData?.tg_id) {
-                        await loadTgData(this.userData.tg_id, this.searchQuery, this.selectedCity, this.selectedGender, this.selectedInterests);
+                        await loadTgData(this.userData.tg_id, this.searchQuery, this.selectedCity, this.selectedGender, this.selectedInterests, localStorage.getItem('token'));
                     }
                     
                     this.$router.push('/signup_2');
@@ -233,8 +233,14 @@
             }
             this.userData = response;
 
-            const refer = await getReferer(this.userData.vk_id);
-            this.referData = refer;
+            if (this.userData.tg_id) {
+                this.referData = await getTgReferer(localStorage.getItem('token'));
+                this.referData.avatar = this.referData.avatar == "" ? require('@/assets/images/empty.png') : this.referData.avatar;
+            } else {
+                const refer = await getReferer(this.userData.vk_id);
+                this.referData = refer; 
+            }
+            
 
             // тут получаем все страны на русском для выпадаюшего списка
             try {

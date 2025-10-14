@@ -14,7 +14,7 @@
                     <span v-if="userData">ID: {{ userData.vk_id }}</span>
                 </div>
             </div>
-            <div class="user_data">
+            <div class="user_data" v-if="userData.vk_id">
                 <h2>Ваша группа ВК</h2>
                 <input
                     v-model="selectedGroup" 
@@ -23,6 +23,13 @@
                 <span>*Вы в любое время можете добавить или изменить свою группу для продвижения в разделе «Настройки» в личном кабинете.</span>
                 <div class="wrapper_btn">
                     <AppGoodButton :text="text1" @click="checkLink" />
+                    <AppBadButton :text="text2" @click="skip" />
+                </div>
+            </div>
+            <div class="user_data" v-if="userData.tg_id">
+                <span>Чтобы привязать свой канал, сделайте нашего бота администратором в вашем канале. После этого ваш канал автоматически привяжется к вашему аккаунту.</span>
+                <div class="wrapper_btn">
+                    <AppGoodButton :text="'INTELEKTAZ BOT'" @click="openBot" />
                     <AppBadButton :text="text2" @click="skip" />
                 </div>
             </div>
@@ -93,6 +100,9 @@
             this.userData = response;
         },
         methods: {
+            openBot() {
+                window.open('https://t.me/test_intelekt_bot', "_blank", "width=800, height=600");
+            },
             async checkLink() {
                 if (this.selectedGroup !== "") {
                     const regex = /^https:\/\/vk\.com\/.+$/;
