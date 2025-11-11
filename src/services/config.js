@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export async function getConfig(key, token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/v1/config', {
+        const response = await axios.get('https://web.intelektaz.com/api/beta/config', {
             params: {
                 key: key
             },

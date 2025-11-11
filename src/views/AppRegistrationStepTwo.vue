@@ -62,7 +62,7 @@
         data() {
             return {
                 addGroups: 0,
-                totalGroups: 2,
+                totalGroups: 25,
                 skipCounts: 10,
                 groupInfo: null,
                 userInfo: [],

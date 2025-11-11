@@ -14,7 +14,7 @@
                     <h2>{{ `${userData.name}` }}</h2>
                     <span v-if="userData?.packages[userData?.packages.length - 1]?.package_name != 'Free'">{{ userData?.packages[userData?.packages.length - 1]?.package_name }}</span>
                 </div>
-                <span>ID: {{ userData.vk_id }}</span>
+                <span>ID: {{ userData.vk_id || userData.tg_id }}</span>
             </div>
         </div>
         <div class="switch_wrapper" v-if="windowWidth > 650">
@@ -318,15 +318,15 @@ export default {
 
     },
     async created() {
-        this.root_vk_id = this.userData.vk_id;
+        this.root_vk_id = this.userData.id;
 
         if (this.userData.current_leg == "left") this.leg_index = 0;
         if (this.userData.current_leg == "right") this.leg_index = 1;
         if (this.userData.current_leg == "auto") this.leg_index = 2;
 
-        await this.next(this.userData.vk_id);
+        await this.next(this.userData.id);
 
-        this.struct_info = await getStructureInfo(this.userData.vk_id);
+        this.struct_info = await getStructureInfo(this.userData.id);
         this.setInitialScrollPosition();
     },
     methods: {
@@ -355,8 +355,8 @@ export default {
         openLinks() {
             this.isLinks = true;
         },
-        async next(vk_id) {
-            const tree = await getTree(vk_id, this.userData.vk_id);
+        async next(id) {
+            const tree = await getTree(id, this.userData.id);
             this.binarTree = tree;
             this.getAllId(this.binarTree);
             if (this.binarTree.left_leg) this.widthChild = 1000;
@@ -364,8 +364,13 @@ export default {
             this.binarStack.push(this.maskedData);
         },
         getAllId(node) {
-            if (!node.vk_id) return
-            else this.users.push(node.vk_id);
+            console.log('ЭТО НОДА: ', node);
+            if (!node.vk_id && !node.tg_id) return
+            else {
+                console.log('КЛАДУ');
+                if (node.vk_id) this.users.push(node.vk_id)
+                else this.users.push(node.tg_id);
+            } 
 
             if (node.left_leg) this.getAllId(node.left_leg);
             if (node.right_leg) this.getAllId(node.right_leg);
@@ -374,7 +379,7 @@ export default {
             this.notFound = false;
             if (this.activeIndex == 1) {
                 try {
-                    this.binarTree = await getTree(+this.search, this.userData.vk_id);
+                    this.binarTree = await getTree(+this.search, this.userData.id);
                     if (this.binarStack.indexOf(this.binarTree.vk_id) == -1) this.binarStack.push(this.binarTree);
                 } catch(err) {
                     console.log("notFound: ", this.notFound);
@@ -385,7 +390,7 @@ export default {
                     this.notFound = true;
                     return;
                 }
-                const resp = await findParents(this.userData.vk_id, +this.search);
+                const resp = await findParents(this.userData.id, +this.search);
                 this.searchUsers = resp.referrers;
                 if (this.searchUsers.length > 0) {
                     this.notFound = false;
@@ -405,10 +410,10 @@ export default {
         async backup() {
             this.cleanCurrSearchUser();
             this.notFound = false;
-            this.binarTree = await getTree(this.userData.vk_id, this.userData.vk_id);
+            this.binarTree = await getTree(this.userData.id, this.userData.id);
             this.searchUsers = [];
             if (this.binarStack.indexOf(this.binarTree.vk_id) == -1) this.binarStack.push(this.binarTree);
-            this.root_vk_id = this.userData.vk_id;
+            this.root_vk_id = this.userData.id;
         },
         changeActiveLeg(index, name) {
             this.leg_index = index;
@@ -448,7 +453,7 @@ export default {
                 this.binarStack.pop();
                 this.binarTree = this.binarStack.at(-1);
             } else {
-                await this.next(this.userData.vk_id);
+                await this.next(this.userData.id);
             }
         }
     }

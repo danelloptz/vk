@@ -49,7 +49,7 @@ export async function getGroupInfo() {
 
 export async function sendNewSettings(payload, token) {
     try {
-        const response = await axios.patch('https://web.intelektaz.com/api/v1/user', payload, {
+        const response = await axios.patch('https://web.intelektaz.com/api/beta/user', payload, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -64,7 +64,7 @@ export async function sendNewSettings(payload, token) {
 
 export async function getUserInfoById(user_id, token) {
     try {
-        const response = await axios.get(`https://web.intelektaz.com/api/v1/user/${user_id}`, { 
+        const response = await axios.get(`https://web.intelektaz.com/api/beta/user/${user_id}`, { 
             params: { 
                 user_id: user_id,
             },
@@ -94,7 +94,7 @@ export async function getReferer(vk_id) {
 
 export async function getVipUser(vk_id) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_vip_user`, { 
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/get_vip_user`, { 
             "vk_id": vk_id
          });
         return response.data;
@@ -104,11 +104,11 @@ export async function getVipUser(vk_id) {
     }
 }
 
-export async function getTree(vk_id, root_vk_id) {
+export async function getTree(id, root_id) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_tree`, { 
-            "vk_id": vk_id,
-            "root_vk_id": root_vk_id
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/get_tree`, { 
+            "id": id,
+            "root_id": root_id
          });
         return response.data;
     } catch (error) {
@@ -130,11 +130,12 @@ export async function setLeg(user_id, leg) {
     }
 }
 
-export async function getReferals(owner_vk_id, second_vk_id) {
+export async function getReferals(owner_id, second_id) {
+    console.log(owner_id, second_id);
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_referals`, { 
-            "owner_vk_id": owner_vk_id,
-            "second_vk_id": second_vk_id
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/get_referals`, { 
+            "owner_id": owner_id,
+            "second_id": second_id
          });
         return response.data;
     } catch (error) {
@@ -143,11 +144,13 @@ export async function getReferals(owner_vk_id, second_vk_id) {
     }
 }
 
-export async function getStructureInfo(vk_id) {
+export async function getStructureInfo(user_id) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_structure`, { 
-            "vk_id": vk_id
-         });
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/get_structure`, {}, {
+            params: {
+                user_id: user_id
+            }
+        });
         return response.data;
     } catch (error) {
         console.error("Ошибка при получении данных для раздела структуры", error);
@@ -180,10 +183,10 @@ export async function setAutoposting(user_id, status) {
     }
 }
 
-export async function findParents(vk_id, search_id) {
+export async function findParents(id, search_id) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/search_referal`, { 
-            "vk_id": vk_id,
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/search_referal`, { 
+            "id": id,
             "search_id": search_id
          });
         return response.data;
@@ -195,7 +198,7 @@ export async function findParents(vk_id, search_id) {
 
 export async function sendPosting(token) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v1/content_plan/schedule_posts`, {},{
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/content_plan/schedule_posts`, {},{
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -210,7 +213,7 @@ export async function sendPosting(token) {
 
 export async function sendPosts(token) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v1/content_plan/send_posts_during_registration`, {},{
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/content_plan/send_posts_during_registration`, {},{
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'

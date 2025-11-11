@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export async function sendBrief(payload, token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/brif/create', payload, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/brif/create', payload, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -17,7 +17,7 @@ export async function sendBrief(payload, token) {
 
 export async function getBrief(token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/v1/brif', {
+        const response = await axios.get('https://web.intelektaz.com/api/beta/brif', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -29,10 +29,9 @@ export async function getBrief(token) {
         return false; 
     }
 }
-
 export async function updateBrief(brif_id, payload,  token) {
     try {
-        const response = await axios.patch(`https://web.intelektaz.com/api/v1/brif/${brif_id}`, payload, {
+        const response = await axios.patch(`https://web.intelektaz.com/api/beta/brif/${brif_id}`, payload, {
             params: {
                 brif_id: brif_id
             },
@@ -50,7 +49,7 @@ export async function updateBrief(brif_id, payload,  token) {
 
 export async function updateContentPlan(plan, token) {
     try {
-        const response = await axios.patch(`https://web.intelektaz.com/api/v1/content_plan`, plan, {
+        const response = await axios.patch(`https://web.intelektaz.com/api/beta/content_plan`, plan, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -65,7 +64,7 @@ export async function updateContentPlan(plan, token) {
 
 export async function getContentPlan(token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/v1/content_plan/', {
+        const response = await axios.get('https://web.intelektaz.com/api/beta/content_plan/', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -80,7 +79,7 @@ export async function getContentPlan(token) {
 
 export async function generateTopics(token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/generate_topics', {}, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/content_plan/generate_topics', {}, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -96,7 +95,7 @@ export async function generateTopics(token) {
 export async function generatePostsText(posts, token) {
     try {
         console.log(posts);
-        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/generate_posts_text', posts, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/content_plan/generate_posts_text', posts, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -111,7 +110,7 @@ export async function generatePostsText(posts, token) {
 
 export async function regenerateThemes(posts, token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/regenerate_topics', posts, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/content_plan/regenerate_topics', posts, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -126,7 +125,7 @@ export async function regenerateThemes(posts, token) {
 
 export async function regeneratePosts(posts, token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/regenerate_posts_text', posts, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/content_plan/regenerate_posts_text', posts, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -142,7 +141,7 @@ export async function regeneratePosts(posts, token) {
 export async function generateBanners(posts, token) {
     try {
         console.log(posts);
-        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/generate_banners', posts, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/content_plan/generate_banners', posts, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -158,7 +157,7 @@ export async function generateBanners(posts, token) {
 
 export async function regenerateBanners(posts, token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/regenerate_banners', posts, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/content_plan/regenerate_banners', posts, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -173,7 +172,7 @@ export async function regenerateBanners(posts, token) {
 
 export async function acceptPlan(plan, token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/content_plan/accept_content_plan', plan, {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/content_plan/accept_content_plan', plan, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -200,7 +199,7 @@ export async function uploadUserImage(topic_id, file, token, chose_image_index =
         }
         
         const response = await axios.post(
-            `https://web.intelektaz.com/api/v1/content_plan/content_plan_custom_image/${topic_id}`,
+            `https://web.intelektaz.com/api/beta/content_plan/content_plan_custom_image/${topic_id}`,
             formData,
             {
                 headers: {
@@ -335,10 +334,10 @@ export async function getGenerations(user_id) {
     }
 }
 
-export async function writeOffGenerations(vk_id, count_posts) {
+export async function writeOffGenerations(id, count_posts) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v2/users/write_off_generations', {
-            "vk_id": vk_id,
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/users/write_off_generations', {
+            "id": id,
             "count_posts": count_posts,
         });
         return response.data;

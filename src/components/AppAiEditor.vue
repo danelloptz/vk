@@ -1715,8 +1715,8 @@
             close() {
                 this.$emit('update:visibility1', false);
             },
-            save() {
-                this.crop();
+            async save() {
+                await this.crop();
                 
                 setTimeout(() => {
                     this.$emit('update:save', this.croppedImage);

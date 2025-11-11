@@ -35,7 +35,7 @@ export function getToken(code, state, code_verifier, device_id, redirect_uri) {
 
 export async function refreshToken(refresh_token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/auth/refresh', {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/auth/refresh', {
             "refresh_token": refresh_token,
         },
         );

@@ -80,10 +80,10 @@ export async function editVideo(video_link, vk_id, token) {
     }
 }
 
-export async function addInRotation(vk_id, rotation_type) {
+export async function addInRotation(owner_id, rotation_type) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/add_in_rotation', {
-            "vk_id": vk_id,
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/groups/add_in_rotation', {
+            "owner_id": owner_id,
             "rotation_type": rotation_type,
         });
         return response.data;

@@ -89,13 +89,25 @@
         },
         computed: {
             refLink() {
-                return `https://${this.refLinks.default}/?ref=${this.userData?.vk_id}`;
+                if (this.userData?.vk_id) {
+                    return `https://${this.refLinks.default}/?ref=${this.userData.vk_id}`;
+                } else {
+                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                }
             },
             refVkLink() {
-                return `https://${this.refLinks.vk}/?ref=${this.userData?.vk_id}`;
+                if (this.userData?.vk_id) {
+                    return `https://${this.refLinks.vk}/?ref=${this.userData.vk_id}`;
+                } else {
+                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                }
             },
             refPremiumLink() {
-                return `https://${this.refLinks.premium}/?ref=${this.userData?.vk_id}`;
+                if (this.userData?.vk_id) {
+                    return `https://${this.refLinks.premium}/?ref=${this.userData.vk_id}`;
+                } else {
+                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                }
             }
         },
         watch: {

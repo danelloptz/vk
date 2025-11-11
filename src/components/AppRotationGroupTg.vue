@@ -16,7 +16,7 @@
     />
     <AppRotationPlans v-if="isPlans" :userData="userData" />
     <section class="rotation_preview" v-if="isRotationPreview && !isPlans && !isTarif">
-        <span>Вы можете увеличить количество целевых подписчиков на свою ВК группу совершенно бесплатно за счет прохождения Ротации. </span>
+        <span>Вы можете увеличить количество целевых подписчиков на свой Телеграмм канал совершенно бесплатно за счет прохождения Ротации. </span>
         <span>Ротация - это взаимовыгодная функция. Вам необходимо подписаться на 20 предложенных ВК групп и в ответ получаете 10 подписок на свою ВК группу.</span>
         <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных подписок до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
         <div class="rotation_preview_btns">
@@ -59,7 +59,9 @@
     import AppModal from "@/components/AppModal.vue";
     // import AppVideoModal from "@/components/AppVideoModal.vue";
 
-    import { addInRotation, checkGroupSub, getRotationGroups, subToGroup} from "@/services/groups";    
+    import { getRotationGroups, checkTgSub } from '@/services/tg';
+    import { addInRotation} from "@/services/groups";    
+    // import { addInRotation, checkGroupSub} from "@/services/groups";    
 
     export default {
         components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppModal, AppModalMessage  },
@@ -128,7 +130,7 @@
                     break;
             }
 
-            const groups = await getRotationGroups(this.userData.vk_id, this.tariff);
+            const groups = await getRotationGroups(this.tariff, localStorage.getItem('token'));
             // if (!groups) location.reload();
             console.log(groups);
 
@@ -184,51 +186,19 @@
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                    if (isMobile) { 
-                        const resp = await subToGroup(this.userData.vk_access_token, this.groupsQueue[this.currentGroupIndex].group_link);
-                        if (!resp) location.reload();
-                        if (resp.status) {
-                            const groupId = String(this.groupsQueue[this.currentGroupIndex].vk_id);
-                            await checkGroupSub(groupId, this.userData.vk_id, "rotation");
-                            this.waitingForCheck = false;
-                            this.addGroups++;
-                            localStorage.setItem("addGroups", this.addGroups);
-                            this.groupsQueue.splice(this.currentGroupIndex, 1);
-                            this.subscribedCount++;
-                            this.noSubscribe = false;
-                            this.tooFast = false;
-
-                            console.log(this.addGroups, this.totalGroups);
-                            if (this.addGroups === this.totalGroups) {
-                                console.log("END");
-                                // this.watchVideo();
-                                this.endRotation();
-                            }
-                            if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
-                                (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 
-                                this.groupsQueue.length === 0) {
-                                    this.nextPriorityGroup();
-                            }
-                        } else {
-                            this.noSubscribe = true;
-                        }
-                    } else {
-                        const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
-                        this.blurTime = Date.now();
-                        this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
-                        window.open(groupLink, "_blank", "width=800, height=600");
-                    }
+                    const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
+                    this.blurTime = Date.now();
+                    this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
+                    window.open(groupLink, "_blank", "width=800, height=600");
                 }
             },
-            async checkSubscription(groupLink) {
+            async checkSubscription(tg_id) {
                 if (!this.waitingForCheck) return;
-                console.log(groupLink);
-                const response = await checkGroupSub(String(groupLink), this.userData.vk_id, "rotation");
-                if (!response) location.reload();
+                const response = await checkTgSub(0, tg_id, localStorage.getItem('token'));
+                // if (!response) location.reload();
                 console.log(response);
 
-                if (response.status) {
+                if (response.subscribed) {
                     this.waitingForCheck = false;
                     this.addGroups++;
                     localStorage.setItem("addGroups", this.addGroups);
@@ -278,7 +248,7 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
+                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.tg_id);
                 }
             },
             handleFocus() {
@@ -289,7 +259,7 @@
                         this.tooFast = false;
                         this.noSubscribe = false;
                         console.log('nandler');
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.vk_id);
+                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.tg_id);
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                         this.tooFast = true;

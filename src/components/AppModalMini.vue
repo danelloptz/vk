@@ -9,7 +9,7 @@
                 </div>
                 <div class="col">
                     <h2>{{ `${userData.name}` }}</h2>
-                    <span class="id">ID: {{ userData.vk_id }}</span>
+                    <span class="id">ID: {{ userData.vk_id || userData.tg_id }}</span>
                     <a style="cursor: pointer;" @click="openRef">Реферальные ссылки</a>
                     <span class="program">Партнерская программа активна до {{ endDate }}</span>
                 </div>

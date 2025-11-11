@@ -10,7 +10,7 @@
             </div>
             <div class="line" v-if="isRoot"></div>
             <div class="top_pagination" v-if="isRoot" :key="pagination.length">
-                <span v-for="(item, index) in pagination" :key="index" @click="updateUser(item.vk_id, index)" class="pagination_item" :class="{ lastPaginationItem: index == pagination.length - 1 }">
+                <span v-for="(item, index) in pagination" :key="index" @click="updateUser(item.id, index)" class="pagination_item" :class="{ lastPaginationItem: index == pagination.length - 1 }">
                     {{ item.name }}
                     <span v-if="index != pagination.length - 1">></span>
                 </span>
@@ -19,7 +19,7 @@
                 <div class="modal_wrapper" v-if="visibility && maskedCurrUser" :key="maskedCurrUser">
                     <div class="modal">
                     <img src="@/assets/images/close.png" class="close" @click="close">
-                    <img :src="maskedCurrUser.avatar_url" class="avatar">
+                    <img :src="maskedCurrUser.avatar_url || require(`@/assets/images/empty.png`)" class="avatar">
                     <h2>{{ maskedCurrUser.name }}</h2>
                     <span class="package_name">{{ maskedCurrUser.package_name }}</span>
                     <div class="row_modal">
@@ -28,11 +28,11 @@
                     </div>
                     <div class="row_modal">
                         <span>ID:</span>
-                        <span>{{ maskedCurrUser.vk_id }}</span>
+                        <span>{{ maskedCurrUser.vk_id ||maskedCurrUser.tg_id  }}</span>
                     </div>
                     <div class="row_modal">
                         <span>Реферер ID:</span>
-                        <span>{{ maskedCurrUser.sponsor_vk_id }}</span>
+                        <span>{{ maskedCurrUser.sponsor_vk_id || maskedCurrUser.sponsor_tg_id }}</span>
                     </div>
                     <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px;">
                         <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
@@ -50,7 +50,7 @@
                     <div class="row first">
                         <div class="plus" @click.stop="toggleExpand(index, maskedCurrUser)">{{ maskedCurrUser?.first_line_referrals > 0 ? '-' : '' }}</div>
                         <div class="user_small">
-                            <img :src="maskedCurrUser.avatar_url">
+                            <img :src="maskedCurrUser.avatar_url || require(`@/assets/images/empty.png`)">
                             <span>{{ maskedCurrUser.name }}</span>
                         </div>
                     </div>
@@ -76,11 +76,11 @@
                         </div>
                         <div class="item_mob_content">
                             <div class="user_small">
-                                <img :src="maskedCurrUser.avatar_url">
+                                <img :src="maskedCurrUser.avatar_url || require(`@/assets/images/empty.png`)">
                                 <span>{{ maskedCurrUser.name }}</span>
                             </div>
                             <div class="item_mob_content_row">
-                                <span>ID / тариф: {{ maskedCurrUser.vk_id }}</span>
+                                <span>ID / тариф: {{ maskedCurrUser.vk_id || maskedCurrUser.tg_id }}</span>
                                 <div class="item_mob_tarif">
                                     <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(maskedCurrUser.package_name)) ? 'green' : 'red' }"></div>
                                     <span>{{ maskedCurrUser.package_name }}</span>
@@ -101,7 +101,7 @@
                     <div class="modal_wrapper" v-if="visibility && !currUser">
                         <div class="modal">
                         <img src="@/assets/images/close.png" class="close" @click="close">
-                        <img :src="selectedUser.avatar_url" class="avatar">
+                        <img :src="selectedUser.avatar_url || require(`@/assets/images/empty.png`)" class="avatar">
                         <h2>{{ selectedUser.name }}</h2>
                         <span class="package_name">{{ selectedUser.package_name }}</span>
                         <div class="row_modal">
@@ -110,11 +110,11 @@
                         </div>
                         <div class="row_modal">
                             <span>ID:</span>
-                            <span>{{ selectedUser.vk_id }}</span>
+                            <span>{{ selectedUser.vk_id || selectedUser.tg_id }}</span>
                         </div>
                         <div class="row_modal">
                             <span>Реферер ID:</span>
-                            <span>{{ selectedUser.sponsor_vk_id }}</span>
+                            <span>{{ selectedUser.sponsor_vk_id || selectedUser.sponsor_tg_id }}</span>
                         </div>
                         <div class="row_modal" v-if="isFirstLine" style="justify-content: center; column-gap: 23px;">
                             <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
@@ -134,12 +134,12 @@
                                 {{ item?.first_line_referrals > 0 ? (openedUsers[currentPage - 1][index] ? '-' : '+') : '' }}
                             </div>
                             <div class="user_small">
-                                <img :src="item.avatar_url">
+                                <img :src="item.avatar_url || require(`@/assets/images/empty.png`)">
                                 <span>{{ item.name }}</span>
                             </div>
                         </div>
                         <div class="row_special">
-                            <span>{{ item.vk_id }}</span>
+                            <span>{{ item.vk_id || item.tg_id }}</span>
                             <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item.package_name)) ? 'green' : 'red' }"></div>
                             <span>{{ item.package_name }}</span>
                         </div>
@@ -160,11 +160,11 @@
                         </div>
                         <div class="item_mob_content">
                             <div class="user_small">
-                                <img :src="item.avatar_url">
+                                <img :src="item.avatar_url || require(`@/assets/images/empty.png`)">
                                 <span>{{ item.name }}</span>
                             </div>
                             <div class="item_mob_content_row">
-                                <span>ID / тариф: {{ item.vk_id }}</span>
+                                <span>ID / тариф: {{ item.vk_id || item.tg_id }}</span>
                                 <div class="item_mob_tarif">
                                     <div class="circle" :style="{ background: !(['Free', 'Not active'].includes(item.package_name)) ? 'green' : 'red' }"></div>
                                     <span>{{ item.package_name }}</span>
@@ -187,7 +187,7 @@
                             :rootUser="rootUser"
                             :isRoot="false" 
                             :referer="item.vk_id" 
-                            :vk_id="item.vk_id" 
+                            :vk_id="item.id" 
                             :lay="lay + 1" 
                             :showNums="isHide" 
                             :referersStack="referersStackData" 
@@ -254,7 +254,7 @@
         async created() {
             if (this.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
             else this.isFirstLine = false;
-            const referals = await getReferals(this.rootUser.vk_id, this.vk_id);
+            const referals = await getReferals(this.rootUser.id, this.vk_id);
             this.node = referals.referrals;
             console.log(this.node);
 
@@ -361,7 +361,7 @@
                     if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                     else this.isFirstLine = false;
                     if (newValue?.vk_id) {
-                        const referals = await getReferals(this.rootUser.vk_id, newValue.vk_id);
+                        const referals = await getReferals(this.rootUser.id, newValue.id);
                         this.node = referals.referrals;
                         console.log("НОДА В currUser: ", this.node);
                     }
@@ -394,10 +394,10 @@
                     if (this.lay % 2 == 0 || this.windowWidth <= 650) {
                         console.log(item.vk_id);
                         this.isZopa = true;
-                        if (!this.maskedCurrUser) this.referersStackData.push({name: item.name, vk_id: item.vk_id});
+                        if (!this.maskedCurrUser) this.referersStackData.push({name: item.name, vk_id: item.vk_id, id: item.id});
                         
-                        if (this.windowWidth <= 650) this.updateUser(item.vk_id)
-                        else this.$emit("updateUser", item.vk_id);
+                        if (this.windowWidth <= 650) this.updateUser(item.id)
+                        else this.$emit("updateUser", item.id);
 
                         this.isNewLay = true; 
                         this.totalOpened = 0;
@@ -408,7 +408,7 @@
                             if (this.totalOpened > 1) {
                                 this.referersStackData.pop();
                             } 
-                            this.referersStackData.push({name: item.name, vk_id: item.vk_id});
+                            this.referersStackData.push({name: item.name, vk_id: item.vk_id, id: item.id});
                             this.openedUsers[this.currentPage - 1][index] = true;
                         } else {
                             if (this.referersStackData.length > 1) {
@@ -466,9 +466,9 @@
                 
                 if (vk_id == this.rootUser.vk_id) {
                     this.referersStackData = [];
-                    this.referersStackData.push({ "vk_id": this.rootUser.vk_id, "name": this.rootUser.name })
+                    this.referersStackData.push({ "vk_id": this.rootUser.vk_id, "name": this.rootUser.name, id: this.rootUser.id})
                 }
-                const referals = await getReferals(this.rootUser.vk_id, vk_id);
+                const referals = await getReferals(this.rootUser.id, vk_id);
                 this.node = referals.referrals;
                 this.currentPage = 1;
             },

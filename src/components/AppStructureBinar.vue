@@ -12,7 +12,7 @@
             <span>Рефералы: {{ node.left.referals }}</span>
             <span>{{ node.left.volume }} USDT</span>
           </div>
-          <img :src="node.avatar" :alt="node.name" class="avatar" @click="open" />
+          <img :src="node.avatar || require(`@/assets/images/empty.png`)" :alt="node.name" class="avatar" @click="open" />
           <div class="text_header" v-if="lay == 1">
             <span><strong>Право</strong></span>
             <span>Рефералы: {{ node.right.referals }}</span>
@@ -28,7 +28,7 @@
         <div class="modal_wrapper" v-if="visibility">
             <div class="modal">
               <img src="@/assets/images/close.png" class="close" @click="close">
-              <img :src="node.avatar" @click="nextUser(node)" class="avatar">
+              <img :src="node.avatar || require(`@/assets/images/empty.png`)" @click="nextUser(node)" class="avatar">
               <h2>{{ node.name }}</h2>
               <span class="package_name" v-if="root_info?.packages.at(-1)?.package_name == 'Business' || root_info?.packages.at(-1)?.package_name == 'Leader'">{{ node.package_name }}</span>
               <div class="row">
@@ -37,11 +37,11 @@
               </div>
               <div class="row">
                 <span>ID:</span>
-                <span>{{ node.vk_id }}</span>
+                <span>{{ node.vk_id || node.tg_id }}</span>
               </div>
               <div class="row">
                 <span>Реферер ID:</span>
-                <span>{{ node.sponsor_vk_id }}</span>
+                <span>{{ node.sponsor_vk_id || node.tg_id }}</span>
               </div>
               <div class="row" v-if="lay == 2" style="justify-content: center; column-gap: 23px;">
                   <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>
@@ -105,9 +105,9 @@
     methods: {
       nextUser(node) {
         this.close();
-        this.$parent.$emit("nextUser", node.vk_id);
-        this.$parent.$parent.$emit("nextUser", node.vk_id);
-        this.$parent.$parent.$parent.$emit("nextUser", node.vk_id);
+        this.$parent.$emit("nextUser", node.id);
+        this.$parent.$parent.$emit("nextUser", node.id);
+        this.$parent.$parent.$parent.$emit("nextUser", node.id);
       },
       open() {
         this.visibility = true;

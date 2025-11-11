@@ -19,7 +19,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import { getToken, addReferer, refreshToken } from '@/services/auth';
     import { getUserInfo } from '@/services/user';
-    import { tgLogin } from '@/services/tg';
+    import { tgLogin, getTokensByCode } from '@/services/tg';
 
     export default {
         components: { AppGoodButton },
@@ -47,7 +47,7 @@
             script.src = "https://telegram.org/js/telegram-widget.js?22";
             script.setAttribute("data-telegram-login", "test_intelekt_bot");
             script.setAttribute("data-size", "large");
-            script.setAttribute("data-auth-url", "https://lk.intelektaz.com/login/");
+            script.setAttribute("data-auth-url", "https://lk.intelektaz.com/login");
             script.setAttribute("data-request-access", "write");
             script.setAttribute("data-userpic", "false");
             script.setAttribute("data-radius", "10");
@@ -189,6 +189,16 @@
 
                 // считываем параметры, которые вк отдаёт
                 const params = new URLSearchParams(window.location.search);
+                const dlink = params.get("dlink");
+                if (dlink) {
+                    const resp = await getTokensByCode(dlink);
+                    if (resp) {
+                        localStorage.setItem("token", resp.access_token);
+                        localStorage.setItem("token_refresh", resp.refresh_token);
+                        localStorage.setItem("is_new_user", resp.is_new_user);
+                        this.$router.push('/home');
+                    }
+                }
                 const code = params.get("code");
                 const state = params.get("state");
                 const device_id = params.get("device_id");

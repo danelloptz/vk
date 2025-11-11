@@ -16,17 +16,23 @@
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
-            <span v-if="windowWidth > 650">Вконтакте: https://vk.com/id{{ userData.vk_id }}</span>
-            <span v-if="tgData?.link && windowWidth > 650">Telegram: {{ tgData.link }}</span>
+            <span v-if="windowWidth > 650 && userData?.vk_id">Вконтакте: https://vk.com/id{{ userData.vk_id }} <img v-if="userData?.vk_id" src="@/assets/images/ok_green2.png" class="ok_green"/></span>
+            <span v-if="windowWidth > 650 && testers.includes(userData?.id)">
+                <span>Telegram: {{ userData?.tg_id ? `tg://user?id=${userData?.tg_id}` : tgData?.link }} </span>
+                <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
+                <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
+            </span>
             <span v-if="whtData?.link && windowWidth > 650">WhatsApp: {{ whtData.link }}</span>
             <span v-if="windowWidth > 650 && emailData">Почта: {{ emailData }}</span>
             <div class="mobile_links_row" v-if="windowWidth <= 650">
                 <span>Вконтакте: </span>
                 <span>https://vk.com/id{{ userData.vk_id }}</span>
             </div>
-            <div class="mobile_links_row" v-if="tgData?.link && windowWidth <= 650">
+            <div class="mobile_links_row" v-if="windowWidth <= 650 && testers.includes(userData?.id)">
                 <span>Telegram: </span>
-                <span>{{ tgData.link }}</span>
+                <span>{{ userData?.tg_id ? `tg://user?id=${userData?.tg_id}` : tgData?.link }} </span>
+                <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
+                <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
             </div>
             <div class="mobile_links_row" v-if="whtData?.link && windowWidth <= 650">
                 <span>WhatsApp: </span>
@@ -184,6 +190,11 @@
         <input  
             v-model="siteLink" 
             placeholder="Сайт" >
+
+        <div class="row2">
+            <input type="checkbox" class="checkbox" v-model="intelAds" @change="changeAds" />
+            <span>Intelektaz Ads</span>
+        </div>
         <AppVipUser 
             v-if="windowWidth <= 650"
             :vipUser="newUserData" 
@@ -214,6 +225,8 @@
     import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
     import { editGroup, editVideo } from "@/services/groups";
     import { refreshToken } from "@/services/auth";
+    import { activeTg, turnAdsOn, turnAdsOff } from '@/services/tg';
+    import { getConfig } from '@/services/config';
 
 export default {
     components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser },
@@ -262,6 +275,8 @@ export default {
             emailData: "",
             userData: [],
             disabled: false,
+            testers: [],
+            intelAds: false
         };
     },
     computed: {
@@ -309,7 +324,11 @@ export default {
         }
         this.userData = response;
 
+        this.intelAds = this.userData.in_ads;
+
         this.beforeLinks = [...this.userData.social_links];
+
+        this.testers = await getConfig('tg_testers');
 
         try {
             const response = await fetch('https://namaztimes.kz/ru/api/country');
@@ -338,6 +357,13 @@ export default {
         },
     },
     methods: {
+        async changeAds() {
+            this.intelAds ? await turnAdsOn(localStorage.getItem('token')) : await turnAdsOff(localStorage.getItem('token'));
+        },
+        async activateTg() {
+            const code = await activeTg(localStorage.getItem('token'));
+            window.open(`http://t.me/test_intelekt_bot?start=code=${code}`, "_blank", "width=800, height=600")
+        },
         selectCountry(country) {
                 this.selectedCountry = country;
                 this.searchQuery = country;
@@ -464,6 +490,20 @@ export default {
     @font-face {
         font-family: 'OpenSans';
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
+    }
+
+    .ok_green {
+        margin-left: 30px;
+        width: 18px;
+        height: 13px;
+    }
+
+    .active_tg_btn {
+        width: 148px;
+        height: 40px;
+        font-size: 14px;
+        letter-spacing: 0px;
+        margin-left: 22px;
     }
 
     .textarea-container {

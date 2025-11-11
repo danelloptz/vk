@@ -27,7 +27,7 @@ export async function setAdds(vk_link, vk_id) {
 
 export async function getOtherAdds(vk_id) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v2/others/get_ads', {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/others/get_ads', {
             "payload": {
                 "vk_id": vk_id
             }

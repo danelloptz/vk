@@ -25,7 +25,7 @@ export async function getHistory() {
 
 export async function getTransactions(offset, limit, token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/v1/user/transactions', { 
+        const response = await axios.get('https://web.intelektaz.com/api/beta/user/transactions', { 
             params: { 
                 offset: offset,
                 limit: limit
@@ -44,7 +44,7 @@ export async function getTransactions(offset, limit, token) {
 
 export async function sendTo(to_user, amount, token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/v1/transactions/transfer', { 
+        const response = await axios.get('https://web.intelektaz.com/api/beta/transactions/transfer', { 
             params: { 
                 to_user: to_user,
                 amount: amount
@@ -64,7 +64,7 @@ export async function sendTo(to_user, amount, token) {
 export async function putMoney(amount, hash, contractaddress, recipient, chain, token) {
     console.log(amount, hash, contractaddress, recipient, chain);
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/user/balance/pick_up', {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/user/balance/pick_up', {
             "amount": amount,
             "hash": hash,
             "contractaddress": contractaddress,
@@ -88,7 +88,7 @@ export async function putMoney(amount, hash, contractaddress, recipient, chain, 
 
 export async function getTariffs(token) {
     try {
-        const response = await axios.get('https://web.intelektaz.com/api/v1/tariffs', { 
+        const response = await axios.get('https://web.intelektaz.com/api/beta/tariffs', { 
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -101,10 +101,10 @@ export async function getTariffs(token) {
     }
 }
 
-export async function getMoney(vk_id, sum_money, wallet, chain, commission) {
+export async function getMoney(id, sum_money, wallet, chain, commission) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v2/users/withdrawal_money', {
-            "vk_id": vk_id,
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/users/withdrawal_money', {
+            "id": id,
             "sum_money": sum_money,
             "wallet": wallet,
             "chain": chain,
@@ -119,7 +119,7 @@ export async function getMoney(vk_id, sum_money, wallet, chain, commission) {
 
 export async function buyTariff(tariff_id, count_month, tariff_name, tariff_price_per_month, token) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/user/tariffs/buy', {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/user/tariffs/buy', {
             "tariff_id": tariff_id,
             "count_month": count_month,
             "tariff_name": tariff_name,
@@ -143,7 +143,7 @@ export async function buyTariff(tariff_id, count_month, tariff_name, tariff_pric
 export async function buyBooster(price, token) {
     console.log(token);
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/user/tariffs/buy_booster', {}, { 
+        const response = await axios.post('https://web.intelektaz.com/api/beta/user/tariffs/buy_booster', {}, { 
             params: {
                 price: price
             },
@@ -164,7 +164,7 @@ export async function buyBooster(price, token) {
 
 export async function cancelTransaction(transaction_id) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v2/users/cancel_withdrawal_money', {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/users/cancel_withdrawal_money', {
             "transaction_id": transaction_id,
         });
         return response.data;
@@ -177,7 +177,7 @@ export async function cancelTransaction(transaction_id) {
 export async function upgradeToLeader(amount, token) {
     console.log(amount);
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v1/user/upgrade_to_leader', {}, { 
+        const response = await axios.post('https://web.intelektaz.com/api/beta/user/upgrade_to_leader', {}, { 
             params: {
                 amount: amount
             },

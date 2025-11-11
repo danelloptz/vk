@@ -488,7 +488,10 @@
         <span class="info_msg" v-if="isLoading && activeIndex == 1">Отправляем посты. После отправки, вы сможете их найти в разделе "Отложенные посты". </span>
         <span class="info_msg" v-if="isPostPubl && activeIndex == 1">Посты были успешно отправлены.</span>
         <span class="error" v-if="publPostsError && activeIndex == 1">При отправке постов произошла ошибка. Пожалуйста, нажмите кнопку "ОПУБЛИКОВАТЬ" ещё раз.</span>
-        <AppGoodButton class="publ_btn" v-if="isContentPlan && fileredPlan.length > 0 && !isLoading && activeIndex == 1 && !isPostPubl" :text="text7" @click="publicate" />
+        <div class="publ_btns" v-if="isContentPlan && fileredPlan.length > 0 && !isLoading && activeIndex == 1 && !isPostPubl">
+            <AppGoodButton class="publ_btn" :text="'ОПУБЛИКОВАТЬ ТГ'" @click="publicateTg" />
+            <AppGoodButton class="publ_btn" :text="text7" @click="publicateVk" />
+        </div>
     </section>
     
 </template>
@@ -518,6 +521,7 @@
     import AppModalGenerator from "@/components/AppModalGenerator.vue";
     import AppModalGeneratorPayment from "@/components/AppModalGeneratorPayment.vue";
     import AppAiBanner from '@/components/AppAiBanner.vue';
+    import { sendPostsTg } from '@/services/tg';
 
     export default {
         components: { AppGoodButton, AppAiEditor, AppModalGenerator, AppModalGeneratorPayment, AppAiBanner },
@@ -699,6 +703,20 @@
             }
         },
         methods: {
+            async publicateTg() {
+                if (this.isLoading) return;
+                this.isLoading = true;
+                const topic_ids = this.plan.map(item => item.topic_id);
+                try {
+                    await sendPostsTg(topic_ids, localStorage.getItem('token'));
+                    this.isPostPubl = true;
+                    this.publPostsError = false;
+                    this.isLoading = false;
+                } catch(err) {
+                    this.publPostsError = true;
+                    this.isLoading = false;
+                }
+            },
             changePosition() {
                 this.isChangePosition = !this.isChangePosition;
             },
@@ -875,6 +893,7 @@
                 return post.replace(/\n/g, "<br>");
             },
             async confirmCurrentPosts() {
+                // return;
                 this.step = this.getStep();
                 this.backupPlan = this.plan;
                 const filtered = this.allCheckboxes ? this.plan : this.plan.filter((_, index) => this.aprovedPostsIndexes[index]);
@@ -921,15 +940,23 @@
                             // оплата: произвоидим оплату, если успешно, то генерация
                             // если отмена или крестик, то plan = backup  и return
 
+                            await writeOffGenerations(this.userData.id, this.plan.length);
+                            const gener = await getGenerations(this.userData.id);
+                            this.generations = gener;
+
                             let resp = await generateBanners(this.plan, localStorage.getItem("token"));
-                            if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
+                            // if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
+
+
+                            if (!resp) window.location.reload();
                             if (resp) {
-                                await writeOffGenerations(this.userData.vk_id, this.plan.length);
+                                await writeOffGenerations(this.userData.id, this.plan.length);
                                 const gener = await getGenerations(this.userData.id);
                                 this.generations = gener;
                             } else {
                                 window.location.reload();
                             }
+
                             this.plan = resp;
                             this.plan.forEach(item => {
                                 item.chose_image_index = 0;
@@ -960,6 +987,7 @@
                 }
             },
             async successPayment() {
+                // return; // УБРАТЬ
                 this.isLoading = true;
                 if (this.isReg) this.isRegenerate = true;
                 this.isModalGeneratorPayment = false;
@@ -972,26 +1000,38 @@
                     this.checkedPlan.forEach(item => {
                         item.chose_image_index++;
                     });
+                    await writeOffGenerations(this.userData.id, this.checkedPlan.length);
+                    const gener = await getGenerations(this.userData.id);
+                    this.generations = gener;
                     const topics = await regenerateBanners(this.checkedPlan, localStorage.getItem("token"));
-                    if (topics) {
-                        await writeOffGenerations(this.userData.vk_id, this.checkedPlan.length);
-                        const gener = await getGenerations(this.userData.id);
-                        this.generations = gener;
-                    } else {
+                    if (!topics) {
                         window.location.reload();
                     }
+                    // if (topics) {
+                    //     await writeOffGenerations(this.userData.vk_id, this.checkedPlan.length);
+                    //     const gener = await getGenerations(this.userData.id);
+                    //     this.generations = gener;
+                    // } else {
+                    //     window.location.reload();
+                    // }
                     this.plan = topics;
                     this.currBanner++;
                 } else {
+                    await writeOffGenerations(this.userData.id, this.plan.length);
+                    const gener = await getGenerations(this.userData.id);
+                    this.generations = gener;
                     let resp = await generateBanners(this.plan, localStorage.getItem("token"));
-                    if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
-                    if (resp) {
-                        await writeOffGenerations(this.userData.vk_id, this.plan.length);
-                        const gener = await getGenerations(this.userData.id);
-                        this.generations = gener;
-                    } else {
+                    // if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
+                    if (!resp) {
                         window.location.reload();
                     }
+                    // if (resp) {
+                    //     await writeOffGenerations(this.userData.vk_id, this.plan.length);
+                    //     const gener = await getGenerations(this.userData.id);
+                    //     this.generations = gener;
+                    // } else {
+                    //     window.location.reload();
+                    // }
                     this.plan = resp;
                     this.plan.forEach(item => {
                         item.chose_image_index = 0;
@@ -1088,6 +1128,7 @@
 
             },
             async generateThemes() {
+                // return;
                 // if (this.isBlockGenerate) return;
                 this.step = 0;
                 this.saveSettings();
@@ -1165,6 +1206,7 @@
                 }
             },
             async regenerateCurrentPosts() {
+                // return;
                 this.step = this.getStep();
                 this.isLoading = true;
                 this.isRegenerate = true;
@@ -1217,14 +1259,20 @@
                         checked_plan.forEach(item => {
                             item.chose_image_index++;
                         });
+                        await writeOffGenerations(this.userData.id, checked_plan.length);
+                        const gener = await getGenerations(this.userData.id);
+                        this.generations = gener;
                         const topics = await regenerateBanners(checked_plan, localStorage.getItem("token"));
-                        if (topics) {
-                            await writeOffGenerations(this.userData.vk_id, checked_plan.length);
-                            const gener = await getGenerations(this.userData.id);
-                            this.generations = gener;
-                        } else {
+                        if (!topics) {
                             window.location.reload();
                         }
+                        // if (topics) {
+                        //     await writeOffGenerations(this.userData.vk_id, checked_plan.length);
+                        //     const gener = await getGenerations(this.userData.id);
+                        //     this.generations = gener;
+                        // } else {
+                        //     window.location.reload();
+                        // }
                         this.plan = topics;
                         this.currBanner++;
                     } catch(err) {
@@ -1298,7 +1346,7 @@
             // Запускаем анимацию
             requestAnimationFrame(updateProgress);
         },
-        async publicate() {
+        async publicateVk() {
             if (this.isLoading) return;
             this.isLoading = true;
             try {
@@ -1803,7 +1851,14 @@
         text-align: start !important;
         padding: 0 !important;
     }
+    .publ_btns {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+    }
     .publ_btn {
+        width: 200px;
         align-self: center;
     }
     .info_msg {

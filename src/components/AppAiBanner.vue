@@ -457,6 +457,7 @@
                 this.selectedAspect = index;
             },
             async generate() {
+                // return;
                 if (this.isLoading) return;
 
                 if (this.generations.free.remains + this.generations.paid.remains <= 0) {

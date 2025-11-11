@@ -130,3 +130,110 @@ export async function getTgReferer(token) {
         return false; 
     }
 }
+
+export async function getTokensByCode(code) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/login/get_tokens_by_code', 
+            {
+                params: {
+                    code: code
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении токенов", error);
+        return false; 
+    }
+}
+
+export async function activeTg(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/login/became_dumbass',
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при активации телеграмма", error);
+        return false; 
+    }
+}
+
+export async function getRotationGroups(tariff, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/rotation/get_rotation_groups',
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    tariff: tariff
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении групп для ротации", error);
+        return false; 
+    }
+}
+
+export async function sendPostsTg(topic_ids, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/processes/create_delayed_publication', {
+            topic_ids: topic_ids
+        },
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при активации пользователя", error);
+        return false; 
+    }
+}
+
+
+export async function turnAdsOn(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/user/on_intelektaz_ads', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при включении Эдс", error);
+        return false; 
+    }
+}
+
+export async function turnAdsOff(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/user/off_intelektaz_ads', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при активации пользователя", error);
+        return false; 
+    }
+}

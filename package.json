@@ -48,7 +48,9 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "no-unreachable": "off"
+    }
   },
   "browserslist": [
     "> 1%",
