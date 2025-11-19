@@ -14,15 +14,15 @@
                 :key="index"
                 :class="{ active: activeIndex === item.index }" 
                 @click="setActive(item.index)"
-            >{{ item.name }}</span>
+            >{{ activeIndex == 1 && mainActiveIndex == 0 ? 'Ротация сториз' : item.name }}</span>
         </div>
         <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
             <AppRotationGroup v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 0) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 0))" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
             <AppRotationVideo v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 1) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 1))" :userData="userData" />
             <AppRotationPosts v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 2) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 2))" :userData="userData" />
         <AppRotationGroupTg v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 0" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
-        <span class="err" v-if="noVk">У вас не привязан ВК. Чтобы привязать его, нажмите "Войти" при входе.</span>
-        <span class="err" v-if="noTg">У вас не привязан Telegram. Чтобы привязать его, зайдите в настройки и нажмите кнопку "Активировать".</span>
+        <span class="err" v-if="noVk && mainActiveIndex == 1">У вас не привязан ВК. Чтобы привязать его, нажмите "Войти" при входе.</span>
+        <span class="err" v-if="noTg && mainActiveIndex == 0">У вас не привязан Telegram. Чтобы привязать его, зайдите в настройки и нажмите кнопку "Активировать".</span>
     </section>
 </template>
 

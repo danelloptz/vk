@@ -41,7 +41,7 @@
               </div>
               <div class="row">
                 <span>Реферер ID:</span>
-                <span>{{ node.sponsor_vk_id || node.tg_id }}</span>
+                <span>{{ node.sponsor_vk_id || node.sponsor_tg_id }}</span>
               </div>
               <div class="row" v-if="lay == 2" style="justify-content: center; column-gap: 23px;">
                   <a :href="vkData" v-if="vkData" target="_blank"><img src="@/assets/images/vk.png"></a>

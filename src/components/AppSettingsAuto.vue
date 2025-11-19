@@ -31,10 +31,10 @@
                         
                     >
                     <div class="sub_row"  >
-                        <span class="add" @click="saveSocial">ДОБАВИТЬ</span>
+                        <span class="add" @click="saveSocial(social.type, social.link)">ДОБАВИТЬ</span>
                         <span v-if="social.isNew" class="add" @click="removeSocial(index)">УДАЛИТЬ</span>
                         <img 
-                            v-if="!social.isNew"
+                            v-if="!social.isNew && social.type != 'Telegram'"
                             src="@/assets/images/addPlus.png" 
                             @click="addSocial(social, index)"
                         >
@@ -72,6 +72,7 @@ import { getUserInfo, sendNewSettings, setAutoposting, sendPosts } from "@/servi
 import { getPosts } from "@/services/posts";
 import AppGoodButton from '@/components/AppGoodButton.vue';
 import AppModal from '@/components/AppModal.vue';
+import { addPromotionChannel } from '@/services/tg';
 
 export default {
     components: { AppGoodButton, AppModal },
@@ -175,7 +176,10 @@ export default {
             a.download = imageLink;
             a.click();
         },
-        async saveSocial() {
+        async saveSocial(social_type, link) {
+            if (social_type == 'Telegram') {
+                await addPromotionChannel(link, localStorage.getItem('token'));
+            }
             const filtered = this.socials.filter(item => item.link != "");
             // Object.values(filtered).forEach(obj => delete obj.isNew);
 

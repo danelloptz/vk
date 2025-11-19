@@ -237,3 +237,170 @@ export async function turnAdsOff(token) {
         return false; 
     }
 }
+
+export async function getTelegramLinks(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_tg_links',
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении ссылок на телеграмм каналы пользователя", error);
+        return false; 
+    }
+}
+
+export async function turnRotationChannels(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/add_group', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при активации ротации", error);
+        return false; 
+    }
+}
+
+export async function getMandatoryChannels(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/login/check_mandatory_channels_subs',
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении ссылок на телеграмм каналы пользователя", error);
+        return false; 
+    }
+}
+
+export async function addPromotionChannel(channel_link, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/user/add_promotion_channel', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    channel_link: channel_link
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при привязки канала для автопродвижения", error);
+        return false; 
+    }
+}
+
+export async function getStoriesRotationChannels(tariff, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/rotation/get_rotation_stories',
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    tariff: tariff
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении историй для ротации", error);
+        return false; 
+    }
+}
+
+export async function addTelegramStory(story_url, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/create_story', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    story_url: story_url
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при привязки телеграмм истории для автопродвижения", error);
+        return false; 
+    }
+}
+
+export async function getVkToken(code, state, code_verifier, device_id, redirect_uri, user_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/auth/add_vk', {
+            "code": code,
+            "state": state,
+            "code_verifier": code_verifier,
+            "device_id": device_id,
+            "redirect_uri": redirect_uri
+        },
+        {
+            params: {
+                user_id: user_id
+            }
+        }
+    );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при привязке вк", error);
+        return false; 
+    }
+}
+
+export async function getUserStory(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_cur_story', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении пользовательской истории", error);
+        return false; 
+    }
+}
+
+export async function getTgGroupStats(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/group/get_statistics', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении статистики о группе пользователя", error);
+        return false; 
+    }
+}

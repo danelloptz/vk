@@ -12,13 +12,24 @@
         @update:checkboxState="isCheckboxChecked = $event"
         @close="closeModal" 
     />
+    <AppModalAds 
+        :visibility1="isModalAds"
+        @update:visibility1="isModalAds = $event"
+        @turn_on="turnAdsOn"
+        @open_rotation="openRotation"
+    />
+
     <section class="settings" v-if="!isAuto">
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
-            <span v-if="windowWidth > 650 && userData?.vk_id">Вконтакте: https://vk.com/id{{ userData.vk_id }} <img v-if="userData?.vk_id" src="@/assets/images/ok_green2.png" class="ok_green"/></span>
+            <span v-if="windowWidth > 650">
+                Вконтакте: https://vk.com/id{{ userData.vk_id }} 
+                <img v-if="userData?.vk_id" src="@/assets/images/ok_green2.png" class="ok_green"/>
+                <AppGoodButton v-else class="active_tg_btn" :text="'АКТИВИРОВАТЬ'" :disabled="isDisabled" @click="tap"/>
+            </span>
             <span v-if="windowWidth > 650 && testers.includes(userData?.id)">
-                <span>Telegram: {{ userData?.tg_id ? `tg://user?id=${userData?.tg_id}` : tgData?.link }} </span>
+                <span>Telegram: {{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }} </span>
                 <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
                 <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
             </span>
@@ -30,7 +41,7 @@
             </div>
             <div class="mobile_links_row" v-if="windowWidth <= 650 && testers.includes(userData?.id)">
                 <span>Telegram: </span>
-                <span>{{ userData?.tg_id ? `tg://user?id=${userData?.tg_id}` : tgData?.link }} </span>
+                <span>{{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }} </span>
                 <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
                 <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
             </div>
@@ -50,12 +61,12 @@
                 placeholder="Почта">
             <span @click="addEmail">ДОБАВИТЬ</span>
         </div>
-        <div class="row">
+        <!-- <div class="row">
             <input 
                 v-model="telegramLink" 
                 placeholder="Telegram (введите имя пользователя)">
             <span @click="addTelegram">ДОБАВИТЬ</span>
-        </div>
+        </div> -->
         <div class="row">
             <input 
                 v-model="whatsappLink" 
@@ -64,7 +75,16 @@
             <span @click="addWhatsapp">ДОБАВИТЬ</span>
             <!-- <span class="error_message" v-if="notTelegram">Введите номер телефона</span> -->
         </div>
-        <h3>Региональные данные</h3>
+
+        <h3>Пассивный доход из реферальной программы на автопилоте</h3>
+        <span>Включите автопродвижение и получайте рефералов автоматически — система сама рассказывает о Intelektaz и приводит новых партнёров по вашей ссылке.</span>
+        <AppGoodButton 
+            :text="'АВТОПРОДВИЖЕНИЕ'"
+            class="auto_btn"
+            @click="nextStep"
+        />
+
+        <h3 class="region_title">Региональные данные</h3>
         <div class="dropdown">
             <input
                 type="text"
@@ -90,7 +110,7 @@
                 placeholder="Город" >
         </div>
         
-        <div class="dropdown" :style="{ marginTop: windowWidth > 650 ? '70px' : '30px' }">
+        <div class="dropdown gender_dropdown">
             <input
                 v-model="searchQueryGender"
                 type="text"
@@ -116,7 +136,61 @@
         </div>
         <span v-if="isNotSelectGender" class="error_message">Не выбран пол!</span>
 
-        <h3>ВК группа для продвижения:</h3>
+        <h3 class="tg_channel_title">Telegram канал для продвижения:</h3>
+        <div class="row">
+            <input  
+                v-model="tg_group" 
+                placeholder="Telegram канал" >
+            <span @click="addTelegramChannel">ДОБАВИТЬ</span>
+            <h3 v-if="userData">Подписки: {{ tgGroupStats?.active || 0}}</h3>
+        </div>
+        <div class="row2">
+            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
+            <span>Подписки</span>
+        </div>
+
+        <h3 class="tg_theme_channel_title">Тема канала: </h3>
+        <div v-if="selectedThemes.length > 0" class="selected-countries">
+            <span v-for="(interest, index) in selectedThemes" :key="index" class="selected-interest">
+            {{ interest }}
+            <img src="@/assets/images/close.png" @click="removeTheme(index)" class="remove-btn">
+            </span>
+        </div>
+        <div class="dropdown">
+            <input
+                type="text"
+                v-model="searchQueryTheme"
+                placeholder="Тема канала"
+                @focus="isDropdownVisibleTheme = true"
+                @blur="hideDropdown"
+                ref="selectTheme"
+            />
+            <img :class="{'rotated': isDropdownVisibleTheme}" src="@/assets/images/arrow_down.png" class="arrow_down">
+            <ul v-if="isDropdownVisibleTheme" class="dropdown-menu">
+                <li
+                v-for="interest in interests"
+                :key="interest"
+                @mousedown.prevent="selectTheme(interest)"
+                >
+                {{ interest }}
+                </li>
+            </ul>
+        </div>
+
+        <h3 class="tg_story_title">Telegram история для продвижения:</h3>
+        <div class="row">
+            <input  
+                v-model="userTgStory" 
+                placeholder="Telegram история" >
+            <span @click="addTelegramStory">ДОБАВИТЬ</span>
+            <h3 v-if="userData">Подписки: {{ tgStoryCount }}</h3>
+        </div>
+        <div class="row2">
+            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
+            <span>Подписки</span>
+        </div>
+
+        <h3 class="vk_group_title">ВК группа для продвижения:</h3>
         <div class="row">
             <input  
                 v-model="vkGroupLink" 
@@ -129,7 +203,7 @@
             <span>Подписки</span>
         </div>
         
-        <h3>ВК видео для продвижения:</h3>
+        <h3 class="vk_video_title">ВК видео для продвижения:</h3>
         <div class="row">
             <input  
                 v-model="vkVideoLink" 
@@ -138,7 +212,8 @@
             <h3 v-if="userData">Просмотры: {{ userData?.video?.count_subs_from_service || 0 }}</h3>
         </div>
 
-        <div v-if="selectedInterests.length > 0" class="selected-countries">
+        <h3 class="interests_title">Интересы: </h3>
+        <div v-if="selectedInterests.length > 0" class="selected-countries ">
             <span v-for="(interest, index) in selectedInterests" :key="index" class="selected-interest">
             {{ interest }}
             <img src="@/assets/images/close.png" @click="removeInterest(index)" class="remove-btn">
@@ -168,6 +243,7 @@
         <a @click="nextStep">Автопродвижение</a>
         <div class="auto">
             <span>Блок <strong>«Ваше предложение»</strong> - отображается только у обладателей пакетов <strong>Business и Leader</strong> в виде большого центрального рекламного блока, и на тарифе <strong>VIP и пакетах Business и Leader</strong>  в левом рекламном блоке.</span>
+            <span><strong>Business</strong> предложение пакетов Business и Leader ежедневно публикуются на тысячи ТГ каналов с многотысячной аудиторией в рамках <strong>Intelektaz Ads</strong>. </span>
             <span><i><strong>Сделайте свое предложение пользователям INTELEKTAZ, прямо сейчас:</strong></i></span>
         </div>
         <h3>Ваше предложение:</h3>
@@ -186,13 +262,24 @@
                 :whtData="whtData"
                 :windowWidth="windowWidth"
             />
+            <!-- <div class="copy_from">
+                <h3>Копировать баннер и название с:</h3>
+                <div class="copy_from_row">
+                    <input type="checkbox" class="checkbox" v-model="copy" @change="changeAds" />
+                    <span>Telegram</span>
+                </div>
+                <div class="copy_from_row">
+                    <input type="checkbox" class="checkbox" v-model="intelAds" @change="changeAds" />
+                    <span>Вконтакте</span>
+                </div>
+            </div> -->
         </div>
         <input  
             v-model="siteLink" 
             placeholder="Сайт" >
 
         <div class="row2">
-            <input type="checkbox" class="checkbox" v-model="intelAds" @change="changeAds" />
+            <input type="checkbox" class="checkbox" v-model="intelAds" @click="changeAds" />
             <span>Intelektaz Ads</span>
         </div>
         <AppVipUser 
@@ -223,13 +310,23 @@
     import AppModal from '@/components/AppModal.vue';
     import AppVipUser from "@/components/AppVipUser.vue";
     import AppSettingsAuto from '@/components/AppSettingsAuto.vue';
+    import AppModalAds from "@/components/AppModalAds.vue";
     import { editGroup, editVideo } from "@/services/groups";
     import { refreshToken } from "@/services/auth";
-    import { activeTg, turnAdsOn, turnAdsOff } from '@/services/tg';
+    import { 
+        activeTg, 
+        turnAdsOn, 
+        turnAdsOff, 
+        getTelegramLinks, 
+        getVkToken, 
+        addTelegramStory, 
+        getUserStory,
+        getTgGroupStats
+    } from '@/services/tg';
     import { getConfig } from '@/services/config';
 
 export default {
-    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser },
+    components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser, AppModalAds },
     props: { 
         businessUser: Object,
         windowWidth: Number
@@ -276,7 +373,22 @@ export default {
             userData: [],
             disabled: false,
             testers: [],
-            intelAds: false
+            intelAds: false,
+            tg_links: [],
+            isDisabled: false,
+            code_verifier: "",
+            code_challenge: "",
+            code_challenge_method: "S256",
+            state: "grehthrtjui7643trr",
+            redirectUrl: "https://lk.intelektaz.com",
+            searchQueryTheme: "",
+            isDropdownVisibleTheme: false,
+            selectedThemes: [],
+            userTgStory: null,
+            tgStoryInfo: null,
+            tgStoryCount: null,
+            tgGroupStats: null,
+            isModalAds: false
         };
     },
     computed: {
@@ -290,6 +402,7 @@ export default {
             return this.sentence.slice(0, 90);
         },
         newUserData() {
+            console.log(this.userData?.packages, this.userData?.packages == true);
             if (this.userData?.packages) {
                 return {
                     "avatar": this.userData?.avatar_url,
@@ -330,6 +443,15 @@ export default {
 
         this.testers = await getConfig('tg_testers');
 
+        this.tg_links = await getTelegramLinks(localStorage.getItem('token'));
+        this.tg_group = this.tg_links.channel_tg_link;
+
+        this.tgStoryInfo = await getUserStory(localStorage.getItem('token'));
+        this.userTgStory = this.tgStoryInfo.story_link;
+        this.tgStoryCount = this.tgStoryInfo.rotation_count;
+
+        this.tgGroupStats = await getTgGroupStats(localStorage.getItem('token'));
+
         try {
             const response = await fetch('https://namaztimes.kz/ru/api/country');
             const data = await response.json();
@@ -357,8 +479,209 @@ export default {
         },
     },
     methods: {
-        async changeAds() {
+        openRotation() {
+            this.$emit('open_rotation');
+        },
+        async turnAdsOn() {
+            this.intelAds = !this.intelAds;
             this.intelAds ? await turnAdsOn(localStorage.getItem('token')) : await turnAdsOff(localStorage.getItem('token'));
+            this.isModalAds = false;
+        },
+        generateCodeVerifier(length = 64) {
+            console.log("генерация code_verifier");
+            const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let codeVerifier = "";
+            for (let i = 0; i < length; i++) {
+                codeVerifier += validChars.charAt(Math.floor(Math.random() * validChars.length));
+            }
+            if (localStorage.getItem("code_verifier") === null)
+                localStorage.setItem("code_verifier", codeVerifier);
+            return codeVerifier;
+        },
+
+        // Преобразование строки в Base64 URL-safe
+        base64UrlEncode(buffer) {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        },
+        async generatePKCE() {
+            const codeVerifier = this.generateCodeVerifier();
+            const codeChallenge = await this.generateCodeChallenge(codeVerifier); 
+            const codeChallengeMethod = 'S256'; 
+
+            return {
+                codeVerifier,
+                codeChallenge,
+                codeChallengeMethod
+            };
+        },
+
+        // Генерация code_challenge из code_verifier
+        async generateCodeChallenge(codeVerifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(codeVerifier);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return this.base64UrlEncode(digest);
+        },
+        async handleUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get("code");
+            const state = params.get("state");
+            const device_id = params.get("device_id");
+            const code_verifier = localStorage.getItem("code_verifier");
+
+            const sponsor_platform = localStorage.getItem('sponsor_platform');
+            console.log(sponsor_platform);
+            let sponsor_id = localStorage.getItem('referer');
+            if (sponsor_id.startsWith('tg')) {
+                sponsor_id = sponsor_id.slice(2);
+            }
+
+
+
+            if (code && state && device_id) {
+                let response;
+                try {
+                    response = await getVkToken(code, state, code_verifier, device_id, this.redirectUrl, this.userData.id);
+                } catch (err) {
+
+                    const referal = localStorage.getItem("referer");
+                    const addGroups = localStorage.getItem("addGroups");
+                    const watchedVideos = localStorage.getItem("watchedVideos");
+                    const addPosts = localStorage.getItem("addPosts");
+                    localStorage.clear();
+                    if (addGroups) localStorage.setItem("addGroups", addGroups);
+                    if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                    if (addPosts) localStorage.setItem("addPosts", addPosts);
+                    localStorage.setItem("referer", referal);
+
+                    const cleanUrl = window.location.origin + window.location.pathname; 
+                    window.history.replaceState({}, document.title, cleanUrl);
+
+                    // location.reload();
+                }
+                if (response.status == 200) {
+                    // оставляем только эти три поля, которые будут использоваться на страницах
+                    const ref = localStorage.getItem("referer");
+                    const addGroups = localStorage.getItem("addGroups");
+                    const watchedVideos = localStorage.getItem("watchedVideos");
+                    const addPosts = localStorage.getItem("addPosts");
+                    localStorage.clear();
+                    if (addGroups) localStorage.setItem("addGroups", addGroups);
+                    if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                    if (addPosts) localStorage.setItem("addPosts", addPosts);
+                    localStorage.setItem("token", response.data.access_token);
+                    localStorage.setItem("token_refresh", response.data.refresh_token);
+                    localStorage.setItem("is_new_user", response.data.is_new_user);
+
+                    try {
+                        await getUserInfo(localStorage.getItem("token"));
+                        const refererId = ref; // если есть рефер, то отмечаем это
+                        console.log("refererId", refererId);
+                        
+                        localStorage.setItem("points", 0);
+                        localStorage.setItem("page", 1);
+                        this.$router.push('/home')
+
+                    } catch(err) {
+                        const referal = localStorage.getItem("referer");
+                        const addGroups = localStorage.getItem("addGroups");
+                        const watchedVideos = localStorage.getItem("watchedVideos");
+                        const addPosts = localStorage.getItem("addPosts");
+                        localStorage.clear();
+                        if (addGroups) localStorage.setItem("addGroups", addGroups);
+                        if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                        if (addPosts) localStorage.setItem("addPosts", addPosts);
+                        localStorage.setItem("first", true);
+                        localStorage.setItem("referer", referal);
+                        // location.reload();
+                    }
+                    
+                } else {
+                    const ref = localStorage.getItem("referer");
+                    const addGroups = localStorage.getItem("addGroups");
+                    const watchedVideos = localStorage.getItem("watchedVideos");
+                    const addPosts = localStorage.getItem("addPosts");
+                    localStorage.clear();
+                    if (addGroups) localStorage.setItem("addGroups", addGroups);
+                    if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                    if (addPosts) localStorage.setItem("addPosts", addPosts);
+                    localStorage.setItem("first", true);
+                    localStorage.setItem("referer", ref);
+                    // const cleanUrl = window.location.origin + window.location.pathname; 
+                    // window.history.replaceState({}, document.title, cleanUrl);
+                    // location.reload();
+                }
+                    
+            } else {
+                console.warn("Параметры code, state или device_id отсутствуют в URL.");
+            }
+        },
+        async tap() {
+            if (!this.isDisabled) {
+                this.isDisabled = true;
+                localStorage.setItem("isDisabled", this.isDisabled);
+                // штука, чтобы параметры только один раз генерировались
+                const isParams = localStorage.getItem("isParams"); 
+                if (isParams != "true") {
+                    console.log("генерируются параметры новые");
+                    const pkce = await this.generatePKCE();
+                    this.code_verifier = pkce.codeVerifier;
+                    this.code_challenge = pkce.codeChallenge;
+                    localStorage.setItem("isParams", "true");
+                }
+
+                // схема "Обмен на бэкенде без SDK"
+                const clientId = "52191705";
+                const redirectUri = this.redirectUrl;
+                const state = this.state;
+                const code_challenge = this.code_challenge;
+                const code_challenge_method = this.code_challenge_method;
+                const scopes = "groups,photos,wall,video,stats";
+                localStorage.setItem('zopa', code_challenge);   
+
+                const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=${scopes}`;
+                try {
+                    window.location.href = vkAuthUrl;
+                } catch(err) {
+                    const ref = localStorage.getItem("referer");
+                    const addGroups = localStorage.getItem("addGroups");
+                    const watchedVideos = localStorage.getItem("watchedVideos");
+                    const addPosts = localStorage.getItem("addPosts");
+                    localStorage.clear();
+                    if (addGroups) localStorage.setItem("addGroups", addGroups);
+                    if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                    if (addPosts) localStorage.setItem("addPosts", addPosts);
+                    localStorage.setItem("first", true);
+                    localStorage.setItem("referer", ref);
+                }
+            }
+            
+        },
+        async addTelegramStory() {
+            try {
+                const resp = await addTelegramStory(this.userTgStory, localStorage.getItem('token'));
+                if (resp) {
+                    this.isSaveModal = true;
+                    this.title = 'УСПЕШНО';
+                    this.msg = 'Ваша Telegram история была успешно привязана';
+                } else {
+                    this.isSaveModal = true;
+                    this.title = 'ОШИБКА';
+                    this.msg = 'История должна принадлежать вашему каналу';
+                }
+            } catch(err) {
+                this.isSaveModal = true;
+                this.title = 'ОШИБКА';
+                this.msg = 'История должна принадлежать вашему каналу';
+            }
+            
+        },
+        async changeAds() {
+            setTimeout(() => this.intelAds = !this.intelAds, 500);
+            this.isModalAds = true;
         },
         async activateTg() {
             const code = await activeTg(localStorage.getItem('token'));
@@ -388,10 +711,23 @@ export default {
                 this.selectedInterests.splice(index, 1);
             },
 
+            selectTheme(interest) {
+                if (!this.selectedThemes.includes(interest)) {
+                    this.selectedThemes.push(interest);
+                }
+                this.searchQueryTheme = '';
+                this.isDropdownVisibleTheme = false;
+                this.$refs.selectTheme.blur();
+            },
+            removeTheme(index) {
+                this.selectedThemes.splice(index, 1);
+            },
+
             hideDropdown() {
                 this.isDropdownVisibleCountry = false;
                 this.isDropdownVisibleGender = false;
                 this.isDropdownVisibleInterest = false;
+                this.isDropdownVisibleTheme = false;
             },
             nextStep() {
                 this.isAuto = true;
@@ -453,6 +789,8 @@ export default {
                     this.searchQueryGender = this.userData.sex_db;
                 if (this.userData.interests) 
                     this.selectedInterests = [...this.userData.interests];
+                if (this.userData?.channel_theme)
+                    this.selectedThemes = [...this.userData.channel_theme];
                     this.sentence = this.userData?.vip_offer_text == '""' ? "" : this.userData?.vip_offer_text;
                     this.siteLink = this.userData?.vip_offer_link == '""' ? "" : this.userData?.vip_offer_link;
             },
@@ -468,6 +806,7 @@ export default {
                     social_links: this.userData.social_links != this.beforeLinks ? this.userData.social_links : null,
                     vip_offer_text: this.sentence,
                     vip_offer_link: this.siteLink,
+                    channel_theme: this.selectedThemes
                 };
 
                 const response = await sendNewSettings(payload, localStorage.getItem("token")); 
@@ -490,6 +829,14 @@ export default {
     @font-face {
         font-family: 'OpenSans';
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
+    }
+
+    .gender_dropdown, .tg_channel_title, .tg_theme_channel_title, .tg_story_title, .vk_video_title, .vk_group_title, .interests_title {
+        margin-top: 25px;
+    }
+
+    .region_title {
+        margin-top: 15px;
     }
 
     .ok_green {

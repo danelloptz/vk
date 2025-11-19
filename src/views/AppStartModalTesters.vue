@@ -1,4 +1,11 @@
 <template>
+    <AppMandatoryChannels 
+        v-if="isMandatory"
+        :visibility1="isMandatory"
+        :channels="channels"
+        @update:visibility1="isMandatory = $event"
+        @close="reload"
+    />
     <section class="modal">
         <img src="@/assets/images/close.png" class="close" @click=reboot>
         <div class="text_wrapper">
@@ -8,6 +15,7 @@
         <hr>
         <div class="btn_wrapper">
             <AppGoodButton class="btn" :text="text" :disabled="isDisabled" @click="tap"/>
+            <AppGoodButton class="btn" :text="'РЕГИСТРАЦИЯ ТЕЛЕГРАММ'" @click="signUpTg" />
             <div style="z-index: 999;" ref="tgButton"></div> <!-- Контейнер для кнопки Telegram -->
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
@@ -17,12 +25,14 @@
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppMandatoryChannels from '@/components/AppMandatoryChannels.vue';
     import { getToken, addReferer, refreshToken } from '@/services/auth';
     import { getUserInfo } from '@/services/user';
-    import { tgLogin, getTokensByCode } from '@/services/tg';
+    import { tgLogin, getTokensByCode, getMandatoryChannels } from '@/services/tg';
+
 
     export default {
-        components: { AppGoodButton },
+        components: { AppGoodButton, AppMandatoryChannels },
         data() {
             return {
                 text: "ВОЙТИ",
@@ -36,7 +46,9 @@
                 device_id: "",
                 redirectUrl: "https://lk.intelektaz.com",
                 isDisabled: true,
-                btnHtml: ""
+                btnHtml: "",
+                isMandatory: false,
+                channels: null
             }
         },
         async mounted() {
@@ -69,7 +81,13 @@
                     if (user && user.activation) {
                         localStorage.setItem("page", 1);
                         localStorage.setItem("points", 0);
-                        this.$router.push('/home');
+                        this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                        if (this.channels.length == 0) 
+                            this.$router.push('/home')
+                        else {
+                            localStorage.clear();
+                            this.isMandatory = true;
+                        }
                         return;
                     }
                     if (user && !user.activation) {
@@ -101,6 +119,17 @@
             
         },
         methods: {
+            reload() {
+                location.reload();
+            },
+            signUpTg() {
+                const referer = localStorage.getItem('referer');
+                console.log(referer);
+                if (referer) 
+                    window.location.href = `https://t.me/test_intelekt_bot?start=ref=${referer}`
+                else 
+                    window.location.href = `https://t.me/test_intelekt_bot?start`;
+            },
             reboot() {
                 console.log("HERE");    
                 const ref = localStorage.getItem("referer");
@@ -186,7 +215,6 @@
             },
 
             async handleUrlParams() {
-
                 // считываем параметры, которые вк отдаёт
                 const params = new URLSearchParams(window.location.search);
                 const dlink = params.get("dlink");
@@ -196,7 +224,14 @@
                         localStorage.setItem("token", resp.access_token);
                         localStorage.setItem("token_refresh", resp.refresh_token);
                         localStorage.setItem("is_new_user", resp.is_new_user);
-                        this.$router.push('/home');
+                        this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                        if (this.channels.length == 0) 
+                            this.$router.push('/home')
+                        else {
+                            localStorage.clear();
+                            this.isMandatory = true;
+                        }
+                        // this.$router.push('/home');
                     }
                 }
                 const code = params.get("code");
@@ -213,7 +248,16 @@
                 const photo_url = decodeURIComponent(params.get("photo_url") || "");
                 const auth_date = decodeURIComponent(params.get("auth_date") || "");
                 const hash = params.get("hash") || "";
-                const sponsor_id = localStorage.getItem('referer');
+                let sponsor_id = localStorage.getItem('referer');
+                if (sponsor_id.startsWith('tg')) {
+                    sponsor_id = sponsor_id.slice(2);
+                }
+
+                const tg_ref = decodeURIComponent(params.get("ref") || "");
+                if (tg_ref != "" && tg_ref.startsWith('tg')) {
+                    localStorage.setItem('referer', tg_ref);
+                }
+
 
                 if (tg_id != "") {
                     const resp = await tgLogin(tg_id, first_name, last_name, username, photo_url, auth_date, hash, sponsor_id, sponsor_platform);
@@ -223,7 +267,15 @@
                     console.log(resp);
                     if (resp) {
                         if (resp.is_new_user) this.$router.push('/signup_1')
-                        else this.$router.push('/home');
+                        else {
+                            this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                            if (this.channels.length == 0) 
+                                this.$router.push('/home')
+                            else {
+                                localStorage.clear();
+                                this.isMandatory = true;
+                            }
+                        } 
                     }
                     // this.$router.push('/signup_1');
                 }
@@ -281,7 +333,14 @@
                             else {
                                 localStorage.setItem("points", 0);
                                 localStorage.setItem("page", 1);
-                                this.$router.push('/home');
+                                this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                                if (this.channels.length == 0) 
+                                    this.$router.push('/home')
+                                else {
+                                    localStorage.clear();
+                                    this.isMandatory = true;
+                                }
+                                // this.$router.push('/home');
                             }
                         } catch(err) {
                             const referal = localStorage.getItem("referer");

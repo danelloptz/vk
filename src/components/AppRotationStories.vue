@@ -36,7 +36,7 @@
             <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
                 <AppGoodButton class="btn" :text="text3" @click="subscribeGroup" />
-                <AppGoodButton class="btn" :text="text5" @click="checkSubscription(groupsQueue[currentGroupIndex]?.tg_id)" />
+                <AppGoodButton class="btn" :text="text5" @click="checkSubscription" />
                 <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
                 <AppBadButton class="btn" :text="text6" @click="openModal" />
             </div>
@@ -59,7 +59,7 @@
     import AppModal from "@/components/AppModal.vue";
     // import AppVideoModal from "@/components/AppVideoModal.vue";
 
-    import { getRotationGroups, checkTgSub, turnRotationChannels } from '@/services/tg';
+    import { getStoriesRotationChannels, turnRotationChannels } from '@/services/tg';
     // import { addInRotation} from "@/services/groups";    
     // import { addInRotation, checkGroupSub} from "@/services/groups";    
 
@@ -134,7 +134,7 @@
                     break;
             }
 
-            const groups = await getRotationGroups(this.tariff, localStorage.getItem('token'));
+            const groups = await getStoriesRotationChannels(this.tariff, localStorage.getItem('token'));
             // if (!groups) location.reload();
             console.log(groups);
 
@@ -195,9 +195,11 @@
                     window.open(groupLink, "_blank", "width=800, height=600");
                 }
             },
-            async checkSubscription(tg_id) {
+            async checkSubscription() {
                 if (!this.waitingForCheck) return;
-                const response = await checkTgSub(0, tg_id, localStorage.getItem('token'));
+                const response = {
+                    subscribed: true
+                }
                 // if (!response) location.reload();
                 console.log(response);
 
@@ -251,7 +253,7 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.tg_id);
+                    this.checkSubscription();
                 }
             },
             handleFocus() {
@@ -262,7 +264,7 @@
                         this.tooFast = false;
                         this.noSubscribe = false;
                         console.log('nandler');
-                        this.checkSubscription(this.groupsQueue[this.currentGroupIndex]?.tg_id);
+                        this.checkSubscription();
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                         this.tooFast = true;

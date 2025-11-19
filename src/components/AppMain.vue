@@ -30,15 +30,15 @@
     <section class="links" v-if="isLinks">
         <h1>Ваши реферальные ссылки</h1>
         <div class="item2">
-            <span>Реферальная ссылка:</span>
+            <span>Реферальная ссылка на лендинг:</span>
             <div class="row2">
-                <strong><span>{{ refLink }}</span></strong>
-                <img src="@/assets/images/copy.png" @click="copyLink(refLink, 1)">
+                <strong><span>{{ lendingLink }}</span></strong>
+                <img src="@/assets/images/copy.png" @click="copyLink(lendingLink, 1)">
                 <span class="green" v-if="isCopy == 1">Скопировано!</span>
             </div>
             <span class="green_mob" v-if="isCopy == 1">Скопировано!</span>
         </div>
-        <div class="item2">
+        <!-- <div class="item2">
             <span>Реферальная ссылка для ВК:</span>
             <div class="row2">
                 <strong><span>{{ refVkLink }}</span></strong>
@@ -46,16 +46,16 @@
                 <span class="green" v-if="isCopy == 2">Скопировано!</span>
             </div>
             <span class="green_mob" v-if="isCopy == 2">Скопировано!</span>
-        </div>
+        </div> -->
         <div class="item2">
-            <span>Премиальная ссылка для обладателей пакетов Business, Leader:</span>
+            <span>Реферальная ссылка Telegram:</span>
             <div class="row2">
-                <strong><span v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">{{ refPremiumLink }}</span></strong>
-                <img v-if="packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)" src="@/assets/images/copy.png" @click="copyLink(refPremiumLink, 3)">
+                <strong><span>{{ telegramLink }}</span></strong>
+                <img src="@/assets/images/copy.png" @click="copyLink(telegramLink, 3)">
                 <span class="green" v-if="isCopy == 3">Скопировано!</span>
             </div>
             <span class="green_mob" v-if="isCopy == 3">Скопировано!</span>
-            <strong><span v-if="!packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">Не доступно</span></strong>
+            <!-- <strong><span v-if="!packages.includes(userData?.packages[userData?.packages.length - 1]?.package_name)">Не доступно</span></strong> -->
         </div>
         <span>Для максимального охвата аудитории используйте все доступные вам информационные источники. Чем больше пользователей перейдет по вашей реферальной ссылке, тем успешнее будет ваш бизнес - больше подписчиков, больше клиентов, больше доход по партнерской программе.</span>
     </section>
@@ -88,6 +88,20 @@
             }
         },
         computed: {
+            lendingLink() {
+                if (this.userData?.user_platform == 'vk') {
+                    return `https://intelektaz.com/?ref=${this.userData.vk_id}`;
+                } else {
+                    return `https://intelektaz.com/?ref=tg${this.userData?.tg_id}`;
+                }
+            },
+            telegramLink() {
+                if (this.userData?.user_platform == 'vk') {
+                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.vk_id}`;
+                } else {
+                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                }
+            },
             refLink() {
                 if (this.userData?.vk_id) {
                     return `https://${this.refLinks.default}/?ref=${this.userData.vk_id}`;

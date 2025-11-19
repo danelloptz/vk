@@ -47,7 +47,21 @@
 
 
         <div class="left_col">
-            <img v-if="objectData" :src="isSettings ? objectData.group.group_photo : (objectData.avatar_url ?? objectData.avatar)" class="avatar" style="margin-top: 15px;">
+            <img 
+                v-if="objectData" 
+                :src="
+                    isSettings
+                    ? (objectData?.group?.group_photo || objectData?.avatar)
+                    : (
+                        ((!objectData?.avatar) ||
+                        objectData?.avatar && !objectData?.avatar.startsWith('https://'))
+                        )
+                        ? require('@/assets/images/empty.png')
+                        : (objectData.avatar_url ?? objectData.avatar)
+                "
+                class="avatar" 
+                style="margin-top: 15px;"
+            >
             <span class="label" v-if="windowWidth <= 650 && (objectData &&
                     (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Business' ||
                      objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Leader' || 
@@ -64,7 +78,7 @@
         </div>
         <div class="footer_data_wrapper">
             <div class="footer_data_row">
-                <h2 v-if="objectData && userData.name">{{ isSettings ? objectData.group.group_name : userData.name }} <span v-if="windowWidth > 650 && (objectData &&
+                <h2 v-if="objectData && userData.name">{{ isSettings ? (objectData?.group?.group_name || objectData?.name) : userData.name }} <span v-if="windowWidth > 650 && (objectData &&
                     (objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Business' ||
                      objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'Leader' || 
                      objectData?.packages?.[objectData?.packages?.length - 1]?.package_name == 'VIP' || 
@@ -79,17 +93,17 @@
                 </span></h2>
                 
             </div>
-            <span class="sentence" style="word-break: break-word;" v-if="shouldDisplayText" >{{ ' ' + (objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text) + ' ' }}</span>
+            <span class="sentence" style="word-break: break-word;" v-if="shouldDisplayText" >{{ ' ' + (objectData.sentence || objectData.group?.vip_offer_text || objectData?.vip_offer_text || "") + ' ' }}</span>
             <a v-if="objectData && (isSettings || (correctStatus.includes(objectData?.packages?.[objectData?.packages?.length - 1]?.package_name) || correctStatus.includes(objectData?.package_name)))" :href="objectData?.group_link && (objectData?.group_link == '' || objectData?.group_link.length == 0) ? `https://vk.com/id${objectData?.vk_id}` : objectData.group?.group_link || objectData?.group_link" target="_blank">Ссылка</a>
             <div v-if="windowWidth > 650 || isRotation" class="footer_data_links" style="margin-top: 20px;">
                 <a v-if="objectData" :href="vkData"  target="_blank"><img src="@/assets/images/vk.png"></a>
-                <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
+                <a v-if="objectData" :href="tgData"  target="_blank"><img src="@/assets/images/telegram.png"></a>
                 <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
             </div>
         </div>
         <div v-if="windowWidth <= 650 && !isRotation" class="footer_data_links" style="margin-top: 20px;margin-bottom: 20px;">
             <a v-if="objectData" :href="vkData"  target="_blank"><img src="@/assets/images/vk.png"></a>
-            <a v-if="objectData" :href="tgData?.link"  target="_blank"><img src="@/assets/images/telegram.png"></a>
+            <a v-if="objectData" :href="tgData"  target="_blank"><img src="@/assets/images/telegram.png"></a>
             <a v-if="objectData" :href="whtData?.link" target="_blank"><img src="@/assets/images/whatsapp.png"></a>
         </div>
         <span v-if="isBusiness || isSettings" class="business">Business-предложение</span>
@@ -131,11 +145,18 @@ export default {
             handler(newValue) {
                 if (newValue) {
                     this.userData = newValue;
+
                     if (this.userData?.social_links) {
-                        this.tgData = this.userData?.social_links.filter(link => link.type === "Telegram").at(-1) || [];
+                        this.tgData = this.userData?.social_links.filter(link => link.type === "Telegram").at(-1)?.link || '';
                         this.whtData = this.userData?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
-                        this.vkData = `https://vk.com/id${this.userData.vk_id}`;
                     }
+
+                    if (Number.isInteger(this.userData?.tg_id)) {
+                        this.tgData = this.userData.group_link;
+                        console.log(this.userData, this.userData.group_link);
+                    }
+                    if (this.userData?.vk_id)
+                        this.vkData = `https://vk.com/id${this.userData.vk_id}`;
                 }
             }
         }
