@@ -78,12 +78,18 @@ export default {
     }
 
     .channels {
+        width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr;
         row-gap: 30px;
         column-gap: 30px;
         padding-bottom: 80px;
         margin-top: 30px;
+        @media (max-width: 1100px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
 
     .sub {

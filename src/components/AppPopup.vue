@@ -242,7 +242,7 @@
         }
     }
     .btn {
-        width: 200px;
+        width: 230px;
         align-self: center;
         @media (max-width: 650px) {
             margin-bottom: 50px;

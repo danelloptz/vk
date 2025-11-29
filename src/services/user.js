@@ -92,11 +92,9 @@ export async function getReferer(vk_id) {
     }
 }
 
-export async function getVipUser(vk_id) {
+export async function getVipUser() {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/get_vip_user`, { 
-            "vk_id": vk_id
-         });
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/get_vip_user`, {});
         return response.data;
     } catch (error) {
         console.error("Ошибка при получении информации о вип юзере", error);

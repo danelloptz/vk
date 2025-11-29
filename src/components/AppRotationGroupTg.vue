@@ -44,8 +44,8 @@
     </section>
     <section class="rotation_end" v-if="isRotationEnd && !isPlans && !isTarif">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
-        <strong><span>Вы успешно прошли Ротацию групп!</span></strong>
-        <span>Ваша группа добавлена в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
+        <strong><span>Вы успешно прошли Ротацию каналов!</span></strong>
+        <span>Ваш канала добавлен в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
         <AppGoodButton :text="text2" @click="openPlans"  />
     </section>
 </template>
@@ -357,11 +357,11 @@
         row-gap: 50px;
     }
     .groups_block_btns {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        column-gap  : 30px;
-        row-gap: 10px;
+        width: fit-content;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 30px;
+        row-gap: 30px;
         @media (max-width: 650px) {
             flex-direction: column;
             align-items: center;

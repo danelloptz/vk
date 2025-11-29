@@ -8,19 +8,29 @@
                 @click="setMainActive(item.index)"
             >{{ item.name }}</span>
         </div>
-        <div class="switch" v-if="!isPackage && windowWidth > 650" :key="isPackage">
+        <div class="switch" v-if="!isPackage && windowWidth > 650 && mainActiveIndex == 1" :key="isPackage">
             <span
                 v-for="(item, index) in listSwtich"
                 :key="index"
                 :class="{ active: activeIndex === item.index }" 
                 @click="setActive(item.index)"
-            >{{ activeIndex == 1 && mainActiveIndex == 0 ? 'Ротация сториз' : item.name }}</span>
+            >{{ item.name }}</span>
+        </div>
+        <div class="switch" v-if="!isPackage && windowWidth > 650 && mainActiveIndex == 0" :key="isPackage">
+            <span
+                v-for="(item, index) in listSwtichTg"
+                :key="index"
+                :class="{ active: activeIndex === item.index }" 
+                @click="setActive(item.index)"
+            >{{ item.name }}</span>
         </div>
         <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
             <AppRotationGroup v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 0) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 0))" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
             <AppRotationVideo v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 1) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 1))" :userData="userData" />
             <AppRotationPosts v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 2) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 2))" :userData="userData" />
         <AppRotationGroupTg v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 0" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
+        <AppRotationStories v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 1" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
+        <AppRotationTgPosts v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 2" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
         <span class="err" v-if="noVk && mainActiveIndex == 1">У вас не привязан ВК. Чтобы привязать его, нажмите "Войти" при входе.</span>
         <span class="err" v-if="noTg && mainActiveIndex == 0">У вас не привязан Telegram. Чтобы привязать его, зайдите в настройки и нажмите кнопку "Активировать".</span>
     </section>
@@ -31,10 +41,12 @@
     import AppRotationVideo from '@/components/AppRotationVideo.vue';
     import AppRotationPosts from '@/components/AppRotationPosts.vue';
     import AppRotationGroupTg from '@/components/AppRotationGroupTg.vue';
+    import AppRotationStories from '@/components/AppRotationStories.vue';
+    import AppRotationTgPosts from '@/components/AppRotationTgPosts.vue';
     import AppDropdown from '@/components/AppDropdown.vue';
     import { getConfig } from '@/services/config';
     export default {
-        components: { AppRotationGroup, AppRotationVideo, AppRotationPosts, AppDropdown, AppRotationGroupTg },
+        components: { AppRotationGroup, AppRotationVideo, AppRotationPosts, AppDropdown, AppRotationGroupTg, AppRotationStories, AppRotationTgPosts },
         props: {
             isTarif: Boolean,
             userData: Object,
@@ -70,6 +82,20 @@
                     {
                         index: 1,
                         name: "Ротация видео"
+                    },
+                    {
+                        index: 2,
+                        name: "Ротация постов"
+                    }
+                ],
+                listSwtichTg: [
+                    {
+                        index: 0,
+                        name: "Ротация каналов"
+                    },
+                    {
+                        index: 1,
+                        name: "Ротация сторис"
                     },
                     {
                         index: 2,

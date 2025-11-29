@@ -23,18 +23,42 @@
         <h2>Настройки</h2>
         <h3>Контактные данные</h3>
         <div class="links">
+            <span v-if="windowWidth > 650">Вконтакте:</span>
             <span v-if="windowWidth > 650">
-                Вконтакте: https://vk.com/id{{ userData.vk_id }} 
+                https://vk.com/id{{ userData.vk_id }} 
                 <img v-if="userData?.vk_id" src="@/assets/images/ok_green2.png" class="ok_green"/>
                 <AppGoodButton v-else class="active_tg_btn" :text="'АКТИВИРОВАТЬ'" :disabled="isDisabled" @click="tap"/>
             </span>
+
+            <!-- <span v-if="windowWidth > 650">
+                Вконтакте: https://vk.com/id{{ userData.vk_id }} 
+                <img v-if="userData?.vk_id" src="@/assets/images/ok_green2.png" class="ok_green"/>
+                <AppGoodButton v-else class="active_tg_btn" :text="'АКТИВИРОВАТЬ'" :disabled="isDisabled" @click="tap"/>
+            </span> -->
+
+            <span v-if="windowWidth > 650 && testers.includes(userData?.id)">Telegram:</span>
             <span v-if="windowWidth > 650 && testers.includes(userData?.id)">
-                <span>Telegram: {{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }} </span>
+                Telegram:
+                {{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }}
                 <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
                 <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
             </span>
-            <span v-if="whtData?.link && windowWidth > 650">WhatsApp: {{ whtData.link }}</span>
-            <span v-if="windowWidth > 650 && emailData">Почта: {{ emailData }}</span>
+
+            <!-- <span v-if="windowWidth > 650 && testers.includes(userData?.id)">
+                <span>Telegram: {{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }} </span>
+                <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
+                <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
+            </span> -->
+            
+            <span  v-if="whtData?.link && windowWidth > 650">WhatsApp:</span>
+            <span  v-if="whtData?.link && windowWidth > 650">{{ whtData.link }}</span>
+
+            <!-- <span v-if="whtData?.link && windowWidth > 650">WhatsApp: {{ whtData.link }}</span> -->
+
+            <span v-if="windowWidth > 650 && emailData">Почта:</span>
+            <span v-if="windowWidth > 650 && emailData">{{ emailData }}</span>
+
+            <!-- <span v-if="windowWidth > 650 && emailData">Почта: {{ emailData }}</span> -->
             <div class="mobile_links_row" v-if="windowWidth <= 650">
                 <span>Вконтакте: </span>
                 <span>https://vk.com/id{{ userData.vk_id }}</span>
@@ -59,7 +83,7 @@
             <input 
                 v-model="emailLink" 
                 placeholder="Почта">
-            <span @click="addEmail">ДОБАВИТЬ</span>
+            <span class="row_text" @click="addEmail">ДОБАВИТЬ</span>
         </div>
         <!-- <div class="row">
             <input 
@@ -72,7 +96,7 @@
                 v-model="whatsappLink" 
                 type="number"
                 placeholder="WhatsApp (введите номер телефона)">
-            <span @click="addWhatsapp">ДОБАВИТЬ</span>
+            <span class="row_text" @click="addWhatsapp">ДОБАВИТЬ</span>
             <!-- <span class="error_message" v-if="notTelegram">Введите номер телефона</span> -->
         </div>
 
@@ -139,13 +163,20 @@
         <h3 class="tg_channel_title">Telegram канал для продвижения:</h3>
         <div class="row">
             <input  
+                v-if="tg_group"
                 v-model="tg_group" 
                 placeholder="Telegram канал" >
-            <span @click="addTelegramChannel">ДОБАВИТЬ</span>
+            <span class="row_text" @click="addTelegramChannel">ДОБАВИТЬ</span>
             <h3 v-if="userData">Подписки: {{ tgGroupStats?.active || 0}}</h3>
         </div>
         <div class="row2">
-            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
+            <div class="checkbox-wrapper-18">
+                <div class="round">
+                    <input type="checkbox" :id="`checkbox-111`" v-model="isCheckboxChecked"  @click="handleCheckboxChange" />
+                    <label :for="`checkbox-111`"></label>
+                </div>
+            </div>
+            <!-- <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange"> -->
             <span>Подписки</span>
         </div>
 
@@ -182,12 +213,17 @@
             <input  
                 v-model="userTgStory" 
                 placeholder="Telegram история" >
-            <span @click="addTelegramStory">ДОБАВИТЬ</span>
-            <h3 v-if="userData">Подписки: {{ tgStoryCount }}</h3>
+            <span class="row_text" @click="addTelegramStory">ДОБАВИТЬ</span>
+            <h3 v-if="userData">Просмотры: {{ tgStoryCount }}</h3>
         </div>
-        <div class="row2">
-            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
-            <span>Подписки</span>
+
+        <h3 class="tg_story_title">Telegram пост для продвижения:</h3>
+        <div class="row">
+            <input  
+                v-model="userTgPost" 
+                placeholder="Telegram пост" >
+            <span class="row_text" @click="addTelegramPost">ДОБАВИТЬ</span>
+            <!-- <h3 v-if="userData">Просмотры: {{ tgStoryCount }}</h3> -->
         </div>
 
         <h3 class="vk_group_title">ВК группа для продвижения:</h3>
@@ -195,11 +231,17 @@
             <input  
                 v-model="vkGroupLink" 
                 placeholder="ВК группа" >
-            <span @click="addVKGroup">ДОБАВИТЬ</span>
+            <span class="row_text" @click="addVKGroup">ДОБАВИТЬ</span>
             <h3 v-if="userData">Подписки: {{ userData.group?.count_subs_from_service || 0}}</h3>
         </div>
         <div class="row2">
-            <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange">
+            <div class="checkbox-wrapper-18">
+                <div class="round">
+                    <input type="checkbox" :id="`checkbox-111`" v-model="isCheckboxChecked"  @click="handleCheckboxChange" />
+                    <label :for="`checkbox-111`"></label>
+                </div>
+            </div>
+            <!-- <input type="checkbox" class="checkbox" v-model="isCheckboxChecked" @change="handleCheckboxChange"> -->
             <span>Подписки</span>
         </div>
         
@@ -208,7 +250,7 @@
             <input  
                 v-model="vkVideoLink" 
                 placeholder="ВК видео" >
-            <span @click="addVKVideo">ДОБАВИТЬ</span>
+            <span class="row_text" @click="addVKVideo">ДОБАВИТЬ</span>
             <h3 v-if="userData">Просмотры: {{ userData?.video?.count_subs_from_service || 0 }}</h3>
         </div>
 
@@ -248,7 +290,7 @@
         </div>
         <h3>Ваше предложение:</h3>
         <span>*В вип-предложении будет показываться только первые 90 символов. Полностью предложение будет видно в бизнес-предложении.</span>
-        <div class="row">
+        <div class="row alg-st">
             <textarea
                 v-model="sentence"
                 placeholder="Ваше предложение"
@@ -262,24 +304,74 @@
                 :whtData="whtData"
                 :windowWidth="windowWidth"
             />
-            <!-- <div class="copy_from">
+            <div class="copy_from">
                 <h3>Копировать баннер и название с:</h3>
-                <div class="copy_from_row">
-                    <input type="checkbox" class="checkbox" v-model="copy" @change="changeAds" />
+                <div class="copy_from_row" style="margin-top: 5px;">
+                    <div class="checkbox-wrapper-18">
+                        <div class="round">
+                            <input type="checkbox" :id="`checkbox-1`" @click="setActiveBussinesStyle('tg')" v-model="tg_business" :checked="active_bussines_style == 'tg'" />
+                            <label :for="`checkbox-1`"></label>
+                        </div>
+                    </div>
                     <span>Telegram</span>
                 </div>
                 <div class="copy_from_row">
-                    <input type="checkbox" class="checkbox" v-model="intelAds" @change="changeAds" />
+                    <div class="checkbox-wrapper-18">
+                        <div class="round">
+                            <input type="checkbox" :id="`checkbox-2`" @click="setActiveBussinesStyle('vk')" v-model="vk_business" :checked="active_bussines_style == 'vk'" />
+                            <label :for="`checkbox-2`"></label>
+                        </div>
+                    </div>
                     <span>Вконтакте</span>
                 </div>
-            </div> -->
+            </div>
         </div>
         <input  
             v-model="siteLink" 
             placeholder="Сайт" >
 
+        <h3 class="tg_theme_channel_title">Интересы Intelektaz Ads: </h3>
+        <div v-if="selectedThemes.length > 0" class="selected-countries">
+            <span v-for="(interest, index) in selectedThemes" :key="index" class="selected-interest">
+            {{ interest }}
+            <img src="@/assets/images/close.png" @click="removeTheme(index)" class="remove-btn">
+            </span>
+        </div>
+        <div class="dropdown">
+            <input
+                type="text"
+                v-model="searchQueryTheme"
+                placeholder="Тема канала"
+                @focus="isDropdownVisibleTheme = true"
+                @blur="hideDropdown"
+                ref="selectTheme"
+            />
+            <img :class="{'rotated': isDropdownVisibleTheme}" src="@/assets/images/arrow_down.png" class="arrow_down">
+            <ul v-if="isDropdownVisibleTheme" class="dropdown-menu">
+                <li
+                v-for="interest in interests"
+                :key="interest"
+                @mousedown.prevent="selectTheme(interest)"
+                >
+                {{ interest }}
+                </li>
+            </ul>
+        </div>
+        <span>Таргетинг по интересам Intelektaz Ads работает только на пакетах Leader.</span>
         <div class="row2">
-            <input type="checkbox" class="checkbox" v-model="intelAds" @click="changeAds" />
+            <!-- <div class="checkbox-wrapper-18">
+                <div class="round">
+                    <input type="checkbox" :id="`checkbox-3`" @click="changeAds('tg')" v-model="intelAds" :checked="intelAds" />
+                    <label :for="`checkbox-3`"></label>
+                </div>
+            </div> -->
+            <!-- <input type="checkbox" class="checkbox" v-model="intelAds" @click="changeAds" /> -->
+            <div class="checkbox-wrapper-18">
+                <div class="round">
+                    <input type="checkbox" :id="`checkbox-11`" v-model="intelAds" @click="changeAds" />
+                    <label :for="`checkbox-11`"></label>
+                </div>
+            </div>
             <span>Intelektaz Ads</span>
         </div>
         <AppVipUser 
@@ -321,7 +413,11 @@
         getVkToken, 
         addTelegramStory, 
         getUserStory,
-        getTgGroupStats
+        getTgGroupStats,
+        upgradeTelegrmChannel,
+        updateVipPlatform,
+        getUserPlatform,
+        createTgPost
     } from '@/services/tg';
     import { getConfig } from '@/services/config';
 
@@ -388,7 +484,12 @@ export default {
             tgStoryInfo: null,
             tgStoryCount: null,
             tgGroupStats: null,
-            isModalAds: false
+            isModalAds: false,
+            tg_group: null,
+            active_bussines_style: null,
+            tg_business: false,
+            vk_business: false,
+            userTgPost: null
         };
     },
     computed: {
@@ -451,6 +552,7 @@ export default {
         this.tgStoryCount = this.tgStoryInfo.rotation_count;
 
         this.tgGroupStats = await getTgGroupStats(localStorage.getItem('token'));
+        this.active_bussines_style = await getUserPlatform(localStorage.getItem('token'));
 
         try {
             const response = await fetch('https://namaztimes.kz/ru/api/country');
@@ -479,6 +581,69 @@ export default {
         },
     },
     methods: {
+        async addTelegramPost() {
+            await createTgPost(this.userTgPost, localStorage.getItem('token'));
+        },
+        async setActiveBussinesStyle(style) {
+            // Запоминаем старое состояние
+            const oldStyle = this.active_bussines_style;
+            const oldTg = this.tg_business;
+            const oldVk = this.vk_business;
+
+            try {
+                // Обновляем визуально выбранный стиль (оптимистично)
+                this.active_bussines_style = style;
+                this.tg_business = style === 'tg';
+                this.vk_business = style === 'vk';
+
+                const resp = await updateVipPlatform(style, localStorage.getItem('token'));
+
+                // Если сервер вернул ошибку
+                if (!resp) {
+                    // Восстанавливаем всё обратно
+                    this.active_bussines_style = oldStyle;
+                    this.tg_business = oldTg;
+                    this.vk_business = oldVk;
+
+                    this.isSaveModal = true;
+                    this.title = 'ОШИБКА!';
+                    this.msg = 'У вас не привязана эта платформа к аккаунту.';
+                    return;
+                }
+
+                // Успех
+                this.isSaveModal = true;
+                this.title = 'УСПЕШНО!';
+                this.msg = 'Платформа для рекламного предложения успешно обновлена';
+
+            } catch (err) {
+                // Ошибка запроса → тоже возвращаем всё обратно
+                this.active_bussines_style = oldStyle;
+                this.tg_business = oldTg;
+                this.vk_business = oldVk;
+
+                this.isSaveModal = true;
+                this.title = 'ОШИБКА!';
+                this.msg = 'Произошла ошибка при обновлении рекламного предложения.';
+            }
+        },
+
+        async addTelegramChannel() {
+            if (this.tg_group) {
+                try {
+                    await upgradeTelegrmChannel(this.tg_group, localStorage.getItem('token'));
+                    this.isModal = true;
+                    this.title = 'УСПЕШНО!';
+                    this.msg = 'Ваш телеграмм канал был успешно обновлён.';
+                } catch(err) {
+                    this.isModal = true;
+                    this.title = 'ОШИБКА!';
+                    this.msg = 'При изменении канала произошла ошибка.';
+                }
+            } else {
+                window.open(`https://t.me/IntelektazTGBot?start`, "_blank", "width=800, height=600");
+            }
+        },
         openRotation() {
             this.$emit('open_rotation');
         },
@@ -551,11 +716,13 @@ export default {
                     const addGroups = localStorage.getItem("addGroups");
                     const watchedVideos = localStorage.getItem("watchedVideos");
                     const addPosts = localStorage.getItem("addPosts");
+                    const code_verifier = localStorage.getItem("code_verifier");
                     localStorage.clear();
                     if (addGroups) localStorage.setItem("addGroups", addGroups);
                     if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
                     if (addPosts) localStorage.setItem("addPosts", addPosts);
                     localStorage.setItem("referer", referal);
+                    localStorage.setItem("code_verifier", code_verifier);
 
                     const cleanUrl = window.location.origin + window.location.pathname; 
                     window.history.replaceState({}, document.title, cleanUrl);
@@ -568,6 +735,7 @@ export default {
                     const addGroups = localStorage.getItem("addGroups");
                     const watchedVideos = localStorage.getItem("watchedVideos");
                     const addPosts = localStorage.getItem("addPosts");
+                    const code_verifier = localStorage.getItem("code_verifier");
                     localStorage.clear();
                     if (addGroups) localStorage.setItem("addGroups", addGroups);
                     if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
@@ -575,6 +743,7 @@ export default {
                     localStorage.setItem("token", response.data.access_token);
                     localStorage.setItem("token_refresh", response.data.refresh_token);
                     localStorage.setItem("is_new_user", response.data.is_new_user);
+                    localStorage.setItem("code_verifier", code_verifier);
 
                     try {
                         await getUserInfo(localStorage.getItem("token"));
@@ -590,12 +759,14 @@ export default {
                         const addGroups = localStorage.getItem("addGroups");
                         const watchedVideos = localStorage.getItem("watchedVideos");
                         const addPosts = localStorage.getItem("addPosts");
+                        const code_verifier = localStorage.getItem("code_verifier");
                         localStorage.clear();
                         if (addGroups) localStorage.setItem("addGroups", addGroups);
                         if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
                         if (addPosts) localStorage.setItem("addPosts", addPosts);
                         localStorage.setItem("first", true);
                         localStorage.setItem("referer", referal);
+                        localStorage.setItem("code_verifier", code_verifier);
                         // location.reload();
                     }
                     
@@ -604,12 +775,14 @@ export default {
                     const addGroups = localStorage.getItem("addGroups");
                     const watchedVideos = localStorage.getItem("watchedVideos");
                     const addPosts = localStorage.getItem("addPosts");
+                    const code_verifier = localStorage.getItem("code_verifier");
                     localStorage.clear();
                     if (addGroups) localStorage.setItem("addGroups", addGroups);
                     if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
                     if (addPosts) localStorage.setItem("addPosts", addPosts);
                     localStorage.setItem("first", true);
                     localStorage.setItem("referer", ref);
+                    localStorage.setItem("code_verifier", code_verifier);
                     // const cleanUrl = window.location.origin + window.location.pathname; 
                     // window.history.replaceState({}, document.title, cleanUrl);
                     // location.reload();
@@ -641,6 +814,8 @@ export default {
                 const code_challenge_method = this.code_challenge_method;
                 const scopes = "groups,photos,wall,video,stats";
                 localStorage.setItem('zopa', code_challenge);   
+                localStorage.setItem('isAddVK', true);
+                localStorage.setItem('userId', this.userData.id);
 
                 const vkAuthUrl = `https://id.vk.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&state=${state}&code_challenge=${code_challenge}&code_challenge_method=${code_challenge_method}&scope=${scopes}`;
                 try {
@@ -650,12 +825,14 @@ export default {
                     const addGroups = localStorage.getItem("addGroups");
                     const watchedVideos = localStorage.getItem("watchedVideos");
                     const addPosts = localStorage.getItem("addPosts");
+                    const code_verifier = localStorage.getItem("code_verifier");
                     localStorage.clear();
                     if (addGroups) localStorage.setItem("addGroups", addGroups);
                     if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
                     if (addPosts) localStorage.setItem("addPosts", addPosts);
                     localStorage.setItem("first", true);
                     localStorage.setItem("referer", ref);
+                    localStorage.setItem("code_verifier", code_verifier);
                 }
             }
             
@@ -685,7 +862,7 @@ export default {
         },
         async activateTg() {
             const code = await activeTg(localStorage.getItem('token'));
-            window.open(`http://t.me/test_intelekt_bot?start=code=${code}`, "_blank", "width=800, height=600")
+            window.open(`https://t.me/IntelektazTGBot?start=code=${code}`, "_blank", "width=800, height=600")
         },
         selectCountry(country) {
                 this.selectedCountry = country;
@@ -831,6 +1008,72 @@ export default {
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
     }
 
+    .checkbox-wrapper-18 .round {
+        position: relative;
+    }
+
+    .checkbox-wrapper-18 .round label {
+        background-color: none;
+        border: 1px solid white;
+        cursor: pointer;
+        height: 23px;
+        width: 23px;
+        display: block;
+    }
+
+    .checkbox-wrapper-18 .round label:after {
+        border: 3px solid #66bb6a;
+        border-top: none;
+        border-right: none;
+        content: "";
+        height: 6px;
+        left: 5px;
+        opacity: 0;
+        position: absolute;
+        top: 3px;
+        transform: rotate(-45deg);
+        width: 18px;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"] {
+        visibility: hidden;
+        display: none;
+        opacity: 0;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label {
+        background-color: none;
+        border-color: white;
+    }
+
+    .checkbox-wrapper-18 .round input[type="checkbox"]:checked + label:after {
+        opacity: 1;
+    }
+
+    .copy_from {
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+    }
+    .copy_from h3 {
+        color: white;
+        font-size: 18px;
+        font-family: 'OpenSans';
+        max-width: 196px;
+    }
+
+    .copy_from_row {
+        display: flex;
+        column-gap: 10px;
+        align-items: center;
+    }
+
+    .sm_checkbox {
+        width: 20px !important;
+        height: 20px !important;
+        background: none;
+    }
+
     .gender_dropdown, .tg_channel_title, .tg_theme_channel_title, .tg_story_title, .vk_video_title, .vk_group_title, .interests_title {
         margin-top: 25px;
     }
@@ -918,9 +1161,14 @@ export default {
     }
 
     .links {
-        display: flex;
-        flex-direction: column;
-        row-gap: 10px;
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        column-gap: 30px;
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
     .mobile_links_row {
         display: grid;
@@ -934,11 +1182,14 @@ export default {
         display: flex;
         align-items: center;
         column-gap: 20px;
-        flex-wrap: wrap;
+        /* flex-wrap: wrap; */
         row-gap: 10px;
         @media (max-width: 650px) {
             row-gap: 20px;
         }
+    }
+    .alg-st {
+        align-items: start;
     }
     .row2 {
         display: flex;
@@ -954,7 +1205,7 @@ export default {
             font-size: 14px;
         }
     }
-    .row span {
+    .row_text {
         font-size: 16px;
         color: white;
         font-family: 'Tektur';
@@ -1209,5 +1460,11 @@ export default {
             width: 20px !important;
             height: 20px;
         }
+    }
+
+    .copy_from_row span {
+        border: none;
+        font-size: 18px;
+        font-weight: normal;
     }
 </style>

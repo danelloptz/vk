@@ -101,7 +101,7 @@
         },
         methods: {
             openBot() {
-                window.open('https://t.me/test_intelekt_bot', "_blank", "width=800, height=600");
+                window.open('https://t.me/IntelektazTGBot', "_blank", "width=800, height=600");
             },
             async checkLink() {
                 if (this.selectedGroup !== "") {

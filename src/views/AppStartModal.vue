@@ -21,6 +21,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import { getToken, addReferer, refreshToken } from '@/services/auth';
     import { getUserInfo } from '@/services/user';
+    import { getVkToken } from '@/services/tg';
 
     export default {
         components: { AppBadButton, AppGoodButton },
@@ -153,10 +154,15 @@
                 const device_id = params.get("device_id");
                 const code_verifier = localStorage.getItem("code_verifier");
 
+                const isAddVK = localStorage.getItem('isAddVK');
+                const userId = localStorage.getItem('userId');
+
                 if (code && state && device_id) {
                     let response;
                     try {
-                        response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
+                        response = isAddVK && userId ? 
+                            await getVkToken(code, state, code_verifier, device_id, this.redirectUrl, userId) : 
+                            await getToken(code, state, code_verifier, device_id, this.redirectUrl);
                     } catch (err) {
 
                         const referal = localStorage.getItem("referer");
@@ -235,7 +241,13 @@
                         localStorage.setItem("referer", ref);
                         // const cleanUrl = window.location.origin + window.location.pathname; 
                         // window.history.replaceState({}, document.title, cleanUrl);
-                        location.reload();
+                        if (response.status) {
+                            localStorage.setItem("points", 0);
+                            this.$router.push('/signup_1');
+                        }
+                        else {
+                            location.reload();
+                        }
                     }
                      
                 } else {

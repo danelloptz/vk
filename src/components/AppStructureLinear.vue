@@ -254,9 +254,12 @@
         async created() {
             if (this.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
             else this.isFirstLine = false;
-            const referals = await getReferals(this.rootUser.id, this.vk_id);
-            this.node = referals.referrals;
-            console.log(this.node);
+            if (String(this.vk_id).length > 15) {
+                const referals = await getReferals(this.rootUser.id, this.vk_id);
+                this.node = referals.referrals;
+                console.log(this.node);
+            }
+            
 
             this.updateOpenedUsers();
 
@@ -361,7 +364,8 @@
                     if (newValue?.vk_id == this.rootUser?.vk_id || (this.currUser && (this.currUser?.sponsor_vk_id === this.rootUser?.vk_id))) this.isFirstLine = true
                     else this.isFirstLine = false;
                     if (newValue?.vk_id) {
-                        const referals = await getReferals(this.rootUser.id, newValue.id);
+                        console.log(newValue);
+                        const referals = await getReferals(this.rootUser.id, newValue.user_id);
                         this.node = referals.referrals;
                         console.log("НОДА В currUser: ", this.node);
                     }

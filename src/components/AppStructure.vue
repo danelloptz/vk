@@ -163,7 +163,7 @@
             :vk_id="root_vk_id" 
             :key="root_vk_id"
             :searchUsers="searchUsers"
-            :referersStack="[{name: userData.name, vk_id: userData.vk_id}]" 
+            :referersStack="[{name: userData.name, vk_id: userData.vk_id, id: userData.id}]" 
             :lay="lay" 
             :isUser="isUser"
             :currUser="currUser"

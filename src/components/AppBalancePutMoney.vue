@@ -41,7 +41,7 @@
                     @click="setActive(index)"
                 > {{ item }} </span>
             </div>
-            <span>{{ (activeIndex == 0) ? bep_msg : trc_msg }}</span>
+            <span v-html="(activeIndex == 0) ? bep_msg : trc_msg"></span>
         </div>
         <div class="steptwo" v-if="stepTwo">
             <div class="row">
@@ -89,7 +89,7 @@
                 text1: "ПОПОЛНИТЬ БАЛАНС",
                 text2: "Я ОПЛАТИЛ",
                 choices: ["BEP-20", "TRC-20"],
-                bep_msg: "Обратите внимание, переводы по сети BEP-20 с минимальными комиссиями",
+                bep_msg: "Обратите внимание, пополнение по сети BEP-20 с дополнительным подтверждением через <a href='https://t.me/IntelektazSupport'>службу поддержки</a>.",
                 activeIndex: 0,
                 commision: 1,
                 usdt: "",

@@ -404,3 +404,168 @@ export async function getTgGroupStats(token) {
         return false; 
     }
 }
+
+export async function turnRotationStories(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/add_story', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при активации сториз", error);
+        return false; 
+    }
+}
+
+export async function checkStoryViewed(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/check_story_viewed', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при проверке просмотра сториз", error);
+        return false; 
+    }
+}
+
+
+export async function upgradeTelegrmChannel(channel_link, token) {
+    try {
+        const response = await axios.put(`https://web.intelektaz.com/api/tg/group/upgrade_channel`, {},{
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            params: {
+                channel_link: channel_link
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при обновлении телеграмм канал пользователя", error);
+        return false; 
+    }
+}
+
+export async function updateVipPlatform(platform, token) {
+    try {
+        const response = await axios.patch(`https://web.intelektaz.com/api/tg/user/update_vip_platform`, {},{
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            params: {
+                platform: platform
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при обновлении платформы рекламного предложения", error);
+        return false; 
+    }
+}
+
+export async function getUserPlatform(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_vip_platform', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении рекламной платформы пользователя", error);
+        return false; 
+    }
+}
+
+export async function getRotationTgPosts(tariff, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/rotation/get_rotation_posts', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    tariff: tariff
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении постов для тг ротации", error);
+        return false; 
+    }
+}
+
+export async function createTgPost(post_url, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/create_post', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    post_url: post_url
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при привязке телеграмм поста для продвижения", error);
+        return false; 
+    }
+}
+
+export async function checkPostViewed(post_id, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/check_post_viewed', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    post_id: post_id
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при проверке просмотра телеграмм поста", error);
+        return false; 
+    }
+}
+
+export async function addTgPostRotation(token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/add_post', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при добавлении поста в ротацию", error);
+        return false; 
+    }
+}

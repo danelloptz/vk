@@ -97,30 +97,30 @@
             },
             telegramLink() {
                 if (this.userData?.user_platform == 'vk') {
-                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.vk_id}`;
+                    return `https://t.me/IntelektazTGBot?start=ref=vk${this.userData?.vk_id}`;
                 } else {
-                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                    return `https://t.me/IntelektazTGBot?start=ref=tg${this.userData?.tg_id}`;
                 }
             },
             refLink() {
                 if (this.userData?.vk_id) {
                     return `https://${this.refLinks.default}/?ref=${this.userData.vk_id}`;
                 } else {
-                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                    return `https://t.me/IntelektazTGBot?start=ref=tg${this.userData?.tg_id}`;
                 }
             },
             refVkLink() {
                 if (this.userData?.vk_id) {
                     return `https://${this.refLinks.vk}/?ref=${this.userData.vk_id}`;
                 } else {
-                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                    return `https://t.me/IntelektazTGBot?start=ref=tg${this.userData?.tg_id}`;
                 }
             },
             refPremiumLink() {
                 if (this.userData?.vk_id) {
                     return `https://${this.refLinks.premium}/?ref=${this.userData.vk_id}`;
                 } else {
-                    return `https://t.me/test_intelekt_bot?start=ref=tg${this.userData?.tg_id}`;
+                    return `https://t.me/IntelektazTGBot?start=ref=tg${this.userData?.tg_id}`;
                 }
             }
         },

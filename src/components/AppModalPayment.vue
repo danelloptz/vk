@@ -24,7 +24,7 @@
                             :key="item.package_name"
                             @mousedown.prevent="selectPackage(item.package_name, item.monthly_cost)"
                         >
-                            {{ item.package_name }}
+                            {{'Пакет ' + item.package_name }}
                         </li>
                     </ul>
                 </div>

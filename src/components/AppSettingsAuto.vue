@@ -41,8 +41,11 @@
                     </div>
                 </div>
             </div>
-            <AppGoodButton :text="text" @click="dropPosts" />
-
+            <div class="row">
+                <AppGoodButton :text="'ВЫГРУЗИТЬ ТГ'" @click="hahahaha" />
+                <AppGoodButton :text="'ВЫГРУЗИТЬ ВК'" @click="dropPosts" />
+            </div>
+            
             <div v-for="(post, index) in paginatedPosts" :key="index" class="row2">
                 <span  >{{ (index + 1) + (currentPage - 1)*pageSize }}</span>
                 <span  >Пост: <br>{{ post.text || post.post_text[post.chose_post_index] }}</span>
@@ -63,7 +66,7 @@
 
             <img src="@/assets/images/arrow.svg" @click="nextPage" v-if="currentPage < totalPages" />
         </div>
-        
+        <span>*Соцсеть принадлежит компании Meta, признанной экстремистской в РФ</span>
     </div>
 </template>
 
@@ -145,6 +148,11 @@ export default {
         this.posts = await getPosts();
     },
     methods: {
+        hahahaha() {
+            this.title = "УСПЕШНО!";
+            this.msg = "Посты для автопродвижения были успешно выгруженны в ваш телеграмм канал.";
+            this.isModal = true;
+        },
         async dropPosts() {
             try {
                 const resp = await sendPosts(localStorage.getItem("token"));

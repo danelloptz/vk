@@ -30,7 +30,7 @@
             </div>
             
             <span>Вывод обрабатывается в течение рабочего дня</span>
-            <span :style="{ marginTop: windowWidth <= 650 ? '-20px' : '0px' }">Вы получите <strong>{{ cashout }}</strong> USDT за вычетом комиссии.</span>
+            <span style="margin-top: -20px;">Вы получите <strong>{{ cashout }}</strong> USDT за вычетом комиссии.</span>
             <span v-if="isError" class="error">{{ errMsg }}</span>
             <AppGoodButton :text="text1" class="btn" @click="openWaitingModal"/>
         </div>
@@ -269,7 +269,7 @@
     }
 
     .btn {
-        width: 190px !important;
-        align-self: center;
+        width: 220px !important;
+        /* align-self: center; */
     }
 </style>

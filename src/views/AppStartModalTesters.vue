@@ -14,9 +14,13 @@
         </div>
         <hr>
         <div class="btn_wrapper">
-            <AppGoodButton class="btn" :text="text" :disabled="isDisabled" @click="tap"/>
-            <AppGoodButton class="btn" :text="'РЕГИСТРАЦИЯ ТЕЛЕГРАММ'" @click="signUpTg" />
-            <div style="z-index: 999;" ref="tgButton"></div> <!-- Контейнер для кнопки Telegram -->
+            <div 
+                style="z-index: 999;" 
+                ref="tgButton" 
+            ></div> <!-- Контейнер для кнопки Telegram -->
+            <AppBadButton class="btn" :text="'РЕГИСТРАЦИЯ ТЕЛЕГРАММ'" @click="signUpTg" />
+            <AppGoodButton class="btn" :text="'ВХОД ВК'" :disabled="isDisabled" @click="tap"/>
+            <AppGoodButton class="btn" :text="'РЕГИСТРАЦИЯ ВК'" :disabled="isDisabled" @click="tap"/>
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
         <img src="@/assets/images/auth_image.png" class="right_image">
@@ -25,6 +29,7 @@
 
 <script>
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppBadButton from '@/components/AppBadButton.vue';
     import AppMandatoryChannels from '@/components/AppMandatoryChannels.vue';
     import { getToken, addReferer, refreshToken } from '@/services/auth';
     import { getUserInfo } from '@/services/user';
@@ -32,7 +37,7 @@
 
 
     export default {
-        components: { AppGoodButton, AppMandatoryChannels },
+        components: { AppGoodButton, AppMandatoryChannels, AppBadButton },
         data() {
             return {
                 text: "ВОЙТИ",
@@ -57,7 +62,7 @@
             const script = document.createElement("script");
             script.async = true;
             script.src = "https://telegram.org/js/telegram-widget.js?22";
-            script.setAttribute("data-telegram-login", "test_intelekt_bot");
+            script.setAttribute("data-telegram-login", "IntelektazTGBot");
             script.setAttribute("data-size", "large");
             script.setAttribute("data-auth-url", "https://lk.intelektaz.com/login");
             script.setAttribute("data-request-access", "write");
@@ -126,9 +131,9 @@
                 const referer = localStorage.getItem('referer');
                 console.log(referer);
                 if (referer) 
-                    window.location.href = `https://t.me/test_intelekt_bot?start=ref=${referer}`
+                    window.location.href = `https://t.me/IntelektazTGBot?start=ref=${referer}`
                 else 
-                    window.location.href = `https://t.me/test_intelekt_bot?start`;
+                    window.location.href = `https://t.me/IntelektazTGBot?start`;
             },
             reboot() {
                 console.log("HERE");    
@@ -432,7 +437,7 @@
     }
 
     .modal {
-        width: 760px;
+        width: 960px;
         height: 437px;
         border-radius: 10px;
         position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
@@ -444,7 +449,7 @@
         z-index: 2;
         align-self: center;
         margin-top: -50px;
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             width: 80vw;
             min-height: 300px;
         }
@@ -564,9 +569,10 @@
     }
 
     .btn_wrapper {
-        display: flex;
-        flex-direction: column;
-        row-gap: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        row-gap: 30px;
+        column-gap: 20px;
         @media (max-width: 420px) {
             row-gap: 10px;
         }

@@ -384,11 +384,11 @@
         row-gap: 50px;
     }
     .groups_block_btns {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        column-gap  : 30px;
-        row-gap: 10px;
+        width: fit-content;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 30px;
+        row-gap: 30px;
         @media (max-width: 650px) {
             flex-direction: column;
             align-items: center;

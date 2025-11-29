@@ -16,9 +16,9 @@
     />
     <AppRotationPlans v-if="isPlans" :userData="userData" />
     <section class="rotation_preview" v-if="isRotationPreview && !isPlans && !isTarif">
-        <span>Вы можете увеличить количество целевых подписчиков на свой Telegram канал совершенно бесплатно за счет прохождения Ротации.</span>
-        <span>Ротация - это взаимовыгодная функция. Вам необходимо подписаться на 20 предложенных Telegram каналов и в ответ получаете 10 подписок на свой Telegram канал.</span>
-        <span>Если у вас активен премиальный тариф, то вы можете уменьшить количество личных подписок до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
+        <span>Вы можете получать целевые просмотры и реакции на свою Telegram сторис совершенно бесплатно за счет прохождения Ротации сторис.</span>
+        <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных Telegram сторис, и в ответ получаете 10 просмотров вашей последней сторис. </span>
+        <span>Если у Вас активен премиальный тариф, то Вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Активировать тариф».</span>
         <div class="rotation_preview_btns">
             <AppBadButton :text="text1" class="btn" @click="makeRotation"/>
             <AppGoodButton :text="text2" class="btn" @click="openPlans" />
@@ -31,12 +31,13 @@
         
         <div class="group">
             <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" :isRotation="true" />
+            <span>Необходимо просмотреть и поставить лайк на сторис.</span>
             <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png"> Не осталось пропусков!</span>
-            <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не подписались на Telegram канал, нажмите «Пропустить» или подпишитесь на Telegram канал.</span>
+            <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не поставили лайк на сторис, нажмите «Пропустить» или поставьте лайк</span>
             <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
-                <AppGoodButton class="btn" :text="text3" @click="subscribeGroup" />
-                <AppGoodButton class="btn" :text="text5" @click="checkSubscription" />
+                <AppGoodButton class="btn bt2_tight" :text="'ПОСМОТРЕТЬ СТОРИЗ'" @click="subscribeGroup" />
+                <AppGoodButton class="btn" :text="'ПРОВЕРИТЬ'" @click="haha" />
                 <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
                 <AppBadButton class="btn" :text="text6" @click="openModal" />
             </div>
@@ -44,8 +45,8 @@
     </section>
     <section class="rotation_end" v-if="isRotationEnd && !isPlans && !isTarif">
         <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
-        <strong><span>Вы успешно прошли Ротацию групп!</span></strong>
-        <span>Ваша группа добавлена в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
+        <strong><span>Вы успешно прошли Ротацию сторис!</span></strong>
+        <span>Ваша сторис добавлена в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
         <AppGoodButton :text="text2" @click="openPlans"  />
     </section>
 </template>
@@ -59,7 +60,7 @@
     import AppModal from "@/components/AppModal.vue";
     // import AppVideoModal from "@/components/AppVideoModal.vue";
 
-    import { getStoriesRotationChannels, turnRotationChannels } from '@/services/tg';
+    import { getStoriesRotationChannels, turnRotationStories } from '@/services/tg';
     // import { addInRotation} from "@/services/groups";    
     // import { addInRotation, checkGroupSub} from "@/services/groups";    
 
@@ -162,6 +163,9 @@
             });
         },
         methods: {
+            haha(){
+                this.noSubscribe = true;
+            },
             openModal() {
                 this.isModal = true;
             },
@@ -180,7 +184,7 @@
                 this.isRotation = true;
             },
             async endRotation() {
-                await turnRotationChannels(localStorage.getItem('token'));
+                await turnRotationStories(localStorage.getItem('token'));
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
@@ -189,7 +193,7 @@
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const groupLink = this.groupsQueue[this.currentGroupIndex].group_link;
+                    const groupLink = this.groupsQueue[this.currentGroupIndex].story_link;
                     this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
                     window.open(groupLink, "_blank", "width=800, height=600");
@@ -334,6 +338,9 @@
             width: 210px;
         }
     }
+    .bt2_tight {
+        letter-spacing: 0px;
+    }
     .rotation, .rotation_end {
         display: flex;
         flex-direction: column;
@@ -359,11 +366,11 @@
         row-gap: 50px;
     }
     .groups_block_btns {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        column-gap  : 30px;
-        row-gap: 10px;
+        width: fit-content;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 30px;
+        row-gap: 30px;
         @media (max-width: 650px) {
             flex-direction: column;
             align-items: center;

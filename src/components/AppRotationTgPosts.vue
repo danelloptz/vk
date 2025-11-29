@@ -1,8 +1,7 @@
 <template>
-    <AppRotationPlans v-if="isPlans" :userData="userData"  />
-    <AppModalMessage 
+   <AppModalMessage 
         :visibility1="isModal"
-        :link="groupsQueue[currentGroupIndex]?.post_link"
+        :link="this.groupsQueue[this.currentGroupIndex]?.group_link"
         :user="userData.id"
         @close="close"
         @update:visibility1="isModal = $event"
@@ -15,36 +14,39 @@
         @close="close"
         @update:visibility1="isSuccess = $event"
     />
-    <section class="rotation_preview" v-if="isRotationPreview && !isPlans">
-        <span>Вы можете получать целевые просмотры и реакции на свой последний  пост совершенно бесплатно за счет прохождения Ротации постов.</span>
-        <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных постов ВК,
-            и в ответ получаете 10 просмотров вашего последнего поста. </span>
-        <span>Если у Вас активен премиальный тариф, то Вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Выбрать тариф».</span>
+    <AppRotationPlans v-if="isPlans" :userData="userData" />
+    <section class="rotation_preview" v-if="isRotationPreview && !isPlans && !isTarif">
+        <span>Вы можете получать целевые просмотры и реакции на свой последний Telegram пост совершенно бесплатно за счет прохождения Ротации постов.</span>
+        <span>Ротация - это взаимовыгодная функция. Вам необходимо просмотреть 20 предложенных Telegram постов, и в ответ получаете 10 просмотров вашего последнего поста. </span>
+        <span>Если у Вас активен премиальный тариф, то Вы можете уменьшить количество личных просмотров до 10. Чтобы подключить премиум нажмите «Активировать тариф».</span>
         <div class="rotation_preview_btns">
-            <AppBadButton class="btn" :text="text1" @click="makeRotation"/>
-            <AppGoodButton class="btn" :text="text2" @click="openPlans" />
+            <AppBadButton :text="text1" class="btn" @click="makeRotation"/>
+            <AppGoodButton :text="text2" class="btn" @click="openPlans" />
         </div>
     </section>
-    <section class="rotation" v-if="isRotation && !isPlans">
-        <span class="counter">Просмотры {{ addGroups }} из {{ totalGroups }}</span>
+    <section class="rotation" v-if="isRotation && !isPlans && !isTarif">
+        <div class="row">
+            <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
+        </div>
+        
         <div class="group">
-            <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" />
-            <span>Необходимо просмотреть и поставить лайк на последний пост в группе, если есть закрепленное сообщение, пропустите его</span>
-            <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png">Не осталось пропусков!</span>
-            <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не поставили лайк на последний пост в группе, нажмите «Пропустить» или поставьте лайк.</span>
+            <AppGroupOrUser :style="{ minWidth: windowWidth > 650 ? '550px' : '100%' }" :v-if="groupInfo" :objectData="groupsQueue[currentGroupIndex]" :isRotation="true" />
+            <span>Необходимо просмотреть и поставить лайк на последний пост в канале</span>
+            <span class="error" v-if="noSkips"><img src="@/assets/images/cross2.png"> Не осталось пропусков!</span>
+            <span class="error" v-if="noSubscribe"><img src="@/assets/images/cross2.png">Вы не поставили лайк на последний пост в канале, нажмите «Пропустить» или поставьте лайк</span>
             <span class="error" v-if="tooFast"><img src="@/assets/images/cross2.png">Слишком быстро, нажмите кнопку ещё раз и повторите действие.</span>
             <div class="groups_block_btns">
-                <AppGoodButton :text="text3" class="btn" @click="subscribeGroup" />
-                <AppGoodButton :text="text5" class="btn" @click="checkSubscription(groupsQueue[currentGroupIndex].post_link, groupsQueue[currentGroupIndex].group_id), userData.vk_id" />
-                <AppBadButton :text="`${text4} (${skipCounts})`" class="btn" @click="skipGroup" />
+                <AppGoodButton class="btn" :text="'ПОСМОТРЕТЬ ПОСТ'" @click="subscribeGroup" />
+                <!-- <AppGoodButton class="btn" :text="text5" @click="checkSubscription" /> -->
+                <AppBadButton class="btn" :text="`${text4} (${skipCounts})`" @click="skipGroup" />
                 <AppBadButton class="btn" :text="text6" @click="openModal" />
             </div>
         </div>
     </section>
-    <section class="rotation_end" v-if="isRotationEnd && !isPlans">
-        <span class="counter">Просмотры {{ addGroups }} из {{ totalGroups }}</span>
+    <section class="rotation_end" v-if="isRotationEnd && !isPlans && !isTarif">
+        <span class="counter">Подписки {{ addGroups }} из {{ totalGroups }}</span>
         <strong><span>Вы успешно прошли Ротацию постов!</span></strong>
-        <span>Ваша группа добавлена в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше подписок и просмотров без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
+        <span>Ваш пост добавлен в список Ротации. Вы можете проходить ротацию сколько угодно раз, ограничений с нашей стороны нет. Активируйте премиальный тариф, чтобы получать еще больше просмотров и подписок без прохождения Ротаций. Узнайте, как получить максимально выгодные условия прямо сейчас:</span>
         <AppGoodButton :text="text2" @click="openPlans"  />
     </section>
 </template>
@@ -54,20 +56,29 @@
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppGroupOrUser from "@/components/AppGroupOrUser.vue";
     import AppRotationPlans from "@/components/AppRotationPlans.vue";
-    import { addInRotation, checkLike, getRotationPosts } from "@/services/groups";
     import AppModalMessage from "@/components/AppModalMessage.vue";
     import AppModal from "@/components/AppModal.vue";
+    // import AppVideoModal from "@/components/AppVideoModal.vue";
+
+    import { getRotationTgPosts, checkPostViewed } from '@/services/tg';
+    // import { addInRotation} from "@/services/groups";    
+    // import { addInRotation, checkGroupSub} from "@/services/groups";    
 
     export default {
-        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppModalMessage, AppModal },
-        props: { userData: Object },
+        components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppModal, AppModalMessage  },
+        // components: { AppGoodButton, AppBadButton, AppGroupOrUser, AppRotationPlans, AppVideoModal },
+        props: {
+            isTarif: Boolean,
+            userData: Object,
+            windowWidth: Number
+        },
         data() {
             return {
                 text1: "НАЧАТЬ РОТАЦИЮ",
                 text2: "ВЫБРАТЬ ТАРИФ",
-                text3: "ПОСМОТРЕТЬ ПОСТ",
+                text3: "ПОДПИСАТЬСЯ",
                 text4: "ПРОПУСТИТЬ",
-                text5: "ПРОВЕРИТЬ ЛАЙК",
+                text5: "ПРОВЕРИТЬ ПОДПИСКУ",
                 text6: "ПОЖАЛОВАТЬСЯ",
                 isRotation: false,
                 isRotationPreview: true,
@@ -101,9 +112,9 @@
         },
         async created() {
             this.tariff = this.userData.packages[this.userData.packages.length - 1].package_name;
+
             if (this.isTarif) {
                 this.openPlans();
-                this.$emit("update:isTarif", false);
             }
             switch (this.tariff) {
                 case "Free": 
@@ -112,7 +123,11 @@
                     break;
                 case "Start":
                     this.totalGroups = 15;
-                    this.skipCounts = 7;
+                    this.skipCounts = 10;
+                    break;
+                case "Standart":
+                    this.totalGroups = 15;
+                    this.skipCounts = 10;
                     break;
                 default:
                     this.totalGroups = 10;
@@ -120,24 +135,16 @@
                     break;
             }
 
-            const groups = await getRotationPosts(this.userData.vk_id, this.tariff);
+            const groups = await getRotationTgPosts(this.tariff, localStorage.getItem('token'));
+            // if (!groups) location.reload();
             console.log(groups);
 
             this.groupInfo = groups;
-            if (localStorage.getItem("addPosts")) this.addGroups = localStorage.getItem("addPosts");
-
-
-            // this.groupInfo.first.forEach(item => {
-            //     item["package_name"] = "Leader";
-            // });
-            // this.groupInfo.second.forEach(item => {
-            //     item["package_name"] = "VIP";
-            // });
-            // this.groupInfo.other.forEach(item => {
-            //     item["package_name"] = "Free";
-            // });
 
             this.updateGroupQueue();
+            
+            if ( /^\d+$/.test(localStorage.getItem("addGroups")) && +localStorage.getItem("addGroups") >= 0 ) this.addGroups = localStorage.getItem("addGroups");
+            if (this.addGroups >= this.totalGroups) this.endRotation();
 
             window.addEventListener("blur", () => {
                 this.wasBlurred = true;
@@ -145,6 +152,7 @@
             });
 
             window.addEventListener("focus", () => {
+                console.log('focus', this.wasBlurred);
                 if (this.wasBlurred) {
                     const elapsed = Date.now() - this.blurTime; // Сколько времени вкладка была неактивной
                     if (elapsed > 500) {
@@ -173,45 +181,45 @@
                 this.isRotation = true;
             },
             async endRotation() {
-                const response = await addInRotation(this.userData.vk_id, "post");
-                console.log(response.status);
+                await checkPostViewed(localStorage.getItem('token'));
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
-                localStorage.setItem("addPosts", 0);
+                localStorage.setItem("addGroups", 0);
             },
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
-                    console.log(this.groupsQueue[this.currentGroupIndex]);
+                    const groupLink = this.groupsQueue[this.currentGroupIndex].story_link;
                     this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
-                    window.open(post_link, "_blank", "width=800, height=600");
-
+                    window.open(groupLink, "_blank", "width=800, height=600");
                 }
             },
-            async checkSubscription(post_link, group_id) {
+            async checkSubscription() {
                 if (!this.waitingForCheck) return;
-                this.waitingForCheck = false;
-                const response = await checkLike(post_link, group_id, this.userData.vk_id);
-                if (!response) location.reload();
+                const response = {
+                    subscribed: true
+                }
+                // if (!response) location.reload();
                 console.log(response);
 
-                if (response.status) {
+                if (response.subscribed) {
+                    this.waitingForCheck = false;
                     this.addGroups++;
-                    localStorage.setItem("addPosts", this.addGroups);
+                    localStorage.setItem("addGroups", this.addGroups);
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;
                     this.tooFast = false;
 
                     if (this.addGroups === this.totalGroups) {
+                        // this.watchVideo();
                         this.endRotation();
                     }
                     if ((this.subscribedCount >= 5 && this.groupPriorities[this.currentGroupIndex] == "other") ||
                         (this.subscribedCount >= 10 && this.groupPriorities[this.currentGroupIndex] != "other") || 
-                        this.groupsQueue.length === 0)  {
+                        this.groupsQueue.length === 0) {
                             this.nextPriorityGroup();
                     }
                 } else {
@@ -246,21 +254,18 @@
             },
             handleVisibilityChange() {
                 if (!document.hidden && this.waitingForCheck) {
-                    const group_id = this.groupsQueue[this.currentGroupIndex].group_id;
-                    const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
-
-                    this.checkSubscription(post_link, group_id, this.userData.vk_id);
+                    this.checkSubscription();
                 }
             },
             handleFocus() {
+                console.log('nadleFocus');
                 if (this.waitingForCheck) {
                     const elapsed = Date.now() - this.blurTime;
                     if (elapsed > 1000) { // Например, если прошло более 5 секунд
                         this.tooFast = false;
-                        const group_id = this.groupsQueue[this.currentGroupIndex].group_id;
-                        const post_link = this.groupsQueue[this.currentGroupIndex].post_link;
-
-                        this.checkSubscription(post_link, group_id, this.userData.vk_id);
+                        this.noSubscribe = false;
+                        console.log('nandler');
+                        this.checkSubscription();
                     } else {
                         console.log("Пользователь вернулся слишком быстро, возможно, не подписался.");
                         this.tooFast = true;
@@ -268,26 +273,34 @@
                 }
             },
             openPlans() {
-                this.isPlans = true;
+                // this.isPlans = true;
+                // this.$emit("update:isTarif", true);
+                this.$emit('openPlans');
             },
-            watchVideo() {
-                this.isVideoShown = true;
-            },
-            closeVideo() {
-                this.isVideoShown = false;
-                if (this.isWatched) {
-                    console.log("посмотрели видео");
-                    this.notWatched = false;
-                    this.endRotation();
-                } else {
-                    console.log("не посмотрели видео");
-                    this.notWatched = true;
-                }
-            },
+            // watchVideo() {
+            //     this.isVideoShown = true;
+            // },
+            // closeVideo() {
+            //     this.isVideoShown = false;
+            //     if (this.isWatched) {
+            //         console.log("посмотрели видео");
+            //         this.notWatched = false;
+            //         this.endRotation();
+            //     } else {
+            //         console.log("не посмотрели видео");
+            //         this.notWatched = true;
+            //     }
+            // },
         },
         watch: {
             isTarif(newValue) {
-                if (newValue) this.openPlans();
+                if (newValue) {
+                    console.log('Я СРАБОТАЛ!!!');
+                    this.openPlans();
+                    // this.$emit("update:isTarif", false);
+                } else {
+                    this.isPlans = newValue;
+                }
             }
         }
     };
@@ -345,16 +358,13 @@
         display: flex;
         flex-direction: column;
         row-gap: 50px;
-        @media (max-width: 650px) {
-            row-gap: 30px;
-        }
     }
     .groups_block_btns {
-        width: fit-content;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
         column-gap: 30px;
-        row-gap: 30px;
+        row-gap: 10px;
         @media (max-width: 650px) {
             flex-direction: column;
             align-items: center;
@@ -379,13 +389,10 @@
     }
     .row {
         display: flex;
-        align-items: center;
         column-gap: 20px;
-    }
-    .row img {
-        width: 30px;
-        height: 30px;
-        object-fit: cover;
-        object-position: center;
+        @media (max-width: 650px) {
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
 </style>
