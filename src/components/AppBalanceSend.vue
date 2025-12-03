@@ -37,10 +37,10 @@
         <span>Подтвердите перевод. Вы хотите перевести {{ usdt }} USDT пользователю</span>
         <div class="user_tosend">
             <div class="user">
-                <img :src="userToSend.avatar_url" @click="redirect(userToSend.vk_id)">
+                <img :src="userToSend.avatar" @click="redirect(userToSend.vk_id)">
                 <div class="text_wrapper">
                     <h3>{{ `${userToSend.name}` }}</h3>
-                    <span>ID: {{ userToSend.vk_id }}</span>
+                    <span>ID: {{ userToSend.vk_id || userToSend.tg_id }}</span>
                 </div>
             </div>
             <div class="btns">
@@ -55,7 +55,7 @@
     import AppGoodButton from "@/components/AppGoodButton.vue";
     import AppBadButton from "@/components/AppBadButton.vue";
     import AppModal from "@/components/AppModal.vue";
-    import { getUserInfoById } from "@/services/user";
+    import { getUserInfoById, getBaseIdByTgOrVk } from "@/services/tg";
     import { sendTo } from "@/services/cash";
     import { refreshToken } from "@/services/auth";
 
@@ -85,7 +85,8 @@
                 if (this.disabled) return;
                 if (this.userId != "" && Number(this.userData.balance) >= Number(this.usdt)) {
                     this.disabled = true;
-                    const response = await getUserInfoById(this.userId, localStorage.getItem("token"));
+                    const id = await getBaseIdByTgOrVk(Number(this.userId), localStorage.getItem('token'));
+                    const response = await getUserInfoById(id, localStorage.getItem("token"));
                     if (!response) {
                         const isAuthorized = await refreshToken(localStorage.getItem("token_refresh"));
                         if (isAuthorized) {

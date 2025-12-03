@@ -386,7 +386,7 @@
             this.pricesData = await getConfig("add_price", localStorage.getItem("token"));
             console.log(this.pricesData);
 
-            const adds = await getUserAdds(this.userData.vk_id);
+            const adds = await getUserAdds(this.userData.id);
             this.userAdds = adds.ads;
             this.userAdds = this.userAdds.reverse();
             console.log("РЕКЛАМЫ ПОЛЬЗОВАТЕЛЯ: ", this.userAdds);
@@ -554,7 +554,7 @@
                     console.log(days_count);
                     
                     formData.append("days_count", JSON.stringify(days_count));
-                    formData.append("vk_id", this.userData.vk_id);
+                    formData.append("user_id", this.userData.id);
                     formData.append("ads_text", "text");
                     formData.append("ads_url", this.link);
                     if (this.position != "") formData.append("position", this.position)

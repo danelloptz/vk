@@ -145,14 +145,14 @@
             <div class="row" v-if="windowWidth > 1000" style="margin-top: 50px; margin-bottom: 44px;">
                 <AppGoodButton :text="text1" @click="saveSettings"/>
                 <AppGoodButton :text="text2" @click="editSettings" />
-                <AppGoodButton :text="text3" @click="generateThemes" />
+                <AppGoodButton class="long_btn" :text="'СГЕНЕРИРОВАТЬ КОНТЕНТ ПЛАН'" @click="generateThemes" />
             </div>  
             <div class="mob_btns" v-if="windowWidth <= 1000">   
                 <div class="mob_btns_row">
                     <AppGoodButton class="mob_btn" :text="text1" @click="saveSettings"/>
                     <AppGoodButton class="mob_btn" :text="text2" @click="editSettings" />
                 </div>
-                <AppGoodButton class="mob_btn" :text="text3" @click="generateThemes" />
+                <AppGoodButton class="mob_btn" :text="'СГЕНЕРИРОВАТЬ КОНТЕНТ ПЛАН'" @click="generateThemes" />
             </div>
             <div class="generations_wrapper">
                 <span class="generations_item" @click="openGeneratorModal(false)">
@@ -1368,6 +1368,9 @@
 </script>
 
 <style scoped>
+    .long_btn {
+        width: 333px;
+    }
     .modal_wrapper {
         width: 100vw;
         height: 100%;

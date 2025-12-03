@@ -417,7 +417,8 @@
         upgradeTelegrmChannel,
         updateVipPlatform,
         getUserPlatform,
-        createTgPost
+        createTgPost,
+        getCurPost
     } from '@/services/tg';
     import { getConfig } from '@/services/config';
 
@@ -489,7 +490,7 @@ export default {
             active_bussines_style: null,
             tg_business: false,
             vk_business: false,
-            userTgPost: null
+            userTgPost: null,
         };
     },
     computed: {
@@ -553,6 +554,9 @@ export default {
 
         this.tgGroupStats = await getTgGroupStats(localStorage.getItem('token'));
         this.active_bussines_style = await getUserPlatform(localStorage.getItem('token'));
+
+        const post = await getCurPost(localStorage.getItem('token'));
+        this.userTgPost = post.post_link;
 
         try {
             const response = await fetch('https://namaztimes.kz/ru/api/country');

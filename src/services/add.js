@@ -12,10 +12,25 @@ export async function getAdds() {
 
 export async function setAdds(vk_link, vk_id) {
     try {
-        const response = await axios.post('https://web.intelektaz.com/api/v2/groups/set_group_in_ads', {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/groups/set_group_in_ads', {
             "payload": {
                 "vk_link": vk_link,
                 "vk_id": vk_id
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при добавлении в рекламную ленту", error);
+        return false; 
+    }
+}
+
+export async function setTgAdds(user_id, group_tg_id) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/groups/set_tg_group_in_ads', {
+            "payload": {
+                "user_id": user_id,
+                "group_tg_id": group_tg_id
             }
         });
         return response.data;
@@ -41,7 +56,7 @@ export async function getOtherAdds(vk_id) {
 
 export async function sendOtherAdd(payload) {
     try {
-        const response = await axios.post("https://web.intelektaz.com/api/v2/others/add_ads", 
+        const response = await axios.post("https://web.intelektaz.com/api/beta/v2/others/add_ads", 
             payload,
             {
                 headers: { "Content-Type": "multipart/form-data" } 
@@ -61,7 +76,7 @@ export async function editOtherAdd(payload, ad_id, timestamp) {
         timestamp = Math.floor(timestamp / 1000);
         console.log(timestamp);
         payload.append("date_view_end", String(timestamp));
-        const response = await axios.patch("https://web.intelektaz.com/api/v2/others/add_ads", 
+        const response = await axios.patch("https://web.intelektaz.com/api/beta/v2/others/add_ads", 
             payload,
             {
                 headers: { "Content-Type": "multipart/form-data" } 
@@ -74,13 +89,13 @@ export async function editOtherAdd(payload, ad_id, timestamp) {
     }
 }
 
-export async function getUserAdds(vk_id) {
-    console.log("vk_id: ",vk_id);
+export async function getUserAdds(user) {
     try {
-        const response = await axios.post("https://web.intelektaz.com/api/v2/users/get_ads", 
-            {
-                "vk_id": vk_id
+        const response = await axios.post("https://web.intelektaz.com/api/beta/v2/users/get_ads", {}, {
+            params: {
+                user: user
             }
+        }
         );
         return response.data;
     } catch (error) {

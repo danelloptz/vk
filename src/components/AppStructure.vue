@@ -186,6 +186,7 @@ import AppStructureBinar from "@/components/AppStructureBinar.vue";
 import AppStructureLinear from "@/components/AppStructureLinear.vue";
 import { setLeg, getStructureInfo, findParents } from '@/services/user';
 import AppModal from '@/components/AppModal.vue';
+import { getBaseIdByTgOrVk } from '@/services/tg';
 import AppDropdown from "@/components/AppDropdown.vue";
 
 export default {
@@ -379,7 +380,8 @@ export default {
             this.notFound = false;
             if (this.activeIndex == 1) {
                 try {
-                    this.binarTree = await getTree(+this.search, this.userData.id);
+                    const id = await getBaseIdByTgOrVk(+this.search, localStorage.getItem('token'));
+                    this.binarTree = await getTree(id, this.userData.id);
                     if (this.binarStack.indexOf(this.binarTree.vk_id) == -1) this.binarStack.push(this.binarTree);
                 } catch(err) {
                     console.log("notFound: ", this.notFound);

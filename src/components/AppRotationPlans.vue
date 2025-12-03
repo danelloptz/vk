@@ -88,8 +88,8 @@
                         <td><div class="minus"></div></td>
                         <td><div class="minus"></div></td>
                         <td><div class="minus"></div></td>
-                        <td><img src="@/assets/images/ok.png"></td>
-                        <td style="border-right: none;"><img src="@/assets/images/ok.png"></td>
+                        <td>1</td>
+                        <td style="border-right: none;">5</td>
                     </tr>
                     <tr>
                         <td class="title_td">SEO оптимизация и поисковый трафик</td>

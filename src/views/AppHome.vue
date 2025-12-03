@@ -219,6 +219,7 @@
             
 
             localStorage.setItem("points", userInfo.gift_score);
+            localStorage.setItem('isParams', 'false');
             console.log(userInfo);
             if (userInfo && !userInfo.activation) {
                 this.$router.push('/signup_1');

@@ -60,7 +60,7 @@
     import AppModal from "@/components/AppModal.vue";
     // import AppVideoModal from "@/components/AppVideoModal.vue";
 
-    import { getStoriesRotationChannels, turnRotationStories } from '@/services/tg';
+    import { getStoriesRotationChannels, turnRotationStories, checkStoryViewed } from '@/services/tg';
     // import { addInRotation} from "@/services/groups";    
     // import { addInRotation, checkGroupSub} from "@/services/groups";    
 
@@ -143,7 +143,7 @@
 
             this.updateGroupQueue();
             
-            if ( /^\d+$/.test(localStorage.getItem("addGroups")) && +localStorage.getItem("addGroups") >= 0 ) this.addGroups = localStorage.getItem("addGroups");
+            if ( /^\d+$/.test(localStorage.getItem("addStories")) && +localStorage.getItem("addStories") >= 0 ) this.addGroups = localStorage.getItem("addStories");
             if (this.addGroups >= this.totalGroups) this.endRotation();
 
             window.addEventListener("blur", () => {
@@ -188,7 +188,7 @@
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
-                localStorage.setItem("addGroups", 0);
+                localStorage.setItem("addStories", 0);
             },
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
@@ -201,16 +201,13 @@
             },
             async checkSubscription() {
                 if (!this.waitingForCheck) return;
-                const response = {
-                    subscribed: true
-                }
-                // if (!response) location.reload();
+                const response = await checkStoryViewed(this.groupsQueue[this.currentGroupIndex].story_id, localStorage.getItem('token'));
                 console.log(response);
 
-                if (response.subscribed) {
+                if (response.viewed) {
                     this.waitingForCheck = false;
                     this.addGroups++;
-                    localStorage.setItem("addGroups", this.addGroups);
+                    localStorage.setItem("addStories", this.addGroups);
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;

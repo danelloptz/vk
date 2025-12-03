@@ -80,11 +80,13 @@ export async function getUserInfoById(user_id, token) {
     }
 }
 
-export async function getReferer(vk_id) {
+export async function getReferer(user_id) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/get_referer`, { 
-            "vk_id": vk_id
-         });
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/get_referer`, {}, {
+            params: {
+                user_id: user_id
+            }
+        });
         return response.data;
     } catch (error) {
         console.error("Ошибка при получении информации о реферере", error);
@@ -156,11 +158,15 @@ export async function getStructureInfo(user_id) {
     }
 }
 
-export async function addGiftScore(vk_id) {
+export async function addGiftScore(user_id) {
     try {
-        const response = await axios.post(`https://web.intelektaz.com/api/v2/users/add_gift_score`, { 
-            "vk_id": vk_id
-         });
+        const response = await axios.post(`https://web.intelektaz.com/api/beta/v2/users/add_gift_score`, {},
+            {
+                params: {
+                    user_id: user_id
+                }
+            }
+        );
         return response.data;
     } catch (error) {
         console.error("Ошибка при сохранении балла", error);

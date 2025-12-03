@@ -31,8 +31,8 @@
         <AppRotationGroupTg v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 0" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
         <AppRotationStories v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 1" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
         <AppRotationTgPosts v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 2" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
-        <span class="err" v-if="noVk && mainActiveIndex == 1">У вас не привязан ВК. Чтобы привязать его, нажмите "Войти" при входе.</span>
-        <span class="err" v-if="noTg && mainActiveIndex == 0">У вас не привязан Telegram. Чтобы привязать его, зайдите в настройки и нажмите кнопку "Активировать".</span>
+        <span class="err" v-if="noVk && mainActiveIndex == 1">Платформа не подключена. Перейдите в настройки, чтобы активировать.</span>
+        <span class="err" v-if="noTg && mainActiveIndex == 0">Платформа не подключена. Перейдите в настройки, чтобы активировать.</span>
     </section>
 </template>
 

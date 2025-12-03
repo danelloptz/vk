@@ -422,13 +422,16 @@ export async function turnRotationStories(token) {
     }
 }
 
-export async function checkStoryViewed(token) {
+export async function checkStoryViewed(story_id, token) {
     try {
         const response = await axios.post('https://web.intelektaz.com/api/tg/rotation/check_story_viewed', {},
             {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
+                },
+                params: {
+                    story_id: story_id
                 }
             }
         );
@@ -566,6 +569,80 @@ export async function addTgPostRotation(token) {
         return response.data;
     } catch (error) {
         console.error("Ошибка при добавлении поста в ротацию", error);
+        return false; 
+    }
+}
+
+export async function getTgGroupInfo(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/group/get_group_photo_and_name', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о привязанном тг канале.", error);
+        return false; 
+    }
+}
+
+export async function getUserInfoById(user_id, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_user_info', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    user_id: user_id
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о пользователе.", error);
+        return false; 
+    }
+}
+
+export async function getBaseIdByTgOrVk(external_id, token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_internal_id_by_external', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    external_id: external_id
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о пользователе.", error);
+        return false; 
+    }
+}
+
+export async function getCurPost(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_cur_post', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении информации о пользователе.", error);
         return false; 
     }
 }

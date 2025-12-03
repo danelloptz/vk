@@ -52,7 +52,7 @@
             }
         },
         async created() {
-            const refer = await getReferer(this.userData.vk_id);
+            const refer = await getReferer(this.userData.id);
             this.refererData = refer;
             const resp = await getConfig("help", localStorage.getItem("token"));
             this.textData = resp.data;

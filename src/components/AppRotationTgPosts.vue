@@ -60,7 +60,7 @@
     import AppModal from "@/components/AppModal.vue";
     // import AppVideoModal from "@/components/AppVideoModal.vue";
 
-    import { getRotationTgPosts, checkPostViewed } from '@/services/tg';
+    import { getRotationTgPosts, checkPostViewed, addTgPostRotation } from '@/services/tg';
     // import { addInRotation} from "@/services/groups";    
     // import { addInRotation, checkGroupSub} from "@/services/groups";    
 
@@ -143,7 +143,7 @@
 
             this.updateGroupQueue();
             
-            if ( /^\d+$/.test(localStorage.getItem("addGroups")) && +localStorage.getItem("addGroups") >= 0 ) this.addGroups = localStorage.getItem("addGroups");
+            if ( /^\d+$/.test(localStorage.getItem("addPostsTg")) && +localStorage.getItem("addPostsTg") >= 0 ) this.addGroups = localStorage.getItem("addPostsTg");
             if (this.addGroups >= this.totalGroups) this.endRotation();
 
             window.addEventListener("blur", () => {
@@ -181,16 +181,17 @@
                 this.isRotation = true;
             },
             async endRotation() {
-                await checkPostViewed(localStorage.getItem('token'));
+                await addTgPostRotation(localStorage.getItem('token'));
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
-                localStorage.setItem("addGroups", 0);
+                localStorage.setItem("addPostsTg", 0);
             },
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
                 if (this.groupInfo) {
-                    const groupLink = this.groupsQueue[this.currentGroupIndex].story_link;
+                    const groupLink = this.groupsQueue[this.currentGroupIndex].post_link;
+                    
                     this.blurTime = Date.now();
                     this.waitingForCheck = true; // Устанавливаем флаг ожидания проверки
                     window.open(groupLink, "_blank", "width=800, height=600");
@@ -198,16 +199,14 @@
             },
             async checkSubscription() {
                 if (!this.waitingForCheck) return;
-                const response = {
-                    subscribed: true
-                }
+                const response = await checkPostViewed(this.groupsQueue[this.currentGroupIndex].post_id, localStorage.getItem('token'));
                 // if (!response) location.reload();
                 console.log(response);
 
-                if (response.subscribed) {
+                if (response.viewed) {
                     this.waitingForCheck = false;
                     this.addGroups++;
-                    localStorage.setItem("addGroups", this.addGroups);
+                    localStorage.setItem("addPostsTg", this.addGroups);
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;

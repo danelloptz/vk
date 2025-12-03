@@ -1,15 +1,24 @@
 <template>
     <section class="analytics" v-if="!nextStep">
-        <h2>ИИ анализ ВК: динамика подписчиков, лучшие посты, вовлеченность, лайки, комментарии, репосты.</h2>
-        <span>К вашему аккаунту привязана ВК группа: </span>
+        <h2>ИИ анализ: динамика подписчиков, лучшие посты, вовлеченность, лайки, комментарии, репосты.</h2>
+        <span>К вашему аккаунту привязаны: </span>
 
-        <div class="group_card" v-if="windowWidth > 650">
+        <div class="group_card" v-if="windowWidth > 650 && userInfo.group?.group_name">
             <div class="group_card_item">
-                <img :src="userInfo.group.group_photo" >
-                <h2>{{ userInfo.group.group_name }}</h2>
+                <img :src="userInfo.group?.group_photo" >
+                <h2>{{ userInfo.group?.group_name }}</h2>
             </div>
             <div class="group_card_item">
                 <span>{{ userInfo.group?.count_subs_vk }} подписчиков</span>
+            </div>
+        </div>
+        <div class="group_card" v-if="windowWidth > 650 && tg_info">
+            <div class="group_card_item">
+                <img :src="tg_info.group_photo" >
+                <h2>{{ tg_info.group_name }}</h2>
+            </div>
+            <div class="group_card_item">
+                <span>{{ tg_stats?.real }} подписчиков</span>
             </div>
         </div>
 
@@ -21,7 +30,11 @@
             </div>
         </div>
 
-        <AppGoodButton :text="text1" class="btn" @click="getStats" />
+        <div class="btns_row">
+            <AppGoodButton :text="'АНАЛИЗ ТГ'" v-if="tg_info" class="btn" @click="getStats" />
+            <AppGoodButton :text="'АНАЛИЗ ВК'" v-if="userInfo?.group?.group_name" class="btn" @click="getStats" />
+        </div>
+       
     </section>
     <section class="analytics" v-if="nextStep">
         <div class="cards">
@@ -41,6 +54,7 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import { getUserInfo } from '@/services/user';
     import { getAnalytics } from '@/services/ai';
+    import { getTgGroupInfo, getTgGroupStats } from '@/services/tg';
 
     export default {
         components: { AppGoodButton },
@@ -69,17 +83,26 @@
                     { label: "Лайки", stat: "." },
                 ],
                 userInfo: [],
-                gpt_comment: ""
+                gpt_comment: "",
+                tg_info: null,
+                tg_stats: null
             }
         },
         async created() {
             this.userInfo = await getUserInfo(localStorage.getItem("token"));
-            const resp = await getAnalytics(this.userInfo.vk_id);
-            this.stats[0].stat = resp.data.reach_total;
-            this.stats[1].stat = resp.data.views;
-            this.stats[2].stat = resp.data.subscribed;
-            this.stats[3].stat = resp.data.likes;
-            this.gpt_comment = resp.data.gpt_comment;
+            if (this.userInfo.tg_id) {
+                this.tg_info = await getTgGroupInfo(localStorage.getItem('token'));
+                this.tg_stats = await getTgGroupStats(localStorage.getItem('token'));
+            }
+            
+            if (this.userInfo.vk_id) {
+                const resp = await getAnalytics(this.userInfo.vk_id);
+                this.stats[0].stat = resp.data.reach_total;
+                this.stats[1].stat = resp.data.views;
+                this.stats[2].stat = resp.data.subscribed;
+                this.stats[3].stat = resp.data.likes;
+                this.gpt_comment = resp.data.gpt_comment;
+            }
         },
         methods: {
             getStats() {
@@ -91,6 +114,11 @@
 </script>
 
 <style scoped>
+    .btns_row {
+        display: flex;
+        column-gap: 40px;
+        align-items: center;
+    }
     .analytics {
         width: 100%;
         display: flex;

@@ -142,7 +142,7 @@
 
             this.updateGroupQueue();
             
-            if ( /^\d+$/.test(localStorage.getItem("addGroups")) && +localStorage.getItem("addGroups") >= 0 ) this.addGroups = localStorage.getItem("addGroups");
+            if ( /^\d+$/.test(localStorage.getItem("addGroupsTg")) && +localStorage.getItem("addGroupsTg") >= 0 ) this.addGroups = localStorage.getItem("addGroupsTg");
             if (this.addGroups >= this.totalGroups) this.endRotation();
 
             window.addEventListener("blur", () => {
@@ -184,7 +184,7 @@
                 this.isRotationPreview = false;
                 this.isRotationEnd = true;
                 this.isRotation = false;
-                localStorage.setItem("addGroups", 0);
+                localStorage.setItem("addGroupsTg", 0);
             },
             async subscribeGroup() {
                 if (!this.groupsQueue.length) return;
@@ -204,7 +204,7 @@
                 if (response.subscribed) {
                     this.waitingForCheck = false;
                     this.addGroups++;
-                    localStorage.setItem("addGroups", this.addGroups);
+                    localStorage.setItem("addGroupsTg", this.addGroups);
                     this.groupsQueue.splice(this.currentGroupIndex, 1);
                     this.subscribedCount++;
                     this.noSubscribe = false;

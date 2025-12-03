@@ -3,8 +3,8 @@
         <section class="modal">
             <div class="modal-background"></div>
             <img src="@/assets/images/close.png" class="close" @click="close">
-            <h1>ПОЛУЧИ VIP ТАРИФ НА МЕСЯЦ В ПОДАРОК!</h1>
-            <span>Розыгрыш проходит 1го числа каждого месяца. После розыгрыша все балы обнуляются. Условия участия в розыгрыше VIP тарифа:</span>
+            <h1>ПОЛУЧИТЕ БАННЕРНУЮ РЕКЛАМУ НА НЕДЕЛЮ</h1>
+            <span>Розыгрыш проходит 1го числа каждого месяца. После розыгрыша все баллы обнуляются. Условия участия в розыгрыше:</span>
             <span>1. Собери 100 балов. 1 клик = 1 балл. Доступно 1 раз в час. <br>
                     2. Должно быть включено автопродвижение. Если оно выключено, то при нажатии на «Получить 1 балл», автопродвижение включается автоматически.</span>
             <AppGoodButton :text="text1" class="btn" @click="getPoint" />
@@ -51,7 +51,7 @@
                 const dif = new Date().getTime() - time;
                 this.isModal = true;
                 if (dif > 60 * 60 * 1000 && points < 100) {
-                    await addGiftScore(this.vk_id);
+                    await addGiftScore(this.id);
                     if (!this.autoposting) {
                         const set_autoposting = await setAutoposting(this.id, true);
                         console.log("set_autoposting: ", set_autoposting);
@@ -106,7 +106,7 @@
 
     .modal {
         width: 1160px;
-        height: 450px;
+        /* height: 450px; */
         border-radius: 10px;
         position: relative;
         display: flex;
