@@ -38,7 +38,6 @@
 
             <span v-if="windowWidth > 650 && testers.includes(userData?.id)">Telegram:</span>
             <span v-if="windowWidth > 650 && testers.includes(userData?.id)">
-                Telegram:
                 {{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }}
                 <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
                 <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
@@ -61,13 +60,18 @@
             <!-- <span v-if="windowWidth > 650 && emailData">Почта: {{ emailData }}</span> -->
             <div class="mobile_links_row" v-if="windowWidth <= 650">
                 <span>Вконтакте: </span>
-                <span>https://vk.com/id{{ userData.vk_id }}</span>
+                <span>
+                    https://vk.com/id{{ userData.vk_id }}
+                    <img v-if="userData?.vk_id" src="@/assets/images/ok_green2.png" class="ok_green"/>
+                    <AppGoodButton v-else class="active_tg_btn" :text="'АКТИВИРОВАТЬ'" :disabled="isDisabled" @click="tap"/>
+                </span>
             </div>
             <div class="mobile_links_row" v-if="windowWidth <= 650 && testers.includes(userData?.id)">
                 <span>Telegram: </span>
-                <span>{{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }} </span>
-                <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
-                <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
+                <span>{{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }} 
+                    <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
+                    <img v-else src="@/assets/images/ok_green2.png" class="ok_green" /> 
+                </span>
             </div>
             <div class="mobile_links_row" v-if="whtData?.link && windowWidth <= 650">
                 <span>WhatsApp: </span>
@@ -214,16 +218,17 @@
                 v-model="userTgStory" 
                 placeholder="Telegram история" >
             <span class="row_text" @click="addTelegramStory">ДОБАВИТЬ</span>
-            <h3 v-if="userData">Просмотры: {{ tgStoryCount }}</h3>
+            <h3 v-if="userData">Просмотры: {{ tgStoryCount || "0" }}</h3>
         </div>
 
-        <h3 class="tg_story_title">Telegram пост для продвижения:</h3>
+        <h3 class="tg_story_title">Telegram пост для продвижения.</h3>
+        <span style="margin-top: -20px;">Укажите ссылку на конкретный пост или ссылку на канал, чтобы работал последний пост:</span>
         <div class="row">
             <input  
                 v-model="userTgPost" 
                 placeholder="Telegram пост" >
             <span class="row_text" @click="addTelegramPost">ДОБАВИТЬ</span>
-            <!-- <h3 v-if="userData">Просмотры: {{ tgStoryCount }}</h3> -->
+            <h3 v-if="userData">Просмотры: {{ postWatchs || "0" }}</h3>
         </div>
 
         <h3 class="vk_group_title">ВК группа для продвижения:</h3>
@@ -418,7 +423,9 @@
         updateVipPlatform,
         getUserPlatform,
         createTgPost,
-        getCurPost
+        getCurPost,
+        getPostStat,
+        getTgGroupInfo
     } from '@/services/tg';
     import { getConfig } from '@/services/config';
 
@@ -491,6 +498,8 @@ export default {
             tg_business: false,
             vk_business: false,
             userTgPost: null,
+            postWatchs: null,
+            tg_info: null
         };
     },
     computed: {
@@ -507,8 +516,8 @@ export default {
             console.log(this.userData?.packages, this.userData?.packages == true);
             if (this.userData?.packages) {
                 return {
-                    "avatar": this.userData?.avatar_url,
-                    "name": this.userData?.name,
+                    "avatar": this.userData?.tg_id && this.tg_business ? this.tg_info.group_photo : this.userData?.avatar_url,
+                    "name": this.userData?.tg_id && this.tg_business ? this.tg_info.group_name : this.userData?.name,
                     "package_name": this.userData?.packages.at(-1)?.package_name,
                     "vip_offer_text": this.sentence,
                     "group_link": this.siteLink,
@@ -554,9 +563,22 @@ export default {
 
         this.tgGroupStats = await getTgGroupStats(localStorage.getItem('token'));
         this.active_bussines_style = await getUserPlatform(localStorage.getItem('token'));
+        if (this.active_bussines_style == 'tg') {
+            this.tg_business = true;
+            this.vk_business = false;
+        } else {
+            this.tg_business = false;
+            this.vk_business = true;
+        }
 
         const post = await getCurPost(localStorage.getItem('token'));
         this.userTgPost = post.post_link;
+
+        this.postWatchs = await getPostStat(localStorage.getItem('token'));
+
+        if (this.userData?.tg_id) {
+            this.tg_info = await getTgGroupInfo(localStorage.getItem('token'));
+        }
 
         try {
             const response = await fetch('https://namaztimes.kz/ru/api/country');
@@ -615,6 +637,7 @@ export default {
                     return;
                 }
 
+                
                 // Успех
                 this.isSaveModal = true;
                 this.title = 'УСПЕШНО!';
@@ -1012,6 +1035,13 @@ export default {
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
     }
 
+    .auto_btn {
+        @media (max-width: 650px) {
+            width: 181px;
+            letter-spacing: 0px;
+        }
+    }
+
     .checkbox-wrapper-18 .round {
         position: relative;
     }
@@ -1090,6 +1120,9 @@ export default {
         margin-left: 30px;
         width: 18px;
         height: 13px;
+        @media (max-width: 650px) {
+            margin-left: 10px;
+        }
     }
 
     .active_tg_btn {
@@ -1188,6 +1221,10 @@ export default {
         column-gap: 20px;
         /* flex-wrap: wrap; */
         row-gap: 10px;
+        @media (max-width: 1000px) {
+            align-items: center;
+            flex-wrap: wrap;
+        }
         @media (max-width: 650px) {
             row-gap: 20px;
         }
@@ -1387,7 +1424,7 @@ export default {
         }
     }
     span {
-        font-size: 18px;
+        font-size: 16px;
         font-family: 'OpenSans';
         font-weight: 400;
         line-height: 32.68px;

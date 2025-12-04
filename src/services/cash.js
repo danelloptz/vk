@@ -42,11 +42,12 @@ export async function getTransactions(offset, limit, token) {
     }
 }
 
-export async function sendTo(to_user, amount, token) {
+export async function sendTo(to_user, from_user, amount, token) {
     try {
         const response = await axios.get('https://web.intelektaz.com/api/beta/transactions/transfer', { 
             params: { 
                 to_user: to_user,
+                from_user: from_user,
                 amount: amount
             },
             headers: {

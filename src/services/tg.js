@@ -646,3 +646,21 @@ export async function getCurPost(token) {
         return false; 
     }
 }
+
+
+export async function getPostStat(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/rotation/get_post_statistics', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении статы о посте.", error);
+        return false; 
+    }
+}

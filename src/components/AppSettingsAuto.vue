@@ -42,8 +42,8 @@
                 </div>
             </div>
             <div class="row">
-                <AppGoodButton :text="'ВЫГРУЗИТЬ ТГ'" @click="hahahaha" />
-                <AppGoodButton :text="'ВЫГРУЗИТЬ ВК'" @click="dropPosts" />
+                <AppGoodButton class="drop_btn" :text="'ВЫГРУЗИТЬ ТГ'" @click="hahahaha" />
+                <AppGoodButton class="drop_btn" :text="'ВЫГРУЗИТЬ ВК'" @click="dropPosts" />
             </div>
             
             <div v-for="(post, index) in paginatedPosts" :key="index" class="row2">
@@ -241,6 +241,10 @@ export default {
 </script>
 
 <style scoped>
+    .drop_btn {
+        width: 230px;
+        height: 40px;
+    }
     .container {
         display: flex;
         flex-direction: column;
@@ -287,7 +291,6 @@ export default {
         align-items: center;
         @media (max-width: 650px) {
             flex-direction: column !important;
-            align-items: start !important;
             row-gap: 15px !important;
         }
     }

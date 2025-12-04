@@ -14,11 +14,11 @@
         :visibility1="isConfirmModal"
         @update:visibility1="isConfirmModal = $event"
     />
-    <section class="unworked" v-if="!testers.includes(userData?.vk_id)">
+    <!-- <section class="unworked" v-if="!testers.includes(userData?.vk_id)">
         <img src="@/assets/images/unworked.png">
         <h1>Раздел находится в разработке</h1>
-    </section>
-    <section class="menu" v-if="testers.includes(userData?.vk_id)">
+    </section> -->
+    <section class="menu">
         <div 
             class="switch" 
         >
@@ -91,7 +91,7 @@
 </template>
 
 <script>
-    import { getConfig } from '@/services/config';
+    // import { getConfig } from '@/services/config';
     import { 
         getManagers, 
         getAllDialogs,
@@ -145,7 +145,7 @@
             }
         },
         async created() {
-            this.testers = await getConfig('manager_testers', localStorage.getItem('token'));
+            // this.testers = await getConfig('manager_testers', localStorage.getItem('token'));
             this.isLeader = this.userData.packages.at(-1).package_name == 'Leader';
             await this.updateManagers();
             if (this.managers[this.activeIndex2]?.id)

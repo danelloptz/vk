@@ -113,7 +113,7 @@
     import { getUserInfo, getVipUser } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
-    import { getConfig } from '@/services/config';
+    // import { getConfig } from '@/services/config';
 
     export default {
         components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans, AppVipUser, AppNews },
@@ -182,18 +182,20 @@
             let userInfo;
             try {
                 userInfo = await getUserInfo(localStorage.getItem("token"));
-                const testers = await getConfig('tg_testers', localStorage.getItem('token'));
-                if (testers.indexOf(userInfo.id) == -1) {
-                    const addGroups = localStorage.getItem("addGroups");
-                    const watchedVideos = localStorage.getItem("watchedVideos");
-                    const addPosts = localStorage.getItem("addPosts");
-                    localStorage.clear();
-                    if (addGroups) localStorage.setItem("addGroups", addGroups);
-                    if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
-                    if (addPosts) localStorage.setItem("addPosts", addPosts);
-                    this.$router.push('/');
-                    return;
-                }
+
+                // const testers = await getConfig('tg_testers', localStorage.getItem('token'));
+                // if (testers.indexOf(userInfo.id) == -1) {
+                //     const addGroups = localStorage.getItem("addGroups");
+                //     const watchedVideos = localStorage.getItem("watchedVideos");
+                //     const addPosts = localStorage.getItem("addPosts");
+                //     localStorage.clear();
+                //     if (addGroups) localStorage.setItem("addGroups", addGroups);
+                //     if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                //     if (addPosts) localStorage.setItem("addPosts", addPosts);
+                //     this.$router.push('/');
+                //     return;
+                // }
+
                 if (!userInfo) {
                     const addGroups = localStorage.getItem("addGroups");
                     const watchedVideos = localStorage.getItem("watchedVideos");
@@ -232,18 +234,20 @@
                     localStorage.setItem("token", isAuthorized.access_token);
                     localStorage.setItem("token_refresh", isAuthorized.refresh_token);
                     userInfo = await getUserInfo(localStorage.getItem("token"));
-                    const testers = await getConfig('tg_testers', localStorage.getItem('token'));
-                    if (testers.indexOf(userInfo.id) == -1) {
-                        const addGroups = localStorage.getItem("addGroups");
-                        const watchedVideos = localStorage.getItem("watchedVideos");
-                        const addPosts = localStorage.getItem("addPosts");
-                        localStorage.clear();
-                        if (addGroups) localStorage.setItem("addGroups", addGroups);
-                        if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
-                        if (addPosts) localStorage.setItem("addPosts", addPosts);
-                        this.$router.push('/');
-                        return;
-                    }
+
+                    // const testers = await getConfig('tg_testers', localStorage.getItem('token'));
+                    // if (testers.indexOf(userInfo.id) == -1) {
+                    //     const addGroups = localStorage.getItem("addGroups");
+                    //     const watchedVideos = localStorage.getItem("watchedVideos");
+                    //     const addPosts = localStorage.getItem("addPosts");
+                    //     localStorage.clear();
+                    //     if (addGroups) localStorage.setItem("addGroups", addGroups);
+                    //     if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
+                    //     if (addPosts) localStorage.setItem("addPosts", addPosts);
+                    //     this.$router.push('/');
+                    //     return;
+                    // }
+
                     if (!userInfo) {
                         const addGroups = localStorage.getItem("addGroups");
                         const watchedVideos = localStorage.getItem("watchedVideos");

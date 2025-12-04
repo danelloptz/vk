@@ -12,7 +12,7 @@
             <div class="row">
                 <AppGoodButton class="btn" :text="'ПОДКЛЮЧИТЬ'" @click="turnOn" />
                 <AppGoodButton class="btn" :text="'РОТАЦИЯ'" @click="openRotation" />
-                <AppBadButton class="btn" :text="'НАЗАД'" @click="cancel" />
+                <AppBadButton class="btn back_btn" :text="'НАЗАД'" @click="cancel" />
             </div>
         </section>
     </div>
@@ -82,8 +82,18 @@ export default {
         font-family: 'OpenSans';
         font-weight: normal;
     }
+    .back_btn {
+        @media (max-width: 650px) {
+            width: 100% !important;
+        }
+    }
     h1, h2, span, img {
         z-index: 5;
+    }
+    h2 {
+        font-size: 24px;
+        color: white;
+        font-family: 'OpenSans';
     }
     .modal_wrapper {
         width: 100vw;
@@ -104,7 +114,7 @@ export default {
         position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        /* justify-content: center; */
         padding: 75px 54px 50px 54px;
         z-index: 2;
         overflow-y: auto;
@@ -115,6 +125,9 @@ export default {
         align-self: center;
         background: #1B1E3D;
         border-radius: 10px;
+        height: 80vh;
+        /* align-items: start; */
+        overflow-y: scroll;
         @media (max-width: 1400px) {
             width: 80vw;
         }
@@ -230,7 +243,7 @@ export default {
             column-gap: 10px;
             align-self: center;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-between;
             row-gap: 10px;
         }
     }

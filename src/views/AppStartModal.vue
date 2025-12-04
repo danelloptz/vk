@@ -1,14 +1,26 @@
 <template>
+    <AppMandatoryChannels 
+        v-if="isMandatory"
+        :visibility1="isMandatory"
+        :channels="channels"
+        @update:visibility1="isMandatory = $event"
+        @close="reload"
+    />
     <section class="modal">
         <img src="@/assets/images/close.png" class="close" @click=reboot>
         <div class="text_wrapper">
             <h1>АВТОРИЗАЦИЯ</h1>
-            <span>Чтобы авторизироваться воспользуйся VK ID</span>
+            <span class="text_wrapper_text">Чтобы авторизироваться воспользуйся VK ID</span>
         </div>
-        <hr>
+        <hr class="line">
         <div class="btn_wrapper">
-            <AppGoodButton class="btn" :text="text" :disabled="isDisabled" @click="tap"/>
-            <AppBadButton class="btn" :text="text2" />
+            <div 
+                style="z-index: 999;" 
+                ref="tgButton" 
+            ></div> <!-- Контейнер для кнопки Telegram -->
+            <AppBadButton class="btn" :text="'РЕГИСТРАЦИЯ ТЕЛЕГРАММ'" @click="signUpTg" />
+            <AppGoodButton class="btn vk_btn" :text="'ВХОД ВК'" :disabled="isDisabled" @click="tap"/>
+            <AppBadButton class="btn" :text="'РЕГИСТРАЦИЯ ВК'" :disabled="isDisabled" @click="tap"/>
         </div>
         <img src="@/assets/images/auth_image.png" class="left_image">
         <img src="@/assets/images/auth_image.png" class="right_image">
@@ -16,15 +28,16 @@
 </template>
 
 <script>
-
-    import AppBadButton from '@/components/AppBadButton.vue';
     import AppGoodButton from '@/components/AppGoodButton.vue';
+    import AppBadButton from '@/components/AppBadButton.vue';
+    import AppMandatoryChannels from '@/components/AppMandatoryChannels.vue';
     import { getToken, addReferer, refreshToken } from '@/services/auth';
     import { getUserInfo } from '@/services/user';
-    import { getVkToken } from '@/services/tg';
+    import { tgLogin, getTokensByCode, getMandatoryChannels } from '@/services/tg';
+
 
     export default {
-        components: { AppBadButton, AppGoodButton },
+        components: { AppGoodButton, AppMandatoryChannels, AppBadButton },
         data() {
             return {
                 text: "ВОЙТИ",
@@ -38,10 +51,37 @@
                 device_id: "",
                 redirectUrl: "https://lk.intelektaz.com",
                 isDisabled: true,
+                btnHtml: "",
+                isMandatory: false,
+                channels: null
             }
         },
-        mounted() {
+        async mounted() {
             this.handleUrlParams();
+            // Загружаем кнопку Telegram
+            const script = document.createElement("script");
+            script.async = true;
+            script.src = "https://telegram.org/js/telegram-widget.js?22";
+            script.setAttribute("data-telegram-login", "IntelektazTGBot");
+            script.setAttribute("data-size", "large");
+            script.setAttribute("data-auth-url", "https://lk.intelektaz.com/login");
+            script.setAttribute("data-request-access", "write");
+            script.setAttribute("data-userpic", "false");
+            script.setAttribute("data-radius", "10");
+
+            // Добавляем в контейнер, чтобы кнопка встроилась в нужное место
+            this.$refs.tgButton.appendChild(script);
+
+            // Наблюдаем появление кнопки
+            const observer = new MutationObserver(() => {
+                const btn = document.getElementById("telegram-login-IntelektazTGBot");
+                if (btn) {
+                    btn.style.height = "51px";
+                    observer.disconnect(); // перестаём слушать
+                }
+            });
+
+            observer.observe(this.$refs.tgButton, { childList: true, subtree: true });
         },
         async created() {
             // тут делаем редирект в ЛК, если живой пользователь решит перейти в lk.intelektaz.com (а не в /home)
@@ -57,8 +97,19 @@
                     if (user && user.activation) {
                         localStorage.setItem("page", 1);
                         localStorage.setItem("points", 0);
-                        this.$router.push('/home');
-                        return;
+                        if (user?.tg_id) {
+                            this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                            if (this.channels.length == 0) 
+                                this.$router.push('/home')
+                            else {
+                                localStorage.clear();
+                                this.isMandatory = true;
+                            }
+                            return;
+                        }
+                        else {
+                            this.$router.push('/home');
+                        }
                     }
                     if (user && !user.activation) {
                         localStorage.setItem("points", 0);
@@ -75,9 +126,11 @@
                 const addGroups = localStorage.getItem("addGroups");
                 const watchedVideos = localStorage.getItem("watchedVideos");
                 const addPosts = localStorage.getItem("addPosts");
+                const sponsor_platform = localStorage.getItem("sponsor_platform");
                 localStorage.clear(); // почистить хранилище, если пользователь первый раз зашёл
                 const urlParams = new URLSearchParams(window.location.search); // сохраняем реферера, если по реф ссылке перешёл юзер
                 localStorage.setItem("referer", urlParams.get('ref') || referer);
+                localStorage.setItem("sponsor_platform", urlParams.get('platform') || sponsor_platform);
                 if (addGroups) localStorage.setItem("addGroups", addGroups);
                 if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
                 if (addPosts) localStorage.setItem("addPosts", addPosts);
@@ -87,6 +140,17 @@
             
         },
         methods: {
+            reload() {
+                location.reload();
+            },
+            signUpTg() {
+                const referer = localStorage.getItem('referer');
+                console.log(referer);
+                if (referer) 
+                    window.location.href = `https://t.me/IntelektazTGBot?start=ref=${referer}`
+                else 
+                    window.location.href = `https://t.me/IntelektazTGBot?start`;
+            },
             reboot() {
                 console.log("HERE");    
                 const ref = localStorage.getItem("referer");
@@ -145,24 +209,102 @@
                 }
                 
             },
-            async handleUrlParams() {
+            base32Decode(input) {
+                const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+                let bits = "";
+                let output = "";
 
+                input = input.replace(/=+$/, ""); // убрать padding
+
+                for (let i = 0; i < input.length; i++) {
+                    const val = alphabet.indexOf(input.charAt(i).toUpperCase());
+                    if (val === -1) continue;
+                    bits += val.toString(2).padStart(5, "0");
+                }
+
+                for (let i = 0; i + 8 <= bits.length; i += 8) {
+                    const byte = bits.substring(i, i + 8);
+                    output += String.fromCharCode(parseInt(byte, 2));
+                }
+
+                try {
+                    // Декодировать UTF-8 (чтобы русские и emoji отображались нормально)
+                    return decodeURIComponent(escape(output));
+                } catch {
+                    return output;
+                }
+            },
+
+            async handleUrlParams() {
                 // считываем параметры, которые вк отдаёт
                 const params = new URLSearchParams(window.location.search);
+                const dlink = params.get("dlink");
+                if (dlink) {
+                    const resp = await getTokensByCode(dlink);
+                    if (resp) {
+                        localStorage.setItem("token", resp.access_token);
+                        localStorage.setItem("token_refresh", resp.refresh_token);
+                        localStorage.setItem("is_new_user", resp.is_new_user);
+                        this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                        if (this.channels.length == 0) 
+                            this.$router.push('/home')
+                        else {
+                            localStorage.clear();
+                            this.isMandatory = true;
+                        }
+                        // this.$router.push('/home');
+                    }
+                }
                 const code = params.get("code");
                 const state = params.get("state");
                 const device_id = params.get("device_id");
                 const code_verifier = localStorage.getItem("code_verifier");
 
-                const isAddVK = localStorage.getItem('isAddVK');
-                const userId = localStorage.getItem('userId');
+                const sponsor_platform = localStorage.getItem('sponsor_platform');
+                console.log(sponsor_platform);
+                const tg_id = decodeURIComponent(params.get("id") || "");
+                const first_name = decodeURIComponent(params.get("first_name") || "");
+                const last_name = decodeURIComponent(params.get("last_name") || "");
+                const username = decodeURIComponent(params.get("username") || "");
+                const photo_url = decodeURIComponent(params.get("photo_url") || "");
+                const auth_date = decodeURIComponent(params.get("auth_date") || "");
+                const hash = params.get("hash") || "";
+                let sponsor_id = localStorage.getItem('referer');
+                if (sponsor_id.startsWith('tg')) {
+                    sponsor_id = sponsor_id.slice(2);
+                }
+
+                const tg_ref = decodeURIComponent(params.get("ref") || "");
+                if (tg_ref != "" && tg_ref.startsWith('tg')) {
+                    localStorage.setItem('referer', tg_ref);
+                }
+
+
+                if (tg_id != "") {
+                    const resp = await tgLogin(tg_id, first_name, last_name, username, photo_url, auth_date, hash, sponsor_id, sponsor_platform);
+                    localStorage.setItem("token", resp.access_token);
+                    localStorage.setItem("token_refresh", resp.refresh_token);
+                    localStorage.setItem("is_new_user", resp.is_new_user);
+                    console.log(resp);
+                    if (resp) {
+                        if (resp.is_new_user) this.$router.push('/signup_1')
+                        else {
+                            this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                            if (this.channels.length == 0) 
+                                this.$router.push('/home')
+                            else {
+                                localStorage.clear();
+                                this.isMandatory = true;
+                            }
+                        } 
+                    }
+                    // this.$router.push('/signup_1');
+                }
 
                 if (code && state && device_id) {
                     let response;
                     try {
-                        response = isAddVK && userId ? 
-                            await getVkToken(code, state, code_verifier, device_id, this.redirectUrl, userId) : 
-                            await getToken(code, state, code_verifier, device_id, this.redirectUrl);
+                        response = await getToken(code, state, code_verifier, device_id, this.redirectUrl);
                     } catch (err) {
 
                         const referal = localStorage.getItem("referer");
@@ -212,7 +354,17 @@
                             else {
                                 localStorage.setItem("points", 0);
                                 localStorage.setItem("page", 1);
-                                this.$router.push('/home');
+                                if (user?.tg_id) {
+                                    this.channels = await getMandatoryChannels(localStorage.getItem('token'));
+                                    if (this.channels.length == 0) 
+                                        this.$router.push('/home')
+                                    else {
+                                        localStorage.clear();
+                                        this.isMandatory = true;
+                                    }
+                                } else {
+                                    this.$router.push('/home');
+                                }
                             }
                         } catch(err) {
                             const referal = localStorage.getItem("referer");
@@ -241,13 +393,7 @@
                         localStorage.setItem("referer", ref);
                         // const cleanUrl = window.location.origin + window.location.pathname; 
                         // window.history.replaceState({}, document.title, cleanUrl);
-                        if (response.status) {
-                            localStorage.setItem("points", 0);
-                            this.$router.push('/signup_1');
-                        }
-                        else {
-                            location.reload();
-                        }
+                        location.reload();
                     }
                      
                 } else {
@@ -309,8 +455,14 @@
         src: url('@/assets/fonts/OpenSans.ttf') format('truetype');
     }
 
+    .line {
+        @media (max-width: 500px) {
+            margin-top: 30px;
+        }
+    }
+
     .modal {
-        width: 760px;
+        width: 960px;
         height: 437px;
         border-radius: 10px;
         position: relative; /* Обеспечиваем позиционирование для псевдоэлемента */
@@ -322,9 +474,10 @@
         z-index: 2;
         align-self: center;
         margin-top: -50px;
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             width: 80vw;
             min-height: 300px;
+            height: auto;
         }
         @media (max-width: 650px) {
             /* padding: 25px 20px; */
@@ -335,7 +488,7 @@
             padding-bottom: 51px;
             padding-left: 20px;
             padding-right: 20px;
-            height: 390px;
+            /* height: 390px; */
             min-width: 331px;
         }
     }
@@ -388,6 +541,17 @@
         flex-direction: column;
         align-items: center;
         row-gap: 10px;
+        @media (max-width: 500px) {
+            row-gap: 0px;
+        }
+    }
+    .text_wrapper_text {
+        @media (max-width: 500px) {
+            max-width: 227px;
+            text-align: center;
+            font-size: 16px !important;
+            line-height: normal !important;
+        }
     }
 
     h1 {
@@ -442,17 +606,28 @@
     }
 
     .btn_wrapper {
-        display: flex;
-        flex-direction: column;
-        row-gap: 20px;
-        @media (max-width: 420px) {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        row-gap: 30px;
+        column-gap: 20px;
+        @media (max-width: 1000px) {
+            display: flex;
+            flex-direction: column;
+            margin-top: 30px;
             row-gap: 10px;
         }
     }
 
+    .vk_btn {
+        @media (max-width: 1000px) {
+            margin-top: 10px;
+        }
+    }
+
     .btn {
+        width: 280px;
         @media (max-width: 500px) {
-            width: 170px !important;
+            width: 280px !important;
             height: 51px !important;
             font-size: 14px;
         }
@@ -466,14 +641,14 @@
         height: 85px;
         transform: rotate(157deg);
         @media (max-width: 900px) {
-            width: 70px;
-            height: 70px;
+            width: 58px;
+            height: 58px;
+            left: 15px;
+            top: 5px;
         }
         @media (max-width: 550px) {
             width: 58px;
             height: 58px;
-            bottom: 73px;
-            left: 5px;
         }
     }
     .right_image {
@@ -484,14 +659,14 @@
         height: 101px;
         transform: rotate(16deg);
         @media (max-width: 900px) {
-            width: 70px;
-            height: 70px;
+            width: 50px;
+            height: 50px;
+            top: 140px;
+            right: 5px;
         }
         @media (max-width: 550px) {
             width: 50px;
             height: 50px;
-            bottom: 33px;
-            right: 5px;
         }
     }
 </style>

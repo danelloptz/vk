@@ -119,7 +119,8 @@
             async sendMoney() {
                 if (this.disabled) return;
                 this.disabled = true;
-                const response = await sendTo(this.userToSend.vk_id, this.usdt, localStorage.getItem("token"));
+                const id = await getBaseIdByTgOrVk(Number(this.userId), localStorage.getItem('token'));
+                const response = await sendTo(id, this.userData.id, this.usdt, localStorage.getItem("token"));
                 if (response) {
                     this.endModal = true;
                     this.stepTwo = false;
