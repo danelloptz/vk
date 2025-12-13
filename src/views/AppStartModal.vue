@@ -33,7 +33,7 @@
     import AppMandatoryChannels from '@/components/AppMandatoryChannels.vue';
     import { getToken, addReferer, refreshToken } from '@/services/auth';
     import { getUserInfo } from '@/services/user';
-    import { tgLogin, getTokensByCode, getMandatoryChannels } from '@/services/tg';
+    import { tgLogin, getTokensByCode, getMandatoryChannels, getVkToken } from '@/services/tg';
 
 
     export default {
@@ -236,6 +236,25 @@
             },
 
             async handleUrlParams() {
+                const isAddVk = localStorage.getItem('isAddVK');
+                if (isAddVk) {
+                    const params = new URLSearchParams(window.location.search);
+                    const code = params.get("code");
+                    const state = params.get("state");
+                    const device_id = params.get("device_id");
+                    const code_verifier = localStorage.getItem("code_verifier");
+                    const userId = localStorage.getItem('userId');
+
+                    const response = await getVkToken(code, state, code_verifier, device_id, this.redirectUrl, userId);
+                    if (response.is_new_user) {
+                        localStorage.setItem("token", response.access_token);
+                        localStorage.setItem("token_refresh", response.refresh_token);
+                        localStorage.setItem("is_new_user", response.is_new_user);
+                        this.$router.push('/signup_1');
+                    } else {
+                        this.$router.push('/home');
+                    }
+                }
                 // считываем параметры, которые вк отдаёт
                 const params = new URLSearchParams(window.location.search);
                 const dlink = params.get("dlink");

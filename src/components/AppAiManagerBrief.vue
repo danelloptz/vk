@@ -227,6 +227,7 @@
             </div>
             <div class="start_msg m50">
                 <h2>Приветственное сообщение</h2>
+                <span>{{ msg_const + ' ' + userData.name}}</span>
                 <div class="line_wrapper" v-if="isGenerated">
                     <div class="line"></div>
                 </div>
@@ -357,6 +358,7 @@
                 isLeader: false,
                 isCopy: false,
                 tg_link: "",
+                msg_const: "Здравствуйте, я Intelektaz, ИИ менеджер"
             }
         },
         computed: {

@@ -974,7 +974,12 @@
             margin-bottom: 10px;
         }
     }
+
+ 
+
+
     .dialog_field_messages {
+        max-width: 400px;
         height: 864px; /* 86 80 */
         border-top: 1px solid rgba(255, 255, 255, 0.5);
         padding: 30px 10px;
@@ -1074,6 +1079,8 @@
         display: flex;
         flex-direction: column;
         row-gap: 20px;
+        max-height: 1050px;
+        overflow-y: scroll;
         @media (max-width: 650px) {
             border-right: none;
         }
@@ -1085,6 +1092,7 @@
         border: 1px solid rgba(255, 255, 255, 0.5);
         margin-top: 38px;
         min-height: 1050px;
+        max-height: 1050px;
         @media (max-width: 650px) {
             display: flex;
             flex-direction: column;

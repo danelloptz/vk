@@ -32,7 +32,7 @@
 
             <div class="item">
                 <h2>Срок оформления:</h2>
-                <div class="dropdown" :style="{ pointerEvents : isYear ? 'none' : 'all'}">
+                <div class="dropdown">
                     <input
                         v-model="selectedTime"
                         type="text"
@@ -44,7 +44,7 @@
                     <!-- <img :class="{'rotated': isDropdo  wnVisibleTime}" src="@/assets/images/arrow_down.png" class="arrow_down"> -->
                     <ul v-if="isDropdownVisibleTime" class="dropdown-menu">
                         <li
-                            v-for="(count, label) in times"
+                            v-for="(count, label) in filteredTimes"
                             :key="label"
                             @mousedown.prevent="selectTime(label, count)"
                         >
@@ -119,11 +119,26 @@ export default {
                 console.log("Я в ЛИДЕРЕ", leader_pack, business_pack, this.daysForBusiness);
                 if (this.daysForBusiness != 0) {
                     return Math.abs((leader_pack.monthly_cost * 12 - 4)  - Math.floor(+this.daysForBusiness / 31) * business_pack.monthly_cost);
-                } else return 500;
+                } else {
+                    if (this.currTime == 12) return 500
+                    else return 75 * this.currTime;
+                }
             } 
-            if (this.selectedPackage == "Business") return 300;
+            if (this.selectedPackage == "Business") {
+                if (this.currTime == 12) return 300
+                else return 55 * this.currTime;
+            }
             console.log("Я В ЖОПЕ");
             return this.currTime * this.currPrice;
+        },
+        filteredTimes() {
+            if (this.isYear) {
+                return {
+                    "1 месяц": this.times["1 месяц"],
+                    "1 год": this.times["1 год"]
+                };
+            }
+            return this.times;
         }
     },  
     // (42 * 12 - 4) - (1094 / 30) * 25 = 
@@ -140,7 +155,7 @@ export default {
                     this.currTime = 12;
                     this.selectedTime = "1 год";
                 } else {
-                    this.isYear = true;
+                    this.isYear = false;
                     this.currTime = 1;
                     this.selectedTime = "1 месяц";
                 }
@@ -173,7 +188,7 @@ export default {
                 this.currTime = 12;
                 this.selectedTime = "1 год";
             } else {
-                this.isYear = true;
+                this.isYear = false;
                 this.currTime = 1;
                 this.selectedTime = "1 месяц";
             }
@@ -190,14 +205,21 @@ export default {
             this.hideDropdownTime();
         },
         async makePayment() {
-            if (this.userData.balance >= this.summary && !this.disabled) {
+            // if (this.userData.balance >= this.summary && !this.disabled) {
                 this.disabled = true;
                 let payment;
                 console.log(this.daysForBusiness);
                 if (this.daysForBusiness != 0) {
                     payment = await upgradeToLeader(this.summary, localStorage.getItem("token"));
                 } else {
-                    payment = await buyTariff(String(this.currTarif?.id), this.currTime, this.currTarif?.package_name, this.currTarif?.monthly_cost, localStorage.getItem("token"));
+                    let month_cost;
+                    if (this.currTime == 12 || this.currTime < 12 && ['Leader', 'Business'].indexOf(this.currTarif?.package_name) == -1) {
+                        month_cost = this.currTarif?.monthly_cost;
+                    } else {
+                        if (this.currTarif?.package_name == 'Leader') month_cost = 75
+                        else month_cost = 55;
+                    }
+                    payment = await buyTariff(String(this.currTarif?.id), this.currTime, this.currTarif?.package_name, month_cost, localStorage.getItem("token"));
                 }
                 
                 if (payment.status) {
@@ -209,12 +231,12 @@ export default {
                     this.errorMessage = payment.message[0].msg;
                 }
                 this.disabled = false;
-            } else {
-                if (!this.disabled) {
-                    this.error = true;
-                    this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance.toFixed(2)} USDT!`;
-                }
-            }
+            // } else {
+            //     if (!this.disabled) {
+            //         this.error = true;
+            //         this.errorMessage = `На вашем счету не хватает ${this.summary - this.userData.balance.toFixed(2)} USDT!`;
+            //     }
+            // }
         }
     },
 };

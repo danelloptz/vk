@@ -36,8 +36,8 @@
                 <AppGoodButton v-else class="active_tg_btn" :text="'АКТИВИРОВАТЬ'" :disabled="isDisabled" @click="tap"/>
             </span> -->
 
-            <span v-if="windowWidth > 650 && testers.includes(userData?.id)">Telegram:</span>
-            <span v-if="windowWidth > 650 && testers.includes(userData?.id)">
+            <span v-if="windowWidth > 650">Telegram:</span>
+            <span v-if="windowWidth > 650">
                 {{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }}
                 <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
                 <img v-else src="@/assets/images/ok_green2.png" class="ok_green" />
@@ -66,7 +66,7 @@
                     <AppGoodButton v-else class="active_tg_btn" :text="'АКТИВИРОВАТЬ'" :disabled="isDisabled" @click="tap"/>
                 </span>
             </div>
-            <div class="mobile_links_row" v-if="windowWidth <= 650 && testers.includes(userData?.id)">
+            <div class="mobile_links_row" v-if="windowWidth <= 650">
                 <span>Telegram: </span>
                 <span>{{ userData?.tg_id && userData.tag ? `https://t.me/${userData.tag}` : userData?.tg_id && !userData.tag ? `tg://user?id=${userData?.tg_id}` : 'https://t.me/ ' }} 
                     <AppGoodButton v-if="!userData?.tg_id" :text="'АКТИВИРОВАТЬ'" class="active_tg_btn" @click="activateTg"/>
@@ -427,7 +427,7 @@
         getPostStat,
         getTgGroupInfo
     } from '@/services/tg';
-    import { getConfig } from '@/services/config';
+    // import { getConfig } from '@/services/config';
 
 export default {
     components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser, AppModalAds },
@@ -552,7 +552,7 @@ export default {
 
         this.beforeLinks = [...this.userData.social_links];
 
-        this.testers = await getConfig('tg_testers');
+        // this.testers = await getConfig('tg_testers');
 
         this.tg_links = await getTelegramLinks(localStorage.getItem('token'));
         this.tg_group = this.tg_links.channel_tg_link;
@@ -561,7 +561,6 @@ export default {
         this.userTgStory = this.tgStoryInfo.story_link;
         this.tgStoryCount = this.tgStoryInfo.rotation_count;
 
-        this.tgGroupStats = await getTgGroupStats(localStorage.getItem('token'));
         this.active_bussines_style = await getUserPlatform(localStorage.getItem('token'));
         if (this.active_bussines_style == 'tg') {
             this.tg_business = true;
@@ -578,6 +577,7 @@ export default {
 
         if (this.userData?.tg_id) {
             this.tg_info = await getTgGroupInfo(localStorage.getItem('token'));
+            this.tgGroupStats = await getTgGroupStats(this.userData.tg_id, localStorage.getItem('token'));
         }
 
         try {

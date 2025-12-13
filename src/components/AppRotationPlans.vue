@@ -350,13 +350,13 @@
                         </td>
                         <td class="column top_col" style="border-bottom: none;">
                             <div class="col2">
-                                <span><span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                                <span>От <span class="large_letters">{{ tariffs[4]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                                 <AppGoodButton :text="currTarrif.includes('Business') ? text2 : text1" class="btn_big" @click="selectPackage(plans[4])"/>
                             </div>
                         </td>
                         <td class="column top_col" style="border-right: none; border-bottom: none;">
                             <div class="col2">
-                                <span><span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
+                                <span>От <span class="large_letters">{{ tariffs[5]?.monthly_cost }}*</span> <span class="medium_letters">USDT</span><br> в месяц</span>
                                 <AppGoodButton :text="(currTarrif.includes('Business') && !currTarrif.includes('Leader') && +daysForBusiness >= 30) ? text3 : currTarrif.includes('Leader') ? text2 : text1" class="btn_big" @click="selectPackage(plans[5])"/>
                             </div>
                         </td>
@@ -838,7 +838,7 @@ import { getTariffs, buyBooster } from "@/services/cash";
                 if (end_time) {
                     const now = Math.floor(Date.now() / 1000);
                     const daysLeft = Math.abs(Math.floor((end_time - now) / 86400));
-                    return daysLeft;
+                    return daysLeft > 1000 ? "действует пока включен Intelektaz Ads" : daysLeft;
                 }
                 return "";
             },

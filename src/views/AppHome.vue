@@ -236,7 +236,7 @@
                     userInfo = await getUserInfo(localStorage.getItem("token"));
 
                     // const testers = await getConfig('tg_testers', localStorage.getItem('token'));
-                    // if (testers.indexOf(userInfo.id) == -1) {
+                    // if (2.indexOf(userInfo.id) == -1) {
                     //     const addGroups = localStorage.getItem("addGroups");
                     //     const watchedVideos = localStorage.getItem("watchedVideos");
                     //     const addPosts = localStorage.getItem("addPosts");

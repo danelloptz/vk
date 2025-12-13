@@ -204,9 +204,9 @@
                 if (limit >= baseLimit) {
                     limit = baseLimit;
                 } else if (limit < 0) {
-                    limit = 0; // защита, если offset слишком большой
+                    limit = 20; // защита, если offset слишком большой
                 }
-                return limit;
+                return limit == 0 ? 20 : limit;
             },
 
             async countTotalPages() {

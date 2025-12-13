@@ -53,7 +53,7 @@
     import { checkGroupSub, getGroups, subToGroup } from '@/services/groups';
     import { getUserInfo } from '@/services/user';
     import { refreshToken, changeStatus } from '@/services/auth';
-    import { getSubTgChannels, checkTgSub, activateTgUser } from '@/services/tg';
+    // import { getSubTgChannels, checkTgSub, activateTgUser } from '@/services/tg';
     import AppModalMessage from '@/components/AppModalMessage.vue';
     import AppModal from '@/components/AppModal.vue';
 
@@ -115,18 +115,19 @@
             if (this.addGroups >= this.totalGroups) {
                 // this.watchVideo();
                 console.log("END");
-                this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                // this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                await changeStatus(this.userInfo.vk_access_token);
                 // if (updateUser.status) {
                 localStorage.removeItem("addGroups");
                 this.$router.push("/signup_3");
                 // }
             }
             let groups;
-            if (this.userInfo.tg_id) {
-                groups = await getSubTgChannels(this.userInfo.id, localStorage.getItem('token'));
-            } else {
+            // if (this.userInfo.tg_id) {
+                // groups = await getSubTgChannels(this.userInfo.id, localStorage.getItem('token'));
+            // } else {
                 groups = await getGroups(this.userInfo.vk_id);
-            }
+            // }
             this.groupInfo = groups;
             console.log(this.groupInfo);
             this.updateGroupQueue();
@@ -185,7 +186,8 @@
                             if (this.addGroups >= this.totalGroups) {
                                 // this.watchVideo();
                                 console.log("END");
-                                this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                                // this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                                await changeStatus(this.userInfo.vk_access_token);
                                 // if (updateUser.status) {
                                     localStorage.removeItem("addGroups");
                                     this.$router.push("/signup_3");
@@ -213,8 +215,8 @@
                 let response;
                 try {
                     console.log(groupLink);
-                    if (this.userInfo.tg_id) response = await checkTgSub(this.userInfo.tg_id, groupLink.tg_id, localStorage.getItem('token'))
-                    else response = await checkGroupSub(String(groupLink.vk_id), this.userInfo.vk_id, "registration");
+                    // if (this.userInfo.tg_id) response = await checkTgSub(this.userInfo.tg_id, groupLink.tg_id, localStorage.getItem('token'))
+                    response = await checkGroupSub(String(groupLink.vk_id), this.userInfo.vk_id, "registration");
                     if (!response) location.reload();
                 } catch(err) {
                     // location.reload();
@@ -233,7 +235,8 @@
 
                     if (this.addGroups === this.totalGroups) {
                         console.log("сработал changestatus", this.addGroups, this.totalGroups);
-                        this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                        // this.userInfo.tg_id ? await activateTgUser(localStorage.getItem('token')) : await changeStatus(this.userInfo.vk_access_token);
+                        await changeStatus(this.userInfo.vk_access_token);
                         // if (updateUser.status) {
                             localStorage.removeItem("addGroups");
                             this.$router.push("/signup_3");

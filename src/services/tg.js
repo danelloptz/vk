@@ -388,13 +388,16 @@ export async function getUserStory(token) {
     }
 }
 
-export async function getTgGroupStats(token) {
+export async function getTgGroupStats(user_tg_id, token) {
     try {
         const response = await axios.get('https://web.intelektaz.com/api/tg/group/get_statistics', 
             {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
+                },
+                params: {
+                    user_tg_id: user_tg_id
                 }
             }
         );

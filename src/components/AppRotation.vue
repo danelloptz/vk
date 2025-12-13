@@ -1,6 +1,6 @@
 <template>
     <section class="balance">
-        <div class="switch_main" v-if="!isPackage && windowWidth > 650 && testers.includes(userData?.id)" :key="isPackage">
+        <div class="switch_main" v-if="!isPackage && windowWidth > 650" :key="isPackage">
             <span
                 v-for="(item, index) in listMainSwtich"
                 :key="index"
@@ -25,12 +25,12 @@
             >{{ item.name }}</span>
         </div>
         <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
-            <AppRotationGroup v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 0) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 0))" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
-            <AppRotationVideo v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 1) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 1))" :userData="userData" />
-            <AppRotationPosts v-if="!noVk && ((!testers.includes(userData?.id) && activeIndex === 2) || (testers.includes(userData?.id) && mainActiveIndex == 1 && activeIndex === 2))" :userData="userData" />
-        <AppRotationGroupTg v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 0" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
-        <AppRotationStories v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 1" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
-        <AppRotationTgPosts v-if="!noTg && testers.includes(userData?.id) && mainActiveIndex == 0 && activeIndex == 2" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
+            <AppRotationGroup v-if="!noVk && ((mainActiveIndex == 1 && activeIndex === 0))" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
+            <AppRotationVideo v-if="!noVk && ((mainActiveIndex == 1 && activeIndex === 1))" :userData="userData" />
+            <AppRotationPosts v-if="!noVk && ((mainActiveIndex == 1 && activeIndex === 2))" :userData="userData" />
+        <AppRotationGroupTg v-if="!noTg && mainActiveIndex == 0 && activeIndex == 0" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
+        <AppRotationStories v-if="!noTg && mainActiveIndex == 0 && activeIndex == 1" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
+        <AppRotationTgPosts v-if="!noTg && mainActiveIndex == 0 && activeIndex == 2" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
         <span class="err" v-if="noVk && mainActiveIndex == 1">Платформа не подключена. Перейдите в настройки, чтобы активировать.</span>
         <span class="err" v-if="noTg && mainActiveIndex == 0">Платформа не подключена. Перейдите в настройки, чтобы активировать.</span>
     </section>
@@ -44,7 +44,7 @@
     import AppRotationStories from '@/components/AppRotationStories.vue';
     import AppRotationTgPosts from '@/components/AppRotationTgPosts.vue';
     import AppDropdown from '@/components/AppDropdown.vue';
-    import { getConfig } from '@/services/config';
+    // import { getConfig } from '@/services/config';
     export default {
         components: { AppRotationGroup, AppRotationVideo, AppRotationPosts, AppDropdown, AppRotationGroupTg, AppRotationStories, AppRotationTgPosts },
         props: {
@@ -53,7 +53,7 @@
             windowWidth: Number
         },
         async created() {
-            this.testers = await getConfig('tg_testers');
+            // this.testers = await getConfig('tg_testers');
             this.isPackage = this.isTarif;
             this.$emit("update:isTarif", false);
             console.log('АЙДИ: ', this.userData.vk_id, this.userData.tg_id);
