@@ -112,6 +112,9 @@
             @click="nextStep"
         />
 
+        <span style="margin-top: 10px;">Подключите свой телеграм канал к Intelektaz Ads и зарабатывайте до 50$ в месяц за рекламу в вашем канале:</span>
+        <AppGoodButton :text="isReload ? 'ПОДКЛЮЧИТЬ' : userData.in_ads ? 'ОТКЛЮЧИТЬ' : 'ПОДКЛЮЧИТЬ'" class="tarif_btn" @click="changeAds" />
+
         <h3 class="region_title">Региональные данные</h3>
         <div class="dropdown">
             <input
@@ -165,6 +168,8 @@
         <span v-if="isNotSelectGender" class="error_message">Не выбран пол!</span>
 
         <h3 class="tg_channel_title">Telegram канал для продвижения:</h3>
+        <span v-if="serv_bot_link">Бот-администратор в вашем канале: {{ serv_bot_link }}</span>
+        <span v-if="serv_bot_link">Если вы захотите изменить канал, то сделайте администратором этого бота в вашем новом канале, вставьте ссылку на канал в поле ниже и нажмите кнопку "Добавить". </span>
         <div class="row">
             <input  
                 v-if="tg_group"
@@ -363,14 +368,15 @@
             </ul>
         </div>
         <span>Таргетинг по интересам Intelektaz Ads работает только на пакетах Leader.</span>
-        <div class="row2">
-            <!-- <div class="checkbox-wrapper-18">
+
+        <!-- <div class="row2">
+            <div class="checkbox-wrapper-18">
                 <div class="round">
                     <input type="checkbox" :id="`checkbox-3`" @click="changeAds('tg')" v-model="intelAds" :checked="intelAds" />
                     <label :for="`checkbox-3`"></label>
                 </div>
-            </div> -->
-            <!-- <input type="checkbox" class="checkbox" v-model="intelAds" @click="changeAds" /> -->
+            </div>
+            <input type="checkbox" class="checkbox" v-model="intelAds" @click="changeAds" />
             <div class="checkbox-wrapper-18">
                 <div class="round">
                     <input type="checkbox" :id="`checkbox-11`" v-model="intelAds" @click="changeAds" />
@@ -378,7 +384,7 @@
                 </div>
             </div>
             <span>Intelektaz Ads</span>
-        </div>
+        </div> -->
         <AppVipUser 
             v-if="windowWidth <= 650"
             :vipUser="newUserData" 
@@ -425,7 +431,8 @@
         createTgPost,
         getCurPost,
         getPostStat,
-        getTgGroupInfo
+        getTgGroupInfo,
+        getMinionLink
     } from '@/services/tg';
     // import { getConfig } from '@/services/config';
 
@@ -433,7 +440,8 @@ export default {
     components: { AppGroupOrUser, AppGoodButton, AppModalSubscribe, AppSettingsAuto, AppModal, AppVipUser, AppModalAds },
     props: { 
         businessUser: Object,
-        windowWidth: Number
+        windowWidth: Number,
+        info: Object
     },
     data() {
         return {
@@ -499,7 +507,9 @@ export default {
             vk_business: false,
             userTgPost: null,
             postWatchs: null,
-            tg_info: null
+            tg_info: null,
+            serv_bot_link: null,
+            isReload: false
         };
     },
     computed: {
@@ -578,6 +588,7 @@ export default {
         if (this.userData?.tg_id) {
             this.tg_info = await getTgGroupInfo(localStorage.getItem('token'));
             this.tgGroupStats = await getTgGroupStats(this.userData.tg_id, localStorage.getItem('token'));
+            this.serv_bot_link = await getMinionLink(localStorage.getItem('token'));
         }
 
         try {
@@ -602,6 +613,15 @@ export default {
                 if (newData?.social_links) {
                     this.telegramLink = newData.social_links.telegram || "";
                     this.whatsappLink = newData.social_links.whatsapp || "";
+                }
+            }
+        },
+        info: {
+            immediate: true,
+            handler(newData) {
+                if (newData) {
+                    console.log(newData);
+                    this.userData = newData;
                 }
             }
         },
@@ -659,11 +679,11 @@ export default {
             if (this.tg_group) {
                 try {
                     await upgradeTelegrmChannel(this.tg_group, localStorage.getItem('token'));
-                    this.isModal = true;
+                    this.isSaveModal = true;
                     this.title = 'УСПЕШНО!';
                     this.msg = 'Ваш телеграмм канал был успешно обновлён.';
                 } catch(err) {
-                    this.isModal = true;
+                    this.isSaveModal = true;
                     this.title = 'ОШИБКА!';
                     this.msg = 'При изменении канала произошла ошибка.';
                 }
@@ -884,8 +904,14 @@ export default {
             
         },
         async changeAds() {
-            setTimeout(() => this.intelAds = !this.intelAds, 500);
-            this.isModalAds = true;
+            // if (this.userData.in_ads) {
+            //     await turnAdsOff(localStorage.getItem('token'));
+            //     this.isSaveModal = true;
+            //     this.title = 'УСПЕШНО';
+            //     this.msg = 'Telegram Ads был выключен.';
+            //     this.isReload = true;
+            // }
+            this.$emit('turnAdsOn');
         },
         async activateTg() {
             const code = await activeTg(localStorage.getItem('token'));

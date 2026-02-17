@@ -382,6 +382,9 @@
         display: flex;
         flex-direction: column;
         row-gap: 50px;
+        @media (max-width: 650px) {
+            align-items: center;
+        }
     }
     .groups_block_btns {
         width: fit-content;
@@ -390,6 +393,7 @@
         column-gap: 30px;
         row-gap: 30px;
         @media (max-width: 650px) {
+            display: flex;
             flex-direction: column;
             align-items: center;
             row-gap: 21px;

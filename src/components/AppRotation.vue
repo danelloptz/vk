@@ -1,6 +1,6 @@
 <template>
     <section class="balance">
-        <div class="switch_main" v-if="!isPackage && windowWidth > 650" :key="isPackage">
+        <div class="switch_main" v-if="!isPackage" :key="isPackage">
             <span
                 v-for="(item, index) in listMainSwtich"
                 :key="index"
@@ -24,7 +24,7 @@
                 @click="setActive(item.index)"
             >{{ item.name }}</span>
         </div>
-        <AppDropdown v-if="windowWidth <= 650" :listSwtich="listSwtich" @update-index="setActive" />
+        <AppDropdown v-if="windowWidth <= 650" :listSwtich="mainActiveIndex ? listSwtich : listSwtichTg" @update-index="setActive" />
             <AppRotationGroup v-if="!noVk && ((mainActiveIndex == 1 && activeIndex === 0))" :userData="userData" :isTarif="isPackage" @openPlans="openPlans" @update:isTarif="changeIsTariff($event)" />
             <AppRotationVideo v-if="!noVk && ((mainActiveIndex == 1 && activeIndex === 1))" :userData="userData" />
             <AppRotationPosts v-if="!noVk && ((mainActiveIndex == 1 && activeIndex === 2))" :userData="userData" />
@@ -164,6 +164,11 @@
         width: 100%;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
+        @media (max-width: 650px) {
+            display: flex;
+            flex-direction: column;
+            row-gap: 10px;
+        }
     }
     .err {
         font-size: 16px;

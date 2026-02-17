@@ -1,5 +1,17 @@
 <template>
     <div class="container">
+        <AppModalAds 
+            :visibility1="isModalAds"
+            @update:visibility1="isModalAds = $event"
+            @turn_on="turnAdsOn"
+            @open_rotation="updateActiveComponent(4)"
+        />
+        <AppModal 
+            :title="title" 
+            :message="msg" 
+            :visibility1="isSaveModal"
+            @update:visibility1="isSaveModal = $event"
+        />
         <AppHeader :userData="userInfo" :windowWidth="windowWidth" @show-news="updateActiveComponent(11)" @show-help="updateActiveComponent(7)" @isTarif="openTarif" @isReff="openReff"/>
         <AppGroupsAssemble @comeToAssembly="updateActiveComponent(8)" />
         <section class="content">
@@ -41,15 +53,19 @@
                     class="card"
                 />
                 <AppBalance v-if="selectedComponent === 0 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
-                <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :userData="userInfo" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" />
+                <AppMain v-if="(selectedComponent === 1 && !isClicked) || isReff" :userData="userInfo" :links="isReff" @update-isTarif="openTarif" @update-isRot="openRot" @isModalAds="openAds" @turnAdsOn="turnAdsOn" />
                 <AppAiGenerator v-if="selectedComponent === 2 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" @openTariff="openTarif" />
                 <AppStructure v-if="selectedComponent === 3 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
                 <AppRotation v-if="selectedComponent === 4 && !isClicked && !isReff" :userData="userInfo" :windowWidth="windowWidth" :isTarif="isTarif" @update:isTarif="isTarif == $event" @openPlans="openTarif" />
                 <AppSettings 
                     v-if="selectedComponent === 5 && !isClicked && !isReff" 
                     @open_rotation="openRot"
+                    @isModalAds="openAds"
                     :windowWidth="windowWidth" 
                     :businessUser="businessUser" 
+                    :intelAds="intelAds"
+                    @turnAdsOn="turnAdsOn"
+                    :info="specific_data"
                 />
                 <AppFAQ v-if="selectedComponent === 6 && !isClicked && !isReff" />
                 <AppBannerAdds v-if="selectedComponent == 10 && !isReff" :userData="userInfo" :windowWidth="windowWidth" />
@@ -113,10 +129,14 @@
     import { getUserInfo, getVipUser } from '@/services/user';
     import { refreshToken } from '@/services/auth';
     import { getOtherAdds } from '@/services/add';
+    import AppModalAds from "@/components/AppModalAds.vue";
+    import { turnAdsOn, turnAdsOff } from '@/services/tg';
+    import AppModal from "@/components/AppModal.vue";
+
     // import { getConfig } from '@/services/config';
 
     export default {
-        components: { AppHeader, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans, AppVipUser, AppNews },
+        components: { AppHeader, AppModal, AppGroupsAssemble, AppNavigation, AppAdd, AppGroupOrUser, AppBalance, AppRotation, AppSettings, AppFAQ, AppStructure, AppBannerAdds, AppHelp, AppMain, AppAiGenerator, AppComeToAssembly, AppRotationPlans, AppVipUser, AppNews, AppModalAds },
         data() {
             return {
                 verticalAddCount: 2,
@@ -151,7 +171,13 @@
                     { img: require('@/assets/images/instructions.png'), label: 'Инструкции' },
                 ],
                 isBurger: false,
-                helpFlag: false
+                helpFlag: false,
+                isModalAds: false,
+                intelAds: false,
+                title: "",
+                msg: "",
+                isSaveModal: false,
+                specific_data: null
             }
         },  
         mounted() {
@@ -296,6 +322,8 @@
             this.whtData = this.vipUser?.social_links.filter(link => link.type === "Whatsapp").at(-1) || [];
             this.vkData = `https://vk.com/id${this.vipUser.vk_id}`;
 
+            this.intelAds = userInfo.in_ads;
+
             console.log(this.vipUser, this.whtData);
             console.log(this.businessUser);
 
@@ -306,6 +334,27 @@
             window.removeEventListener("resize", this.checkWindowWidth);
         },
         methods: {
+            openAds(event) {
+                this.isModalAds = event;
+            },
+            async turnAdsOn() {
+                if (!this.isModalAds && !this.intelAds) {
+                    this.isModalAds = true;
+                    return;
+                }
+                this.intelAds = !this.intelAds;
+                this.intelAds ? await turnAdsOn(localStorage.getItem('token')) : await turnAdsOff(localStorage.getItem('token'));
+                this.isModalAds = false;
+                this.title = 'ПОДОЖДИТЕ';
+                this.msg = 'Не закрывайте окно, пока не закончится изменение.';
+                this.isSaveModal = true;
+                setTimeout( async () => {
+                    this.specific_data = await getUserInfo(localStorage.getItem("token"));
+                    this.userInfo = this.specific_data;
+                    this.title = 'УСПЕШНО';
+                    this.msg = 'Сохранения изменены.';
+                }, 7000)
+            },
             openBurger() {
                 document.addEventListener("click", this.handleClickOutside);
                 this.isBurger = true;
@@ -362,6 +411,7 @@
             openRot() {
                 // если откуда-то захотят открыть Ротацию
                 this.isReff = false;
+                this.isModalAds = false;
                 this.isTarif = false;
                 this.selectedComponent = 4;
                 console.log('ОТКРЫВАЮ РОТАЦИЮ!', this.isTarif);

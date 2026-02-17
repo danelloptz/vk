@@ -101,7 +101,7 @@ export default {
         position: absolute;
         left: 0;
         top: 0;
-        z-index: 900;
+        z-index: 996;
         background: rgba(0, 0, 0, 0.6);
         display: flex;
         justify-content: center;

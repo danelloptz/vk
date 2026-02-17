@@ -834,14 +834,41 @@ import { getTariffs, buyBooster } from "@/services/cash";
                 
             },
             getDays(item) {
-                const end_time = this.userData.packages_datetime.find(el => el.tarif_id == item.id)?.date_end;
-                if (end_time) {
-                    const now = Math.floor(Date.now() / 1000);
-                    const daysLeft = Math.abs(Math.floor((end_time - now) / 86400));
-                    return daysLeft > 1000 ? "действует пока включен Intelektaz Ads" : daysLeft;
+                const pkg = this.userData.packages_datetime.find(
+                    el => el.tarif_id == item.id
+                );
+
+                if (!pkg) return "";
+
+                const now = Math.floor(Date.now() / 1000);
+
+                // если тариф завязан на Intelektaz Ads
+                if (
+                    this.userData.in_ads &&
+                    (item.package_name === 'Standard' || item.package_name === 'VIP')
+                ) {
+                    const YEAR_SECONDS = 365 * 86400;
+                    const endByYear = pkg.date_start + YEAR_SECONDS;
+
+                    const daysLeft = Math.max(
+                        0,
+                        Math.floor((endByYear - now) / 86400)
+                    );
+
+                    return daysLeft;
                 }
+
+                // обычный тариф с date_end
+                if (pkg.date_end) {
+                    return Math.max(
+                        0,
+                        Math.floor((pkg.date_end - now) / 86400)
+                    );
+                }
+
                 return "";
             },
+
             reload() {
                 window.location.reload();
             },

@@ -59,12 +59,12 @@
         async mounted() {
             this.handleUrlParams();
             // Загружаем кнопку Telegram
-            const script = document.createElement("script");
+             const script = document.createElement("script");
             script.async = true;
             script.src = "https://telegram.org/js/telegram-widget.js?22";
             script.setAttribute("data-telegram-login", "IntelektazTGBot");
             script.setAttribute("data-size", "large");
-            script.setAttribute("data-auth-url", "https://lk.intelektaz.com/login");
+            script.setAttribute("data-auth-url", "https://lk.intelektaz.com");
             script.setAttribute("data-request-access", "write");
             script.setAttribute("data-userpic", "false");
             script.setAttribute("data-radius", "10");
@@ -250,7 +250,7 @@
                         localStorage.setItem("token", response.access_token);
                         localStorage.setItem("token_refresh", response.refresh_token);
                         localStorage.setItem("is_new_user", response.is_new_user);
-                        this.$router.push('/signup_1');
+                        this.$router.push('/signup_2');
                     } else {
                         this.$router.push('/home');
                     }
@@ -347,6 +347,7 @@
                         const addGroups = localStorage.getItem("addGroups");
                         const watchedVideos = localStorage.getItem("watchedVideos");
                         const addPosts = localStorage.getItem("addPosts");
+                        const referal = localStorage.getItem("referer");
                         localStorage.clear();
                         if (addGroups) localStorage.setItem("addGroups", addGroups);
                         if (watchedVideos) localStorage.setItem("watchedVideos", watchedVideos);
@@ -354,6 +355,7 @@
                         localStorage.setItem("token", response.data.access_token);
                         localStorage.setItem("token_refresh", response.data.refresh_token);
                         localStorage.setItem("is_new_user", response.data.is_new_user);
+                        localStorage.setItem("referer", referal);
 
                         try {
                             const user = await getUserInfo(localStorage.getItem("token"));
@@ -368,7 +370,7 @@
                                 }   
                                 localStorage.setItem("points", 0);
                                 if (addGroups) this.$router.push('/signup_2')
-                                else this.$router.push('/signup_2');
+                                else this.$router.push('/signup_1');
                             }
                             else {
                                 localStorage.setItem("points", 0);

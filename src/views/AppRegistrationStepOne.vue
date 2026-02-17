@@ -40,32 +40,12 @@
                 <input
                     v-model="selectedCity" 
                     placeholder="Город" >
-                <div class="dropdown" style="margin-top: 40px;">
-                    <input
-                        v-model="searchQueryGender"
-                        type="text"
-                        placeholder="Пол*"
-                        @focus="isDropdownVisibleGender = true"
-                        @blur="hideDropdown"
-                        ref="genderInput"
-                        readonly 
-                    />
-                    <img :class="{'rotated': isDropdownVisibleGender}" src="@/assets/images/arrow_down.png" class="arrow_down">
-                    <ul v-if="isDropdownVisibleGender" class="dropdown-menu">
-                        <li
-                            @mousedown.prevent="selectGender(genders[0])"
-                        >
-                            {{ genders[0] }}
-                        </li>
-                        <li
-                            @mousedown.prevent="selectGender(genders[1])"
-                        >
-                            {{ genders[1] }}
-                        </li>
-                    </ul>
-                </div>
-                <span v-if="isNotSelectGender" class="error_message">Не выбран пол!</span>
-                <h3 style="margin-top: 50px;">Интересы:</h3>
+
+            </div>
+        </div>
+        <div class="modal_cotainer">
+            <div class="inputs" style="margin-top: -43px;">
+                <h3>Интересы:</h3>
 
                 <div v-if="selectedInterests.length > 0" class="selected-countries">
                     <span v-for="(interest, index) in selectedInterests" :key="index" class="selected-interest">
@@ -95,24 +75,72 @@
                     </ul>
                 </div>
                 <span v-if="isNotSelectInterest" class="error_message">Не выбраны интересы!</span>
-            
+                <h3>Реферальный код:</h3>
+                <input v-model="reff" placeholder="Код" />
+                <AppGoodButton class="check_btn" :text="'ПРОВЕРИТЬ'" @click="checkReferer" />
+
+            </div>
+            <div class="inputs" style="margin-left: -10px;">
+                <div class="dropdown">
+                    <input
+                        v-model="searchQueryGender"
+                        type="text"
+                        placeholder="Пол*"
+                        @focus="isDropdownVisibleGender = true"
+                        @blur="hideDropdown"
+                        ref="genderInput"
+                        readonly 
+                    />
+                    <img :class="{'rotated': isDropdownVisibleGender}" src="@/assets/images/arrow_down.png" class="arrow_down">
+                    <ul v-if="isDropdownVisibleGender" class="dropdown-menu">
+                        <li
+                            @mousedown.prevent="selectGender(genders[0])"
+                        >
+                            {{ genders[0] }}
+                        </li>
+                        <li
+                            @mousedown.prevent="selectGender(genders[1])"
+                        >
+                            {{ genders[1] }}
+                        </li>
+                    </ul>
+                </div>
+                <span v-if="isNotSelectGender" class="error_message">Не выбран пол!</span>
+                <AppGroupOrUser style="width: 100%;" :objectData="referData" />
+            </div>
+        </div>
+        <!-- <div class="modal_container">
+            <div class="agreement">
+                <input type="checkbox" v-model="isCheckboxChecked">
+                <span>Мне исполнилось 18 лет и я принимаю <a style="color: white;" href="https://docs.google.com/viewer?url=https://api.intelektaz.com/assets/610b8919-c766-4311-9f0d-e893dfd4541a"  target="_blank" >пользовательское соглашение</a>.</span>
+            </div>
+            <span v-if="isNotCheckboxChecked" class="error_message">Нет соглашения!</span>
+
+            <AppGoodButton style="align-self: center;" :text="text" @click="nextStep" />
+        </div> -->
+        <!-- <hr> -->
+        <span class="ref_text">Если данные реферера отсутствуют, вставьте реферальный код в поле выше и нажмите Проверить.</span>
+        <div class="footer">
+            <div class="col">
                 <div class="agreement">
-                    <input type="checkbox" v-model="isCheckboxChecked">
+                    <input type="checkbox" v-model="isRefChecked" class="checkbox">
+                    <span>Данные реферера корректны и изменению не подлежат.</span>
+                </div>
+                <span v-if="isNotRefChecked" class="error_message">Нет соглашения!</span>
+
+                <div class="agreement">
+                    <input type="checkbox" class="checkbox" v-model="isCheckboxChecked">
                     <span>Мне исполнилось 18 лет и я принимаю <a style="color: white;" href="https://docs.google.com/viewer?url=https://api.intelektaz.com/assets/610b8919-c766-4311-9f0d-e893dfd4541a"  target="_blank" >пользовательское соглашение</a>.</span>
                 </div>
                 <span v-if="isNotCheckboxChecked" class="error_message">Нет соглашения!</span>
-
-                <AppGoodButton style="align-self: center;" :text="text" @click="nextStep" />
-
             </div>
-        </div>
-        <hr>
-        <div class="footer">
-            <div class="footer_text">
+            
+            <AppGoodButton style="align-self: center;" :text="text" @click="nextStep" />
+            <!-- <div class="footer_text">
                 <h1>ВОЗНИКЛИ ВОПРОСЫ?</h1>
                 <span>Обратитесь за помощью к Вашему личному консультанту (рефереру):</span>
             </div>
-            <AppGroupOrUser style="width: 100%;" :objectData="referData" />
+            <AppGroupOrUser style="width: 100%; margin-top: 40px;" :objectData="referData" /> -->
         </div>
 </section>
 </template>
@@ -123,9 +151,9 @@
     import AppGoodButton from '@/components/AppGoodButton.vue';
     import AppGroupOrUser from '@/components/AppGroupOrUser.vue';
     // import { getUserInfo, getReferInfo } from '@/services/user';
-    import { getUserInfo, getReferer } from '@/services/user';
+    import { getUserInfo } from '@/services/user';
     import { refreshToken } from '@/services/auth';
-    import { loadTgData, getTgReferer } from '@/services/tg';
+    import { loadTgData, getBaseIdByTgOrVk, getUserInfoById } from '@/services/tg';
 
     export default {
         components: { AppGoodButton, AppGroupOrUser },
@@ -152,7 +180,10 @@
                 isNotSelectCountry: false,
                 isNotSelectGender: false,
                 isNotSelectInterest: false,
-                isNotCheckboxChecked: false
+                isNotCheckboxChecked: false,
+                isRefChecked: false,
+                isNotRefChecked: false,
+                reff: null
             }
         },
         computed: {
@@ -163,6 +194,15 @@
             },
         },
         methods: {
+            async checkReferer() {
+                console.log(this.reff);
+                const check_reponse = await getBaseIdByTgOrVk(this.reff, localStorage.getItem('token'));
+                if (check_reponse) {
+                    const user_reponse = await getUserInfoById(check_reponse, localStorage.getItem('token'));
+                    this.referData = user_reponse;
+                }
+
+            },
             selectCountry(country) {
                 this.selectedCountry = country;
                 this.searchQuery = country;
@@ -197,7 +237,8 @@
                 this.isNotSelectGender = !(this.selectedGender != "");
                 this.isNotSelectInterest = !(this.selectedInterests.length > 0);
                 this.isNotCheckboxChecked = !this.isCheckboxChecked;
-                if (!(this.isNotSelectCountry || this.isNotSelectGender || this.isNotSelectInterest || this.isNotCheckboxChecked)) {
+                this.isNotRefChecked = !this.isRefChecked;
+                if (!(this.isNotSelectCountry || this.isNotSelectGender || this.isNotSelectInterest || this.isNotCheckboxChecked || this.isNotRefChecked)) {
                     localStorage.setItem("country", this.searchQuery);
                     localStorage.setItem("city", this.selectedCity);
                     localStorage.setItem("sex", this.selectedGender);
@@ -233,12 +274,20 @@
             }
             this.userData = response;
 
-            if (this.userData.tg_id) {
-                this.referData = await getTgReferer(localStorage.getItem('token'));
-                this.referData.avatar = this.referData.avatar == "" ? require('@/assets/images/empty.png') : this.referData.avatar;
-            } else {
-                const refer = await getReferer(this.userData.vk_id);
-                this.referData = refer; 
+            // if (this.userData.tg_id) {
+            //     this.referData = await getTgReferer(localStorage.getItem('token'));
+            //     this.referData.avatar = this.referData.avatar == "" ? require('@/assets/images/empty.png') : this.referData.avatar;
+            // } else {
+            //     const refer = await getReferer(this.userData.vk_id);
+            //     this.referData = refer; 
+            // }
+
+            const referer = localStorage.getItem('referer');
+            if (referer) this.reff = referer;
+            await this.checkReferer();
+
+            if (this.referData) {
+                this.reff = this.referData.vk_id || this.referData.tg_id;
             }
             
 
@@ -491,7 +540,7 @@
         display: flex;
         width: 100%;
         align-items: start;
-        column-gap: 130px;
+        column-gap: 200px;
         @media (max-width: 1100px) {
             flex-direction: column;
             align-items: center;
@@ -569,8 +618,8 @@
         column-gap: 12px;
     }
     .agreement input {
-        width: 40px;
-        height: 40px;
+        width: 20px;
+        height: 20px;
         background: none;
         border: 1px solid white;
         border-radius: 3px;
@@ -586,16 +635,23 @@
     }
 
     .footer {
-        margin-top: 20px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        column-gap: 40px;
+        display: flex;
+        column-gap: 78px;
+        align-items: center;
+        align-self: start;
+        row-gap: 10px;
         @media (max-width: 1100px) {
-            grid-template-columns: 1fr;
-            align-items: center;
+            flex-direction: column;
             row-gap: 20px;
         }
     }
+
+    .col {
+        display: flex;
+        flex-direction: column;
+        row-gap: 15px;
+    }
+
     .footer_text {
         display: flex;
         flex-direction: column;
@@ -641,5 +697,18 @@
         font-size: 14px;
         font-family: 'OpenSans';
         color: red;
+    }
+
+    .check_btn {
+        width: 170px;
+    }
+
+    .checkbox {
+        width: 20px;
+        height: 20px;
+    }
+
+    .ref_text {
+        align-self: self-start;
     }
 </style>

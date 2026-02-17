@@ -17,6 +17,9 @@
             </div>
             <span style="margin-top: 10px;">Подключите эффективное продвижения с искуственным интеллектом. Выберите тариф прямо сейчас:</span>
             <AppGoodButton :text="text1" class="tarif_btn" @click="openTarif" />
+
+            <span style="margin-top: 10px;">Подключите свой телеграм канал к Intelektaz Ads и зарабатывайте до 50$ в месяц за рекламу в вашем канале:</span>
+            <AppGoodButton :text="userData.in_ads ? 'ОТКЛЮЧИТЬ' : 'ПОДКЛЮЧИТЬ'" class="tarif_btn" @click="changeAds" />
         </div>
         <div class="item">
             <h2>Делитесь своей реферальной ссылкой:</h2>
@@ -107,6 +110,8 @@
                 code_challenge_method: "S256",
                 state: "grehthrtjui7643trr",
                 redirectUrl: "https://lk.intelektaz.com",
+                isModalAds: false,
+                intelAds: null
             }
         },
         computed: {
@@ -165,12 +170,19 @@
             const resp = await getConfig('referal_domains', localStorage.getItem("token"));
             this.refLinks = resp;
             this.isLinks = this.links;
+            this.intelAds = this.userData.in_ads;
             if (this.links) {
                 this.openLinks();
                 // this.$emit("update:links", false);
             }
         },
         methods: {
+            openRotation() {
+                this.$emit('open_rotation');
+            },
+            async changeAds() {
+                this.$emit('turnAdsOn');
+            },
             async activateTg() {
                 const code = await activeTg(localStorage.getItem('token'));
                 window.open(`https://t.me/IntelektazTGBot?start=code=${code}`, "_blank", "width=800, height=600")

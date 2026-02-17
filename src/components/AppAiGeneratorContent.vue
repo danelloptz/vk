@@ -919,7 +919,7 @@
                             this.step = this.getStep();
                         } catch(err) {
                             console.error(err);
-                            window.location.reload();
+                            // window.location.reload();
                         }
                     } else if (this.step == 2) {
                         try {
@@ -948,13 +948,13 @@
                             // if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
 
 
-                            if (!resp) window.location.reload();
+                            // if (!resp) window.location.reload();
                             if (resp) {
                                 await writeOffGenerations(this.userData.id, this.plan.length);
                                 const gener = await getGenerations(this.userData.id);
                                 this.generations = gener;
                             } else {
-                                window.location.reload();
+                                // window.location.reload();
                             }
 
                             this.plan = resp;
@@ -965,7 +965,7 @@
                             this.step = this.getStep();
                         } catch(err) {
                             console.error(err);
-                            window.location.reload();
+                            // window.location.reload();
                         }
                     } else if (this.step > 2) {
                         try {
@@ -1022,9 +1022,9 @@
                     this.generations = gener;
                     let resp = await generateBanners(this.plan, localStorage.getItem("token"));
                     // if (!resp) resp = await generateBanners(this.plan, localStorage.getItem("token"));
-                    if (!resp) {
-                        window.location.reload();
-                    }
+                    // if (!resp) {
+                    //     window.location.reload();
+                    // }
                     // if (resp) {
                     //     await writeOffGenerations(this.userData.vk_id, this.plan.length);
                     //     const gener = await getGenerations(this.userData.id);

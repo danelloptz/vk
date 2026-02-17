@@ -124,7 +124,7 @@
                     this.totalGroups = 15;
                     this.skipCounts = 10;
                     break;
-                case "Standart":
+                case "Standart" || "Standard":
                     this.totalGroups = 15;
                     this.skipCounts = 10;
                     break;
@@ -134,6 +134,8 @@
                     break;
             }
 
+            if (this.tariff == 'Standard') 
+                this.tariff = 'Standart';
             const groups = await getRotationGroups(this.tariff, localStorage.getItem('token'));
             // if (!groups) location.reload();
             console.log(groups);
@@ -355,6 +357,9 @@
         display: flex;
         flex-direction: column;
         row-gap: 50px;
+        @media (max-width: 650px) {
+            align-items: center;
+        }
     }
     .groups_block_btns {
         width: fit-content;
@@ -363,6 +368,7 @@
         column-gap: 30px;
         row-gap: 30px;
         @media (max-width: 650px) {
+            display: flex;
             flex-direction: column;
             align-items: center;
             row-gap: 21px;

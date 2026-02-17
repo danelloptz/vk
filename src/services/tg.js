@@ -667,3 +667,40 @@ export async function getPostStat(token) {
         return false; 
     }
 }
+
+export async function upgradeTgChannel(channel_link, token) {
+    try {
+        const response = await axios.post('https://web.intelektaz.com/api/tg/group/upgrade_channel', {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                params: {
+                    channel_link: channel_link
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при обновлении привязанного канала", error);
+        return false; 
+    }
+}
+
+export async function getMinionLink(token) {
+    try {
+        const response = await axios.get('https://web.intelektaz.com/api/tg/user/get_minion_bot_link', 
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении бота для привязки канала", error);
+        return false; 
+    }
+}

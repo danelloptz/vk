@@ -29,7 +29,7 @@ export async function loadImage(file) {
     try {
         const formData = new FormData();
         formData.append("img", file);
-        const response = await axios.post('https://web.intelektaz.com/api/v2/others/load_image', formData,
+        const response = await axios.post('https://web.intelektaz.com/api/beta/v2/others/load_image', formData,
         {
             headers: {
                 "Content-Type": "multipart/form-data"
